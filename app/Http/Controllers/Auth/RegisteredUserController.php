@@ -17,10 +17,10 @@ class RegisteredUserController extends Controller
 {
     public function index(): View
     {
-        return view('registration');
+        return view('auth.registration');
     }
 
-    public function store(Request $request): Response
+    public function store(Request $request): View
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -39,6 +39,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return response()->noContent();
+        return view('index-page.index');
     }
 }

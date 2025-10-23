@@ -12,10 +12,10 @@
 
                 @guest
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Войти</a>
+                        <a class="nav-link" href="{{ route('authorization') }}">Войти</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ route('register') }}">Регистрация</a>
+                        <a class="btn btn-primary ms-2" href="{{ route('registration') }}">Регистрация</a>
                     </li>
                 @endguest
 
