@@ -5,10 +5,13 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a href="#" class="nav-link">Войти</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Регистрация</a></li>
-            </ul>
+
+            @guest
+                <ul class="navbar-nav ms-auto">
+                     <li class="nav-item"><a href="#" class="nav-link">Войти</a></li>
+                     <li class="nav-item"><a href="{{ route('registration') }}" class="nav-link">Регистрация</a></li>
+                </ul>
+            @endguest
         </div>
     </div>
 </nav>
