@@ -2,9 +2,20 @@
 
 @section('content')
     <div class="container mt-4">
+        @if (session('success'))
+            <div class="alert alert-success" role="alert">
+                {{ session('success') }}
+            </div>
+        @endif
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div class="container mt-4">
         <div class="row">
-            <div class="col">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1>Список пользователей</h1>
+                <a href="{{ route('users.create') }}" class="btn btn-success">
+                    Добавить пользователя
+                </a>
             </div>
         </div>
 
@@ -27,16 +38,16 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>
-                            <span class="badge bg-primary">{{ $user->role_id->toString() }}</span>
+                            <span class="badge bg-{{ $user->role_id->color() }}">{{ $user->role_id->toString() }}</span>
                         </td>
 
                         <td class="text-center">
-                            <div class="btn-group" role="group" aria-label="Действия с пользователем">
-                                <a href="{{-- route('users.edit', $user->id) --}}" class="btn btn-warning btn-sm">
+                            <div class="d-flex justify-content-center gap-2" role="group" aria-label="Действия с пользователем">
+                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm">
                                     Редактировать
                                 </a>
 
-                                <form action="{{-- route('users.destroy', $user->id) --}}" method="POST" class="d-inline">
+                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Вы уверены, что хотите удалить пользователя?')">

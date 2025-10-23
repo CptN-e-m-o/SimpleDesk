@@ -19,7 +19,7 @@ enum UserRole: int
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Client => 'primary',
             self::Agent => 'warning',
             self::Admin => 'danger',

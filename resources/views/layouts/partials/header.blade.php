@@ -24,7 +24,7 @@
                         <a class="nav-link" href="#">Мои тикеты</a>
                     </li>
 
-                    @if (Auth::user()->role_id === \App\Enums\UserRole::Agent->value)
+                    @if (Auth::user()->role_id !== \App\Enums\UserRole::Client->value)
                         <li class="nav-item">
                             <a class="nav-link" href="#">Все тикеты</a>
                         </li>

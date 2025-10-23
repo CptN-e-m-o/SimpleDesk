@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -17,14 +20,24 @@ class UserController extends Controller
         return view('users.index', compact('users'));
     }
 
-    public function create()
+    public function create(): View
     {
-        //
+        return view('users.create', [
+            'roles' => UserRole::cases(),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        //
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => $request->role_id,
+        ]);
+
+        return redirect()->route('users.index')
+            ->with('success', 'Пользователь успешно создан!');
     }
 
     public function show(string $id)
@@ -32,18 +45,44 @@ class UserController extends Controller
         //
     }
 
-    public function edit(string $id)
+    public function edit(User $user)
     {
-        //
+        return view('users.edit', [
+            'user' => $user,
+            'roles' => UserRole::cases(),
+        ]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        $validatedData = $request->validated();
+
+        if (! empty($validatedData['password'])) {
+            $validatedData['password'] = Hash::make($validatedData['password']);
+        } else {
+            unset($validatedData['password']);
+        }
+
+        $user->update($validatedData);
+
+        return redirect()->route('users.index')
+            ->with('success', 'Данные пользователя успешно обновлены!');
     }
 
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        if (auth()->user()->role_id !== UserRole::Admin) {
+            abort(403, 'У вас нет прав для выполнения этого действия.');
+        }
+
+        if (auth()->id() === $user->id) {
+            return redirect()->route('users.index')
+                ->with('error', 'Вы не можете удалить свою собственную учетную запись!');
+        }
+
+        $user->delete();
+
+        return redirect()->route('users.index')
+            ->with('success', 'Пользователь успешно удален!');
     }
 }
