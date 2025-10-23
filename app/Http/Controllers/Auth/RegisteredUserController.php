@@ -19,6 +19,7 @@ class RegisteredUserController extends Controller
     {
         return view('registration');
     }
+
     public function store(Request $request): Response
     {
         $request->validate([
