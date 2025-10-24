@@ -43,6 +43,10 @@
 
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-2" role="group" aria-label="Действия с пользователем">
+                                <a href="{{ route('users.show', $user->id) }}" class="btn btn-primary btn-sm">
+                                    Просмотр
+                                </a>
+
                                 <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm">
                                     Редактировать
                                 </a>

@@ -30,7 +30,7 @@
                         </li>
                     @endif
 
-                    @if (Auth::user()->role_id === \App\Enums\UserRole::Admin->value)
+                    @if (Auth::user()->role_id === \App\Enums\UserRole::Admin)
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('users.index') }}">Пользователи</a>
                         </li>

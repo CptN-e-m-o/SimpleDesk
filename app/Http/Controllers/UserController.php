@@ -40,9 +40,9 @@ class UserController extends Controller
             ->with('success', 'Пользователь успешно создан!');
     }
 
-    public function show(string $id)
+    public function show(User $user): View
     {
-        //
+        return view('users.show', compact('user'));
     }
 
     public function edit(User $user)
