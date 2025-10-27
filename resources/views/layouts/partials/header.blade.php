@@ -26,7 +26,7 @@
 
                     @if (Auth::user()->role_id !== \App\Enums\UserRole::Client->value)
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Все тикеты</a>
+                            <a class="nav-link" href="{{ route('tickets.index') }}">Все тикеты</a>
                         </li>
                     @endif
 
