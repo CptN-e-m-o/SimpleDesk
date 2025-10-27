@@ -6,9 +6,9 @@
             <div class="col-md-8">
                 <div class="card user-card shadow-sm">
                     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">Профиль пользователя</h4>
+                        <h4 class="mb-0">{{ __('lang.user_show_title') }}</h4>
                         <a href="{{ route('users.index') }}" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-arrow-left me-2"></i>К списку пользователей
+                            <i class="bi bi-arrow-left me-2"></i>{{ __('lang.user_show_back_to_list') }}
                         </a>
                     </div>
                     <div class="card-body">
@@ -20,41 +20,16 @@
                             <div class="col-md-8">
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <strong>ID пользователя:</strong>
+                                        <strong>{{ __('lang.user_show_id_label') }}</strong>
                                         <span>{{ $user->id }}</span>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <strong>E-mail:</strong>
+                                        <strong>{{ __('lang.user_show_email_label') }}</strong>
                                         <a href="mailto:{{ $user->email }}">{{ $user->email }}</a>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <strong>Дата регистрации:</strong>
+                                        <strong>{{ __('lang.user_show_registered_at_label') }}</strong>
                                         <span>{{ $user->created_at->format('d.m.Y H:i') }}</span>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <strong>Последнее обновление:</strong>
-                                        <span>{{ $user->updated_at->diffForHumans() }}</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer text-center bg-light">
-                        <div class="d-flex justify-content-center gap-2" role="group">
-                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">
-                                <i class="bi bi-pencil-square me-2"></i>Редактировать
-                            </a>
-                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?')">
-                                    <i class="bi bi-trash me-2"></i>Удалить
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
+                                        <strong>{{ __('lang.user_sho

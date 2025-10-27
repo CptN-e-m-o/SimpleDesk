@@ -58,7 +58,7 @@ class TicketController extends Controller
         }
         Ticket::create($validated);
 
-        return redirect()->route('tickets.index')->with('success', 'Заявка успешно создана!');
+        return redirect()->route('tickets.index')->with('success', __('lang.ticket_created_success'));
     }
 
     public function show(Ticket $ticket): View
@@ -97,7 +97,7 @@ class TicketController extends Controller
         $this->authorize('update', $ticket);
         $ticket->update($request->validated());
 
-        return redirect()->route('tickets.index')->with('success', "Заявка #{$ticket->id} успешно обновлена!");
+        return redirect()->route('tickets.index')->with('success', __('ticket_updated_success', ['id' => $ticket->id]));
     }
 
     public function destroy(Ticket $ticket): RedirectResponse
@@ -105,6 +105,6 @@ class TicketController extends Controller
         $this->authorize('delete', $ticket);
         $ticket->delete();
 
-        return redirect()->route('tickets.index')->with('success', "Заявка #{$ticket->id} была успешно удалена.");
+        return redirect()->route('tickets.index')->with('success', __('ticket_deleted_success', ['id' => $ticket->id]));
     }
 }

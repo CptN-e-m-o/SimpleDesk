@@ -15,33 +15,33 @@
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="card shadow-sm p-4">
-                    <h2 class="text-center mb-4">Регистрация</h2>
+                    <h2 class="text-center mb-4">{{ __('lang.register_title') }}</h2>
 
                     <form method="POST" action="{{ route('register') }}">
                         @csrf
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Имя</label>
+                            <label for="name" class="form-label">{{ __('lang.register_name_label') }}</label>
                             <input type="text" id="name" name="name" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label">{{ __('lang.register_email_label') }}</label>
                             <input type="email" id="email" name="email" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">Пароль</label>
+                            <label for="password" class="form-label">{{ __('lang.register_password_label') }}</label>
                             <input type="password" id="password" name="password" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Подтверждение пароля</label>
+                            <label for="password_confirmation" class="form-label">{{ __('lang.register_password_confirmation_label') }}</label>
                             <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">
-                            Зарегистрироваться
+                            {{ __('lang.register_submit_button') }}
                         </button>
                     </form>
                 </div>

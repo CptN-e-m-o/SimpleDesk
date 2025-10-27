@@ -11,9 +11,9 @@ enum TicketPriority: int
     public function label(): string
     {
         return match ($this) {
-            self::Low => 'Низкий',
-            self::Medium => 'Средний',
-            self::High => 'Высокий',
+            self::Low => __('lang.ticket_priority_low'),
+            self::Medium => __('lang.ticket_priority_medium'),
+            self::High => __('lang.ticket_priority_high'),
         };
     }
 

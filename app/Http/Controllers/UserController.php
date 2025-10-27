@@ -37,7 +37,7 @@ class UserController extends Controller
         ]);
 
         return redirect()->route('users.index')
-            ->with('success', 'Пользователь успешно создан!');
+            ->with('success', __('user_created_success'));
     }
 
     public function show(User $user): View
@@ -66,23 +66,23 @@ class UserController extends Controller
         $user->update($validatedData);
 
         return redirect()->route('users.index')
-            ->with('success', 'Данные пользователя успешно обновлены!');
+            ->with('success', __('user_updated_success'));
     }
 
     public function destroy(User $user)
     {
         if (auth()->user()->role_id !== UserRole::Admin) {
-            abort(403, 'У вас нет прав для выполнения этого действия.');
+            abort(403, __('user_delete_permission_denied'));
         }
 
         if (auth()->id() === $user->id) {
             return redirect()->route('users.index')
-                ->with('error', 'Вы не можете удалить свою собственную учетную запись!');
+                ->with('error', __('user_delete_self_error'));
         }
 
         $user->delete();
 
         return redirect()->route('users.index')
-            ->with('success', 'Пользователь успешно удален!');
+            ->with('success', __('user_deleted_success'));
     }
 }

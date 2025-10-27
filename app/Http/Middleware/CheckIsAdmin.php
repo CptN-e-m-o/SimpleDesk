@@ -15,6 +15,6 @@ class CheckIsAdmin
             return $next($request);
         }
 
-        abort(403, 'У вас нет прав для доступа к этой странице.');
+        abort(403, __('lang.access_denied'));
     }
 }

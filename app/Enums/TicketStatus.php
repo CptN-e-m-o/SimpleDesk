@@ -11,9 +11,9 @@ enum TicketStatus: int
     public function label(): string
     {
         return match ($this) {
-            self::Open => 'Открыта',
-            self::In_Progress => 'В работе',
-            self::Closed => 'Закрыта',
+            self::Open => __('lang.ticket_status_open'),
+            self::In_Progress => __('lang.ticket_status_in_progress'),
+            self::Closed => __('lang.ticket_status_closed'),
         };
     }
 
@@ -24,5 +24,10 @@ enum TicketStatus: int
             self::In_Progress => 'warning',
             self::Closed => 'success',
         };
+    }
+
+    public function isClosed(): bool
+    {
+        return $this === self::Closed;
     }
 }
