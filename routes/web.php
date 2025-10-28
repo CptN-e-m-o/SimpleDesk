@@ -39,6 +39,7 @@ Route::middleware(['web'])->group(function () {
         if (in_array($locale, ['en', 'ru'])) {
             Session::put('locale', $locale);
         }
+
         return redirect()->back();
     })->name('locale.switch');
 });
