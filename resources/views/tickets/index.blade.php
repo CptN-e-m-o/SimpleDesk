@@ -42,15 +42,14 @@
                                 <td>{{ $ticket->user->name }}</td>
 
                                 <td>
-                                    {{-- Примечание: названия статусов и приоритетов приходят из БД --}}
-                                    <span class="badge bg-{{ $ticket->status->name == 'Открыта' ? 'primary' : ($ticket->status->name == 'В работе' ? 'warning' : 'success') }}">
-                                        {{ $ticket->status->name }}
+                                    <span class="badge bg-{{ $ticket->status->color() }}">
+                                        {{ $ticket->status->label() }}
                                     </span>
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-{{ $ticket->priority->name == 'Низкий' ? 'info' : ($ticket->priority->name == 'Средний' ? 'warning' : 'danger') }}">
-                                        {{ $ticket->priority->name }}
+                                    <span class="badge bg-{{ $ticket->priority->color() }}">
+                                        {{ $ticket->priority->label() }}
                                     </span>
                                 </td>
 

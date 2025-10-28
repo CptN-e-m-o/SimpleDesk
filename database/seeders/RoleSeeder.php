@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -9,10 +10,11 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('roles')->insert([
-            ['id' => 1, 'name' => 'Client'],
-            ['id' => 2, 'name' => 'Agent'],
-            ['id' => 3, 'name' => 'Admin'],
-        ]);
+        foreach (UserRole::cases() as $role) {
+            DB::table('roles')->updateOrInsert(
+                ['id' => $role->value],
+                ['name' => $role->name]
+            );
+        }
     }
 }

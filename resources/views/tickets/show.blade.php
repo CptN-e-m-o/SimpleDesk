@@ -23,12 +23,19 @@
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_status_label') }}</span>
-                                <span class="badge bg-{{ $ticket->status->name == 'Открыта' ? 'primary' : ($ticket->status->name == 'В работе' ? 'warning' : 'success') }}">{{ $ticket->status->name }}</span>
+                                <span class="badge bg-{{ $ticket->status->color() }}">
+                                    {{ $ticket->status->label() }}
+                                </span>
                             </li>
+
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_priority_label') }}</span>
-                                <span class="badge bg-{{ $ticket->priority->name == 'Низкий' ? 'info' : ($ticket->priority->name == 'Средний' ? 'warning' : 'danger') }}">{{ $ticket->priority->name }}</span>
+                                <span class="badge bg-{{ $ticket->priority->color() }}">
+                                    {{ $ticket->priority->label() }}
+                                </span>
                             </li>
+
+
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_created_label') }}</span>
                                 <span>{{ $ticket->created_at->format('d.m.Y H:i') }}</span>

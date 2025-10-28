@@ -7,6 +7,7 @@ use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 Route::get('/', [IndexController::class, 'index'])->name('index');
 
@@ -31,6 +32,15 @@ Route::middleware(['auth', 'admin-agent'])->group(function () {
     Route::resource('tickets', TicketController::class)->only([
         'destroy',
     ]);
+});
+
+Route::middleware(['web'])->group(function () {
+    Route::get('locale/{locale}', function ($locale) {
+        if (in_array($locale, ['en', 'ru'])) {
+            Session::put('locale', $locale);
+        }
+        return redirect()->back();
+    })->name('locale.switch');
 });
 
 require __DIR__.'/auth.php';
