@@ -3,23 +3,23 @@
 @section('content')
     <header class="py-5 bg-primary text-white text-center">
         <div class="container">
-            <h1 class="fw-bold mb-3">Добро пожаловать в SimpleDesk</h1>
-            <p class="lead mb-4">Система для управления заявками и общения с техподдержкой.</p>
-            <a href="#" class="btn btn-light btn-lg me-2">Создать тикет</a>
-            <a href="#" class="btn btn-outline-light btn-lg">Войти в систему</a>
+            <h1 class="fw-bold mb-3">{{ __('lang.header_title') }}</h1>
+            <p class="lead mb-4">{{ __('lang.header_subtitle') }}</p>
+            <a href="#" class="btn btn-light btn-lg me-2">{{ __('lang.create_ticket_button') }}</a>
+            <a href="#" class="btn btn-outline-light btn-lg">{{ __('lang.login_button') }}</a>
         </div>
     </header>
 
     <section class="py-5">
         <div class="container text-center">
-            <h2 class="fw-semibold mb-4">Что умеет SimpleDesk</h2>
+            <h2 class="fw-semibold mb-4">{{ __('lang.features_title') }}</h2>
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="card h-100 shadow-sm border-0">
                         <div class="card-body">
-                            <h5 class="card-title fw-bold">Клиент</h5>
+                            <h5 class="card-title fw-bold">{{ __('lang.features_client_title') }}</h5>
                             <p class="card-text">
-                                Создавайте тикеты, следите за статусом своих заявок и получайте помощь от команды поддержки.
+                                {{ __('lang.features_client_text') }}
                             </p>
                         </div>
                     </div>
@@ -27,9 +27,9 @@
                 <div class="col-md-4">
                     <div class="card h-100 shadow-sm border-0">
                         <div class="card-body">
-                            <h5 class="card-title fw-bold">Агент</h5>
+                            <h5 class="card-title fw-bold">{{ __('lang.features_agent_title') }}</h5>
                             <p class="card-text">
-                                Берите тикеты в работу, отвечайте клиентам и помогайте быстро решать проблемы пользователей.
+                                {{ __('lang.features_agent_text') }}
                             </p>
                         </div>
                     </div>
@@ -37,9 +37,9 @@
                 <div class="col-md-4">
                     <div class="card h-100 shadow-sm border-0">
                         <div class="card-body">
-                            <h5 class="card-title fw-bold">Администратор</h5>
+                            <h5 class="card-title fw-bold">{{ __('lang.features_admin_title') }}</h5>
                             <p class="card-text">
-                                Управляйте пользователями, назначайте роли и следите за эффективностью работы службы поддержки.
+                                {{ __('lang.features_admin_text') }}
                             </p>
                         </div>
                     </div>
@@ -50,14 +50,14 @@
 
     <section class="bg-white py-5">
         <div class="container text-center">
-            <h2 class="fw-semibold mb-4">Как это работает</h2>
+            <h2 class="fw-semibold mb-4">{{ __('lang.how_it_works_title') }}</h2>
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <ol class="list-group list-group-numbered shadow-sm">
-                        <li class="list-group-item">Пользователь создаёт заявку с описанием проблемы.</li>
-                        <li class="list-group-item">Агент берёт заявку в работу и отвечает пользователю.</li>
-                        <li class="list-group-item">Обсуждение продолжается, пока заявку не будет решён.</li>
-                        <li class="list-group-item">Администратор следит за процессом и управляет ролями.</li>
+                        <li class="list-group-item">{{ __('lang.how_it_works_step1') }}</li>
+                        <li class="list-group-item">{{ __('lang.how_it_works_step2') }}</li>
+                        <li class="list-group-item">{{ __('lang.how_it_works_step3') }}</li>
+                        <li class="list-group-item">{{ __('lang.how_it_works_step4') }}</li>
                     </ol>
                 </div>
             </div>

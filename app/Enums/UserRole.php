@@ -11,9 +11,9 @@ enum UserRole: int
     public function toString(): string
     {
         return match ($this) {
-            self::Client => 'Пользователь',
-            self::Agent => 'Агент',
-            self::Admin => 'Администратор',
+            self::Client => __('lang.user_role_client'),
+            self::Agent => __('lang.user_role_agent'),
+            self::Admin => __('lang.user_role_admin'),
         };
     }
 

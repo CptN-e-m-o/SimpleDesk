@@ -28,12 +28,12 @@ class StoreUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Поле "Имя" обязательно для заполнения.',
-            'email.required' => 'Поле "E-mail" обязательно для заполнения.',
-            'email.unique' => 'Пользователь с таким E-mail уже существует.',
-            'password.required' => 'Поле "Пароль" обязательно для заполнения.',
-            'password.confirmed' => 'Пароли не совпадают.',
-            'role_id.required' => 'Необходимо выбрать роль для пользователя.',
+            'name.required' => __('validation_name_required'),
+            'email.required' => __('validation_email_required'),
+            'email.unique' => __('validation_email_unique'),
+            'password.required' => __('validation_password_required'),
+            'password.confirmed' => __('validation_password_confirmed'),
+            'role_id.required' => __('validation_role_required'),
         ];
     }
 }

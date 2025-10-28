@@ -1,9 +1,9 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="{{ url('/') }}">SimpleDesk</a>
+        <a class="navbar-brand fw-bold" href="{{ url('/') }}">{{ __('lang.navbar_brand') }}</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarNav" aria-expanded="false" aria-label="{{ __('lang.navbar_toggle_navigation') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -12,27 +12,27 @@
 
                 @guest
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('authorization') }}">Войти</a>
+                        <a class="nav-link" href="{{ route('authorization') }}">{{ __('lang.navbar_login') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ route('registration') }}">Регистрация</a>
+                        <a class="btn btn-primary ms-2" href="{{ route('registration') }}">{{ __('lang.navbar_register') }}</a>
                     </li>
                 @endguest
 
                 @auth
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Мои тикеты</a>
+                        <a class="nav-link" href="#">{{ __('lang.navbar_my_tickets') }}</a>
                     </li>
 
                     @if (Auth::user()->role_id !== \App\Enums\UserRole::Client->value)
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('tickets.index') }}">Все тикеты</a>
+                            <a class="nav-link" href="{{ route('tickets.index') }}">{{ __('lang.navbar_all_tickets') }}</a>
                         </li>
                     @endif
 
                     @if (Auth::user()->role_id === \App\Enums\UserRole::Admin)
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('users.index') }}">Пользователи</a>
+                            <a class="nav-link" href="{{ route('users.index') }}">{{ __('lang.navbar_users') }}</a>
                         </li>
                     @endif
 
@@ -45,7 +45,7 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
                                 <a class="dropdown-item disabled" href="#">
-                                    Мой профиль
+                                    {{ __('lang.navbar_my_profile') }}
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -53,7 +53,7 @@
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="dropdown-item text-danger">
-                                        Выйти
+                                        {{ __('lang.navbar_logout') }}
                                     </button>
                                 </form>
                             </li>

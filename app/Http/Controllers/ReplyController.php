@@ -12,8 +12,8 @@ class ReplyController extends Controller
     {
         $this->authorize('view', $ticket);
 
-        if ($ticket->status->name === 'Закрыта') {
-            return back()->with('error', 'Нельзя ответить на закрытую заявку.');
+        if ($ticket->status->isClosed()) {
+            return back()->with('error', __('lang.reply_closed_ticket_error'));
         }
 
         $request->validate(['body' => 'required|string']);
@@ -23,7 +23,7 @@ class ReplyController extends Controller
             'author_id' => auth()->id(),
         ]);
 
-        return back()->with('success', 'Ваш ответ был добавлен.');
+        return back()->with('success', __('lang.reply_added_success'));
     }
 
     public function update(Request $request, Reply $reply)
@@ -34,7 +34,7 @@ class ReplyController extends Controller
 
         $reply->update(['body' => $request->body]);
 
-        return back()->with('success', 'Ответ был успешно обновлен.');
+        return back()->with('success', __('lang.reply_updated_success'));
     }
 
     public function destroy(Reply $reply)
@@ -43,6 +43,6 @@ class ReplyController extends Controller
 
         $reply->delete();
 
-        return back()->with('success', 'Ответ был удален.');
+        return back()->with('success', __('lang.reply_deleted_success'));
     }
 }

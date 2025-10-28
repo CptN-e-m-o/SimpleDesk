@@ -12,9 +12,9 @@
             <div class="container mt-4">
                 <div class="row">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h1>Список заявок</h1>
+                        <h1>{{ __('lang.tickets_list_title') }}</h1>
                         <a href="{{ route('tickets.create') }}" class="btn btn-success">
-                            Добавить заявку
+                            {{ __('lang.tickets_list_add_button') }}
                         </a>
                     </div>
                 </div>
@@ -23,13 +23,13 @@
                     <table class="table table-striped table-hover table-bordered align-middle">
                         <thead class="table-dark">
                         <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Тема</th>
-                            <th scope="col">Автор</th>
-                            <th scope="col">Статус</th>
-                            <th scope="col">Приоритет</th>
-                            <th scope="col">Создана</th>
-                            <th scope="col" class="text-center">Действия</th>
+                            <th scope="col">{{ __('lang.tickets_list_header_id') }}</th>
+                            <th scope="col">{{ __('lang.tickets_list_header_subject') }}</th>
+                            <th scope="col">{{ __('lang.tickets_list_header_author') }}</th>
+                            <th scope="col">{{ __('lang.tickets_list_header_status') }}</th>
+                            <th scope="col">{{ __('lang.tickets_list_header_priority') }}</th>
+                            <th scope="col">{{ __('lang.tickets_list_header_created') }}</th>
+                            <th scope="col" class="text-center">{{ __('lang.tickets_list_header_actions') }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -42,15 +42,16 @@
                                 <td>{{ $ticket->user->name }}</td>
 
                                 <td>
-                <span class="badge bg-{{ $ticket->status->name == 'Открыта' ? 'primary' : ($ticket->status->name == 'В работе' ? 'warning' : 'success') }}">
-                    {{ $ticket->status->name }}
-                </span>
+                                    {{-- Примечание: названия статусов и приоритетов приходят из БД --}}
+                                    <span class="badge bg-{{ $ticket->status->name == 'Открыта' ? 'primary' : ($ticket->status->name == 'В работе' ? 'warning' : 'success') }}">
+                                        {{ $ticket->status->name }}
+                                    </span>
                                 </td>
 
                                 <td>
-                <span class="badge bg-{{ $ticket->priority->name == 'Низкий' ? 'info' : ($ticket->priority->name == 'Средний' ? 'warning' : 'danger') }}">
-                    {{ $ticket->priority->name }}
-                </span>
+                                    <span class="badge bg-{{ $ticket->priority->name == 'Низкий' ? 'info' : ($ticket->priority->name == 'Средний' ? 'warning' : 'danger') }}">
+                                        {{ $ticket->priority->name }}
+                                    </span>
                                 </td>
 
                                 <td>{{ $ticket->created_at->format('d.m.Y H:i') }}</td>
@@ -66,7 +67,7 @@
                                         <form action="{{ route('tickets.destroy', $ticket) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Вы уверены, что хотите удалить заявку?')">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{{ __('lang.tickets_list_delete_confirm') }}')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -75,7 +76,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">Заявки не найдены</td>
+                                <td colspan="7" class="text-center">{{ __('lang.tickets_list_no_tickets_found') }}</td>
                             </tr>
                         @endforelse
                         </tbody>
