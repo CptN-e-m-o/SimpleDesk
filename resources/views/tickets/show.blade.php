@@ -19,19 +19,19 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_author_label') }}</span>
-                                <strong>{{ $ticket->user->name }}</strong>
+                                <strong>{{ $ticket->user->first_name }}</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_status_label') }}</span>
-                                <span class="badge bg-{{ $ticket->status->color() }}">
-                                    {{ $ticket->status->label() }}
+                                <span class="badge bg-{{ $ticket->status->enum->color() }}">
+                                    {{ $ticket->status->enum->label() }}
                                 </span>
                             </li>
 
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_priority_label') }}</span>
-                                <span class="badge bg-{{ $ticket->priority->color() }}">
-                                    {{ $ticket->priority->label() }}
+                                <span class="badge bg-{{ $ticket->priority->enum->color() }}">
+                                    {{ $ticket->priority->enum->label() }}
                                 </span>
                             </li>
 

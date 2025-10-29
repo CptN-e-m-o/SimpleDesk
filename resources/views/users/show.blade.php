@@ -14,7 +14,7 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-4 text-center">
-                                <h5 class="card-title mb-1">{{ $user->name }}</h5>
+                                <h5 class="card-title mb-1">{{ $user->first_name }}</h5>
                                 <span class="badge bg-{{ $user->role_id->color() }} fs-6">{{ $user->role_id->toString() }}</span>
                             </div>
                             <div class="col-md-8">

@@ -39,17 +39,17 @@
 
                                 <td>{{ $ticket->title }}</td>
 
-                                <td>{{ $ticket->user->name }}</td>
+                                <td>{{ $ticket->user->first_name }}</td>
 
                                 <td>
-                                    <span class="badge bg-{{ $ticket->status->color() }}">
-                                        {{ $ticket->status->label() }}
+                                    <span class="badge bg-{{ $ticket->status->enum->color() }}">
+                                        {{ $ticket->status->enum->label() }}
                                     </span>
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-{{ $ticket->priority->color() }}">
-                                        {{ $ticket->priority->label() }}
+                                    <span class="badge bg-{{ $ticket->priority->enum->color() }}">
+                                        {{ $ticket->priority->enum->label() }}
                                     </span>
                                 </td>
 

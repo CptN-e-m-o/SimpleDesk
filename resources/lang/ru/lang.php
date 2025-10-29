@@ -192,4 +192,15 @@ return [
     'validation_password_required' => 'Поле "Пароль" обязательно для заполнения.',
     'validation_password_confirmed' => 'Пароли не совпадают.',
     'validation_role_required' => 'Необходимо выбрать роль для пользователя.',
+
+    // --- Профиль пользователя ---
+    'profile_tab_info' => 'Профиль пользователя',
+    'profile_tab_2fa' => 'Двухфакторная аутентификация',
+    'profile_tab_login_history' => 'История входов',
+    'profile_first_name' => 'Имя',
+    'profile_last_name' => 'Фамилия',
+    'profile_patronymic' => 'Отчество',
+    'profile_email' => 'Электронная почта',
+    'profile_timezone' => 'Часовой пояс',
+    'profile_save_changes' => 'Сохранить изменения',
 ];

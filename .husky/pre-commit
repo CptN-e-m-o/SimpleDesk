@@ -1,1 +1,1 @@
-composer pint
+composer run-script pint:staged

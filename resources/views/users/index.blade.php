@@ -35,7 +35,7 @@
                             <tr>
                                 <th scope="row">{{ $user->id }}</th>
 
-                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->first_name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
                                     <span class="badge bg-{{ $user->role_id->color() }}">{{ $user->role_id->toString() }}</span>

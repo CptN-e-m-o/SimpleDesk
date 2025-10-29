@@ -66,7 +66,7 @@
 
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item disabled" href="#">
+                                <a class="dropdown-item" href="{{ route('profile.index') }}">
                                     {{ __('lang.navbar_my_profile') }}
                                 </a>
                             </li>

@@ -45,7 +45,7 @@
                                             <option value="">{{ __('lang.ticket_form_agent_none') }}</option>
                                             @foreach($users as $user)
                                                 <option value="{{ $user->id }}" {{ old('assigned_agent_id', $ticket->assigned_agent_id ?? '') == $user->id ? 'selected' : '' }}>
-                                                    {{ $user->name }}
+                                                    {{ $user->first_name }}
                                                 </option>
                                             @endforeach
                                         </select>
