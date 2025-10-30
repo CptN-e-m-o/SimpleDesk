@@ -181,7 +181,7 @@ return [
     'user_delete_permission_denied' => 'У вас нет прав для выполнения этого действия.',
     'user_delete_self_error' => 'Вы не можете удалить свою собственную учетную запись!',
 
-    // --- Сообщения контроллера профиля (Profile Controller Messages) ---  <- НОВЫЙ БЛОК
+    // --- Сообщения контроллера профиля (Profile Controller Messages) ---
     'profile_updated' => 'Информация профиля была успешно обновлена',
     'profile_current_password_is_incorrect' => 'Текущий пароль введен неверно.',
     'profile_current_password_required' => 'Для смены пароля необходимо ввести текущий пароль.',
