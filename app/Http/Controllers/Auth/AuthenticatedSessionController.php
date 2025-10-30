@@ -18,9 +18,18 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): View
+    public function store(LoginRequest $request)
     {
         $request->authenticate();
+
+        $user = Auth::user();
+
+        if ($user->google2fa_enabled) {
+            $request->session()->put('2fa_user_id', $user->id);
+            Auth::logout();
+
+            return redirect()->route('2fa.challenge');
+        }
 
         $request->session()->regenerate();
 

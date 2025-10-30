@@ -31,10 +31,25 @@
                                 @csrf
                                 @method('PUT')
 
+                                @if (session('success'))
+                                    <div class="alert alert-success" role="alert">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
+                                @if ($errors->any())
+                                    <div class="alert alert-danger" role="alert">
+                                        <ul class="mb-0">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
                                 <div class="row align-items-center mb-4">
                                     <div class="col-md-4 text-center position-relative">
                                         <div class="avatar-wrapper position-relative d-inline-block rounded-circle"
-                                             style="width: 150px; height: 150px;"
+                                             style="width: 250px; height: 250px;"
                                              data-upload-url="{{ route('profile.avatar.update') }}">
 
                                             <img src="{{ Auth::user()->avatar_url ?? asset('images/default-avatar.png') }}"
@@ -63,31 +78,65 @@
                                         <div class="row">
                                             <div class="col-md-4 mb-3">
                                                 <label for="first_name" class="form-label">{{ __('lang.profile_first_name') }}</label>
-                                                <input type="text" name="first_name" id="first_name" class="form-control" value="{{ old('first_name', Auth::user()->first_name) }}" required>
+                                                <input type="text" name="first_name" id="first_name" class="form-control @error('first_name') is-invalid @enderror" value="{{ old('first_name', Auth::user()->first_name) }}" required>
+                                                @error('first_name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
 
                                             <div class="col-md-4 mb-3">
                                                 <label for="last_name" class="form-label">{{ __('lang.profile_last_name') }}</label>
-                                                <input type="text" name="last_name" id="last_name" class="form-control" value="{{ old('last_name', Auth::user()->last_name) }}">
+                                                <input type="text" name="last_name" id="last_name" class="form-control @error('last_name') is-invalid @enderror" value="{{ old('last_name', Auth::user()->last_name) }}">
+                                                @error('last_name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
 
                                             <div class="col-md-4 mb-3">
                                                 <label for="patronymic" class="form-label">{{ __('lang.profile_patronymic') }}</label>
-                                                <input type="text" name="patronymic" id="patronymic" class="form-control" value="{{ old('patronymic', Auth::user()->patronymic) }}">
+                                                <input type="text" name="patronymic" id="patronymic" class="form-control @error('patronymic') is-invalid @enderror" value="{{ old('patronymic', Auth::user()->patronymic) }}">
+                                                @error('patronymic')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                             <div class="col-md-12 mb-3">
                                                 <label class="form-label">{{ __('lang.profile_email') }}</label>
                                                 <input type="email" name="email" class="form-control" value="{{ Auth::user()->email }}" disabled>
                                             </div>
+
                                             <div class="col-md-12 mb-3">
                                                 <label class="form-label">{{ __('lang.profile_timezone') }}</label>
-                                                <select name="timezone" class="form-select" required>
+                                                <select name="timezone" class="form-select @error('timezone') is-invalid @enderror" required>
                                                     @foreach($timezones as $tz)
                                                         <option value="{{ $tz['identifier'] }}" @selected(Auth::user()->timezone === $tz['identifier'])>
                                                             {{ $tz['display'] }}
                                                         </option>
                                                     @endforeach
                                                 </select>
+                                                @error('timezone')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <hr>
+                                            <div class="col-md-12 mb-3">
+                                                <label for="current_password" class="form-label">{{ __('lang.profile_current_password') }}</label>
+                                                <input type="password" name="current_password" id="current_password" class="form-control @error('current_password') is-invalid @enderror">
+                                                @error('current_password')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label for="password" class="form-label">{{ __('lang.profile_enter_password') }}</label>
+                                                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror">
+                                                @error('password')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label for="password_confirmation" class="form-label">{{ __('lang.profile_repeat_password') }}</label>
+                                                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control">
                                             </div>
                                         </div>
 
@@ -104,7 +153,42 @@
                         <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
                             <h5>{{ __('lang.profile_2fa_title') }}</h5>
                             <p>{{ __('lang.profile_2fa_description') }}</p>
-                            <button class="btn btn-outline-primary">{{ __('lang.profile_enable_2fa') }}</button>
+
+                            @if (Auth::user()->google2fa_enabled)
+                                <div class="alert alert-success">{{ __('lang.profile_2auth_enabled') }}</div>
+                                <form method="POST" action="{{ route('profile.2fa.disable') }}">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label for="current_password_2fa" class="form-label">{{ __('lang.profile_current_password') }}</label>
+                                        <input type="password" name="current_password" id="current_password_2fa" class="form-control @error('current_password') is-invalid @enderror" required>
+                                        @error('current_password')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">{{ __('lang.profile_disable_2auth') }}</button>
+                                </form>
+                            @else
+                                <p><strong>{{ __('lang.profile_step_1') }}</strong>{{ __('lang.profile_scan_qr_code') }}</p>
+                                <div class="my-3">
+                                    {!! QrCode::size(200)->generate($qrCodeUrl) !!}
+                                </div>
+                                <p>{{ __('lang.profile_enter_code_manually') }}<code>{{ $secretKey }}</code></p>
+
+                                <hr>
+
+                                <p><strong>{{ __('lang.profile_step_2') }}</strong>{{ __('lang.profile_enter_code_finish_settings') }}</p>
+                                <form method="POST" action="{{ route('profile.2fa.enable') }}" class="mt-3">
+                                    @csrf
+                                    <div class="mb-3" style="max-width: 250px;">
+                                        <label for="one_time_password" class="form-label">{{ __('lang.profile_confirmation_code') }}</label>
+                                        <input type="text" name="one_time_password" id="one_time_password" class="form-control @error('one_time_password') is-invalid @enderror" required>
+                                        @error('one_time_password')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">{{ __('lang.profile_enable_2fa') }}</button>
+                                </form>
+                            @endif
                         </div>
 
                         <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
@@ -112,9 +196,9 @@
                             <table class="table table-sm table-striped mt-3">
                                 <thead>
                                 <tr>
-                                    <th>{{ __('lang.login_ip') }}</th>
-                                    <th>{{ __('lang.login_device') }}</th>
-                                    <th>{{ __('lang.login_time') }}</th>
+                                    <th>{{ __('lang.profile_login_ip') }}</th>
+                                    <th>{{ __('lang.profile_login_device') }}</th>
+                                    <th>{{ __('lang.profile_login_time') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
