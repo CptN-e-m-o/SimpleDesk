@@ -10,9 +10,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "doctrine/dbal": "^4.3",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/tinker": "^2.10.1",
+        "pragmarx/google2fa-laravel": "^2.3",
+        "simplesoftwareio/simple-qrcode": "^4.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -72,7 +75,11 @@
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
-        "pint": "vendor/bin/pint"
+        "pint": "vendor/bin/pint",
+        "pint:staged": [
+            "php ./vendor/bin/pint -- --dirty",
+            "git add -A"
+        ]
     },
     "extra": {
         "laravel": {

@@ -22,7 +22,7 @@
 
                         <div class="mb-3">
                             <label for="name" class="form-label">{{ __('lang.register_name_label') }}</label>
-                            <input type="text" id="name" name="name" class="form-control" required>
+                            <input type="text" id="first_name" name="first_name" class="form-control" required>
                         </div>
 
                         <div class="mb-3">

@@ -39,22 +39,21 @@
 
                                 <td>{{ $ticket->title }}</td>
 
-                                <td>{{ $ticket->user->name }}</td>
+                                <td>{{ $ticket->user->first_name }}</td>
 
                                 <td>
-                                    {{-- Примечание: названия статусов и приоритетов приходят из БД --}}
-                                    <span class="badge bg-{{ $ticket->status->name == 'Открыта' ? 'primary' : ($ticket->status->name == 'В работе' ? 'warning' : 'success') }}">
-                                        {{ $ticket->status->name }}
+                                    <span class="badge bg-{{ $ticket->status->enum->color() }}">
+                                        {{ $ticket->status->enum->label() }}
                                     </span>
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-{{ $ticket->priority->name == 'Низкий' ? 'info' : ($ticket->priority->name == 'Средний' ? 'warning' : 'danger') }}">
-                                        {{ $ticket->priority->name }}
+                                    <span class="badge bg-{{ $ticket->priority->enum->color() }}">
+                                        {{ $ticket->priority->enum->label() }}
                                     </span>
                                 </td>
 
-                                <td>{{ $ticket->created_at->format('d.m.Y H:i') }}</td>
+                                <td>{{ $ticket->localized_created_at }}</td>
 
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2" role="group">

@@ -13,7 +13,7 @@ class StatusSeeder extends Seeder
         foreach (TicketStatus::cases() as $status) {
             Status::firstOrCreate([
                 'id' => $status->value,
-                'name' => $status->label(),
+                'name' => $status->name,
             ]);
         }
     }
