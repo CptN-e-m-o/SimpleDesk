@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,13 @@ class TwoFactorChallengeController extends Controller
             return redirect()->intended('/');
         }
 
-        return back()->withErrors(['one_time_password' => 'Неверный код. Попробуйте снова.']);
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_at' => now(),
+        ]);
+
+        return back()->withErrors(['one_time_password' => __('lang.profile_try_again')]);
     }
 }

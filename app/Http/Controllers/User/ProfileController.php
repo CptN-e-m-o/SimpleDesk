@@ -23,21 +23,18 @@ class ProfileController extends Controller
 
         if (! $user->google2fa_enabled) {
             $secretKey = $google2fa->generateSecretKey();
-
-            $qrCodeUrl = $google2fa->getQRCodeUrl(
-                config('app.name'),
-                $user->email,
-                $secretKey
-            );
-
+            $qrCodeUrl = $google2fa->getQRCodeUrl(config('app.name'), $user->email, $secretKey);
             session(['2fa_secret' => Crypt::encrypt($secretKey)]);
         }
+
+        $logins = $user->loginHistories()->latest('login_at')->take(10)->get();
 
         return view('users.profile.index', [
             'user' => $user,
             'timezones' => $timezoneService->getUniqueFormattedList(),
             'qrCodeUrl' => $qrCodeUrl,
             'secretKey' => $secretKey,
+            'logins' => $logins,
         ]);
     }
 
@@ -76,11 +73,7 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request)
     {
         $request->validate([
-            'avatar' => [
-                'required',
-                File::image()
-                    ->max(2 * 1024),
-            ],
+            'avatar' => ['required', File::image()->max(2 * 1024)],
         ]);
 
         $user = Auth::user();
@@ -95,7 +88,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Аватар успешно обновлен!',
+            'message' => __('lang.profile_avatar_updated'),
             'new_avatar_url' => $user->fresh()->avatar_url,
         ]);
     }
@@ -114,10 +107,10 @@ class ProfileController extends Controller
 
             session()->forget('2fa_secret');
 
-            return back()->with('success', 'Двухфакторная аутентификация успешно включена!');
+            return back()->with('success', __('lang.profile_2fa_enabled_successfully'));
         }
 
-        return back()->withErrors(['one_time_password' => 'Неверный код подтверждения. Попробуйте еще раз.']);
+        return back()->withErrors(['one_time_password' => __('lang.profile_2fa_incorrect_code')]);
     }
 
     public function disableTwoFactor(Request $request)
@@ -130,6 +123,6 @@ class ProfileController extends Controller
         $user->google2fa_secret = null;
         $user->save();
 
-        return back()->with('success', 'Двухфакторная аутентификация отключена.');
+        return back()->with('success', __('lang.profile_2fa_disabled_successfully'));
     }
 }

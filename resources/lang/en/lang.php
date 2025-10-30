@@ -181,6 +181,15 @@ return [
     'user_delete_permission_denied' => 'You do not have permission to perform this action.',
     'user_delete_self_error' => 'You cannot delete your own account!',
 
+    // --- Profile Controller Messages ---
+    'profile_updated' => 'Profile information has been successfully updated.',
+    'profile_current_password_is_incorrect' => 'The current password is incorrect.',
+    'profile_current_password_required' => 'The current password is required to set a new one.',
+    'profile_avatar_updated' => 'Avatar updated successfully!',
+    'profile_2fa_enabled_successfully' => 'Two-factor authentication has been enabled successfully!',
+    'profile_2fa_disabled_successfully' => 'Two-factor authentication has been disabled.',
+    'profile_2fa_incorrect_code' => 'The verification code is invalid. Please try again.',
+
     // --- Middleware Messages ---
     'access_denied' => 'You do not have permission to access this page.',
     'email_not_verified' => 'Your e-mail address is not verified.',
@@ -206,7 +215,6 @@ return [
     'profile_current_password' => 'Current Password',
     'profile_enter_password' => 'New Password',
     'profile_repeat_password' => 'Confirm Password',
-    'profile_updated' => 'Profile information has been successfully updated.',
     'profile_2fa_title' => 'Set Up Two-Factor Authentication',
     'profile_2fa_description' => 'Google Authenticator',
     'profile_enable_2fa' => 'Enable Two-Factor Authentication',
@@ -221,6 +229,6 @@ return [
     'profile_enter_code_manually' => 'Or enter this key manually: ',
     'profile_step_2' => 'Step 2:',
     'profile_enter_code_finish_settings' => 'Enter the code from your app to complete the setup.',
-    'profile_confirmation_code' => 'Confirmation Code',
+    'profile_confirmation_code' => 'Verification Code',
     'no_login_history' => 'No login history found.',
 ];

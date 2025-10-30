@@ -7,6 +7,7 @@ use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Auth;
 
 class Ticket extends Authenticatable
 {
@@ -50,5 +51,14 @@ class Ticket extends Authenticatable
     public function replies(): HasMany
     {
         return $this->hasMany(Reply::class)->orderBy('created_at', 'asc');
+    }
+
+    public function getLocalizedCreatedAtAttribute(): string
+    {
+        if (Auth::check() && Auth::user()->timezone) {
+            return $this->created_at->setTimezone(Auth::user()->timezone)->format('d.m.Y H:i');
+        }
+
+        return $this->created_at->format('d.m.Y H:i').' UTC';
     }
 }

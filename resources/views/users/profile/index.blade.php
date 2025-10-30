@@ -204,9 +204,9 @@
                                 <tbody>
                                 @forelse($logins ?? [] as $login)
                                     <tr>
-                                        <td>{{-- $login->ip_address --}}</td>
-                                        <td>{{-- $login->user_agent --}}</td>
-                                        <td>{{-- $login->created_at->format('Y-m-d H:i:s') --}}</td>
+                                        <td>{{ $login->ip_address }}</td>
+                                        <td>{{ $login->user_agent }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($login->login_at)->setTimezone(Auth::user()->timezone)->format('Y-m-d H:i:s') }}</td>
                                     </tr>
                                 @empty
                                     <tr>

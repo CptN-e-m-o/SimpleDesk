@@ -38,7 +38,7 @@
 
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_created_label') }}</span>
-                                <span>{{ $ticket->created_at->format('d.m.Y H:i') }}</span>
+                                <span>{{ $ticket->localized_created_at }}</span>
                             </li>
                         </ul>
                     </div>

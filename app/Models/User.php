@@ -64,4 +64,9 @@ class User extends Authenticatable
             ? asset('storage/'.$this->avatar)
             : asset('images/default-avatar.png');
     }
+
+    public function loginHistories()
+    {
+        return $this->hasMany(LoginHistory::class);
+    }
 }

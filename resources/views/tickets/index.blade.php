@@ -53,7 +53,7 @@
                                     </span>
                                 </td>
 
-                                <td>{{ $ticket->created_at->format('d.m.Y H:i') }}</td>
+                                <td>{{ $ticket->localized_created_at }}</td>
 
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2" role="group">

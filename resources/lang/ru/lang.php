@@ -181,6 +181,15 @@ return [
     'user_delete_permission_denied' => 'У вас нет прав для выполнения этого действия.',
     'user_delete_self_error' => 'Вы не можете удалить свою собственную учетную запись!',
 
+    // --- Сообщения контроллера профиля (Profile Controller Messages) ---  <- НОВЫЙ БЛОК
+    'profile_updated' => 'Информация профиля была успешно обновлена',
+    'profile_current_password_is_incorrect' => 'Текущий пароль введен неверно.',
+    'profile_current_password_required' => 'Для смены пароля необходимо ввести текущий пароль.',
+    'profile_avatar_updated' => 'Аватар успешно обновлен!',
+    'profile_2fa_enabled_successfully' => 'Двухфакторная аутентификация успешно включена!',
+    'profile_2fa_disabled_successfully' => 'Двухфакторная аутентификация отключена.',
+    'profile_2fa_incorrect_code' => 'Неверный код подтверждения. Попробуйте еще раз.',
+
     // --- Сообщения Middleware ---
     'access_denied' => 'У вас нет прав для доступа к этой странице.',
     'email_not_verified' => 'Ваш e-mail не подтверждён',
@@ -206,7 +215,6 @@ return [
     'profile_current_password' => 'Текущий пароль',
     'profile_enter_password' => 'Новый пароль',
     'profile_repeat_password' => 'Подтверждение пароля',
-    'profile_updated' => 'Информация профиля была успешно обновлена',
     'profile_2fa_title' => 'Подключить двухфакторную аутентификацию',
     'profile_2fa_description' => 'Google Authenticator',
     'profile_enable_2fa' => 'Активировать двухфакторную аутентификацию',
