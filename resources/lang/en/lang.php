@@ -231,4 +231,7 @@ return [
     'profile_enter_code_finish_settings' => 'Enter the code from your app to complete the setup.',
     'profile_confirmation_code' => 'Verification Code',
     'no_login_history' => 'No login history found.',
+    'profile_phone_number' => 'Phone number',
+    'profile_signature' => 'Agent Signature',
+    'profile_signature_help' => 'This signature will be automatically appended to your replies in tickets.',
 ];

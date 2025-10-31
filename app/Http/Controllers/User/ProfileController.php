@@ -49,12 +49,16 @@ class ProfileController extends Controller
             'timezone' => ['required', 'string'],
             'current_password' => ['nullable', 'current_password'],
             'password' => ['nullable', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+            'phone_number' => ['nullable', 'string', 'starts_with:+'],
+            'signature' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $user->first_name = $validated['first_name'];
         $user->last_name = $validated['last_name'];
         $user->patronymic = $validated['patronymic'];
         $user->timezone = $validated['timezone'];
+        $user->phone_number = $validated['phone_number'];
+        $user->signature = $validated['signature'];
 
         if ($request->filled('password') && $request->filled('current_password')) {
             if (! Hash::check($request->current_password, $user->password)) {

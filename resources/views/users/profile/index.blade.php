@@ -117,6 +117,21 @@
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                            @if(Auth::user()->isAdminOrAgent())
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="phone_number" class="form-label">{{ __('lang.profile_phone_number') }}</label>
+                                                    <input id="phone_number" type="tel" name="phone_number_input" class="form-control" value="{{ old('phone_number', Auth::user()->phone_number) }}">
+
+                                                    <input type="hidden" name="phone_number" id="phone_number_hidden">
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="signature" class="form-label">{{ __('lang.profile_signature') }}</label>
+                                                    <textarea name="signature" id="signature" rows="4" class="form-control">{{ old('signature', Auth::user()->signature) }}</textarea>
+                                                    <div class="form-text">{{ __('lang.profile_signature_help') }}</div>
+                                                </div>
+                                            @endif
+
                                             <hr>
                                             <div class="col-md-12 mb-3">
                                                 <label for="current_password" class="form-label">{{ __('lang.profile_current_password') }}</label>
