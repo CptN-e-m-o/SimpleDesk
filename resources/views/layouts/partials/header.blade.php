@@ -12,10 +12,10 @@
 
                 @guest
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('authorization') }}">{{ __('lang.navbar_login') }}</a>
+                        <a class="nav-link" href="{{ route('login-page') }}">{{ __('lang.navbar_login') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ route('registration') }}">{{ __('lang.navbar_register') }}</a>
+                        <a class="btn btn-primary ms-2" href="{{ route('registration-page') }}">{{ __('lang.navbar_register') }}</a>
                     </li>
                 @endguest
 

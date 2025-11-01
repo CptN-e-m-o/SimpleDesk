@@ -231,4 +231,7 @@ return [
     'profile_enter_code_finish_settings' => ' Введите код из приложения, чтобы завершить настройку.',
     'profile_confirmation_code' => 'Код подтверждения',
     'no_login_history' => 'Нет истории входов',
+    'profile_phone_number' => 'Номер телефона',
+    'profile_signature' => 'Подпись агента',
+    'profile_signature_help' => 'Эта подпись будет автоматически добавляться в конце ваших ответов в заявках.',
 ];
