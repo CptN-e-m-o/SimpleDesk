@@ -6,11 +6,14 @@ use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Auth;
 
 class Ticket extends Authenticatable
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'title',
         'description',

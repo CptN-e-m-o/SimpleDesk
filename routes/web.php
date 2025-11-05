@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\TicketStatus;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ReplyController;
@@ -16,9 +18,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/tickets/{category}', [TicketController::class, 'index'])
+        ->name('tickets.index');
+
     Route::resource('tickets', TicketController::class)->except([
-        'destroy',
-    ]);
+        'destroy', 'index']);
 
     Route::resource('tickets.replies', ReplyController::class)
         ->only(['store', 'update', 'destroy'])
@@ -29,6 +33,14 @@ Route::middleware(['auth', 'admin-agent'])->group(function () {
     Route::resource('tickets', TicketController::class)->only([
         'destroy',
     ]);
+    $statuses = collect(TicketStatus::cases())->map(fn ($case) => strtolower($case->name))->all();
+
+    $filters = ['my', 'unassigned', 'my-pending-approvals', 'trash'];
+    $categories = array_merge($statuses, $filters);
+
+    Route::get('/{category}', [TicketController::class, 'index'])
+        ->whereIn('category', $categories)
+        ->name('index');
 });
 
 Route::middleware(['web'])->group(function () {
@@ -59,5 +71,17 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('2fa.challenge');
 Route::post('/two-factor-challenge', [TwoFactorChallengeController::class, 'store'])->name('2fa.challenge.store');
+
+// Панель администратора
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    });
+});
+
+// Заявки
+Route::middleware(['auth', 'admin-agent'])->prefix('tickets')->name('tickets.')->group(function () {
+    Route::get('/open', [TicketController::class, 'index'])->name('open');
+});
 
 require __DIR__.'/auth.php';

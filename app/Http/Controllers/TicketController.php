@@ -18,17 +18,66 @@ class TicketController extends Controller
 {
     const ELEMENTS_PER_PAGE = 20;
 
-    public function index(): View
+    public function index(string $category): View
     {
         $user = auth()->user();
-        $query = Ticket::with('user', 'status', 'priority')->latest();
-        if ($user->isAdminOrAgent()) {
-            $tickets = $query->paginate(self::ELEMENTS_PER_PAGE);
-        } else {
-            $tickets = $query->where('user_id', $user->id)->paginate(self::ELEMENTS_PER_PAGE);
+        $query = Ticket::with('user', 'priority');
+        $title = '';
+
+        switch ($category) {
+            case 'created':
+                $query->where('user_id', $user->id);
+                $title = __('lang.my_created_tickets');
+                break;
+
+            case 'assigned':
+                if (! $user->isAdminOrAgent()) {
+                    abort(404);
+                }
+                $query->where('assigned_agent_id', $user->id);
+                $title = __('lang.tickets_assigned_to_me');
+                break;
+
+            case 'unassigned':
+                if (! $user->isAdminOrAgent()) {
+                    abort(404);
+                }
+                $query->whereNull('assigned_agent_id');
+                $title = __('lang.unassigned_tickets');
+                break;
+
+            case 'my-pending-approvals':
+                if (! $user->isAdminOrAgent()) {
+                    abort(404);
+                }
+                $query->where('assigned_agent_id', $user->id)
+                    ->where('status_id', TicketStatus::Pending_Approval->value);
+                $title = __('lang.my_pending_approvals');
+                break;
+
+            case 'trash':
+                $query->onlyTrashed();
+                $title = __('lang.trash');
+                break;
+
+            default:
+                $statusEnum = TicketStatus::fromName($category);
+                if ($statusEnum) {
+                    $query->where('status_id', $statusEnum->value);
+                    $title = $statusEnum->label();
+                } else {
+                    abort(404);
+                }
+                break;
         }
 
-        return view('tickets.index', compact('tickets'));
+        if (! $user->isAdminOrAgent()) {
+            $query->where('user_id', $user->id);
+        }
+
+        $tickets = $query->latest()->paginate(self::ELEMENTS_PER_PAGE);
+
+        return view('tickets.index', compact('tickets', 'title'));
     }
 
     public function create(): View

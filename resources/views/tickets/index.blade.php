@@ -13,9 +13,6 @@
                 <div class="row">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1>{{ __('lang.tickets_list_title') }}</h1>
-                        <a href="{{ route('tickets.create') }}" class="btn btn-success">
-                            {{ __('lang.tickets_list_add_button') }}
-                        </a>
                     </div>
                 </div>
 
