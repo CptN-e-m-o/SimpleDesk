@@ -14,12 +14,12 @@ enum TicketStatus: int
     public function label(): string
     {
         return match ($this) {
-            self::Open => __('lang.open_tickets'),
-            self::Closed => __('lang.closed_tickets'),
-            self::Overdue => __('lang.overdue_tickets'),
-            self::Unanswered => __('lang.unanswered_tickets'),
+            self::Open => __('lang.open'),
+            self::Closed => __('lang.closed'),
+            self::Overdue => __('lang.overdue'),
+            self::Unanswered => __('lang.unanswered'),
             self::Pending_Approval => __('lang.pending_approvals'),
-            self::Spam => __('lang.spam_tickets'),
+            self::Spam => __('lang.spam'),
         };
     }
 

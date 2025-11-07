@@ -20,6 +20,11 @@
                 @endguest
 
                 @auth
+                        <a class="nav-link {{ request()->routeIs('tickets.create') ? 'active' : '' }}"
+                           href="{{ route('tickets.create') }}">
+                            {{ __('lang.create_ticket_button') }}
+                        </a>
+
                     <a class="nav-link {{ request()->routeIs('tickets.index') ? 'active' : '' }}"
                         href="{{ route('tickets.index', ['category' => 'created']) }}">
                         {{ __('lang.navbar_my_tickets') }}
@@ -28,8 +33,8 @@
 
                     @if(Auth::user()->isAdminOrAgent())
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-                               href="{{ route('admin.dashboard') }}">
+                            <a class="nav-link {{ request()->routeIs('panel.dashboard') ? 'active' : '' }}"
+                               href="{{ route('panel.dashboard') }}">
                                {{ __('lang.dashboard') }}
                             </a>
                         </li>

@@ -238,10 +238,22 @@ return [
     // Панель агента
     'dashboard' => 'Панель агента',
     'open_tickets' => 'Открытые заявки',
+    'spam_tickets' => 'Спам',
+    'closed_tickets' => 'Закрытые заявки',
     'my_tickets' => 'Мои заявки',
     'overdue_tickets' => 'Просроченные заявки',
     'unanswered_tickets' => 'Неотвеченные заявки',
     'unassigned_tickets' => 'Не назначенные заявки',
     'tickets_assigned_to_me' => 'Назначенные мне заявки',
     'pending_approvals' => 'Ожидают одобрения',
+
+    // Статусы заявок
+    'open' => 'Открытые',
+    'spam' => 'Спам',
+    'closed' => 'Закрытые',
+    'my' => 'Мои заявки',
+    'overdue' => 'Просроченные',
+    'unanswered' => 'Неотвеченные',
+    'unassigned' => 'Не назначенные',
+    'assigned_to_me' => 'Назначенные мне',
 ];

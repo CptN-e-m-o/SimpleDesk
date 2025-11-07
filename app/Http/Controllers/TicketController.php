@@ -86,7 +86,7 @@ class TicketController extends Controller
         $currentUser = auth()->user();
         $assignees = [];
         if ($currentUser->isAdminOrAgent()) {
-            $assignees = User::whereIn('role_id', [UserRole::Admin, UserRole::Agent])->orderBy('name')->get();
+            $assignees = User::whereIn('role_id', [UserRole::Admin, UserRole::Agent])->orderBy('last_name')->get();
         }
 
         return view('tickets.create', [

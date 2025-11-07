@@ -9,9 +9,6 @@
                         <h4 class="mb-0">
                             {{ isset($ticket) ? __('lang.ticket_form_edit_title', ['id' => $ticket->id]) : __('lang.ticket_form_create_title') }}
                         </h4>
-                        <a href="{{ route('tickets.index') }}" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-arrow-left me-2"></i>{{ __('lang.ticket_form_back_to_list') }}
-                        </a>
                     </div>
 
                     <div class="card-body">
@@ -87,7 +84,7 @@
                             @endif
 
                             <div class="d-flex justify-content-end border-top pt-3 mt-3">
-                                <a href="{{ route('tickets.index') }}" class="btn btn-secondary me-2">
+                                <a href="{{ url()->previous() }}" class="btn btn-secondary me-2">
                                     <i class="bi bi-x-lg me-1"></i>{{ __('lang.ticket_form_cancel_button') }}
                                 </a>
                                 <button type="submit" class="btn btn-primary">

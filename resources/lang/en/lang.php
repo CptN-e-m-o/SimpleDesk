@@ -238,10 +238,22 @@ return [
     // Agent panel
     'dashboard' => 'Agent Dashboard',
     'open_tickets' => 'Open Tickets',
+    'spam_tickets' => 'Spam',
+    'closed_tickets' => 'Closed Tickets',
     'my_tickets' => 'My Tickets',
     'overdue_tickets' => 'Overdue Tickets',
     'unanswered_tickets' => 'Unanswered Tickets',
     'unassigned_tickets' => 'Unassigned Tickets',
     'tickets_assigned_to_me' => 'Tickets Assigned to Me',
     'pending_approvals' => 'Pending Approvals',
+
+    // Статусы заявок
+    'open' => 'Open',
+    'spam' => 'Spam',
+    'closed' => 'Closed',
+    'my' => 'My Tickets',
+    'overdue' => 'Overdue',
+    'unanswered' => 'Unanswered',
+    'unassigned' => 'Unassigned',
+    'assigned_to_me' => 'Assigned to Me',
 ];
