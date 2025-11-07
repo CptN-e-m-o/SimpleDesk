@@ -46,8 +46,8 @@
                         </ul>
                     </li>
 
-                    <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-                       href="{{ route('admin.dashboard') }}">
+                    <a class="nav-link {{ request()->routeIs('panel.dashboard') ? 'active' : '' }}"
+                       href="{{ route('panel.dashboard') }}">
                         <i class="bi bi-gear-wide-connected me-1"></i>
                     </a>
                     <a class="nav-link {{ request()->routeIs('tickets.index') ? 'active' : '' }}"

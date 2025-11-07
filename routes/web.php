@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\TicketStatus;
+use App\Http\Controllers\Admin\AdminPanelController;
+use App\Http\Controllers\Admin\AgentsController;
 use App\Http\Controllers\Agent\DashboardController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\IndexController;
@@ -58,6 +60,13 @@ Route::prefix('panel')->middleware(['auth', 'admin-agent'])->name('panel.')->gro
     Route::get('/{category}', [TicketController::class, 'index'])
         ->whereIn('category', $categories)
         ->name('index');
+});
+
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminPanelController::class, 'index'])->name('dashboard');
+
+    // Блок "Пользователи. Агенты"
+    Route::resource('/agents', AgentsController::class);
 });
 
 Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('2fa.challenge');

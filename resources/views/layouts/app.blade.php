@@ -14,6 +14,8 @@
 
 @if(Auth::check() && (Auth::user()->isAdminOrAgent()) && Str::contains(request()->path(), 'panel'))
     @include('layouts.partials.agent_header')
+@elseif(Auth::check() && (Auth::user()->isAdmin()) && Str::contains(request()->path(), 'admin'))
+    @include('layouts.partials.admin_header')
 @else
     @include('layouts.partials.header')
 @endif
