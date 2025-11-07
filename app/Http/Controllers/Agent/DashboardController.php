@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Agent;
 
 use App\Enums\TicketStatus;
 use App\Http\Controllers\Controller;
@@ -27,6 +27,6 @@ class DashboardController extends Controller
             'trash' => (clone $baseQuery)->onlyTrashed()->count(),
         ];
 
-        return view('admin.dashboard.index', compact('counts'));
+        return view('agent.dashboard.index', compact('counts'));
     }
 }

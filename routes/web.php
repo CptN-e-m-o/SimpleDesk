@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\TicketStatus;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Agent\DashboardController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ReplyController;
@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('panel')->middleware(['auth', 'admin-agent'])->name('panel.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
 
     Route::middleware('admin')->resource('users', UserController::class);
 

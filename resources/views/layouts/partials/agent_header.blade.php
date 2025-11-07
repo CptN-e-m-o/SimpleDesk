@@ -29,7 +29,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
                             <li>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                <a class="dropdown-item d-flex align-items-center" href="{{ route('panel.tickets.create') }}">
                                     <i class="bi bi-file-earmark-plus me-1"></i><span class="ms-2">Заявку</span>
                                 </a>
                             </li>
