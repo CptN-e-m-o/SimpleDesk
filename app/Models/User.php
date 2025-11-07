@@ -55,6 +55,11 @@ class User extends Authenticatable
         return in_array($this->role_id, [UserRole::Admin, UserRole::Agent]);
     }
 
+    public function isAdmin(): bool
+    {
+        return in_array($this->role_id, [UserRole::Admin]);
+    }
+
     public function replies(): HasMany
     {
         return $this->hasMany(Reply::class, 'author_id');

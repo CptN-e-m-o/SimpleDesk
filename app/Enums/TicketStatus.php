@@ -5,15 +5,21 @@ namespace App\Enums;
 enum TicketStatus: int
 {
     case Open = 1;
-    case In_Progress = 2;
-    case Closed = 3;
+    case Closed = 2;
+    case Overdue = 3;
+    case Unanswered = 4;
+    case Pending_Approval = 5;
+    case Spam = 6;
 
     public function label(): string
     {
         return match ($this) {
-            self::Open => __('lang.ticket_status_open'),
-            self::In_Progress => __('lang.ticket_status_in_progress'),
-            self::Closed => __('lang.ticket_status_closed'),
+            self::Open => __('lang.open'),
+            self::Closed => __('lang.closed'),
+            self::Overdue => __('lang.overdue'),
+            self::Unanswered => __('lang.unanswered'),
+            self::Pending_Approval => __('lang.pending_approvals'),
+            self::Spam => __('lang.spam'),
         };
     }
 
@@ -21,13 +27,22 @@ enum TicketStatus: int
     {
         return match ($this) {
             self::Open => 'primary',
-            self::In_Progress => 'warning',
             self::Closed => 'success',
+            self::Overdue => 'danger',
+            self::Unanswered => 'warning',
+            self::Pending_Approval => 'info',
+            self::Spam => 'secondary',
         };
     }
 
-    public function isClosed(): bool
+    public static function fromName(string $name): ?self
     {
-        return $this === self::Closed;
+        foreach (self::cases() as $status) {
+            if (strtolower($status->name) === str_replace('-', '_', $name)) {
+                return $status;
+            }
+        }
+
+        return null;
     }
 }

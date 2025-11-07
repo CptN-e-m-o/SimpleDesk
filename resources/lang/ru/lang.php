@@ -6,7 +6,7 @@ return [
     // Секция Header
     'header_title' => 'Добро пожаловать в SimpleDesk',
     'header_subtitle' => 'Система для управления заявками и общения с техподдержкой.',
-    'create_ticket_button' => 'Создать тикет',
+    'create_ticket_button' => 'Создать заявку',
     'login_button' => 'Войти в систему',
 
     // Секция "Что умеет SimpleDesk"
@@ -47,8 +47,8 @@ return [
     'navbar_toggle_navigation' => 'Переключить навигацию',
     'navbar_login' => 'Войти',
     'navbar_register' => 'Регистрация',
-    'navbar_my_tickets' => 'Мои тикеты',
-    'navbar_all_tickets' => 'Все тикеты',
+    'navbar_my_tickets' => 'Мои заявки',
+    'navbar_all_tickets' => 'Все заявки',
     'navbar_users' => 'Пользователи',
     'navbar_my_profile' => 'Мой профиль',
     'navbar_logout' => 'Выйти',
@@ -234,4 +234,26 @@ return [
     'profile_phone_number' => 'Номер телефона',
     'profile_signature' => 'Подпись агента',
     'profile_signature_help' => 'Эта подпись будет автоматически добавляться в конце ваших ответов в заявках.',
+
+    // Панель агента
+    'dashboard' => 'Панель агента',
+    'open_tickets' => 'Открытые заявки',
+    'spam_tickets' => 'Спам',
+    'closed_tickets' => 'Закрытые заявки',
+    'my_tickets' => 'Мои заявки',
+    'overdue_tickets' => 'Просроченные заявки',
+    'unanswered_tickets' => 'Неотвеченные заявки',
+    'unassigned_tickets' => 'Не назначенные заявки',
+    'tickets_assigned_to_me' => 'Назначенные мне заявки',
+    'pending_approvals' => 'Ожидают одобрения',
+
+    // Статусы заявок
+    'open' => 'Открытые',
+    'spam' => 'Спам',
+    'closed' => 'Закрытые',
+    'my' => 'Мои заявки',
+    'overdue' => 'Просроченные',
+    'unanswered' => 'Неотвеченные',
+    'unassigned' => 'Не назначенные',
+    'assigned_to_me' => 'Назначенные мне',
 ];

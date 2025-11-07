@@ -12,7 +12,11 @@
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light text-dark">
 
-@include('layouts.partials.header')
+@if(Auth::check() && (Auth::user()->isAdminOrAgent()) && Str::contains(request()->path(), 'panel'))
+    @include('layouts.partials.agent_header')
+@else
+    @include('layouts.partials.header')
+@endif
 
 <main class="flex-grow-1">
     @yield('content')

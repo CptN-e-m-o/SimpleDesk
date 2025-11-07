@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\TicketStatus;
+use App\Http\Controllers\Agent\DashboardController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ReplyController;
@@ -11,50 +13,51 @@ use Illuminate\Support\Facades\Session;
 
 Route::get('/', [IndexController::class, 'index'])->name('index');
 
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::resource('users', UserController::class);
-});
+Route::get('locale/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'ru'])) {
+        Session::put('locale', $locale);
+    }
+
+    return redirect()->back();
+})->name('locale.switch');
 
 Route::middleware('auth')->group(function () {
-    Route::resource('tickets', TicketController::class)->except([
-        'destroy',
-    ]);
+    Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
+    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets/{ticket}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
+    Route::put('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
+    Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->whereNumber('ticket')->name('tickets.show');
+    Route::get('/tickets/{category}', [TicketController::class, 'index'])->name('tickets.index');
+    Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])->name('tickets.destroy');
 
     Route::resource('tickets.replies', ReplyController::class)
         ->only(['store', 'update', 'destroy'])
         ->shallow();
-});
 
-Route::middleware(['auth', 'admin-agent'])->group(function () {
-    Route::resource('tickets', TicketController::class)->only([
-        'destroy',
-    ]);
-});
-
-Route::middleware(['web'])->group(function () {
-    Route::get('locale/{locale}', function ($locale) {
-        if (in_array($locale, ['en', 'ru'])) {
-            Session::put('locale', $locale);
-        }
-
-        return redirect()->back();
-    })->name('locale.switch');
-});
-
-// User profile
-Route::middleware('auth')
-    ->prefix('profile')
-    ->name('profile.')
-    ->group(function () {
+    Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('index');
         Route::put('/', [ProfileController::class, 'update'])->name('update');
         Route::post('avatar', [ProfileController::class, 'updateAvatar'])->name('avatar.update');
+        Route::post('/2fa/enable', [ProfileController::class, 'enableTwoFactor'])->name('2fa.enable');
+        Route::post('/2fa/disable', [ProfileController::class, 'disableTwoFactor'])->name('2fa.disable');
     });
+});
 
-// 2FA
-Route::middleware('auth')->group(function () {
-    Route::post('/profile/2fa/enable', [ProfileController::class, 'enableTwoFactor'])->name('profile.2fa.enable');
-    Route::post('/profile/2fa/disable', [ProfileController::class, 'disableTwoFactor'])->name('profile.2fa.disable');
+Route::prefix('panel')->middleware(['auth', 'admin-agent'])->name('panel.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
+
+    Route::middleware('admin')->resource('users', UserController::class);
+
+    Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])->name('tickets.destroy');
+
+    $statuses = collect(TicketStatus::cases())->map(fn ($case) => strtolower($case->name))->all();
+    $filters = ['my', 'unassigned', 'my-pending-approvals', 'trash'];
+    $categories = array_merge($statuses, $filters);
+
+    Route::get('/{category}', [TicketController::class, 'index'])
+        ->whereIn('category', $categories)
+        ->name('index');
 });
 
 Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('2fa.challenge');

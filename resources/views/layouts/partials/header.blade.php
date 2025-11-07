@@ -20,21 +20,25 @@
                 @endguest
 
                 @auth
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __('lang.navbar_my_tickets') }}</a>
-                    </li>
+                        <a class="nav-link {{ request()->routeIs('tickets.create') ? 'active' : '' }}"
+                           href="{{ route('tickets.create') }}">
+                            {{ __('lang.create_ticket_button') }}
+                        </a>
 
-                    @if (Auth::user()->role_id !== \App\Enums\UserRole::Client->value)
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('tickets.index') }}">{{ __('lang.navbar_all_tickets') }}</a>
-                        </li>
-                    @endif
+                    <a class="nav-link {{ request()->routeIs('tickets.index') ? 'active' : '' }}"
+                        href="{{ route('tickets.index', ['category' => 'created']) }}">
+                        {{ __('lang.navbar_my_tickets') }}
+                    </a>
 
-                    @if (Auth::user()->role_id === \App\Enums\UserRole::Admin)
+
+                    @if(Auth::user()->isAdminOrAgent())
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('users.index') }}">{{ __('lang.navbar_users') }}</a>
+                            <a class="nav-link {{ request()->routeIs('panel.dashboard') ? 'active' : '' }}"
+                               href="{{ route('panel.dashboard') }}">
+                               {{ __('lang.dashboard') }}
+                            </a>
                         </li>
-                    @endif
+                    @endcan
 
                         <li class="nav-item dropdown ms-3">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

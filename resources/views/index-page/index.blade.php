@@ -5,8 +5,10 @@
         <div class="container">
             <h1 class="fw-bold mb-3">{{ __('lang.header_title') }}</h1>
             <p class="lead mb-4">{{ __('lang.header_subtitle') }}</p>
-            <a href="#" class="btn btn-light btn-lg me-2">{{ __('lang.create_ticket_button') }}</a>
-            <a href="#" class="btn btn-outline-light btn-lg">{{ __('lang.login_button') }}</a>
+            <a href="{{ route('tickets.create') }}" class="btn btn-light btn-lg me-2">{{ __('lang.create_ticket_button') }}</a>
+            <a href="{{ route('tickets.index', ['category' => 'my']) }}" class="btn btn-outline-light btn-lg">
+                {{ __('lang.my_tickets') }}
+            </a>
         </div>
     </header>
 
