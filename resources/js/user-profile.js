@@ -1,0 +1,87 @@
+document.addEventListener('DOMContentLoaded', function () {
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const avatarWrapper = document.querySelector('.avatar-wrapper');
+    const spinner = document.getElementById('avatar-spinner');
+
+    if (!avatarInput || !avatarPreview || !avatarWrapper || !spinner) {
+        return;
+    }
+
+    const uploadUrl = avatarWrapper.dataset.uploadUrl;
+
+    avatarInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            avatarPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        uploadAvatar(file);
+    });
+
+    function uploadAvatar(file) {
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        spinner.classList.remove('d-none');
+        avatarPreview.style.opacity = '0.5';
+
+        fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(data.message);
+                    avatarPreview.src = data.new_avatar_url;
+                } else {
+                    alert('Ошибка: ' + (data.message || 'Не удалось загрузить изображение.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла системная ошибка.');
+            })
+            .finally(() => {
+                spinner.classList.add('d-none');
+                avatarPreview.style.opacity = '1';
+                avatarInput.value = '';
+            });
+    }
+
+    const phoneInputField = document.querySelector("#phone_number");
+
+    const phoneInput = window.intlTelInput(phoneInputField, {
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js",
+
+        initialCountry: "auto",
+        geoIpLookup: function(callback) {
+            fetch("https://ipapi.co/json")
+                .then(res => res.json())
+                .then(data => callback(data.country_code))
+                .catch(() => callback("us"));
+        },
+        separateDialCode: true,
+    });
+
+    const profileForm = phoneInputField.closest('form');
+    const hiddenInput = document.querySelector("#phone_number_hidden");
+
+    profileForm.addEventListener('submit', function() {
+        hiddenInput.value = phoneInput.getNumber();
+    });
+
+});

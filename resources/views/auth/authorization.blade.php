@@ -21,8 +21,8 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">{{ __('lang.login_email_label') }}</label>
-                            <input type="email" id="email" name="email" class="form-control" required>
+                            <label for="login" class="form-label">{{ __('lang.login_email_label') }}</label>
+                            <input type="text" id="login" name="login" class="form-control" required autofocus placeholder="Введите ваш email или логин">
                         </div>
 
                         <div class="mb-3">

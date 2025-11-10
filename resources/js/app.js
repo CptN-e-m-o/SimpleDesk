@@ -1,2 +1,5 @@
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '../sass/app.scss';
+import './bootstrap';
+
+import './admin/agent-list.js';
+import './user-profile.js';

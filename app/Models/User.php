@@ -15,6 +15,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'first_name',
+        'login',
         'email',
         'password',
         'role_id',
@@ -23,6 +24,7 @@ class User extends Authenticatable
         'avatar',
         'timezone',
         'phone_number',
+        'phone_verified_at',
         'signature',
     ];
 
@@ -36,6 +38,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'role_id' => UserRole::class,
         ];

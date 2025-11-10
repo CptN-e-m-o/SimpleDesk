@@ -27,13 +27,14 @@ return [
 
     // --- Login Page ---
     'login_title' => 'Login',
-    'login_email_label' => 'Email',
+    'login_email_label' => 'Login or Email',
     'login_password_label' => 'Password',
     'login_submit_button' => 'Log In',
 
     // --- Register Page ---
     'register_title' => 'Register',
     'register_name_label' => 'Name',
+    'register_name_login' => 'Login',
     'register_email_label' => 'Email',
     'register_password_label' => 'Password',
     'register_password_confirmation_label' => 'Password Confirmation',

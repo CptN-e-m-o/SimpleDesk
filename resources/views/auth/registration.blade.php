@@ -26,6 +26,11 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="name" class="form-label">{{ __('lang.register_name_login') }}</label>
+                            <input type="text" id="login" name="login" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
                             <label for="email" class="form-label">{{ __('lang.register_email_label') }}</label>
                             <input type="email" id="email" name="email" class="form-control" required>
                         </div>

@@ -26,7 +26,6 @@
 
 @include('layouts.partials.footer')
 
-<script src="{{ asset('js/user-profile.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
 @stack('scripts')
 </body>

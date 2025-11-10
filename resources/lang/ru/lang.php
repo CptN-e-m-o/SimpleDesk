@@ -27,13 +27,14 @@ return [
 
     // --- Страница авторизации (Login Page) ---
     'login_title' => 'Авторизация',
-    'login_email_label' => 'Email',
+    'login_email_label' => 'Логин или Email',
     'login_password_label' => 'Пароль',
     'login_submit_button' => 'Войти',
 
     // --- Страница регистрации (Register Page) ---
     'register_title' => 'Регистрация',
     'register_name_label' => 'Имя',
+    'register_name_login' => 'Логин',
     'register_email_label' => 'Email',
     'register_password_label' => 'Пароль',
     'register_password_confirmation_label' => 'Подтверждение пароля',

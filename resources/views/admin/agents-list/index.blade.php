@@ -6,35 +6,24 @@
         <div class="card shadow-sm">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Список агентов</h5>
+
+                <div>
+                    <label for="perPageSelect" class="form-label me-2">Показывать по:</label>
+                    <select id="perPageSelect" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                        @php $options = [10, 20, 50]; @endphp
+                        @foreach ($options as $option)
+                            <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>
+                                {{ $option }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <div class="card-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox"></th>
-                            <th>ФИО</th>
-                            <th>Логин</th>
-                            <th>Электронная почта</th>
-                            <th>Телефон</th>
-                            <th>Информация об аккаунте</th>
-                            <th>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($agents as $agent)
-                            <tr>
-                                <td><input type="checkbox"></td>
-                                <td>{{ $agent->full_name }}</td>
-                                <td></td>
-                                <td>{{ $agent->email }}</td>
-                                <td>{{ $agent->phone_number }}</td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <div id="agent-list-container">
+                    @include('admin.agents-list.partials.agent_table', ['agents' => $agents])
+                </div>
             </div>
         </div>
     </div>
