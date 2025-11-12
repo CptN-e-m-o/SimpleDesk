@@ -15,18 +15,19 @@
                         <a class="nav-link" href="{{ route('login-page') }}">{{ __('lang.navbar_login') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ route('registration-page') }}">{{ __('lang.navbar_register') }}</a>
+                        <a class="btn btn-primary ms-2"
+                           href="{{ route('registration-page') }}">{{ __('lang.navbar_register') }}</a>
                     </li>
                 @endguest
 
                 @auth
-                        <a class="nav-link {{ request()->routeIs('tickets.create') ? 'active' : '' }}"
-                           href="{{ route('tickets.create') }}">
-                            {{ __('lang.create_ticket_button') }}
-                        </a>
+                    <a class="nav-link {{ request()->routeIs('tickets.create') ? 'active' : '' }}"
+                       href="{{ route('tickets.create') }}">
+                        {{ __('lang.create_ticket_button') }}
+                    </a>
 
                     <a class="nav-link {{ request()->routeIs('tickets.index') ? 'active' : '' }}"
-                        href="{{ route('tickets.index', ['category' => 'created']) }}">
+                       href="{{ route('tickets.index', ['category' => 'created']) }}">
                         {{ __('lang.navbar_my_tickets') }}
                     </a>
 
@@ -35,34 +36,41 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('panel.dashboard') ? 'active' : '' }}"
                                href="{{ route('panel.dashboard') }}">
-                               {{ __('lang.dashboard') }}
+                                {{ __('lang.dashboard') }}
                             </a>
                         </li>
                     @endcan
 
-                        <li class="nav-item dropdown ms-3">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                @if (session('locale') === 'en')
-                                    🇬🇧 English
-                                @else
-                                    🇷🇺 Русский
-                                @endif
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('locale.switch', 'ru') }}">
-                                        🇷🇺 <span class="ms-2">Русский</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('locale.switch', 'en') }}">
-                                        🇬🇧 <span class="ms-2">English</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                @endauth
 
-                        <li class="nav-item dropdown ms-3">
+                <li class="nav-item dropdown ms-3">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="langDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        @if (session('locale') === 'en')
+                            🇬🇧 English
+                        @else
+                            🇷🇺 Русский
+                        @endif
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center"
+                               href="{{ route('locale.switch', 'ru') }}">
+                                🇷🇺 <span class="ms-2">Русский</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center"
+                               href="{{ route('locale.switch', 'en') }}">
+                                🇬🇧 <span class="ms-2">English</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                @auth
+
+                    <li class="nav-item dropdown ms-3">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
@@ -74,7 +82,9 @@
                                     {{ __('lang.navbar_my_profile') }}
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf

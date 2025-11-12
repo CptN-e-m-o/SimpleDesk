@@ -27,8 +27,10 @@ return [
 
     // --- Страница авторизации (Login Page) ---
     'login_title' => 'Авторизация',
-    'login_email_label' => 'Логин или Email',
-    'login_password_label' => 'Пароль',
+    'login_email_label' => 'Логин или Email:',
+    'login_enter_email_label' => 'Введите ваш логин или email',
+    'login_password_label' => 'Пароль:',
+    'login_enter_password_label' => 'Введите ваш пароль',
     'login_submit_button' => 'Войти',
 
     // --- Страница регистрации (Register Page) ---

@@ -27,8 +27,10 @@ return [
 
     // --- Login Page ---
     'login_title' => 'Login',
-    'login_email_label' => 'Login or Email',
-    'login_password_label' => 'Password',
+    'login_email_label' => 'Login or Email:',
+    'login_enter_email_label' => 'Enter your login or email',
+    'login_password_label' => 'Password:',
+    'login_enter_password_label' => 'Enter your password',
     'login_submit_button' => 'Log In',
 
     // --- Register Page ---
