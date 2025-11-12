@@ -11,7 +11,7 @@ class SortableLink extends Component
 
     public bool $isActive = false;
 
-    public string $iconDirection = 'asc';
+    public ?string $iconDirection = null; // nullable, чтобы для неактивной колонки было null
 
     public function __construct(string $column, public string $title, Request $request)
     {
@@ -22,11 +22,7 @@ class SortableLink extends Component
 
         $newDirection = ($this->isActive && $currentSortDirection === 'asc') ? 'desc' : 'asc';
 
-        if ($this->isActive) {
-            $this->iconDirection = $currentSortDirection;
-        } else {
-            $this->iconDirection = 'desc';
-        }
+        $this->iconDirection = $this->isActive ? $currentSortDirection : null;
 
         $queryParams = $request->query();
         $linkParams = array_merge($queryParams, ['sort_by' => $column, 'sort_direction' => $newDirection]);
