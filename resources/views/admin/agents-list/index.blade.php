@@ -8,24 +8,49 @@
             <div class="card-header bg-light">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Список агентов</h5>
+
+                    <div class="d-flex gap-2">
+                        <a href="#"
+                           class="text-center text-decoration-none text-dark d-flex align-items-center justify-content-center"
+                           style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
+                           data-bs-toggle="tooltip"
+                           title="Фильтр">
+                            <i class="bi bi-funnel fs-5"></i>
+                        </a>
+
+                        <a href="#"
+                           class="text-center text-decoration-none text-dark d-flex align-items-center justify-content-center"
+                           style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
+                           data-bs-toggle="tooltip"
+                           title="Создать агента">
+                            <i class="bi bi-plus-circle fs-5"></i>
+                        </a>
+                    </div>
                 </div>
 
-                <div class="mt-2">
-                    <div>
-                        <label for="perPageSelect" class="form-label me-2 mb-0 align-middle">Показывать по:</label>
-                        <select id="perPageSelect" class="form-select form-select-sm d-inline-block" style="width: auto;">
+                <div class="mt-2 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="perPageSelect" class="form-label mb-0 align-middle">Показывать по:</label>
+                        <select id="perPageSelect" class="form-select form-select-sm" style="width: auto;">
                             @foreach ($options as $option)
                                 <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>
                                     {{ $option }}
                                 </option>
                             @endforeach
                         </select>
+
+                        <button type="button" id="deactivate-selected-btn" class="btn btn-light border v-popper--has-tooltip d-none"
+                                data-bs-toggle="modal" data-bs-target="#deactivateAgentModal">
+                            <i class="fas fa-trash"></i>
+                            Отключить выбранных
+                        </button>
                     </div>
-                    <button type="button" id="deactivate-selected-btn" class="btn btn-light border v-popper--has-tooltip d-none"
-                            data-bs-toggle="modal" data-bs-target="#deactivateAgentModal">
-                        <i class="fas fa-trash"></i>
-                        Отключить выбранных
-                    </button>
+
+                    <div>
+                        <input type="text" class="form-control form-control-sm"
+                               placeholder="Введите текст и нажмите Enter для поиска..."
+                               style="width: 350px;">
+                    </div>
                 </div>
             </div>
 
