@@ -5,7 +5,7 @@
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">{{ __('lang.ticket_show_title', ['id' => $ticket->id, 'title' => $ticket->title]) }}</h4>
-                <a href="{{ route('tickets.index') }}" class="btn btn-outline-light btn-sm">
+                <a href="{{ url()->previous() }}" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-arrow-left me-2"></i>{{ __('lang.ticket_form_back_to_list') }}
                 </a>
             </div>
@@ -19,7 +19,7 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_author_label') }}</span>
-                                <strong>{{ $ticket->user->first_name }}</strong>
+                                <strong>{{ $ticket->user->full_name }}</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">{{ __('lang.ticket_show_status_label') }}</span>

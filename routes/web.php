@@ -67,6 +67,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     // Блок "Пользователи. Агенты"
     Route::resource('/agents', AgentsController::class);
+    Route::post('/admin/agents/deactivate-bulk', [AgentsController::class, 'deactivateBulk'])->name('agents.deactivate.bulk');
 });
 
 Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('2fa.challenge');
