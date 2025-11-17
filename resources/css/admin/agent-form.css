@@ -1,0 +1,6 @@
+@media (min-width: 768px) {
+    .col-md-5th {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+}

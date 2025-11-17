@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
             history.pushState(null, '', url);
             initializeTableInteractions();
         } catch (error) {
-            console.error('Ошибка при загрузке данных:', error);
+
         } finally {
             agentListContainer.style.opacity = '1';
         }

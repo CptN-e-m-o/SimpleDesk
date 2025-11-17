@@ -35,6 +35,7 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->string('password')),
             'role_id' => UserRole::Client->value,
             'is_active' => true,
+            'timezone' => 'UTC',
         ]);
 
         event(new Registered($user));

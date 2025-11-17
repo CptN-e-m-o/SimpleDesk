@@ -1,3 +1,5 @@
+import { initPhoneInput } from './helpers/phone-input.js';
+
 document.addEventListener('DOMContentLoaded', function () {
     const avatarInput = document.getElementById('avatar');
     const avatarPreview = document.getElementById('avatar-preview');
@@ -62,26 +64,5 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    const phoneInputField = document.querySelector("#phone_number");
-
-    const phoneInput = window.intlTelInput(phoneInputField, {
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js",
-
-        initialCountry: "auto",
-        geoIpLookup: function(callback) {
-            fetch("https://ipapi.co/json")
-                .then(res => res.json())
-                .then(data => callback(data.country_code))
-                .catch(() => callback("us"));
-        },
-        separateDialCode: true,
-    });
-
-    const profileForm = phoneInputField.closest('form');
-    const hiddenInput = document.querySelector("#phone_number_hidden");
-
-    profileForm.addEventListener('submit', function() {
-        hiddenInput.value = phoneInput.getNumber();
-    });
-
+    initPhoneInput("#phone_number", "#phone_number_hidden");
 });

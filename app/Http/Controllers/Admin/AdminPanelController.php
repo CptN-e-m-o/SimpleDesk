@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\View\Factory;
+use Illuminate\View\View;
 
 class AdminPanelController extends Controller
 {
-    public function index()
+    public function index(): Factory|View
     {
         $sections = [
             __('lang.sections.users') => [

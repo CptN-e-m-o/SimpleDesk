@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -83,5 +84,62 @@ class AgentsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Выбранные агенты были успешно деактивированы.');
+    }
+
+    public function create(TimezoneService $timezoneService)
+    {
+        return view('admin.agents-list.create', [
+            'timezones' => $timezoneService->getUniqueFormattedList(),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'role_id' => ['required', 'integer'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'login' => ['nullable', 'string', 'unique:users,login'],
+            'last_name' => ['nullable', 'string'],
+            'first_name' => ['required', 'string'],
+            'patronymic' => ['nullable', 'string'],
+            'phone_number' => ['nullable', 'string'],
+            'mobile_phone' => ['nullable', 'string'],
+            'internal_number' => ['nullable', 'string'],
+            'timezone' => ['required', 'string'],
+            'signature' => ['nullable', 'string'],
+        ]);
+
+        $agent = User::create($data);
+
+        return redirect()->route('agents.index');
+    }
+
+    public function edit(TimezoneService $timezoneService, User $agent)
+    {
+        return view('admin.agents-list.edit', [
+            'timezones' => $timezoneService->getUniqueFormattedList(),
+            'agent' => $agent,
+        ]);
+    }
+
+    public function update(Request $request, User $agent)
+    {
+        $data = $request->validate([
+            'role_id' => ['required', 'integer'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($agent->id)],
+            'login' => ['nullable', 'string', Rule::unique('users', 'login')->ignore($agent->id)],
+            'last_name' => ['nullable', 'string'],
+            'first_name' => ['required', 'string'],
+            'patronymic' => ['nullable', 'string'],
+            'phone_number' => ['nullable', 'string'],
+            'mobile_phone' => ['nullable', 'string'],
+            'internal_number' => ['nullable', 'string'],
+            'timezone' => ['required', 'string'],
+            'signature' => ['nullable', 'string'],
+        ]);
+
+        $agent->update($data);
+
+        return redirect()->route('admin.agents.index');
     }
 }

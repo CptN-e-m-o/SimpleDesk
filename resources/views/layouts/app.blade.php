@@ -9,6 +9,7 @@
 
     <link href="{{ asset('css/user-profile.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css"/>
+    @stack('styles')
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light text-dark">
 
