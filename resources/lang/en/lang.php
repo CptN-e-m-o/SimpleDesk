@@ -278,6 +278,7 @@ return [
 
     'users' => [
         'agents' => 'Agents',
+        'roles' => 'Roles',
         'departments' => 'Departments',
         'teams' => 'Teams',
     ],

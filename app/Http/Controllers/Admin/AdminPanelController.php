@@ -13,6 +13,7 @@ class AdminPanelController extends Controller
         $sections = [
             __('lang.sections.users') => [
                 ['icon' => 'bi-person-fill', 'label' => __('lang.users.agents'), 'route' => 'admin.agents.index'],
+                ['icon' => 'bi-person-check-fill', 'label' => __('lang.users.roles')],
                 ['icon' => 'bi-diagram-3-fill', 'label' => __('lang.users.departments')],
                 ['icon' => 'bi-people-fill', 'label' => __('lang.users.teams')],
             ],

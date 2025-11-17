@@ -279,6 +279,7 @@ return [
 
     'users' => [
         'agents' => 'Агенты',
+        'roles' => 'Роли',
         'departments' => 'Отделы',
         'teams' => 'Команды',
     ],

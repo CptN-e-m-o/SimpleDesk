@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Доступ к SimpleDesk</title>
+    <title>!Доступ к SimpleDesk</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f6f9fc; padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -23,25 +23,25 @@
     </div>
 
     <div class="body">
-        <p>Ваш аккаунт в системе <strong>SimpleDesk</strong> успешно создан.</p>
-        <p>Для входа используйте следующие данные:</p>
+        <p>!Ваш аккаунт в системе <strong>SimpleDesk</strong> успешно создан.</p>
+        <p>!Для входа используйте следующие данные:</p>
 
         <div class="password">
             <strong>{{ $password }}</strong>
         </div>
 
         <p style="text-align: center;">
-            <a href="{{ route('login') }}" class="btn">Войти в систему</a>
+            <a href="{{ route('login') }}" class="btn">!Войти в систему</a>
         </p>
 
         <p style="color: #e11d48; font-size: 14px;">
-            После первого входа обязательно смените этот временный пароль!
+            !После первого входа обязательно смените этот временный пароль!
         </p>
     </div>
 
     <div class="footer">
-        © {{ date('Y') }} SimpleDesk<br>
-        Это письмо отправлено автоматически
+        © {{ date('Y') }} !SimpleDesk<br>
+        !Это письмо отправлено автоматически
     </div>
 </div>
 </body>
