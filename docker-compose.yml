@@ -42,6 +42,14 @@ services:
     networks:
       - simpledesk-network
 
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - simpledesk-network
+
 networks:
   simpledesk-network:
     driver: bridge

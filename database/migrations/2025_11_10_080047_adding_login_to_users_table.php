@@ -9,6 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->string('avatar')->nullable();
+            $table->string('timezone')->nullable()->default('UTC');
             $table->string('login')->nullable()->after('timezone')->unique();
             $table->timestamp('phone_verified_at')->nullable()->after('phone_number');
         });
@@ -17,7 +19,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['login', 'phone_verified_at']);
+            $table->dropColumn(['timezone', 'login', 'phone_verified_at']);
         });
     }
 };

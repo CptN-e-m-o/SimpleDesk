@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\TicketStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Mail\UserGeneratedPasswordMail;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AgentsController extends Controller
@@ -109,9 +112,26 @@ class AgentsController extends Controller
             'signature' => ['nullable', 'string'],
         ]);
 
+        $password = $this->generatePassword();
+
+        $data['password'] = bcrypt($password);
+
         $agent = User::create($data);
 
-        return redirect()->route('agents.index');
+        Mail::to($agent->email)->send(new UserGeneratedPasswordMail($password));
+
+        return redirect()->route('admin.agents.index');
+    }
+
+    private function generatePassword(): string
+    {
+        $letters = Str::upper(Str::random(4));
+        $numbers = Str::random(2);
+        $symbols = '!@#$%^&*()';
+        $symbol = $symbols[random_int(0, strlen($symbols) - 1)];
+        $symbol2 = $symbols[random_int(0, strlen($symbols) - 1)];
+
+        return str_shuffle($letters.$numbers.$symbol.$symbol2);
     }
 
     public function edit(TimezoneService $timezoneService, User $agent)
