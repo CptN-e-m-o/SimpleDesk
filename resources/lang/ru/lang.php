@@ -305,6 +305,7 @@ return [
         'approval_workflow' => 'Рабочий процесс утверждения',
         'priority' => 'Приоритет',
         'ticket_types' => 'Типы билетов',
+        'widgets' => 'Виджеты',
         'daily_report' => 'Ежедневный отчет',
         'admin_panel' => 'Панель администратора',
     ],

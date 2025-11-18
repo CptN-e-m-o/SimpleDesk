@@ -13,6 +13,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    const SORTABLE = ['login', 'email', 'last_name', 'created_at'];
+
     protected $fillable = [
         'first_name',
         'login',
@@ -90,5 +92,15 @@ class User extends Authenticatable
                 $this->patronymic,
             ]))
         );
+    }
+
+    public function scopeAgents($query)
+    {
+        return $query->whereIn('role_id', [UserRole::Agent, UserRole::Admin]);
+    }
+
+    public function scopeSort($query, $column, $direction)
+    {
+        return $query->orderBy($column, $direction);
     }
 }

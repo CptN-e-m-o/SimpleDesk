@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\TicketStatus;
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Mail\UserGeneratedPasswordMail;
 use App\Models\Ticket;
@@ -21,29 +20,27 @@ class AgentsController extends Controller
 
     public function index(Request $request)
     {
-        $sortableColumns = ['login', 'email', 'last_name'];
         $sortBy = $request->input('sort_by', 'created_at');
-        $sortDirection = $request->input('sort_direction', 'desc');
+        $direction = $request->input('sort_direction', 'desc');
+        $perPage = $request->input('per_page', self::PAGINATE_PER_PAGE);
 
-        if (! in_array($sortBy, $sortableColumns)) {
-            $sortBy = 'created_at';
+        $query = User::agents();
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->input('status'));
         }
+
+        $query->sort($sortBy, $direction);
+
+        $agents = $query->paginate($perPage)->appends($request->query());
 
         $options = [10, 20, 50];
 
-        $perPage = $request->input('per_page', self::PAGINATE_PER_PAGE);
+        $view = $request->ajax()
+            ? 'admin.agents-list.partials.agent_table'
+            : 'admin.agents-list.index';
 
-        $agents = User::whereIn('role_id', [UserRole::Agent, UserRole::Admin])
-            ->orderBy($sortBy, $sortDirection)
-            ->paginate($perPage);
-
-        $agents->appends($request->query());
-
-        if ($request->ajax()) {
-            return view('admin.agents-list.partials.agent_table', compact('agents', 'perPage', 'sortBy', 'sortDirection', 'options'))->render();
-        }
-
-        return view('admin.agents-list.index', compact('agents', 'perPage', 'sortBy', 'sortDirection', 'options'));
+        return view($view, compact('agents', 'perPage', 'sortBy', 'direction', 'options'));
     }
 
     public function deactivateBulk(Request $request)

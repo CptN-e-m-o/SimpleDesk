@@ -13,7 +13,7 @@
                 <h5 class="mb-0">Редактировать агента</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('admin.agents.update', $agent) }}">
+                <form method="POST" action="{{ route('admin.agents.update', $agent) }}" novalidate>
                     @csrf
                     @method('PUT')
                     @include('admin.agents-list.partials.form-agent-info', ['agent' => $agent])

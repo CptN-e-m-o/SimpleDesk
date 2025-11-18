@@ -13,7 +13,7 @@
                 <h5 class="mb-0">Создать агента</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('admin.agents.store') }}">
+                <form method="POST" action="{{ route('admin.agents.store') }}" novalidate>
                     @csrf
                     @include('admin.agents-list.partials.form-agent-info', ['agent' => null])
                     @include('admin.agents-list.partials.form-account-settings', ['agent' => null])

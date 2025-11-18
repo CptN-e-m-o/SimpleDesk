@@ -7,11 +7,21 @@
     <div class="card-body">
         <div class="row g-5 mb-3">
             <div class="col-md-6">
-                <label for="email" class="form-label fw-bold">!Электронная почта: <span class="text-danger">*</span></label>
-                <input type="email" id="email" name="email" class="form-control"
-                       placeholder="!Введите email"
+                <label for="email" class="form-label fw-bold">
+                    !Электронная почта: <span class="text-danger">*</span>
+                </label>
+
+                <input type="email"
+                       id="email"
+                       name="email"
+                       class="form-control @error('email') is-invalid @enderror"
+                       placeholder="Введите email"
                        value="{{ old('email', $agent->email ?? '') }}"
-                       required>
+                >
+
+                @error('email')
+                <div class="invalid-feedback">!Введите настоящий адрес e-mail</div>
+                @enderror
             </div>
 
             <div class="col-md-6">
@@ -30,11 +40,20 @@
             </div>
 
             <div class="col-md-4">
-                <label for="first_name" class="form-label fw-bold">!Имя: <span class="text-danger">*</span></label>
-                <input type="text" id="first_name" name="first_name" class="form-control"
-                       placeholder="!Введите имя"
+                <label for="first_name" class="form-label fw-bold">
+                    !Имя: <span class="text-danger">*</span>
+                </label>
+                <input type="text"
+                       id="first_name"
+                       name="first_name"
+                       class="form-control @error('first_name') is-invalid @enderror"
+                       placeholder="Введите email"
                        value="{{ old('first_name', $agent->first_name ?? '') }}"
-                       required>
+                >
+
+                @error('first_name')
+                <div class="invalid-feedback">!Это поле не может быть пустым</div>
+                @enderror
             </div>
 
             <div class="col-md-4">

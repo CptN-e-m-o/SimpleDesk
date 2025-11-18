@@ -10,11 +10,13 @@
                     <h5 class="mb-0">!Список агентов</h5>
 
                     <div class="d-flex gap-2">
-                        <a href="#"
-                           class="text-center text-decoration-none text-dark d-flex align-items-center justify-content-center"
-                           style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
-                           data-bs-toggle="tooltip"
-                           title="!Фильтр">
+                        <a
+                            id="toggleFiltersBtn"
+                            class="text-center text-decoration-none text-dark d-flex align-items-center justify-content-center"
+                            style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
+                            role="button"
+                            data-bs-toggle="tooltip"
+                            title="!Фильтр">
                             <i class="bi bi-funnel fs-5"></i>
                         </a>
 
@@ -26,6 +28,66 @@
                             <i class="bi bi-plus-circle fs-5"></i>
                         </a>
                     </div>
+                </div>
+
+                <div class="card shadow-sm mb-3 d-none" id="agentFiltersCard">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">!Фильтр</h5>
+                        </div>
+                    </div>
+
+                    <form id="agentFilterForm">
+                        <div class="row g-3 px-3 px-md-4 px-lg-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">!Роль:</label>
+
+                                <select name="role" class="form-select">
+                                    <option value="">— Все —</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                <label class="form-label fw-bold">!Статус:</label>
+                                <select id="statusFilter" name="status" class="form-select">
+                                    <option value="">— Все —</option>
+                                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
+                                        !Активный
+                                    </option>
+                                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
+                                        !Неактивный
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">!Отдел:</label>
+
+                                <select name="department" class="form-select">
+                                    <option value="">— Все —</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">!Команда:</label>
+
+                                <select name="team" class="form-select">
+                                    <option value="">— Все —</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 px-lg-3 mt-3 mb-3">
+                            <button type="submit" class="btn btn-outline-primary">
+                                Применить
+                            </button>
+                            <button type="button" class="btn btn-outline-danger">
+                                Сбросить
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary">
+                                Скрыть фильтры
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="mt-2 d-flex justify-content-between align-items-center">

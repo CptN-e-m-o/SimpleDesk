@@ -117,5 +117,49 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+    const filtersCard = document.getElementById('agentFiltersCard');
+    const filterForm = document.getElementById('agentFilterForm');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const hideFiltersBtn = document.getElementById('hideFiltersBtn');
+
+    if (toggleFiltersBtn && filtersCard) {
+        toggleFiltersBtn.addEventListener('click', function () {
+            filtersCard.classList.toggle('d-none');
+        });
+    }
+
+    if (hideFiltersBtn && filtersCard) {
+        hideFiltersBtn.addEventListener('click', function () {
+            filtersCard.classList.add('d-none');
+        });
+    }
+
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', function () {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('status');
+            url.searchParams.delete('page');
+            fetchAgents(url.toString());
+            filterForm.reset();
+        });
+    }
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const url = new URL(window.location.href);
+
+            const status = document.getElementById('statusFilter').value;
+
+            if (status) url.searchParams.set('status', status);
+            else url.searchParams.delete('status');
+
+            url.searchParams.delete('page');
+
+            fetchAgents(url.toString());
+        });
+    }
+
     initializeTableInteractions();
 });

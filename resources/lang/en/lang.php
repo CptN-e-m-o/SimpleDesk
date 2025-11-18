@@ -304,6 +304,7 @@ return [
         'approval_workflow' => 'Approval Workflow',
         'priority' => 'Priority',
         'ticket_types' => 'Ticket Types',
+        'widgets' => 'Виджеты',
         'daily_report' => 'Daily Report',
         'admin_panel' => 'Admin Panel',
     ],
