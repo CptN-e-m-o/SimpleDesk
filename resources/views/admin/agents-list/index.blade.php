@@ -30,7 +30,7 @@
                     </div>
                 </div>
 
-                <div class="card shadow-sm mb-3 d-none" id="agentFiltersCard">
+                <div class="card shadow-sm mb-3 mt-1 d-none" id="agentFiltersCard">
                     <div class="card-header bg-light">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">!Фильтр</h5>
@@ -77,15 +77,9 @@
                             </div>
                         </div>
                         <div class="d-flex flex-wrap gap-2 px-lg-3 mt-3 mb-3">
-                            <button type="submit" class="btn btn-outline-primary">
-                                Применить
-                            </button>
-                            <button type="button" class="btn btn-outline-danger">
-                                Сбросить
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary">
-                                Скрыть фильтры
-                            </button>
+                            <button type="submit" class="btn btn-outline-primary">Применить</button>
+                            <button type="button" id="resetFiltersBtn" class="btn btn-outline-danger">Сбросить</button>
+                            <button type="button" id="hideFiltersBtn" class="btn btn-outline-secondary">Скрыть фильтры</button>
                         </div>
                     </form>
                 </div>
@@ -109,9 +103,12 @@
                     </div>
 
                     <div>
-                        <input type="text" class="form-control form-control-sm"
-                               placeholder="!Введите текст и нажмите Enter для поиска..."
-                               style="width: 350px;">
+                        <input
+                            type="text"
+                            id="agentSearchInput"
+                            class="form-control form-control-sm"
+                            placeholder="!Введите текст и нажмите Enter для поиска..."
+                            style="width: 350px;">
                     </div>
                 </div>
             </div>

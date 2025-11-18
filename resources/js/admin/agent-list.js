@@ -136,14 +136,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (resetFiltersBtn) {
-        resetFiltersBtn.addEventListener('click', function () {
+        resetFiltersBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const selects = filterForm.querySelectorAll('select');
+            selects.forEach(select => {
+                select.selectedIndex = 0;
+            });
+
             const url = new URL(window.location.href);
-            url.searchParams.delete('status');
+
+            const filterParams = ['status', 'role', 'department', 'team'];
+            filterParams.forEach(param => url.searchParams.delete(param));
             url.searchParams.delete('page');
+
             fetchAgents(url.toString());
-            filterForm.reset();
         });
     }
+
 
     if (filterForm) {
         filterForm.addEventListener('submit', function (e) {
@@ -160,6 +170,56 @@ document.addEventListener('DOMContentLoaded', function () {
             fetchAgents(url.toString());
         });
     }
+
+    const searchInput = document.getElementById('agentSearchInput');
+
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+
+                const url = new URL(window.location.href);
+                const search = searchInput.value.trim();
+
+                if (search.length > 0) {
+                    url.searchParams.set('search', search);
+                } else {
+                    url.searchParams.delete('search');
+                }
+
+                url.searchParams.delete('page');
+
+                fetchAgents(url.toString());
+            }
+        });
+    }
+
+    window.addEventListener('popstate', () => {
+        window.addEventListener('popstate', () => {
+            const url = new URL(window.location.href);
+
+            if (searchInput) {
+                searchInput.value = url.searchParams.get('search') ?? '';
+            }
+
+            const statusFilter = document.getElementById('statusFilter');
+            if (statusFilter) {
+                const status = url.searchParams.get('status');
+                statusFilter.value = status ?? '';
+            }
+
+            const filterForm = document.getElementById('agentFilterForm');
+            if (filterForm) {
+                const hasParams = Array.from(url.searchParams).length > 0;
+                if (!hasParams) {
+                    filterForm.reset();
+                }
+            }
+
+            fetchAgents(window.location.href);
+        });
+
+    });
 
     initializeTableInteractions();
 });

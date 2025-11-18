@@ -30,6 +30,18 @@ class AgentsController extends Controller
             $query->where('is_active', $request->input('status'));
         }
 
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('patronymic', 'LIKE', "%{$search}%")
+                    ->orWhere('login', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('phone_number', 'LIKE', "%{$search}%");
+                // Search by role should be added
+            });
+        }
+
         $query->sort($sortBy, $direction);
 
         $agents = $query->paginate($perPage)->appends($request->query());
