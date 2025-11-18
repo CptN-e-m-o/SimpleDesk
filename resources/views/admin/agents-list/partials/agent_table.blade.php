@@ -1,21 +1,21 @@
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-            <tr>
-                <th><input type="checkbox" id="selectAllCheckbox"></th>
-                <th scope="col">
-                    <x-sortable-link column="last_name" title="!ФИО" />
-                </th>
-                <th scope="col">
-                    <x-sortable-link column="login" title="!Логин" />
-                </th>
-                <th scope="col">
-                    <x-sortable-link column="email" title="!Электронная почта" />
-                </th>
-                <th class="text-decoration-none text-secondary">!Телефон</th>
-                <th class="text-decoration-none text-secondary">!Информация об аккаунте</th>
-                <th class="text-decoration-none text-secondary">!Действия</th>
-            </tr>
+        <tr>
+            <th><input type="checkbox" id="selectAllCheckbox"></th>
+            <th scope="col">
+                <x-sortable-link column="last_name" title="{{ __('lang.agents_list.full_name') }}" />
+            </th>
+            <th scope="col">
+                <x-sortable-link column="login" title="{{ __('lang.agents_list.login') }}" />
+            </th>
+            <th scope="col">
+                <x-sortable-link column="email" title="{{ __('lang.agents_list.email') }}" />
+            </th>
+            <th class="text-decoration-none text-secondary">{{ __('lang.agents_list.phone') }}</th>
+            <th class="text-decoration-none text-secondary">{{ __('lang.agents_list.account_info') }}</th>
+            <th class="text-decoration-none text-secondary">{{ __('lang.agents_list.actions') }}</th>
+        </tr>
         </thead>
         <tbody>
         @foreach($agents as $agent)
@@ -34,13 +34,13 @@
 
                     <div class="mt-2 d-flex align-items-center gap-2">
                         <i class="bi {{ $agent->email_verified_at ? 'bi-envelope-check-fill text-success' : 'bi-envelope-slash-fill text-danger' }}"
-                           data-bs-toggle="tooltip" title="!Email"></i>
+                           data-bs-toggle="tooltip" title="{{ __('lang.agents_list.email_verified') }}"></i>
 
                         <i class="bi {{ $agent->phone_verified_at ? 'bi-telephone-fill text-success' : 'bi-telephone-x-fill text-danger' }}"
-                           data-bs-toggle="tooltip" title="!Телефон"></i>
+                           data-bs-toggle="tooltip" title="{{ __('lang.agents_list.phone_verified') }}"></i>
 
                         <i class="bi {{ $agent->google2fa_enabled ? 'bi-shield-lock-fill text-success' : 'bi-shield-slash-fill text-danger' }}"
-                           data-bs-toggle="tooltip" title="!2FA"></i>
+                           data-bs-toggle="tooltip" title="{{ __('lang.agents_list.two_factor') }}"></i>
                     </div>
                 </td>
                 <td>
@@ -49,7 +49,7 @@
                            class="text-center text-decoration-none text-dark d-flex align-items-center justify-content-center"
                            style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
                            data-bs-toggle="tooltip"
-                           title="!Редактировать">
+                           title="{{ __('lang.agents_list.edit') }}">
                             <i class="bi bi-pencil-square fs-5"></i>
                         </a>
 
@@ -59,13 +59,13 @@
                                     style="width: 60px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
-                                    title="!Просмотр">
+                                    title="{{ __('lang.agents_list.view') }}">
                                 <i class="fas bi-eye fs-5"></i>
                                 <i class="bi bi-caret-down-fill fs-6 ms-1"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">!Посмотреть как агент</a></li>
-                                <li><a class="dropdown-item" href="#">!Посмотреть как пользователь</a></li>
+                                <li><a class="dropdown-item" href="#">{{ __('lang.agents_list.view_as_agent') }}</a></li>
+                                <li><a class="dropdown-item" href="#">{{ __('lang.agents_list.view_as_user') }}</a></li>
                             </ul>
                         </div>
                     </div>

@@ -10,7 +10,7 @@
     <div class="container-fluid mt-4">
         <div class="card shadow-sm">
             <div class="card-header bg-light">
-                <h5 class="mb-0">Создать агента</h5>
+                <h5 class="mb-0">{{ __('lang.agents_form.create_agent') }}</h5>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ route('admin.agents.store') }}" novalidate>
@@ -22,7 +22,7 @@
 
                     <div class="d-flex justify-content-start ms-3 mb-3">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save me-1"></i> Сохранить
+                            <i class="bi bi-save me-1"></i> {{ __('lang.agents_form.save') }}
                         </button>
                     </div>
                 </form>
