@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,8 +13,11 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    const SORTABLE = ['login', 'email', 'last_name', 'created_at'];
+
     protected $fillable = [
         'first_name',
+        'login',
         'email',
         'password',
         'role_id',
@@ -22,6 +26,7 @@ class User extends Authenticatable
         'avatar',
         'timezone',
         'phone_number',
+        'phone_verified_at',
         'signature',
     ];
 
@@ -35,6 +40,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'role_id' => UserRole::class,
         ];
@@ -75,5 +81,26 @@ class User extends Authenticatable
     public function loginHistories()
     {
         return $this->hasMany(LoginHistory::class);
+    }
+
+    protected function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => implode(' ', array_filter([
+                $this->last_name,
+                $this->first_name,
+                $this->patronymic,
+            ]))
+        );
+    }
+
+    public function scopeAgents($query)
+    {
+        return $query->whereIn('role_id', [UserRole::Agent, UserRole::Admin]);
+    }
+
+    public function scopeSort($query, $column, $direction)
+    {
+        return $query->orderBy($column, $direction);
     }
 }

@@ -36,7 +36,7 @@
 
                                 <td>{{ $ticket->title }}</td>
 
-                                <td>{{ $ticket->user->first_name }}</td>
+                                <td>{{ $ticket->user->full_name }}</td>
 
                                 <td>
                                     <span class="badge bg-{{ $ticket->status->enum->color() }}">

@@ -21,13 +21,13 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">{{ __('lang.login_email_label') }}</label>
-                            <input type="email" id="email" name="email" class="form-control" required>
+                            <label for="login" class="form-label">{{ __('lang.login_email_label') }}</label>
+                            <input type="text" id="login" name="login" class="form-control" required autofocus placeholder="{{ __('lang.login_enter_email_label') }}">
                         </div>
 
                         <div class="mb-3">
                             <label for="password" class="form-label">{{ __('lang.login_password_label') }}</label>
-                            <input type="password" id="password" name="password" class="form-control" required>
+                            <input type="password" id="password" name="password" class="form-control" required placeholder="{{ __('lang.login_enter_password_label') }}">
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">

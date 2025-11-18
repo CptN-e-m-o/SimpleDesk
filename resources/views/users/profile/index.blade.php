@@ -238,3 +238,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    @vite('resources/js/user-profile.js')
+@endpush

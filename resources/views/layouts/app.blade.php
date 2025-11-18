@@ -9,11 +9,14 @@
 
     <link href="{{ asset('css/user-profile.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css"/>
+    @stack('styles')
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light text-dark">
 
 @if(Auth::check() && (Auth::user()->isAdminOrAgent()) && Str::contains(request()->path(), 'panel'))
     @include('layouts.partials.agent_header')
+@elseif(Auth::check() && (Auth::user()->isAdmin()) && Str::contains(request()->path(), 'admin'))
+    @include('layouts.partials.admin_header')
 @else
     @include('layouts.partials.header')
 @endif
@@ -24,7 +27,6 @@
 
 @include('layouts.partials.footer')
 
-<script src="{{ asset('js/user-profile.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
 @stack('scripts')
 </body>

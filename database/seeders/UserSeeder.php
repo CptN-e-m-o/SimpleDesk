@@ -7,19 +7,19 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class AdminUserSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        if (User::where('role_id', UserRole::Admin->value)->exists()) {
-            return;
-        }
-
-        User::create([
-            'name' => 'Admin',
+        User::factory()->create([
+            'first_name' => 'Admin',
+            'last_name' => 'Main',
+            'login' => 'admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
-            'role_id' => UserRole::Admin->value,
+            'role_id' => UserRole::Admin,
         ]);
+
+        User::factory(20)->create();
     }
 }
