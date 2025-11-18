@@ -65,9 +65,12 @@ Route::prefix('panel')->middleware(['auth', 'admin-agent'])->name('panel.')->gro
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminPanelController::class, 'index'])->name('dashboard');
 
-    // Блок "Пользователи. Агенты"
+    // Users.Agents block
     Route::resource('/agents', AgentsController::class);
     Route::post('/admin/agents/deactivate-bulk', [AgentsController::class, 'deactivateBulk'])->name('agents.deactivate.bulk');
+
+    // Users.Roles block
+    Route::resource('/roles', RolesController::class);
 });
 
 Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('2fa.challenge');

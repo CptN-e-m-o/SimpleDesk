@@ -386,6 +386,7 @@ return [
     // Agents list
     'agents_list' => [
         'agents_list' => 'Список агентов',
+        'agents' => 'Агенты',
         'filter' => 'Фильтр',
         'create_agent' => 'Создать агента',
         'role' => 'Роль:',
