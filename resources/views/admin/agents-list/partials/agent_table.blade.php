@@ -1,30 +1,18 @@
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th><input type="checkbox" id="selectAllCheckbox"></th>
-            <th scope="col">
-                <x-sortable-link column="last_name" title="{{ __('lang.agents_list.full_name') }}" />
-            </th>
-            <th scope="col">
-                <x-sortable-link column="login" title="{{ __('lang.agents_list.login') }}" />
-            </th>
-            <th scope="col">
-                <x-sortable-link column="email" title="{{ __('lang.agents_list.email') }}" />
-            </th>
-            <th class="text-decoration-none text-secondary">{{ __('lang.agents_list.phone') }}</th>
-            <th class="text-decoration-none text-secondary">{{ __('lang.agents_list.account_info') }}</th>
-            <th class="text-decoration-none text-secondary">{{ __('lang.agents_list.actions') }}</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($agents as $agent)
+<div class="table-responsive mb-4">
+    <x-table :head="$head">
+        @foreach($agents->all() as $agent)
             <tr>
-                <td><input type="checkbox" class="row-checkbox" value="{{ $agent->id }}" {{ Auth::id() == $agent->id ? 'disabled' : '' }}></td>
+                <td>
+                    <input type="checkbox" class="row-checkbox form-check-input"
+                           value="{{ $agent->id }}"
+                        {{ Auth::id() == $agent->id ? 'disabled' : '' }}>
+                </td>
+
                 <td>{{ $agent->full_name }}</td>
                 <td>{{ $agent->login ?? '-' }}</td>
                 <td>{{ $agent->email }}</td>
-                <td>{{ $agent->phone_number ?? '-'}}</td>
+                <td>{{ $agent->phone_number ?? '-' }}</td>
+
                 <td>
                     <div>
                         <span class="badge bg-{{ $agent->role_id->color() }}">
@@ -43,6 +31,7 @@
                            data-bs-toggle="tooltip" title="{{ __('lang.agents_list.two_factor') }}"></i>
                     </div>
                 </td>
+
                 <td>
                     <div class="agent-actions d-flex gap-2">
                         <a href="{{ route('admin.agents.edit', $agent) }}"
@@ -60,7 +49,7 @@
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                     title="{{ __('lang.agents_list.view') }}">
-                                <i class="fas bi-eye fs-5"></i>
+                                <i class="bi bi-eye fs-5"></i>
                                 <i class="bi bi-caret-down-fill fs-6 ms-1"></i>
                             </button>
                             <ul class="dropdown-menu">
@@ -72,8 +61,7 @@
                 </td>
             </tr>
         @endforeach
-        </tbody>
-    </table>
+    </x-table>
 </div>
 
 <div class="d-flex justify-content-end">

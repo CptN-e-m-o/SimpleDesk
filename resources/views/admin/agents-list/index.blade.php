@@ -87,14 +87,10 @@
 
                 <div class="mt-2 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
-                        <label for="perPageSelect" class="form-label mb-0 align-middle">{{ __('lang.agents_list.show_by') }}</label>
-                        <select id="perPageSelect" class="form-select form-select-sm" style="width: auto;">
-                            @foreach ($options as $option)
-                                <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>
-                                    {{ $option }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <x-per-page-select
+                            :per-page="$perPage"
+                            :options="$options"
+                        />
 
                         <button type="button" id="deactivate-selected-btn" class="btn btn-light border v-popper--has-tooltip d-none"
                                 data-bs-toggle="modal" data-bs-target="#deactivateAgentModal">
@@ -116,7 +112,7 @@
 
             <div class="card-body">
                 <div id="agent-list-container">
-                    @include('admin.agents-list.partials.agent_table', ['agents' => $agents])
+                    @include('admin.agents-list.partials.agent_table', ['agents' => $agents, 'head' => $head])
                 </div>
             </div>
         </div>

@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\Agent\DeactivateAgentsRequest;
 use App\Http\Requests\Admin\Agent\StoreAgentRequest;
 use App\Http\Requests\Admin\Agent\UpdateAgentRequest;
 use App\Models\User;
-use App\Services\Admin\Agent\AgentService;
+use App\Services\Admin\Users\AgentService;
 use App\Services\TimezoneService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -30,12 +30,15 @@ class AgentsController extends Controller
             ? 'admin.agents-list.partials.agent_table'
             : 'admin.agents-list.index';
 
+        $head = $service->tableHead();
+
         return view($view, [
             'agents' => $agents,
             'perPage' => $request->perPage(),
             'sortBy' => $request->sortBy(),
             'direction' => $request->direction(),
             'options' => $options,
+            'head' => $head,
         ]);
     }
 

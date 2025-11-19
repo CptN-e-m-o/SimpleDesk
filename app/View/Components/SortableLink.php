@@ -11,7 +11,7 @@ class SortableLink extends Component
 
     public bool $isActive = false;
 
-    public ?string $iconDirection = null; // nullable, чтобы для неактивной колонки было null
+    public ?string $iconDirection = null;
 
     public function __construct(string $column, public string $title, Request $request)
     {

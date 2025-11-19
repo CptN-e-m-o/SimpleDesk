@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Admin\Agent;
+namespace App\Services\Admin\Users;
 
 use App\Enums\TicketStatus;
 use App\Mail\UserGeneratedPasswordMail;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Repositories\Admin\Agent\AgentRepository;
+use App\Repositories\Admin\Users\AgentRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -78,5 +78,38 @@ class AgentService
         $agent->update($data);
 
         return $agent;
+    }
+
+    public function tableHead(): array
+    {
+        return [
+            [
+                'type' => 'checkbox',
+            ],
+            [
+                'title' => __('lang.agents_list.full_name'),
+                'column' => 'last_name',
+                'sortable' => true,
+            ],
+            [
+                'title' => __('lang.agents_list.login'),
+                'column' => 'login',
+                'sortable' => true,
+            ],
+            [
+                'title' => __('lang.agents_list.email'),
+                'column' => 'email',
+                'sortable' => true,
+            ],
+            [
+                'title' => __('lang.agents_list.phone'),
+            ],
+            [
+                'title' => __('lang.agents_list.account_info'),
+            ],
+            [
+                'title' => __('lang.agents_list.actions'),
+            ],
+        ];
     }
 }

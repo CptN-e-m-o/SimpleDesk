@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Admin\Agent;
+namespace App\Repositories\Admin\Users;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;

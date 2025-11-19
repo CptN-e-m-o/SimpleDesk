@@ -94,6 +94,30 @@ class User extends Authenticatable
         );
     }
 
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'team_user')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
+    }
+
+    public function ownedTeams()
+    {
+        return $this->hasMany(Team::class, 'owner_id');
+    }
+
+    public function manageableTeams()
+    {
+        return $this->ownedTeams()
+            ->orWhere->teams()
+            ->wherePivot('role', 'admin');
+    }
+
+    public function activeTeams()
+    {
+        return $this->teams()->where('is_active', true);
+    }
+
     public function scopeAgents($query)
     {
         return $query->whereIn('role_id', [UserRole::Agent, UserRole::Admin]);
