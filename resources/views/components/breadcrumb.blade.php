@@ -16,6 +16,5 @@
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('Agents'), 'url' => route('admin.agents.index')]
         ]" />
-        </div>
     --}}
 </nav>

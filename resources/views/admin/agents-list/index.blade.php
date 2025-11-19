@@ -3,6 +3,10 @@
 @section('content')
     <x-alert />
 
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3 ms-3">
+        <h1 class="h4 mb-0">{{ __('lang.agents_list.agents') }}</h1>
+    </div>
+
     <div class="container-fluid mt-4">
         <div class="card shadow-sm">
             <div class="card-header bg-light">
@@ -20,13 +24,10 @@
                             <i class="bi bi-funnel fs-5"></i>
                         </a>
 
-                        <a href="{{ route('admin.agents.create') }}"
-                           class="text-center text-decoration-none text-dark d-flex align-items-center justify-content-center"
-                           style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
-                           data-bs-toggle="tooltip"
-                           title="{{ __('lang.agents_list.create_agent') }}">
-                            <i class="bi bi-plus-circle fs-5"></i>
-                        </a>
+                        <x-create-button
+                            routeName="{{ route('admin.agents.create') }}"
+                            title="{{ __('lang.agents_list.create_agent') }}"
+                        />
                     </div>
                 </div>
 

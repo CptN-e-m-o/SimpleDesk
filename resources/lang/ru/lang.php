@@ -461,4 +461,10 @@ return [
         'role' => 'Роль',
         'agent_signature' => 'Подпись агента',
     ],
+    // Teams list
+    'teams_list' => [
+        'teams' => 'Команды',
+        'teams_list' => 'Список команд',
+        'create_team' => 'Создать команду',
+    ],
 ];

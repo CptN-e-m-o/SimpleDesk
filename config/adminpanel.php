@@ -6,7 +6,7 @@ return [
             ['icon' => 'bi-person-fill', 'label' => 'users.agents', 'route' => 'admin.agents.index'],
             ['icon' => 'bi-person-check-fill', 'label' => 'users.roles'],
             ['icon' => 'bi-diagram-3-fill', 'label' => 'users.departments'],
-            ['icon' => 'bi-people-fill', 'label' => 'users.teams'],
+            ['icon' => 'bi-people-fill', 'label' => 'users.teams', 'route' => 'admin.teams.index'],
         ],
         'sections.email' => [
             ['icon' => 'bi-envelope-fill', 'label' => 'email.settings'],

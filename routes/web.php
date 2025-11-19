@@ -3,6 +3,7 @@
 use App\Enums\TicketStatus;
 use App\Http\Controllers\Admin\AdminPanelController;
 use App\Http\Controllers\Admin\AgentsController;
+use App\Http\Controllers\Admin\TeamsController;
 use App\Http\Controllers\Agent\DashboardController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\IndexController;
@@ -70,7 +71,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('/admin/agents/deactivate-bulk', [AgentsController::class, 'deactivateBulk'])->name('agents.deactivate.bulk');
 
     // Users.Roles block
-    Route::resource('/roles', RolesController::class);
+    Route::resource('/teams', TeamsController::class);
 });
 
 Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('2fa.challenge');
