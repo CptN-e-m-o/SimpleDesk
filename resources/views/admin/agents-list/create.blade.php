@@ -33,4 +33,5 @@
 
 @push('scripts')
     @vite('resources/js/admin/agent-form.js')
+    @vite('resources/js/common/rich-editor.js')
 @endpush

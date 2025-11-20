@@ -1,6 +1,6 @@
 <div class="table-responsive mb-4">
     <x-table :head="$head">
-        @foreach($agents->all() as $agent)
+        @foreach($agents as $agent)
             <tr>
                 <td>
                     <input type="checkbox" class="row-checkbox form-check-input"

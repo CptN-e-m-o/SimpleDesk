@@ -49,7 +49,7 @@
 
             <div class="card-body">
                 <div id="agent-list-container">
-
+                    @include('admin.teams.partials.team_table', ['teams' => $teams, 'head' => $head])
                 </div>
             </div>
         </div>

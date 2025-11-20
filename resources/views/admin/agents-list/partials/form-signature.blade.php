@@ -4,7 +4,7 @@
     </div>
 
     <div class="card-body">
-        <textarea id="signature" name="signature" class="form-control">
+        <textarea id="signature" name="signature" class="form-control rich-editor">
             {!! old('signature', $agent->signature ?? '') !!}
         </textarea>
     </div>

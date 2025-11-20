@@ -179,3 +179,7 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/admin/agent-list.js')
+@endpush

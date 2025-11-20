@@ -82,4 +82,9 @@ class Team extends Model
     {
         return $query->where('owner_id', $user?->id);
     }
+
+    public function getMembersCountAttribute(): int
+    {
+        return $this->members()->count();
+    }
 }
