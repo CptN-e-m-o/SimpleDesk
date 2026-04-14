@@ -5,11 +5,14 @@ import { createRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
 import type { ComponentType } from 'react'
 
-const pages = import.meta.glob<{ default: ComponentType<any> }>('./Pages/**/*.tsx')
+const pages = import.meta.glob('./Pages/**/*.tsx', { eager: true }) as Record<
+    string,
+    { default: ComponentType<any> }
+>
 
 createInertiaApp({
-    resolve: async (name) => {
-        const page = await pages[`./Pages/${name}.tsx`]?.()
+    resolve: (name) => {
+        const page = pages[`./Pages/${name}.tsx`]
 
         if (!page) {
             throw new Error(`Page not found: ${name}`)
