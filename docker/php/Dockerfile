@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
         bcmath \
         exif \
         gd \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
