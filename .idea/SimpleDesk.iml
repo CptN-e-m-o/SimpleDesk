@@ -117,6 +117,11 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/tijsverkoyen/css-to-inline-styles" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/voku/portable-ascii" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/bacon/bacon-qr-code" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/dasprid/enum" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/laravel/fortify" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/paragonie/constant_time_encoding" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/pragmarx/google2fa" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
