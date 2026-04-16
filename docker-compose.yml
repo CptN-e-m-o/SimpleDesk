@@ -34,7 +34,7 @@ services:
       POSTGRES_USER: simpledesk
       POSTGRES_PASSWORD: simpledesk
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgsql_data:/var/lib/postgresql/data
     networks:
