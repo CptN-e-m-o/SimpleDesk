@@ -30,7 +30,7 @@ type Props = {
 const navigation = [
     {
         label: 'Dashboard',
-        href: '/',
+        href: '/dashboard',
         icon: LayoutDashboard,
         isActive: (url: string) => url === '/dashboard',
     },
@@ -42,7 +42,7 @@ const navigation = [
     },
 ]
 
-export default function AppLayout({ title = 'Dashboard', children }: Props) {
+export default function AgentLayout({ title = 'Dashboard', children }: Props) {
     const { props, url } = usePage<SharedData>()
     const user = props.auth.user
     const [locale, setLocale] = useState<'EN' | 'RU'>('EN')
@@ -224,7 +224,7 @@ export default function AppLayout({ title = 'Dashboard', children }: Props) {
                                 </div>
 
                                 <Link
-                                    href="#"
+                                    href="/profile"
                                     className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-3 py-2 transition hover:bg-gray-50"
                                 >
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-700">

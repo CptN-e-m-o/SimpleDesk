@@ -1,5 +1,5 @@
 import { Head, usePage } from '@inertiajs/react'
-import AppLayout from '../Layouts/AppLayout'
+import AgentLayout from '../Layouts/AgentLayout'
 import type { SharedData } from '../types'
 
 export default function Dashboard() {
@@ -10,7 +10,7 @@ export default function Dashboard() {
         <>
             <Head title="Dashboard" />
 
-            <AppLayout title="Dashboard">
+            <AgentLayout title="Dashboard">
                 <div className="grid gap-6 md:grid-cols-3">
                     <div className="rounded-2xl bg-white p-6 shadow-sm">
                         <div className="text-sm text-gray-500">Welcome back</div>
@@ -36,7 +36,7 @@ export default function Dashboard() {
                         Next step: create ticket entities, statuses, priorities and the tickets list page.
                     </p>
                 </div>
-            </AppLayout>
+            </AgentLayout>
         </>
     )
 }
