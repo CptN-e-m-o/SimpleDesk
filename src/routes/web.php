@@ -4,7 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::redirect('/', '/dashboard');
+Route::get('/', function () {
+    return Inertia::render('Home');
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
