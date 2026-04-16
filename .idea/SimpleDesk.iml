@@ -122,6 +122,8 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/laravel/fortify" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/paragonie/constant_time_encoding" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/pragmarx/google2fa" />
+      <excludeFolder url="file://$MODULE_DIR$/src/storage/app" />
+      <excludeFolder url="file://$MODULE_DIR$/src/storage/framework" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
