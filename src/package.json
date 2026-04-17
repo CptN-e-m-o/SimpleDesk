@@ -4,6 +4,7 @@
     "type": "module",
     "scripts": {
         "lint": "eslint resources/js",
+        "lint:fix": "eslint resources/js --fix",
         "type-check": "tsc --noEmit",
         "build": "vite build",
         "dev": "vite"

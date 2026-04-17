@@ -13,7 +13,6 @@ type Props = {
 export default function PublicLayout({ children }: Props) {
     const { props } = usePage<SharedData>()
     const user = props.auth?.user
-    const isAdminOrAgent = hasAnyRole(user, ['admin', 'agent'])
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
             <header className="border-b border-gray-200 bg-white">
