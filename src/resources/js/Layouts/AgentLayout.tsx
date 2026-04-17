@@ -10,6 +10,7 @@ import {
     Plus,
     RefreshCw,
     ChevronDown,
+    Shield,
 } from 'lucide-react'
 
 import {
@@ -21,31 +22,45 @@ import {
 import { Check } from 'lucide-react'
 
 import type { SharedData } from '../types'
+import { isAdmin } from '@/lib/roles'
 
 type Props = {
     title?: string
     children: ReactNode
 }
 
-const navigation = [
-    {
-        label: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutDashboard,
-        isActive: (url: string) => url === '/dashboard',
-    },
-    {
-        label: 'Tickets',
-        href: '/tickets',
-        icon: Ticket,
-        isActive: (url: string) => url === '/tickets' || url.startsWith('/tickets/'),
-    },
-]
 
 export default function AgentLayout({ title = 'Dashboard', children }: Props) {
     const { props, url } = usePage<SharedData>()
     const user = props.auth.user
+    const isAdminUser = isAdmin(user)
     const [locale, setLocale] = useState<'EN' | 'RU'>('EN')
+
+    const navigation = [
+        {
+            label: 'Dashboard',
+            href: '/dashboard',
+            icon: LayoutDashboard,
+            isActive: (url: string) => url === '/dashboard',
+        },
+        {
+            label: 'Tickets',
+            href: '/tickets',
+            icon: Ticket,
+            isActive: (url: string) => url === '/tickets' || url.startsWith('/tickets/'),
+        },
+        ...(isAdminUser
+            ? [
+                {
+                    label: 'Admin panel',
+                    href: '/admin',
+                    icon: Shield,
+                    isActive: (url: string) =>
+                        url === '/admin' || url.startsWith('/admin'),
+                },
+            ]
+            : []),
+    ]
 
     function logout() {
         router.post('/logout')
