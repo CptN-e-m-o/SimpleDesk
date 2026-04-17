@@ -12,6 +12,7 @@ import {
     ChevronDown,
     Shield,
 } from 'lucide-react'
+import { route } from 'ziggy-js'
 
 import {
     DropdownMenu,
@@ -38,14 +39,20 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
 
     const navigation = [
         {
+            label: 'Home Page',
+            href: '/',
+            icon: Ticket,
+            isActive: (url: string) => url === '/',
+        },
+        {
             label: 'Dashboard',
-            href: '/dashboard',
+            href: route('dashboard'),
             icon: LayoutDashboard,
-            isActive: (url: string) => url === '/dashboard',
+            isActive: (url: string) => url === '/dashboard' || url.startsWith('/dashboard/'),
         },
         {
             label: 'Tickets',
-            href: '/tickets',
+            href: route('tickets'),
             icon: Ticket,
             isActive: (url: string) => url === '/tickets' || url.startsWith('/tickets/'),
         },
