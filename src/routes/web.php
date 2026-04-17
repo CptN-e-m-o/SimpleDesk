@@ -27,12 +27,8 @@ Route::middleware('auth')->group(function () {
             return Inertia::render('Tickets/Index');
         })->name('tickets');
     });
-    Route::middleware('role:admin')->group(function () {
-
-    });
-    Route::middleware('role:agent')->group(function () {
-
-    });
+    Route::middleware('role:admin')->group(function () {});
+    Route::middleware('role:agent')->group(function () {});
 
     Route::post('/logout', function (Request $request) {
         auth()->guard('web')->logout();
