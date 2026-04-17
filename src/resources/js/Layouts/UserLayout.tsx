@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import { ChevronDown } from 'lucide-react'
 import type { SharedData } from '../types'
+import { hasAnyRole } from '@/lib/roles'
+import { route } from 'ziggy-js'
 
 type Props = {
     title?: string
@@ -11,7 +13,7 @@ type Props = {
 export default function PublicLayout({ children }: Props) {
     const { props } = usePage<SharedData>()
     const user = props.auth?.user
-
+    const isAdminOrAgent = hasAnyRole(user, ['admin', 'agent'])
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
             <header className="border-b border-gray-200 bg-white">
@@ -45,12 +47,23 @@ export default function PublicLayout({ children }: Props) {
                         </Link>
 
                         {user && (
-                            <Link
-                                href="/tickets"
-                                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
-                            >
-                                My Tickets
-                            </Link>
+                            <>
+                                <Link
+                                    href="/tickets"
+                                    className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+                                >
+                                    My Tickets
+                                </Link>
+
+                                {hasAnyRole(user, ['admin', 'agent']) && (
+                                    <Link
+                                        href={route('dashboard')}
+                                        className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+                                    >
+                                        Agent Dashboard
+                                    </Link>
+                                )}
+                            </>
                         )}
                     </nav>
 

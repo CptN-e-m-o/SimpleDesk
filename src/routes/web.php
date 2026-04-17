@@ -19,13 +19,20 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::middleware('role:admin,agent')->group(function () {
+        Route::get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        })->name('dashboard');
+        Route::get('/tickets', function () {
+            return Inertia::render('Tickets/Index');
+        })->name('tickets');
+    });
+    Route::middleware('role:admin')->group(function () {
 
-    Route::get('/tickets', function () {
-        return Inertia::render('Tickets/Index');
-    })->name('tickets');
+    });
+    Route::middleware('role:agent')->group(function () {
+
+    });
 
     Route::post('/logout', function (Request $request) {
         auth()->guard('web')->logout();

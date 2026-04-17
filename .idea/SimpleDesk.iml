@@ -124,6 +124,7 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/pragmarx/google2fa" />
       <excludeFolder url="file://$MODULE_DIR$/src/storage/app" />
       <excludeFolder url="file://$MODULE_DIR$/src/storage/framework" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/tightenco/ziggy" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
