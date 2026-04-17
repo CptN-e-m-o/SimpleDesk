@@ -132,11 +132,15 @@
       <path value="$PROJECT_DIR$/src/vendor/bacon/bacon-qr-code" />
       <path value="$PROJECT_DIR$/src/vendor/laravel/fortify" />
       <path value="$PROJECT_DIR$/src/vendor/tightenco/ziggy" />
+      <path value="$PROJECT_DIR$/src/vendor/larastan/larastan" />
+      <path value="$PROJECT_DIR$/src/vendor/phpstan/phpstan" />
+      <path value="$PROJECT_DIR$/src/vendor/iamcal/sql-parser" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />
   <component name="PhpStan">
     <PhpStan_settings>
+      <PhpStanConfiguration tool_path="$PROJECT_DIR$/src/vendor/bin/phpstan" />
       <phpstan_by_interpreter asDefaultInterpreter="true" interpreter_id="f90bf435-8a95-4683-a824-350d53c9e380" timeout="60000" />
     </PhpStan_settings>
   </component>
