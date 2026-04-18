@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import AgentLayout from '../../Layouts/AgentLayout'
+import AgentLayout from '../../../Layouts/AgentLayout'
 
 export default function TicketsIndex() {
     return (
