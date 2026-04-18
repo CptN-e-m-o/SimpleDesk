@@ -52,7 +52,7 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
         },
         {
             label: 'Tickets',
-            href: route('tickets'),
+            href: route('agent.tickets'),
             icon: Ticket,
             isActive: (url: string) => url === '/tickets' || url.startsWith('/tickets/'),
         },

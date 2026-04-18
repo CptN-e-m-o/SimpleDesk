@@ -184,17 +184,19 @@ export default function TicketsShow({ ticket }: Props) {
                             </p>
 
                             <div className="mt-6 flex flex-wrap items-center gap-2">
-                                <span
-                                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClasses(ticket.status)}`}
+                                <Link
+                                    href={route('tickets.index', { status: ticket.status })}
+                                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition hover:opacity-80 hover:shadow-sm ${getStatusClasses(ticket.status)}`}
                                 >
                                     {humanize(ticket.status)}
-                                </span>
+                                </Link>
 
-                                <span
-                                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getPriorityClasses(ticket.priority)}`}
+                                <Link
+                                    href={route('tickets.index', { priority: ticket.priority })}
+                                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition hover:opacity-80 hover:shadow-sm ${getPriorityClasses(ticket.priority)}`}
                                 >
                                     {humanize(ticket.priority)}
-                                </span>
+                                </Link>
 
                                 {ticket.category?.name && (
                                     <span className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200">

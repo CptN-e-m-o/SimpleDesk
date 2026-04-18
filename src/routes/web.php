@@ -21,10 +21,12 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
-    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
-    Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::prefix('tickets')->name('tickets.')->group(function () {
+        Route::get('/', [TicketController::class, 'index'])->name('index');
+        Route::get('/create', [TicketController::class, 'create'])->name('create');
+        Route::post('/', [TicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
+    });
 
     Route::post('/tickets/{ticket}/replies', [TicketReplyController::class, 'store'])
         ->name('tickets.replies.store');
@@ -33,9 +35,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return Inertia::render('Dashboard');
         })->name('dashboard');
-        /*Route::get('/tickets', function () {
-            return Inertia::render('Tickets/Agent/Index');
-        })->name('tickets');*/
+        Route::prefix('agent')->name('agent.')->group(function () {
+            Route::get('/tickets', function () {
+                return Inertia::render('Tickets/Agent/Index');
+            })->name('tickets');
+            //Route::get('/tickets/{ticket}', [AgentTicketController::class, 'show'])->name('tickets.show');
+        });
     });
     Route::middleware('role:admin')->group(function () {});
     Route::middleware('role:agent')->group(function () {});
