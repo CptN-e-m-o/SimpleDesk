@@ -140,6 +140,7 @@
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />
   <component name="PhpStan">
     <PhpStan_settings>
+      <PhpStanConfiguration tool_path="$PROJECT_DIR$/src/vendor/bin/phpstan" />
       <phpstan_by_interpreter asDefaultInterpreter="true" interpreter_id="f90bf435-8a95-4683-a824-350d53c9e380" timeout="60000" />
     </PhpStan_settings>
   </component>

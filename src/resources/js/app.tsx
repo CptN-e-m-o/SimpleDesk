@@ -8,7 +8,7 @@ import type { Config as ZiggyConfig } from 'ziggy-js'
 
 const pages = import.meta.glob('./Pages/**/*.tsx', { eager: true }) as Record<
     string,
-    { default: ComponentType<any> }
+    { default: ComponentType }
 >
 
 declare global {

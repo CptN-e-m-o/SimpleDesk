@@ -125,6 +125,9 @@
       <excludeFolder url="file://$MODULE_DIR$/src/storage/app" />
       <excludeFolder url="file://$MODULE_DIR$/src/storage/framework" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/tightenco/ziggy" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/iamcal/sql-parser" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/larastan/larastan" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/phpstan/phpstan" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
