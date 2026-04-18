@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Tickets;
+namespace App\Http\Requests\TicketReply;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreTicketReplyRequest extends FormRequest
+class TicketReplyStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {

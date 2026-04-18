@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Tickets;
+namespace App\Http\Requests\Tickets\User;
 
 use App\Models\Ticket;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreTicketRequest extends FormRequest
+class TicketStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {

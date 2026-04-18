@@ -14,7 +14,7 @@ class TicketFactory extends Factory
     public function definition(): array
     {
         return [
-            'ticket_number' => 'SD-' . fake()->unique()->numerify('######'),
+            'ticket_number' => 'SD-'.fake()->unique()->numerify('######'),
             'requester_id' => User::factory(),
             'category_id' => TicketCategory::factory(),
             'assignee_id' => null,

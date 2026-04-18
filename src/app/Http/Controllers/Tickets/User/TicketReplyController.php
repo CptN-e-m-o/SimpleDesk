@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Tickets\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Tickets\StoreTicketReplyRequest;
+use App\Http\Requests\TicketReply\TicketReplyStoreRequest;
 use App\Models\Ticket;
 use Illuminate\Http\RedirectResponse;
 
 class TicketReplyController extends Controller
 {
-    public function store(StoreTicketReplyRequest $request, Ticket $ticket): RedirectResponse
+    public function store(TicketReplyStoreRequest $request, Ticket $ticket): RedirectResponse
     {
         abort_unless($ticket->requester_id === auth()->id(), 403);
 

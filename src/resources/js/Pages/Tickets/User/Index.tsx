@@ -7,7 +7,9 @@ import {
     Search,
     Ticket,
     X,
+    House,
 } from 'lucide-react'
+import Breadcrumbs from '@/Components/Breadcrumbs'
 import { FormEvent } from 'react'
 
 import UserLayout from '@/Layouts/UserLayout'
@@ -172,6 +174,20 @@ export default function TicketsIndex({
                                 <Ticket className="h-3.5 w-3.5" />
                                 Support history
                             </div>
+
+                            <Breadcrumbs
+                                className="mb-4"
+                                items={[
+                                    {
+                                        label: 'Home',
+                                        href: route('home'),
+                                        icon: <House className="h-4 w-4" />,
+                                    },
+                                    {
+                                        label: 'My tickets',
+                                    },
+                                ]}
+                            />
 
                             <h1 className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                                 My tickets
