@@ -39,7 +39,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/tickets', function () {
                 return Inertia::render('Tickets/Agent/Index');
             })->name('tickets');
-            //Route::get('/tickets/{ticket}', [AgentTicketController::class, 'show'])->name('tickets.show');
+            // Route::get('/tickets/{ticket}', [AgentTicketController::class, 'show'])->name('tickets.show');
+        });
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::get('/dashboard', function () {
+                return Inertia::render('Admin/Dashboard');
+            })->name('dashboard');
         });
     });
     Route::middleware('role:admin')->group(function () {});

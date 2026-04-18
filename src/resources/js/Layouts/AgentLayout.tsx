@@ -60,7 +60,7 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
             ? [
                 {
                     label: 'Admin panel',
-                    href: '/admin',
+                    href: route('admin.dashboard'),
                     icon: Shield,
                     isActive: (url: string) =>
                         url === '/admin' || url.startsWith('/admin'),
