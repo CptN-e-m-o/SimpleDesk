@@ -32,7 +32,7 @@ export default function PublicLayout({ children }: Props) {
                         </Link>
 
                         <Link
-                            href="/tickets/create"
+                            href={route('tickets.create')}
                             className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
                         >
                             Submit Ticket
@@ -48,7 +48,7 @@ export default function PublicLayout({ children }: Props) {
                         {user && (
                             <>
                                 <Link
-                                    href="/tickets"
+                                    href={route('tickets.index')}
                                     className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     My Tickets

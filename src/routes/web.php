@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Tickets\User\TicketController;
+use App\Http\Controllers\Tickets\User\TicketReplyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,13 +21,26 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::prefix('tickets')->name('tickets.')->group(function () {
+        Route::get('/', [TicketController::class, 'index'])->name('index');
+        Route::get('/create', [TicketController::class, 'create'])->name('create');
+        Route::post('/', [TicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
+    });
+
+    Route::post('/tickets/{ticket}/replies', [TicketReplyController::class, 'store'])
+        ->name('tickets.replies.store');
+
     Route::middleware('role:admin,agent')->group(function () {
         Route::get('/dashboard', function () {
             return Inertia::render('Dashboard');
         })->name('dashboard');
-        Route::get('/tickets', function () {
-            return Inertia::render('Tickets/Index');
-        })->name('tickets');
+        Route::prefix('agent')->name('agent.')->group(function () {
+            Route::get('/tickets', function () {
+                return Inertia::render('Tickets/Agent/Index');
+            })->name('tickets');
+            //Route::get('/tickets/{ticket}', [AgentTicketController::class, 'show'])->name('tickets.show');
+        });
     });
     Route::middleware('role:admin')->group(function () {});
     Route::middleware('role:agent')->group(function () {});
