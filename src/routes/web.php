@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
 use Illuminate\Http\Request;
@@ -41,13 +42,23 @@ Route::middleware('auth')->group(function () {
             })->name('tickets');
             // Route::get('/tickets/{ticket}', [AgentTicketController::class, 'show'])->name('tickets.show');
         });
+    });
+    Route::middleware('role:admin')->group(function () {
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/dashboard', function () {
                 return Inertia::render('Admin/Dashboard');
             })->name('dashboard');
+
+            // Team routes
+            Route::resource('teams', TeamController::class);
+            Route::post('teams/{team}/restore', [TeamController::class, 'restore'])
+                ->name('teams.restore');
+
+            Route::delete('teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
+                ->name('teams.force-delete');
+
         });
     });
-    Route::middleware('role:admin')->group(function () {});
     Route::middleware('role:agent')->group(function () {});
 
     Route::post('/logout', function (Request $request) {

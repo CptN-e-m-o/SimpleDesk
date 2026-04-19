@@ -70,10 +70,10 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                 items: [
                     {
                         label: 'Admin Panel',
-                        href: '/admin',
+                        href: route('admin.dashboard'),
                         icon: LayoutDashboard,
                         isActive: (currentUrl: string) =>
-                            currentUrl === '/admin' || currentUrl.startsWith('/admin/'),
+                            currentUrl === '/admin/dashboard',
                     },
                     {
                         label: 'Go to Agent Page',
@@ -108,9 +108,10 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                     },
                     {
                         label: 'Teams',
-                        href: '#',
+                        href: route('admin.teams.index'),
                         icon: UsersRound,
-                        isActive: () => false,
+                        isActive: (currentUrl: string) =>
+                            currentUrl === '/admin/teams' || currentUrl.startsWith('/admin/teams/'),
                     },
                 ],
             },
