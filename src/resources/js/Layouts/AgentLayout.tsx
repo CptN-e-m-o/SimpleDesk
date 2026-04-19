@@ -11,6 +11,7 @@ import {
     RefreshCw,
     ChevronDown,
     Shield,
+    Check,
 } from 'lucide-react'
 import { route } from 'ziggy-js'
 
@@ -20,14 +21,13 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/Components/ui/dropdown-menu'
-import { Check } from 'lucide-react'
 
 import type { SharedData } from '../types'
 import { isAdmin } from '@/lib/roles'
 
 type Props = {
-    title?: string
-    children: ReactNode
+    readonly title?: string
+    readonly children: ReactNode
 }
 
 

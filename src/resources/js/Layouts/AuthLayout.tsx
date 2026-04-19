@@ -3,9 +3,9 @@ import { Link } from '@inertiajs/react'
 import { ShieldCheck, Ticket, LifeBuoy } from 'lucide-react'
 
 type Props = {
-    title: string
-    description?: string
-    children: ReactNode
+    readonly title: string
+    readonly description?: string
+    readonly children: ReactNode
 }
 
 const features = [

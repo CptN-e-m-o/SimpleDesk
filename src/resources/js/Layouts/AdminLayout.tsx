@@ -26,6 +26,7 @@ import {
     CheckCircle2,
     Briefcase,
     GitBranch,
+    Check,
 } from 'lucide-react'
 
 import {
@@ -34,14 +35,13 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/Components/ui/dropdown-menu'
-import { Check } from 'lucide-react'
 import { route } from 'ziggy-js'
 
 import type { SharedData } from '../types'
 
 type Props = {
-    title?: string
-    children: ReactNode
+    readonly title?: string
+    readonly children: ReactNode
 }
 
 type NavItem = {

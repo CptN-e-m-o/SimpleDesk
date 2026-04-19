@@ -1,7 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout'
 import { Head, Link } from '@inertiajs/react'
 import {
-    AlertTriangle,
     UserCog,
     ShieldCheck,
     Building2,

@@ -40,7 +40,7 @@ type Team = {
 }
 
 type Props = {
-    teams?: Team[]
+    readonly teams?: Team[]
 }
 
 type TeamAction =

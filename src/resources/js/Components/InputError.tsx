@@ -1,6 +1,6 @@
 type Props = {
-    message?: string
-    className?: string
+    readonly message?: string
+    readonly className?: string
 }
 
 export default function InputError({ message, className = '' }: Props) {

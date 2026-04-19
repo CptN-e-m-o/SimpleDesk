@@ -54,7 +54,7 @@ class TicketController extends Controller
         $validated = $request->validated();
 
         $ticket = DB::transaction(function () use ($request, $validated) {
-            $ticket = Ticket::create([
+            return Ticket::create([
                 'ticket_number' => $this->generateTicketNumber(),
                 'requester_id' => $request->user()->id,
                 'category_id' => $validated['category_id'],
@@ -66,11 +66,6 @@ class TicketController extends Controller
                 'description' => $validated['description'],
                 'last_reply_at' => now(),
             ]);
-
-            // Вложения можно подключить позже.
-            // Например через media library или отдельную таблицу ticket_attachments.
-
-            return $ticket;
         });
 
         return redirect()
