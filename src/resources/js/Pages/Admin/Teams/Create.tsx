@@ -3,8 +3,8 @@ import { route } from 'ziggy-js'
 import type { DepartmentOption, UserOption } from '@/types/team'
 
 type Props = {
-    departments: DepartmentOption[]
-    users: UserOption[]
+    readonly departments: DepartmentOption[]
+    readonly users: UserOption[]
 }
 
 export default function Create({ departments, users }: Props) {

@@ -3,9 +3,9 @@ import { route } from 'ziggy-js'
 import type { DepartmentOption, UserOption, TeamData } from '@/types/team'
 
 type Props = {
-    team: TeamData
-    departments: DepartmentOption[]
-    users: UserOption[]
+    readonly team: TeamData
+    readonly departments: DepartmentOption[]
+    readonly users: UserOption[]
 }
 
 export default function Edit({ team, departments, users }: Props) {

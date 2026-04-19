@@ -6,8 +6,7 @@ import { hasAnyRole } from '@/lib/roles'
 import { route } from 'ziggy-js'
 
 type Props = {
-    title?: string
-    children: ReactNode
+    readonly children: ReactNode
 }
 
 export default function PublicLayout({ children }: Props) {

@@ -9,8 +9,8 @@ type BreadcrumbItem = {
 }
 
 type Props = {
-    items: BreadcrumbItem[]
-    className?: string
+    readonly items: readonly BreadcrumbItem[]
+    readonly className?: string
 }
 
 export default function Breadcrumbs({ items, className = '' }: Props) {
