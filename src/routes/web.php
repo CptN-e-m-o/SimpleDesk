@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
                 return Inertia::render('Admin/Dashboard');
             })->name('dashboard');
 
-            //Team routes
+            // Team routes
             Route::resource('teams', TeamController::class);
             Route::post('teams/{team}/restore', [TeamController::class, 'restore'])
                 ->name('teams.restore');

@@ -21,8 +21,7 @@ class TeamController extends Controller
         protected TeamService $teamService,
         protected TeamEligibleUsers $teamEligibleUsers,
         protected TeamDepartmentOptions $teamDepartmentOptions,
-    ) {
-    }
+    ) {}
 
     public function index(): Response
     {
