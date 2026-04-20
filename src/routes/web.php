@@ -40,7 +40,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/tickets', function () {
                 return Inertia::render('Tickets/Agent/Index');
             })->name('tickets');
-            // Route::get('/tickets/{ticket}', [AgentTicketController::class, 'show'])->name('tickets.show');
         });
     });
     Route::middleware('role:admin')->group(function () {
@@ -59,7 +58,6 @@ Route::middleware('auth')->group(function () {
 
         });
     });
-    Route::middleware('role:agent')->group(function () {});
 
     Route::post('/logout', function (Request $request) {
         auth()->guard('web')->logout();

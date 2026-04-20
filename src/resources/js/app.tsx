@@ -16,6 +16,12 @@ declare global {
 }
 
 createInertiaApp({
+    defaults: {
+        future: {
+            useDataInertiaHeadAttribute: true,
+        },
+    },
+
     resolve: (name) => {
         const page = pages[`./Pages/${name}.tsx`]
 
