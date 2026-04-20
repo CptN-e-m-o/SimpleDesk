@@ -140,13 +140,13 @@ export default function TeamForm({
     const pageDescription = isEdit
         ? 'Update team details, change members, and assign a different team lead if needed.'
         : 'Create a new team, assign members, choose a team lead, and configure routing-related departments.'
-    const submitText = processing
-        ? isEdit
-            ? 'Saving...'
-            : 'Creating...'
-        : isEdit
-            ? 'Save Changes'
-            : 'Create Team'
+    let submitText = ''
+
+    if (processing) {
+        submitText = isEdit ? 'Saving...' : 'Creating...'
+    } else {
+        submitText = isEdit ? 'Save Changes' : 'Create Team'
+    }
 
     return (
         <AdminLayout title={pageTitle}>
@@ -202,11 +202,15 @@ export default function TeamForm({
 
                         <div className="grid gap-6 p-6 lg:grid-cols-2">
                             <div className="lg:col-span-2">
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                <label
+                                    htmlFor="team-name"
+                                    className="mb-2 block text-sm font-medium text-gray-700"
+                                >
                                     Team name <span className="text-rose-500">*</span>
                                 </label>
 
                                 <input
+                                    id="team-name"
                                     type="text"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
@@ -218,35 +222,51 @@ export default function TeamForm({
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
-                                    Status <span className="text-rose-500">*</span>
-                                </label>
+                                <fieldset>
+                                    <legend className="mb-2 block text-sm font-medium text-gray-700">
+                                        Status <span className="text-rose-500">*</span>
+                                    </legend>
 
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setData('is_active', true)}
-                                        className={`rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
-                                            data.is_active
-                                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-100'
-                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                                        }`}
-                                    >
-                                        Active
-                                    </button>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <label
+                                            htmlFor="status-active"
+                                            className={`cursor-pointer rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
+                                                data.is_active
+                                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-100'
+                                                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <input
+                                                id="status-active"
+                                                type="radio"
+                                                name="is_active"
+                                                checked={data.is_active}
+                                                onChange={() => setData('is_active', true)}
+                                                className="sr-only"
+                                            />
+                                            Active
+                                        </label>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => setData('is_active', false)}
-                                        className={`rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
-                                            data.is_active
-                                                ? 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                                                : 'border-rose-200 bg-rose-50 text-rose-700 ring-4 ring-rose-100'
-                                        }`}
-                                    >
-                                        Inactive
-                                    </button>
-                                </div>
+                                        <label
+                                            htmlFor="status-inactive"
+                                            className={`cursor-pointer rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
+                                                data.is_active
+                                                    ? 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                                    : 'border-rose-200 bg-rose-50 text-rose-700 ring-4 ring-rose-100'
+                                            }`}
+                                        >
+                                            <input
+                                                id="status-inactive"
+                                                type="radio"
+                                                name="is_active"
+                                                checked={!data.is_active}
+                                                onChange={() => setData('is_active', false)}
+                                                className="sr-only"
+                                            />
+                                            Inactive
+                                        </label>
+                                    </div>
+                                </fieldset>
 
                                 <InputError message={errors.is_active} className="mt-2" />
                             </div>

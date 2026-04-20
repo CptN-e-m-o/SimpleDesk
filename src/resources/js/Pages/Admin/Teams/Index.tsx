@@ -121,6 +121,23 @@ export default function Index({ teams = [] }: Props) {
     const [sortField, setSortField] = useState<SortField>('name')
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
+    const isRestore = teamAction?.type === 'restore'
+    const isForceDelete = teamAction?.type === 'force-delete'
+
+    const actionLabels: Record<string, string> = {
+        restore: 'Restore Team',
+        'force-delete': 'Delete Permanently',
+        default: 'Delete Team',
+    }
+
+    const buttonText = processing
+        ? 'Processing...'
+        : actionLabels[teamAction?.type ?? ''] ?? actionLabels.default
+
+    const buttonClass = isRestore
+        ? 'bg-emerald-600 hover:bg-emerald-700'
+        : 'bg-rose-600 hover:bg-rose-700'
+
     const filteredTeams = useMemo(() => {
         const query = search.trim().toLowerCase()
 
@@ -725,19 +742,9 @@ export default function Index({ teams = [] }: Props) {
                                     handleAction()
                                 }}
                                 disabled={processing}
-                                className={`cursor-pointer rounded-2xl px-4 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-70 ${
-                                    teamAction?.type === 'restore'
-                                        ? 'bg-emerald-600 hover:bg-emerald-700'
-                                        : 'bg-rose-600 hover:bg-rose-700'
-                                }`}
+                                className={`cursor-pointer rounded-2xl px-4 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-70 ${buttonClass}`}
                             >
-                                {processing
-                                    ? 'Processing...'
-                                    : teamAction?.type === 'restore'
-                                        ? 'Restore Team'
-                                        : teamAction?.type === 'force-delete'
-                                            ? 'Delete Permanently'
-                                            : 'Delete Team'}
+                                {buttonText}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </div>
