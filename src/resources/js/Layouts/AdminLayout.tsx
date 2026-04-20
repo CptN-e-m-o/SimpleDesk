@@ -57,6 +57,10 @@ type NavSection = {
     items: NavItem[]
 }
 
+function logout() {
+    router.post('/logout')
+}
+
 export default function AdminLayout({ title = 'Admin Panel', children }: Props) {
     const { props, url } = usePage<SharedData>()
     const user = props.auth.user
@@ -242,9 +246,7 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
         }))
     }
 
-    function logout() {
-        router.post('/logout')
-    }
+
 
     return (
         <div className="min-h-screen bg-gray-100">
