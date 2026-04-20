@@ -29,10 +29,12 @@ services:
   pgsql:
     image: postgres:16-alpine
     container_name: simpledesk_pgsql
+    env_file:
+      - .env.docker
     environment:
-      POSTGRES_DB: simpledesk
-      POSTGRES_USER: simpledesk
-      POSTGRES_PASSWORD: simpledesk
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
