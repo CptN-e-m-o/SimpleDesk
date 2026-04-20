@@ -96,10 +96,8 @@ class TeamController extends Controller
             ->with('success', 'Team deleted successfully.');
     }
 
-    public function restore(int $teamId): RedirectResponse
+    public function restore(Team $team): RedirectResponse
     {
-        $team = Team::withTrashed()->findOrFail($teamId);
-
         $team->restore();
 
         return redirect()
@@ -107,10 +105,8 @@ class TeamController extends Controller
             ->with('success', 'Team restored successfully.');
     }
 
-    public function forceDelete(int $teamId): RedirectResponse
+    public function forceDelete(Team $team): RedirectResponse
     {
-        $team = Team::withTrashed()->findOrFail($teamId);
-
         $team->forceDelete();
 
         return redirect()

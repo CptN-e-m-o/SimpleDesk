@@ -242,7 +242,7 @@ export default function Index({ teams = [] }: Props) {
         }
 
         if (teamAction.type === 'restore') {
-            router.post(
+            router.patch(
                 route('admin.teams.restore', teamAction.team.id),
                 {},
                 {

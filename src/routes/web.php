@@ -50,11 +50,13 @@ Route::middleware('auth')->group(function () {
 
             // Team routes
             Route::resource('teams', TeamController::class);
-            Route::post('teams/{team}/restore', [TeamController::class, 'restore'])
-                ->name('teams.restore');
+            Route::patch('/teams/{team}/restore', [TeamController::class, 'restore'])
+                ->name('teams.restore')
+                ->withTrashed();
 
-            Route::delete('teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
-                ->name('teams.force-delete');
+            Route::delete('/teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
+                ->name('teams.force-delete')
+                ->withTrashed();;
 
         });
     });

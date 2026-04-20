@@ -18,6 +18,7 @@ import type {
     UserOption,
     TeamFormData,
 } from '@/types/team'
+import FieldHint from '@/Components/FieldHint'
 
 type Props = {
     readonly mode: 'create' | 'edit'
@@ -272,9 +273,13 @@ export default function TeamForm({
                             </div>
 
                             <div>
-                                <p id="departments-label" className="mb-2 block text-sm font-medium text-gray-700">
-                                    Departments
-                                </p>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <p id="departments-label" className="block text-sm font-medium text-gray-700">
+                                        Departments
+                                    </p>
+
+                                    <FieldHint text="Select the departments this team is responsible for. You can choose more than one if the team handles multiple routing areas." />
+                                </div>
 
                                 <div ref={departmentsRef} className="relative">
                                     <button
@@ -382,12 +387,16 @@ export default function TeamForm({
                             </div>
 
                             <div className="lg:col-span-2">
-                                <label
-                                    htmlFor="admin-notes"
-                                    className="mb-2 block text-sm font-medium text-gray-700"
-                                >
-                                    Internal notes
-                                </label>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <label
+                                        htmlFor="admin-notes"
+                                        className="block text-sm font-medium text-gray-700"
+                                    >
+                                        Internal notes
+                                    </label>
+
+                                    <FieldHint text="Add notes about team responsibilities, escalation rules, or anything other admins should know. These notes are for internal use only." />
+                                </div>
 
                                 <textarea
                                     id="admin-notes"
