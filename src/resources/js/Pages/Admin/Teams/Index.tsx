@@ -404,7 +404,37 @@ export default function Index({ teams = [] }: Props) {
                                                 </td>
 
                                                 <td className="px-6 py-5">
-                                                    {!team.is_deleted ? (
+                                                    {team.is_deleted ? (
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    openActionDialog(
+                                                                        'restore',
+                                                                        team,
+                                                                    )
+                                                                }
+                                                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                                                            >
+                                                                <RotateCcw className="h-4 w-4" />
+                                                                Restore
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    openActionDialog(
+                                                                        'force-delete',
+                                                                        team,
+                                                                    )
+                                                                }
+                                                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+                                                            >
+                                                                <ShieldAlert className="h-4 w-4" />
+                                                                Delete permanently
+                                                            </button>
+                                                        </div>
+                                                    ) : (
                                                         <div className="flex items-center justify-end gap-2">
                                                             <Link
                                                                 href={route(
@@ -437,37 +467,6 @@ export default function Index({ teams = [] }: Props) {
                                                                 className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    openActionDialog(
-                                                                        'restore',
-                                                                        team,
-                                                                    )
-                                                                }
-                                                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
-                                                            >
-                                                                <RotateCcw className="h-4 w-4" />
-                                                                Restore
-                                                            </button>
-
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    openActionDialog(
-                                                                        'force-delete',
-                                                                        team,
-                                                                    )
-                                                                }
-                                                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
-                                                            >
-                                                                <ShieldAlert className="h-4 w-4" />
-                                                                Delete
-                                                                permanently
                                                             </button>
                                                         </div>
                                                     )}
@@ -532,7 +531,37 @@ export default function Index({ teams = [] }: Props) {
                                                 </div>
                                             </div>
 
-                                            {!team.is_deleted ? (
+                                            {team.is_deleted ? (
+                                                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            openActionDialog(
+                                                                'restore',
+                                                                team,
+                                                            )
+                                                        }
+                                                        className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                                                    >
+                                                        <RotateCcw className="h-4 w-4" />
+                                                        Restore
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            openActionDialog(
+                                                                'force-delete',
+                                                                team,
+                                                            )
+                                                        }
+                                                        className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+                                                    >
+                                                        <ShieldAlert className="h-4 w-4" />
+                                                        Delete permanently
+                                                    </button>
+                                                </div>
+                                            ) : (
                                                 <div className="mt-4 flex items-center gap-2">
                                                     <Link
                                                         href={route(
@@ -567,36 +596,6 @@ export default function Index({ teams = [] }: Props) {
                                                         className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            openActionDialog(
-                                                                'restore',
-                                                                team,
-                                                            )
-                                                        }
-                                                        className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
-                                                    >
-                                                        <RotateCcw className="h-4 w-4" />
-                                                        Restore
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            openActionDialog(
-                                                                'force-delete',
-                                                                team,
-                                                            )
-                                                        }
-                                                        className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
-                                                    >
-                                                        <ShieldAlert className="h-4 w-4" />
-                                                        Delete permanently
                                                     </button>
                                                 </div>
                                             )}

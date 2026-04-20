@@ -58,7 +58,7 @@ type TicketData = {
 }
 
 type Props = {
-    ticket: TicketData
+    readonly ticket: TicketData
 }
 
 function formatDate(value: string | null) {

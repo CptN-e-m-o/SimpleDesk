@@ -20,12 +20,12 @@ import type {
 } from '@/types/team'
 
 type Props = {
-    mode: 'create' | 'edit'
-    teamId?: number
-    departments: DepartmentOption[]
-    users: UserOption[]
-    initialData: TeamFormData
-    submitUrl: string
+    readonly mode: 'create' | 'edit'
+    readonly teamId?: number
+    readonly departments: DepartmentOption[]
+    readonly users: UserOption[]
+    readonly initialData: TeamFormData
+    readonly submitUrl: string
 }
 
 export default function TeamForm({
@@ -239,9 +239,9 @@ export default function TeamForm({
                                         type="button"
                                         onClick={() => setData('is_active', false)}
                                         className={`rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
-                                            !data.is_active
-                                                ? 'border-rose-200 bg-rose-50 text-rose-700 ring-4 ring-rose-100'
-                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                            data.is_active
+                                                ? 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                                : 'border-rose-200 bg-rose-50 text-rose-700 ring-4 ring-rose-100'
                                         }`}
                                     >
                                         Inactive
