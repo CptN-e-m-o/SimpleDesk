@@ -40,7 +40,7 @@ type TeamData = {
 }
 
 type Props = {
-    team: TeamData
+    readonly team: TeamData
 }
 
 function getStatusClasses(isActive: boolean) {
@@ -98,7 +98,7 @@ export default function Show({ team }: Props) {
                             </span>
 
                             <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-200">
-                                {team.members_count} member{team.members_count !== 1 ? 's' : ''}
+                                {team.members_count} member{team.members_count === 1 ? '' : 's'}
                             </span>
 
                             {team.lead && (

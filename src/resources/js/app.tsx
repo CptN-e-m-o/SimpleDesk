@@ -12,9 +12,7 @@ const pages = import.meta.glob('./Pages/**/*.tsx', { eager: true }) as Record<
 >
 
 declare global {
-    interface Window {
-        Ziggy: ZiggyConfig
-    }
+    var Ziggy: ZiggyConfig
 }
 
 createInertiaApp({
@@ -29,7 +27,7 @@ createInertiaApp({
     },
 
     setup({ el, App, props }) {
-        window.Ziggy = props.initialPage.props.ziggy as ZiggyConfig
+        globalThis.Ziggy = props.initialPage.props.ziggy as ZiggyConfig
 
         createRoot(el).render(<App {...props} />)
     },

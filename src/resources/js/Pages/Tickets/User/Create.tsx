@@ -20,7 +20,7 @@ type Category = {
 }
 
 type Props = {
-    categories: Category[]
+    readonly categories: Category[]
 }
 
 const priorityOptions = [

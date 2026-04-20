@@ -52,14 +52,14 @@ type FilterOption = {
 }
 
 type Props = {
-    tickets: PaginatedTickets
-    filters: {
+    readonly tickets: PaginatedTickets
+    readonly filters: {
         search: string
         status: string
         priority: string
     }
-    statusOptions: FilterOption[]
-    priorityOptions: FilterOption[]
+    readonly statusOptions: FilterOption[]
+    readonly priorityOptions: FilterOption[]
 }
 
 function formatDate(value: string | null) {
