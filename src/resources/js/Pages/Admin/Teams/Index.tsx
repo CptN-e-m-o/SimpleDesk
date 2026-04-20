@@ -68,6 +68,52 @@ function getStatusLabel(team: Team) {
     return team.is_active ? 'Active' : 'Inactive'
 }
 
+const getTeamStatus = (team: Team) => {
+    if (team.is_deleted) return 'deleted'
+    if (team.is_active) return 'active'
+    return 'inactive'
+}
+
+const dialogTitles: Record<string, string> = {
+    restore: 'Restore team?',
+    'force-delete': 'Delete team permanently?',
+    delete: 'Delete team?',
+}
+
+const getDialogDescription = (action?: TeamAction) => {
+    if (!action) return null
+
+    const name = action.team.name
+
+    if (action.type === 'restore') {
+        return (
+            <>
+                Team{' '}
+                <span className="font-semibold text-gray-900">{name}</span>{' '}
+                will be restored and returned to the list.
+            </>
+        )
+    }
+
+    if (action.type === 'force-delete') {
+        return (
+            <>
+                Team{' '}
+                <span className="font-semibold text-gray-900">{name}</span>{' '}
+                will be permanently deleted. This action cannot be undone.
+            </>
+        )
+    }
+
+    return (
+        <>
+            Team{' '}
+            <span className="font-semibold text-gray-900">{name}</span>{' '}
+            will be soft deleted and can be restored later.
+        </>
+    )
+}
+
 export default function Index({ teams = [] }: Props) {
     const [search, setSearch] = useState('')
     const [teamAction, setTeamAction] = useState<TeamAction>(null)
@@ -82,11 +128,7 @@ export default function Index({ teams = [] }: Props) {
 
         return teams.filter((team) => {
             const leadName = team.lead?.name?.toLowerCase() ?? ''
-            const status = team.is_deleted
-                ? 'deleted'
-                : team.is_active
-                    ? 'active'
-                    : 'inactive'
+            const status = getTeamStatus(team)
 
             return (
                 team.name.toLowerCase().includes(query) ||
@@ -659,42 +701,11 @@ export default function Index({ teams = [] }: Props) {
                     >
                         <AlertDialogHeader>
                             <AlertDialogTitle className="text-xl font-semibold tracking-tight text-gray-900">
-                                {teamAction?.type === 'restore'
-                                    ? 'Restore team?'
-                                    : teamAction?.type === 'force-delete'
-                                        ? 'Delete team permanently?'
-                                        : 'Delete team?'}
+                                {dialogTitles[teamAction?.type ?? 'delete']}
                             </AlertDialogTitle>
 
                             <AlertDialogDescription className="mt-2 text-sm leading-6 text-gray-500">
-                                {teamAction?.type === 'restore' ? (
-                                    <>
-                                        Team{' '}
-                                        <span className="font-semibold text-gray-900">
-                                            {teamAction.team.name}
-                                        </span>{' '}
-                                        will be restored and returned to the
-                                        list.
-                                    </>
-                                ) : teamAction?.type === 'force-delete' ? (
-                                    <>
-                                        Team{' '}
-                                        <span className="font-semibold text-gray-900">
-                                            {teamAction?.team.name}
-                                        </span>{' '}
-                                        will be permanently deleted. This action
-                                        cannot be undone.
-                                    </>
-                                ) : (
-                                    <>
-                                        Team{' '}
-                                        <span className="font-semibold text-gray-900">
-                                            {teamAction?.team.name}
-                                        </span>{' '}
-                                        will be soft deleted and can be restored
-                                        later.
-                                    </>
-                                )}
+                                {getDialogDescription(teamAction)}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                     </div>

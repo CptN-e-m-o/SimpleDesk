@@ -30,6 +30,9 @@ type Props = {
     readonly children: ReactNode
 }
 
+function logout() {
+    router.post('/logout')
+}
 
 export default function AgentLayout({ title = 'Dashboard', children }: Props) {
     const { props, url } = usePage<SharedData>()
@@ -69,9 +72,6 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
             : []),
     ]
 
-    function logout() {
-        router.post('/logout')
-    }
 
     return (
         <div className="min-h-screen bg-gray-50">
