@@ -22,8 +22,10 @@ class StoreTeamRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
+
             'departments' => ['nullable', 'array'],
-            'departments.*' => ['string', Rule::in($departmentIds)],
+            'departments.*' => ['integer', Rule::in($departmentIds)],
+
             'is_active' => ['required', 'boolean'],
             'admin_notes' => ['nullable', 'string'],
 
@@ -43,7 +45,7 @@ class StoreTeamRequest extends FormRequest
 
             $leadUserId = $this->input('lead_user_id');
 
-            if ($leadUserId !== null && ! $memberIds->contains((int) $leadUserId)) {
+            if ($leadUserId !== null && $leadUserId !== '' && ! $memberIds->contains((int) $leadUserId)) {
                 $validator->errors()->add(
                     'lead_user_id',
                     'The selected team lead must also be a team member.'

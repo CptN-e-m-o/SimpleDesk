@@ -56,7 +56,7 @@ Route::middleware('auth')->group(function () {
 
             Route::delete('/teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
                 ->name('teams.force-delete')
-                ->withTrashed();;
+                ->withTrashed();
 
         });
     });

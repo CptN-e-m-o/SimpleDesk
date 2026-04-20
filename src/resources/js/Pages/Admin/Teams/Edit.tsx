@@ -12,13 +12,12 @@ export default function Edit({ team, departments, users }: Props) {
     return (
         <TeamForm
             mode="edit"
-            teamId={team.id}
+            submitUrl={route('admin.teams.update', team.id)}
             departments={departments}
             users={users}
-            submitUrl={route('admin.teams.update', team.id)}
             initialData={{
                 name: team.name ?? '',
-                departments: team.departments ?? [],
+                departments: team.departments.map((department) => department.id),
                 is_active: team.is_active,
                 admin_notes: team.admin_notes ?? '',
                 member_ids: team.member_ids ?? [],

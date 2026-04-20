@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Admin\Department;
 use App\Models\Admin\Team;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -39,7 +40,9 @@ class User extends Authenticatable
 
     public function hasRole(string $role): bool
     {
-        return $this->roles->contains('name', $role);
+        return $this->roles()
+            ->where('name', $role)
+            ->exists();
     }
 
     public function hasAnyRole(array $roles): bool
@@ -83,6 +86,29 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Team::class, 'team_user')
             ->withPivot('is_lead')
+            ->withTimestamps();
+    }
+
+    public function leadingTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'team_user')
+            ->withPivot('is_lead')
+            ->wherePivot('is_lead', true)
+            ->withTimestamps();
+    }
+
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class, 'department_user')
+            ->withPivot('is_manager')
+            ->withTimestamps();
+    }
+
+    public function managedDepartments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class, 'department_user')
+            ->withPivot('is_manager')
+            ->wherePivot('is_manager', true)
             ->withTimestamps();
     }
 }

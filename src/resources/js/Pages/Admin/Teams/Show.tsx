@@ -24,10 +24,16 @@ type TeamMember = {
     is_lead: boolean
 }
 
+type TeamDepartment = {
+    id: number
+    name: string
+    slug: string
+}
+
 type TeamData = {
     id: number
     name: string
-    departments: string[]
+    departments: TeamDepartment[]
     is_active: boolean
     admin_notes: string | null
     members_count: number
@@ -43,18 +49,13 @@ type Props = {
     readonly team: TeamData
 }
 
+
 function getStatusClasses(isActive: boolean) {
     return isActive
         ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
         : 'bg-rose-50 text-rose-700 ring-rose-200'
 }
 
-function humanizeDepartment(value: string) {
-    return value
-        .split('_')
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ')
-}
 
 export default function Show({ team }: Props) {
     const [search, setSearch] = useState('')
@@ -200,14 +201,14 @@ export default function Show({ team }: Props) {
                                             {team.departments.length > 0 ? (
                                                 team.departments.map((department) => (
                                                     <span
-                                                        key={department}
+                                                        key={department.id}
                                                         className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200"
                                                     >
-                                                        {humanizeDepartment(department)}
+                                                        {department.name}
                                                     </span>
-                                                ))
-                                            ) : (
-                                                <span className="text-sm font-semibold text-gray-900">
+                                                                                            ))
+                                                                                        ) : (
+                                                                                            <span className="text-sm font-semibold text-gray-900">
                                                     —
                                                 </span>
                                             )}

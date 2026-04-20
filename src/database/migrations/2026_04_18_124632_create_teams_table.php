@@ -12,13 +12,17 @@ return new class extends Migration
             $table->id();
 
             $table->string('name');
+            $table->string('slug')->unique();
 
-            $table->json('departments')->nullable();
             $table->boolean('is_active')->default(true);
+
             $table->longText('admin_notes')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index('name');
+            $table->index('is_active');
         });
     }
 
