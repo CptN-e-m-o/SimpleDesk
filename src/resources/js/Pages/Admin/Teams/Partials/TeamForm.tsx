@@ -244,7 +244,7 @@ export default function TeamForm({
                                                 onChange={() => setData('is_active', true)}
                                                 className="sr-only"
                                             />
-                                            Active
+                                            <span>Active</span>
                                         </label>
 
                                         <label
@@ -263,7 +263,7 @@ export default function TeamForm({
                                                 onChange={() => setData('is_active', false)}
                                                 className="sr-only"
                                             />
-                                            Inactive
+                                            <span>Inactive</span>
                                         </label>
                                     </div>
                                 </fieldset>
@@ -272,9 +272,9 @@ export default function TeamForm({
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                <p id="departments-label" className="mb-2 block text-sm font-medium text-gray-700">
                                     Departments
-                                </label>
+                                </p>
 
                                 <div ref={departmentsRef} className="relative">
                                     <button
@@ -298,32 +298,20 @@ export default function TeamForm({
                                                             key={departmentId}
                                                             className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-200"
                                                         >
-                                                            <span>
-                                                                {department?.name ?? departmentId}
-                                                            </span>
+                                                        <span>{department?.name ?? departmentId}</span>
 
-                                                            <span
-                                                                role="button"
-                                                                tabIndex={0}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    removeDepartment(departmentId)
-                                                                }}
-                                                                onKeyDown={(e) => {
-                                                                    if (
-                                                                        e.key === 'Enter' ||
-                                                                        e.key === ' '
-                                                                    ) {
-                                                                        e.preventDefault()
-                                                                        e.stopPropagation()
-                                                                        removeDepartment(departmentId)
-                                                                    }
-                                                                }}
-                                                                className="inline-flex h-4 w-4 items-center justify-center rounded-full text-sky-500 transition hover:bg-sky-100 hover:text-sky-700"
-                                                            >
-                                                                <X className="h-3 w-3" />
-                                                            </span>
-                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                removeDepartment(departmentId)
+                                                            }}
+                                                            className="inline-flex h-4 w-4 items-center justify-center rounded-full text-sky-500 transition hover:bg-sky-100 hover:text-sky-700"
+                                                            aria-label={`Remove department ${department?.name ?? departmentId}`}
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </span>
                                                     )
                                                 })
                                             ) : (
@@ -394,11 +382,15 @@ export default function TeamForm({
                             </div>
 
                             <div className="lg:col-span-2">
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                <label
+                                    htmlFor="admin-notes"
+                                    className="mb-2 block text-sm font-medium text-gray-700"
+                                >
                                     Internal notes
                                 </label>
 
                                 <textarea
+                                    id="admin-notes"
                                     value={data.admin_notes}
                                     onChange={(e) => setData('admin_notes', e.target.value)}
                                     rows={8}
@@ -426,12 +418,16 @@ export default function TeamForm({
 
                         <div className="grid gap-6 p-6 xl:grid-cols-[1.2fr_0.8fr]">
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                <label
+                                    htmlFor="member-search"
+                                    className="mb-2 block text-sm font-medium text-gray-700"
+                                >
                                     Search users
                                 </label>
 
                                 <div className="relative">
                                     <input
+                                        id="member-search"
                                         type="text"
                                         value={memberSearch}
                                         onChange={(e) => setMemberSearch(e.target.value)}

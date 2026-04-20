@@ -421,21 +421,28 @@ export default function TicketsIndex({
 
                     {tickets.links.length > 3 && (
                         <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-gray-100 pt-6">
-                            {tickets.links.map((link, index) => (
-                                <Link
-                                    key={`${link.label}-${index}`}
-                                    href={link.url || '#'}
-                                    preserveScroll
-                                    className={`inline-flex min-w-10 items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition ${
-                                        link.active
-                                            ? 'bg-gray-900 text-white'
-                                            : link.url
-                                                ? 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                                                : 'cursor-not-allowed border border-gray-100 bg-gray-100 text-gray-400'
-                                    }`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
+                            {tickets.links.map((link, index) => {
+                                let linkClass =
+                                    'inline-flex min-w-10 items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition'
+
+                                if (link.active) {
+                                    linkClass += ' bg-gray-900 text-white'
+                                } else if (link.url) {
+                                    linkClass += ' border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                } else {
+                                    linkClass += ' cursor-not-allowed border border-gray-100 bg-gray-100 text-gray-400'
+                                }
+
+                                return (
+                                    <Link
+                                        key={`${link.label}-${index}`}
+                                        href={link.url || '#'}
+                                        preserveScroll
+                                        className={linkClass}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                )
+                            })}
                         </div>
                     )}
                 </section>
