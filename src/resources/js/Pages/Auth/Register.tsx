@@ -25,58 +25,83 @@ export default function Register() {
             >
                 <form onSubmit={submit} className="space-y-4">
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="name"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Name
                         </label>
                         <input
+                            id="name"
                             type="text"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-gray-500"
                             autoComplete="name"
+                            aria-describedby={errors.name ? 'name-error' : undefined}
                         />
                         {errors.name && (
-                            <div className="mt-1 text-sm text-red-600">{errors.name}</div>
+                            <div id="name-error" className="mt-1 text-sm text-red-600">
+                                {errors.name}
+                            </div>
                         )}
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="email"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Email
                         </label>
                         <input
+                            id="email"
                             type="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-gray-500"
                             autoComplete="email"
+                            aria-describedby={errors.email ? 'email-error' : undefined}
                         />
                         {errors.email && (
-                            <div className="mt-1 text-sm text-red-600">{errors.email}</div>
+                            <div id="email-error" className="mt-1 text-sm text-red-600">
+                                {errors.email}
+                            </div>
                         )}
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="password"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Password
                         </label>
                         <input
+                            id="password"
                             type="password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
                             className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-gray-500"
                             autoComplete="new-password"
+                            aria-describedby={errors.password ? 'password-error' : undefined}
                         />
                         {errors.password && (
-                            <div className="mt-1 text-sm text-red-600">{errors.password}</div>
+                            <div id="password-error" className="mt-1 text-sm text-red-600">
+                                {errors.password}
+                            </div>
                         )}
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="password-confirmation"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Confirm password
                         </label>
                         <input
+                            id="password-confirmation"
                             type="password"
                             value={data.password_confirmation}
                             onChange={(e) => setData('password_confirmation', e.target.value)}

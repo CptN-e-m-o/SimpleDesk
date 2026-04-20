@@ -72,8 +72,6 @@ export default function Show({ team }: Props) {
         })
     }, [search, team.members])
 
-    const activeMembersCount = team.members.length
-
     return (
         <AdminLayout title="Team Details">
             <Head title={`${team.name} - Team`} />

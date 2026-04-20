@@ -25,34 +25,50 @@ export default function Login() {
             >
                 <form onSubmit={submit} className="space-y-4">
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="email"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Email
                         </label>
+
                         <input
+                            id="email"
                             type="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-gray-500"
                             autoComplete="email"
                         />
+
                         {errors.email && (
-                            <div className="mt-1 text-sm text-red-600">{errors.email}</div>
+                            <div id="email-error" className="mt-1 text-sm text-red-600">
+                                {errors.email}
+                            </div>
                         )}
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="password"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Password
                         </label>
+
                         <input
+                            id="password"
                             type="password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
                             className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-gray-500"
                             autoComplete="current-password"
                         />
+
                         {errors.password && (
-                            <div className="mt-1 text-sm text-red-600">{errors.password}</div>
+                            <div id="password-error" className="mt-1 text-sm text-red-600">
+                                {errors.password}
+                            </div>
                         )}
                     </div>
 

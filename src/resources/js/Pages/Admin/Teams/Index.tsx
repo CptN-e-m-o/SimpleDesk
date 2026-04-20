@@ -122,7 +122,6 @@ export default function Index({ teams = [] }: Props) {
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
     const isRestore = teamAction?.type === 'restore'
-    const isForceDelete = teamAction?.type === 'force-delete'
 
     const actionLabels: Record<string, string> = {
         restore: 'Restore Team',
