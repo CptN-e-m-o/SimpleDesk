@@ -16,7 +16,15 @@ class TeamFormResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'departments' => $this->departments ?? [],
+            'departments' => $this->whenLoaded('departments', function () {
+                return $this->departments
+                    ->map(fn ($department) => [
+                        'id' => (int) $department->id,
+                        'name' => $department->name,
+                        'slug' => $department->slug,
+                    ])
+                    ->values();
+            }, collect()),
             'is_active' => (bool) $this->is_active,
             'admin_notes' => $this->admin_notes,
             'member_ids' => $this->whenLoaded('members', function () {
@@ -25,7 +33,7 @@ class TeamFormResource extends JsonResource
                     ->map(fn ($id) => (int) $id)
                     ->values();
             }, collect()),
-            'lead_user_id' => $lead?->id,
+            'lead_user_id' => $lead?->id ? (int) $lead->id : null,
         ];
     }
 }

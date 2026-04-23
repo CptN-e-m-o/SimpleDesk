@@ -17,100 +17,124 @@ import {
 import { route } from 'ziggy-js'
 import { useMemo, useState } from 'react'
 
-type TeamMember = {
+type DepartmentStatus = {
+    id: number
+    name: string
+    code: string
+    color?: string | null
+} | null
+
+type DepartmentUser = {
     id: number
     name: string
     email: string
-    is_lead: boolean
+    is_manager?: boolean
 }
 
-type TeamDepartment = {
+type DepartmentTeam = {
+    id: number
+    name: string
+}
+
+type DepartmentData = {
     id: number
     name: string
     slug: string
-}
-
-type TeamData = {
-    id: number
-    name: string
-    departments: TeamDepartment[]
-    is_active: boolean
-    admin_notes: string | null
+    type: string
+    business_hours: string | null
+    outgoing_email: string | null
+    signature: string | null
+    is_default: boolean
+    status: DepartmentStatus
+    managers: DepartmentUser[]
+    teams: DepartmentTeam[]
+    users: DepartmentUser[]
     members_count: number
-    lead: {
-        id: number
-        name: string
-        email: string
-    } | null
-    members: TeamMember[]
+    teams_count: number
+    managers_count: number
 }
 
 type Props = {
-    readonly team: TeamData
+    readonly department: DepartmentData
 }
 
+function formatDepartmentType(type: string) {
+    if (!type) return '—'
 
-function getStatusClasses(isActive: boolean) {
-    return isActive
-        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-        : 'bg-rose-50 text-rose-700 ring-rose-200'
+    return type
+        .split(/[_\s-]+/)
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ')
 }
 
+function getTypeClasses(type: string) {
+    return type === 'private'
+        ? 'bg-violet-50 text-violet-700 ring-violet-200'
+        : 'bg-sky-50 text-sky-700 ring-sky-200'
+}
 
-export default function Show({ team }: Props) {
+export default function Show({ department }: Props) {
     const [search, setSearch] = useState('')
 
-    const filteredMembers = useMemo(() => {
+    const filteredUsers = useMemo(() => {
         const query = search.trim().toLowerCase()
 
-        if (!query) return team.members
+        if (!query) return department.users
 
-        return team.members.filter((member) => {
+        return department.users.filter((user) => {
             return (
-                member.name.toLowerCase().includes(query) ||
-                member.email.toLowerCase().includes(query)
+                user.name.toLowerCase().includes(query) ||
+                user.email.toLowerCase().includes(query)
             )
         })
-    }, [search, team.members])
+    }, [search, department.users])
 
     return (
-        <AdminLayout title="Team Details">
-            <Head title={`${team.name} - Team`} />
+        <AdminLayout title="Department Details">
+            <Head title={`${department.name} - Department`} />
 
             <div className="space-y-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 text-sm font-medium text-sky-600">
                             <Shield className="h-4 w-4" />
-                            Team Management
+                            Department Management
                         </div>
 
                         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
-                            {team.name}
+                            {department.name}
                         </h1>
 
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                             <span
-                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(team.is_active)}`}
+                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTypeClasses(department.type)}`}
                             >
-                                {team.is_active ? 'Active' : 'Inactive'}
+                                {formatDepartmentType(department.type)}
                             </span>
 
-                            <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-200">
-                                {team.members_count} member{team.members_count === 1 ? '' : 's'}
-                            </span>
-
-                            {team.lead && (
+                            {department.is_default && (
                                 <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
-                                    Lead: {team.lead.name}
+                                    Default Department
                                 </span>
                             )}
+
+                            {department.status?.name && (
+                                <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                    {department.status.name}
+                                </span>
+                            )}
+
+                            <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-200">
+                                {department.members_count} member
+                                {department.members_count === 1 ? '' : 's'}
+                            </span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Link
-                            href={route('admin.teams.index')}
+                            href={route('admin.departments.index')}
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
                         >
                             <ArrowLeft className="h-4 w-4" />
@@ -118,11 +142,11 @@ export default function Show({ team }: Props) {
                         </Link>
 
                         <Link
-                            href={route('admin.teams.edit', team.id)}
+                            href={route('admin.departments.edit', department.id)}
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-sky-600 px-4 text-sm font-medium text-white transition hover:bg-sky-700"
                         >
                             <Pencil className="h-4 w-4" />
-                            Edit Team
+                            Edit Department
                         </Link>
                     </div>
                 </div>
@@ -132,12 +156,12 @@ export default function Show({ team }: Props) {
                         <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-sky-50 ring-1 ring-inset ring-sky-100">
-                                    <UsersRound className="h-7 w-7 text-sky-600" />
+                                    <Building2 className="h-7 w-7 text-sky-600" />
                                 </div>
 
                                 <div>
                                     <h2 className="text-lg font-semibold text-gray-900">
-                                        Team Summary
+                                        Department Summary
                                     </h2>
                                     <p className="mt-1 text-sm text-gray-500">
                                         Overview and key metadata.
@@ -150,34 +174,27 @@ export default function Show({ team }: Props) {
                             <div className="rounded-[24px] bg-gray-50 p-5 ring-1 ring-inset ring-gray-200">
                                 <div className="text-center">
                                     <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-white shadow-sm ring-1 ring-inset ring-gray-200">
-                                        <UsersRound className="h-10 w-10 text-sky-600" />
+                                        <Building2 className="h-10 w-10 text-sky-600" />
                                     </div>
 
                                     <h3 className="mt-4 text-2xl font-semibold tracking-tight text-gray-900">
-                                        {team.name}
+                                        {department.name}
                                     </h3>
 
                                     <p className="mt-1 text-sm text-gray-500">
-                                        Support team
+                                        Department
                                     </p>
                                 </div>
 
                                 <div className="mt-6 space-y-4">
                                     <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
                                         <span className="text-sm font-medium text-gray-500">
-                                            Team Lead
+                                            Type
                                         </span>
-                                        <span className="text-right text-sm font-semibold text-gray-900">
-                                            {team.lead?.name ?? '—'}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
-                                        <span className="text-sm font-medium text-gray-500">
-                                            Team Size
-                                        </span>
-                                        <span className="text-right text-sm font-semibold text-gray-900">
-                                            {team.members_count}
+                                        <span
+                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTypeClasses(department.type)}`}
+                                        >
+                                            {formatDepartmentType(department.type)}
                                         </span>
                                     </div>
 
@@ -185,43 +202,63 @@ export default function Show({ team }: Props) {
                                         <span className="text-sm font-medium text-gray-500">
                                             Status
                                         </span>
-                                        <span
-                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(team.is_active)}`}
-                                        >
-                                            {team.is_active ? 'Active' : 'Inactive'}
+                                        <span className="text-right text-sm font-semibold text-gray-900">
+                                            {department.status?.name ?? '—'}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+                                        <span className="text-sm font-medium text-gray-500">
+                                            Managers
+                                        </span>
+                                        <span className="text-right text-sm font-semibold text-gray-900">
+                                            {department.managers_count}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+                                        <span className="text-sm font-medium text-gray-500">
+                                            Members
+                                        </span>
+                                        <span className="text-right text-sm font-semibold text-gray-900">
+                                            {department.members_count}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+                                        <span className="text-sm font-medium text-gray-500">
+                                            Teams
+                                        </span>
+                                        <span className="text-right text-sm font-semibold text-gray-900">
+                                            {department.teams_count}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+                                        <span className="text-sm font-medium text-gray-500">
+                                            Business Hours
+                                        </span>
+                                        <span className="text-right text-sm font-semibold text-gray-900">
+                                            {department.business_hours ?? '—'}
                                         </span>
                                     </div>
 
                                     <div className="flex items-start justify-between gap-4">
                                         <span className="text-sm font-medium text-gray-500">
-                                            Departments
+                                            Outgoing Email
                                         </span>
-
-                                        <div className="flex max-w-[180px] flex-wrap justify-end gap-2">
-                                            {team.departments.length > 0 ? (
-                                                team.departments.map((department) => (
-                                                    <span
-                                                        key={department.id}
-                                                        className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200"
-                                                    >
-                                                        {department.name}
-                                                    </span>
-                                                                                            ))
-                                                                                        ) : (
-                                                                                            <span className="text-sm font-semibold text-gray-900">
-                                                    —
-                                                </span>
-                                            )}
-                                        </div>
+                                        <span className="text-right text-sm font-semibold text-gray-900">
+                                            {department.outgoing_email ?? '—'}
+                                        </span>
                                     </div>
                                 </div>
 
                                 <Link
-                                    href={route('admin.teams.edit', team.id)}
+                                    href={route('admin.departments.edit', department.id)}
                                     className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-sky-600 px-4 text-sm font-medium text-white transition hover:bg-sky-700"
                                 >
                                     <Pencil className="h-4 w-4" />
-                                    Edit Team
+                                    Edit Department
                                 </Link>
                             </div>
                         </div>
@@ -233,10 +270,10 @@ export default function Show({ team }: Props) {
                                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                                     <div>
                                         <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                                            Team Members
+                                            Department Members
                                         </h2>
                                         <p className="mt-1 text-sm text-gray-500">
-                                            Members assigned to this team.
+                                            Users assigned to this department.
                                         </p>
                                     </div>
 
@@ -260,136 +297,102 @@ export default function Show({ team }: Props) {
                                             Total Members
                                         </div>
                                         <p className="mt-2 text-2xl font-semibold text-gray-900">
-                                            {team.members_count}
+                                            {department.members_count}
                                         </p>
                                     </div>
 
                                     <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3">
                                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                                             <UserCheck className="h-4 w-4" />
-                                            Team Lead
+                                            Managers
                                         </div>
-                                        <p className="mt-2 text-base font-semibold text-gray-900">
-                                            {team.lead?.name ?? 'Not assigned'}
+                                        <p className="mt-2 text-2xl font-semibold text-gray-900">
+                                            {department.managers_count}
                                         </p>
                                     </div>
 
                                     <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3">
                                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                                             <Building2 className="h-4 w-4" />
-                                            Departments
+                                            Teams
                                         </div>
-                                        <p className="mt-2 text-base font-semibold text-gray-900">
-                                            {team.departments.length}
+                                        <p className="mt-2 text-2xl font-semibold text-gray-900">
+                                            {department.teams_count}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="p-6">
-                                {filteredMembers.length > 0 ? (
-                                    <>
-                                        <div className="hidden overflow-hidden rounded-[24px] border border-gray-200 lg:block">
-                                            <table className="min-w-full divide-y divide-gray-200">
-                                                <thead className="bg-gray-50">
-                                                <tr>
-                                                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                        Name
-                                                    </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                        Email
-                                                    </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                        Role in Team
-                                                    </th>
-                                                    <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                        Actions
-                                                    </th>
-                                                </tr>
-                                                </thead>
+                                {filteredUsers.length > 0 ? (
+                                    <div className="hidden overflow-hidden rounded-[24px] border border-gray-200 lg:block">
+                                        <table className="min-w-full divide-y divide-gray-200">
+                                            <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                    Name
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                    Email
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                    Role
+                                                </th>
+                                                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                            </thead>
 
-                                                <tbody className="divide-y divide-gray-100 bg-white">
-                                                {filteredMembers.map((member) => (
-                                                    <tr
-                                                        key={member.id}
-                                                        className="transition hover:bg-sky-50/40"
-                                                    >
-                                                        <td className="px-6 py-5">
-                                                            <div>
-                                                                <p className="font-semibold text-gray-900">
-                                                                    {member.name}
-                                                                </p>
-                                                                <p className="mt-1 text-sm text-gray-500">
-                                                                    User #{member.id}
-                                                                </p>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className="px-6 py-5 text-sm text-gray-600">
-                                                            <div className="inline-flex items-center gap-2">
-                                                                <Mail className="h-4 w-4 text-gray-400" />
-                                                                {member.email}
-                                                            </div>
-                                                        </td>
-
-                                                        <td className="px-6 py-5">
-                                                            {member.is_lead ? (
-                                                                <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
-                                                                        Team Lead
-                                                                    </span>
-                                                            ) : (
-                                                                <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-200">
-                                                                        Member
-                                                                    </span>
-                                                            )}
-                                                        </td>
-
-                                                        <td className="px-6 py-5">
-                                                            <div className="flex justify-end">
-                                                                <Link
-                                                                    href="#"
-                                                                    className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
-                                                                >
-                                                                    <Eye className="h-4 w-4" />
-                                                                </Link>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <div className="grid gap-4 lg:hidden">
-                                            {filteredMembers.map((member) => (
-                                                <div
-                                                    key={member.id}
-                                                    className="rounded-[24px] border border-gray-200 bg-gray-50 p-5"
+                                            <tbody className="divide-y divide-gray-100 bg-white">
+                                            {filteredUsers.map((user) => (
+                                                <tr
+                                                    key={user.id}
+                                                    className="transition hover:bg-sky-50/40"
                                                 >
-                                                    <div className="flex items-start justify-between gap-4">
-                                                        <div className="min-w-0">
-                                                            <h3 className="text-base font-semibold text-gray-900">
-                                                                {member.name}
-                                                            </h3>
-                                                            <p className="mt-1 text-sm text-gray-500">
-                                                                {member.email}
-                                                            </p>
-                                                        </div>
+                                                    <td className="px-6 py-5">
+                                                        <p className="font-semibold text-gray-900">
+                                                            {user.name}
+                                                        </p>
+                                                        <p className="mt-1 text-sm text-gray-500">
+                                                            User #{user.id}
+                                                        </p>
+                                                    </td>
 
-                                                        {member.is_lead ? (
+                                                    <td className="px-6 py-5 text-sm text-gray-600">
+                                                        <div className="inline-flex items-center gap-2">
+                                                            <Mail className="h-4 w-4 text-gray-400" />
+                                                            {user.email}
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="px-6 py-5">
+                                                        {user.is_manager ? (
                                                             <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
-                                                                Lead
-                                                            </span>
+                                                                    Manager
+                                                                </span>
                                                         ) : (
                                                             <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-200">
-                                                                Member
-                                                            </span>
+                                                                    Member
+                                                                </span>
                                                         )}
-                                                    </div>
-                                                </div>
+                                                    </td>
+
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex justify-end">
+                                                            <Link
+                                                                href="#"
+                                                                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             ))}
-                                        </div>
-                                    </>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 ) : (
                                     <div className="rounded-[24px] border border-dashed border-gray-300 bg-gray-50 px-6 py-14 text-center">
                                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-sm ring-1 ring-inset ring-gray-200">
@@ -401,7 +404,52 @@ export default function Show({ team }: Props) {
                                         </h3>
 
                                         <p className="mt-2 text-sm leading-6 text-gray-500">
-                                            Try changing the search query or update the team members.
+                                            Try changing the search query or update department managers.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 ring-1 ring-inset ring-violet-100">
+                                        <Building2 className="h-5 w-5 text-violet-600" />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+                                            Connected Teams
+                                        </h2>
+                                        <p className="mt-1 text-sm text-gray-500">
+                                            Teams linked to this department.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-6">
+                                {department.teams.length > 0 ? (
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        {department.teams.map((team) => (
+                                            <div
+                                                key={team.id}
+                                                className="rounded-[24px] border border-gray-200 bg-gray-50 p-5"
+                                            >
+                                                <p className="font-semibold text-gray-900">
+                                                    {team.name}
+                                                </p>
+                                                <p className="mt-1 text-sm text-gray-500">
+                                                    Team #{team.id}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-[24px] border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
+                                        <p className="text-sm font-medium text-gray-700">
+                                            No teams connected
                                         </p>
                                     </div>
                                 )}
@@ -417,28 +465,30 @@ export default function Show({ team }: Props) {
 
                                     <div>
                                         <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                                            Internal Notes
+                                            Department Signature
                                         </h2>
                                         <p className="mt-1 text-sm text-gray-500">
-                                            Private notes for administrators.
+                                            Signature used for department replies.
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="p-6">
-                                {team.admin_notes ? (
+                                {department.signature ? (
                                     <div
                                         className="prose max-w-none rounded-[24px] border border-gray-200 bg-gray-50 px-5 py-4 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900"
-                                        dangerouslySetInnerHTML={{ __html: team.admin_notes }}
+                                        dangerouslySetInnerHTML={{
+                                            __html: department.signature,
+                                        }}
                                     />
                                 ) : (
                                     <div className="rounded-[24px] border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
                                         <p className="text-sm font-medium text-gray-700">
-                                            No internal notes yet
+                                            No signature yet
                                         </p>
                                         <p className="mt-1 text-sm text-gray-500">
-                                            You can add notes when editing this team.
+                                            You can add a signature when editing this department.
                                         </p>
                                     </div>
                                 )}
@@ -454,7 +504,7 @@ export default function Show({ team }: Props) {
 
                                     <div>
                                         <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                                            Team Report
+                                            Department Report
                                         </h2>
                                         <p className="mt-1 text-sm text-gray-500">
                                             Placeholder analytics block for future reporting.
@@ -512,15 +562,6 @@ export default function Show({ team }: Props) {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="mt-6 rounded-[24px] border border-dashed border-gray-300 bg-gray-50 px-6 py-16 text-center">
-                                    <p className="text-sm font-medium text-gray-700">
-                                        Reporting widgets will go here later
-                                    </p>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        Once team ticket analytics are ready, this section can display charts and trends.
-                                    </p>
                                 </div>
                             </div>
                         </section>

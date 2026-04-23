@@ -69,7 +69,10 @@ class TeamController extends Controller
 
     public function edit(Team $team): Response
     {
-        $team->load(['members:id,name,email']);
+        $team->load([
+            'departments:id,name,slug',
+            'members:id,name,email',
+        ]);
 
         return Inertia::render('Admin/Teams/Edit', [
             'team' => TeamFormResource::make($team)->resolve(),

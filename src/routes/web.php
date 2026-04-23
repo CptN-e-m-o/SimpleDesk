@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
@@ -56,7 +57,17 @@ Route::middleware('auth')->group(function () {
 
             Route::delete('/teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
                 ->name('teams.force-delete')
-                ->withTrashed();;
+                ->withTrashed();
+
+            // Department routes
+            Route::resource('departments', DepartmentController::class);
+            Route::patch('/departments/{department}/restore', [DepartmentController::class, 'restore'])
+                ->name('departments.restore')
+                ->withTrashed();
+
+            Route::delete('/departments/{department}/force-delete', [DepartmentController::class, 'forceDelete'])
+                ->name('departments.force-delete')
+                ->withTrashed();
 
         });
     });

@@ -1,6 +1,12 @@
 export type DepartmentOption = {
-    id: string
+    id: number
     name: string
+}
+
+export type TeamDepartment = {
+    id: number
+    name: string
+    slug: string
 }
 
 export type UserOption = {
@@ -12,7 +18,7 @@ export type UserOption = {
 export type TeamData = {
     id: number
     name: string
-    departments: string[]
+    departments: TeamDepartment[]
     is_active: boolean
     admin_notes: string | null
     member_ids: number[]
@@ -21,7 +27,7 @@ export type TeamData = {
 
 export type TeamFormData = {
     name: string
-    departments: string[]
+    departments: number[]
     is_active: boolean
     admin_notes: string
     member_ids: number[]

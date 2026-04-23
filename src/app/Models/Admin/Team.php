@@ -13,15 +13,20 @@ class Team extends Model
 
     protected $fillable = [
         'name',
-        'departments',
+        'slug',
         'is_active',
         'admin_notes',
     ];
 
     protected $casts = [
-        'departments' => 'array',
         'is_active' => 'boolean',
     ];
+
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class)
+            ->withTimestamps();
+    }
 
     public function members(): BelongsToMany
     {
@@ -30,10 +35,11 @@ class Team extends Model
             ->withTimestamps();
     }
 
-    public function lead(): BelongsToMany
+    public function leads(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'team_user')
             ->withPivot('is_lead')
-            ->wherePivot('is_lead', true);
+            ->wherePivot('is_lead', true)
+            ->withTimestamps();
     }
 }
