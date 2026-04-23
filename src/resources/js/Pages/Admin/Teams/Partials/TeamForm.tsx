@@ -282,16 +282,9 @@ export default function TeamForm({
                                 </div>
 
                                 <div ref={departmentsRef} className="relative">
-                                    <div
-                                        role="button"
-                                        tabIndex={0}
+                                    <button
+                                        type="button"
                                         onClick={() => setIsDepartmentsOpen((prev) => !prev)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' || e.key === ' ') {
-                                                e.preventDefault()
-                                                setIsDepartmentsOpen((prev) => !prev)
-                                            }
-                                        }}
                                         className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-[24px] border bg-white px-4 py-3 text-left transition ${
                                             isDepartmentsOpen
                                                 ? 'border-sky-300 ring-4 ring-sky-100'
@@ -338,7 +331,7 @@ export default function TeamForm({
                                                 isDepartmentsOpen ? 'rotate-180' : ''
                                             }`}
                                         />
-                                    </div>
+                                    </button>
 
                                     {isDepartmentsOpen && (
                                         <div className="absolute z-20 mt-2 w-full rounded-[24px] border border-gray-200 bg-white p-2 shadow-xl shadow-gray-900/10">

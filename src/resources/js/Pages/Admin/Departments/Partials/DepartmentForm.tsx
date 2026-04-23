@@ -614,21 +614,9 @@ export default function DepartmentForm({
                                     <FieldHint text="Connect teams that belong to this department." />
                                 </div>
 
-                                <div
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() =>
-                                        setIsTeamsOpen((prev) => !prev)
-                                    }
-                                    onKeyDown={(e) => {
-                                        if (
-                                            e.key === 'Enter' ||
-                                            e.key === ' '
-                                        ) {
-                                            e.preventDefault()
-                                            setIsTeamsOpen((prev) => !prev)
-                                        }
-                                    }}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsTeamsOpen((prev) => !prev)}
                                     className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-[24px] border bg-white px-4 py-3 text-left transition ${
                                         isTeamsOpen
                                             ? 'border-sky-300 ring-4 ring-sky-100'
@@ -668,7 +656,7 @@ export default function DepartmentForm({
                                             isTeamsOpen ? 'rotate-180' : ''
                                         }`}
                                     />
-                                </div>
+                                </button>
 
                                 {isTeamsOpen && (
                                     <div className="absolute z-20 mt-2 w-full rounded-[24px] border border-gray-200 bg-white p-2 shadow-xl shadow-gray-900/10">
@@ -764,6 +752,7 @@ export default function DepartmentForm({
 
                             <label
                                 htmlFor="is-default"
+                                aria-label="Make system's default department"
                                 className={`flex cursor-pointer items-start gap-3 rounded-[24px] border p-4 transition ${
                                     data.is_default
                                         ? 'border-sky-200 bg-sky-50 ring-4 ring-sky-100'
