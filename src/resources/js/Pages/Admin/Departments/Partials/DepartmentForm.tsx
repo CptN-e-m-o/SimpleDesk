@@ -9,7 +9,6 @@ import {
     ChevronDown,
     Save,
     Shield,
-    UsersRound,
     X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -167,13 +166,10 @@ export default function DepartmentForm({
         ? 'Update department details, managers, teams, and routing-related settings.'
         : 'Create a department, assign managers, connect teams, and configure support settings.'
 
-    const submitText = processing
-        ? isEdit
-            ? 'Saving...'
-            : 'Creating...'
-        : isEdit
-            ? 'Save Changes'
-            : 'Create Department'
+    const actionText = isEdit ? 'Save Changes' : 'Create Department'
+    const processingText = isEdit ? 'Saving...' : 'Creating...'
+
+    const submitText = processing ? processingText : actionText
 
     return (
         <AdminLayout title={pageTitle}>
@@ -285,7 +281,7 @@ export default function DepartmentForm({
                                                 }
                                                 className="sr-only"
                                             />
-                                            Public
+                                            <span>Public</span>
                                         </label>
 
                                         <label
@@ -308,7 +304,7 @@ export default function DepartmentForm({
                                                 }
                                                 className="sr-only"
                                             />
-                                            Private
+                                            <span>Private</span>
                                         </label>
                                     </div>
                                 </fieldset>
@@ -502,21 +498,9 @@ export default function DepartmentForm({
                                     <FieldHint text="Managers can supervise this department and can be shown in department lists." />
                                 </div>
 
-                                <div
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() =>
-                                        setIsManagersOpen((prev) => !prev)
-                                    }
-                                    onKeyDown={(e) => {
-                                        if (
-                                            e.key === 'Enter' ||
-                                            e.key === ' '
-                                        ) {
-                                            e.preventDefault()
-                                            setIsManagersOpen((prev) => !prev)
-                                        }
-                                    }}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsManagersOpen((prev) => !prev)}
                                     className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-[24px] border bg-white px-4 py-3 text-left transition ${
                                         isManagersOpen
                                             ? 'border-sky-300 ring-4 ring-sky-100'
@@ -558,7 +542,7 @@ export default function DepartmentForm({
                                             isManagersOpen ? 'rotate-180' : ''
                                         }`}
                                     />
-                                </div>
+                                </button>
 
                                 {isManagersOpen && (
                                     <div className="absolute z-20 mt-2 w-full rounded-[24px] border border-gray-200 bg-white p-2 shadow-xl shadow-gray-900/10">
