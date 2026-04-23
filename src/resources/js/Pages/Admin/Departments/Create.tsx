@@ -2,7 +2,7 @@ import DepartmentForm from './Partials/DepartmentForm'
 import { route } from 'ziggy-js'
 import type { DepartmentFormOptions } from '@/types/department'
 
-type Props = DepartmentFormOptions
+type Props = Readonly<DepartmentFormOptions>
 
 export default function Create({ users, teams, statuses }: Props) {
     return (
