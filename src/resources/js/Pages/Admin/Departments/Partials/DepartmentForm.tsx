@@ -48,6 +48,24 @@ function closeDropdownOnOutside(
     }
 }
 
+function getPageTitle(isEdit: boolean) {
+    return isEdit ? 'Edit Department' : 'Create Department'
+}
+
+function getPageDescription(isEdit: boolean) {
+    return isEdit
+        ? 'Update department details, managers, teams, and routing-related settings.'
+        : 'Create a department, assign managers, connect teams, and configure support settings.'
+}
+
+function getSubmitText(isEdit: boolean, processing: boolean) {
+    if (processing) {
+        return isEdit ? 'Saving...' : 'Creating...'
+    }
+
+    return isEdit ? 'Save Changes' : 'Create Department'
+}
+
 export default function DepartmentForm({
                                            mode,
                                            users,
@@ -163,15 +181,9 @@ export default function DepartmentForm({
         post(submitUrl)
     }
 
-    const pageTitle = isEdit ? 'Edit Department' : 'Create Department'
-    const pageDescription = isEdit
-        ? 'Update department details, managers, teams, and routing-related settings.'
-        : 'Create a department, assign managers, connect teams, and configure support settings.'
-
-    const actionText = isEdit ? 'Save Changes' : 'Create Department'
-    const processingText = isEdit ? 'Saving...' : 'Creating...'
-
-    const submitText = processing ? processingText : actionText
+    const pageTitle = getPageTitle(isEdit)
+    const pageDescription = getPageDescription(isEdit)
+    const submitText = getSubmitText(isEdit, processing)
 
     return (
         <AdminLayout title={pageTitle}>
