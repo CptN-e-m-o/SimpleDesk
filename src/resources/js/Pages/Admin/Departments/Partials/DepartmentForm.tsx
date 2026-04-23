@@ -30,6 +30,24 @@ type Props = {
     readonly submitUrl: string
 }
 
+function toggleId(ids: number[], id: number) {
+    if (ids.includes(id)) {
+        return ids.filter((currentId) => currentId !== id)
+    }
+
+    return [...ids, id]
+}
+
+function closeDropdownOnOutside(
+    element: HTMLElement | null,
+    target: Node,
+    close: () => void,
+) {
+    if (!element?.contains(target)) {
+        close()
+    }
+}
+
 export default function DepartmentForm({
                                            mode,
                                            users,
@@ -143,24 +161,6 @@ export default function DepartmentForm({
         }
 
         post(submitUrl)
-    }
-
-    function closeDropdownOnOutside(
-        element: HTMLElement | null,
-        target: Node,
-        close: () => void,
-    ) {
-        if (!element?.contains(target)) {
-            close()
-        }
-    }
-
-    function toggleId(ids: number[], id: number) {
-        if (ids.includes(id)) {
-            return ids.filter((currentId) => currentId !== id)
-        }
-
-        return [...ids, id]
     }
 
     const pageTitle = isEdit ? 'Edit Department' : 'Create Department'
