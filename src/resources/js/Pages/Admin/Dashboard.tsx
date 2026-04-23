@@ -26,7 +26,7 @@ export default function Index() {
         {
             title: 'Departments',
             description: 'Organize requests by department and assign ownership.',
-            href: '#',
+            href: route('admin.departments.index'),
             icon: Building2,
         },
         {
