@@ -57,17 +57,17 @@ export default function DepartmentForm({
         function handleClickOutside(event: MouseEvent) {
             const target = event.target as Node
 
-            if (managersRef.current && !managersRef.current.contains(target)) {
-                setIsManagersOpen(false)
-            }
+            closeDropdownOnOutside(managersRef.current, target, () =>
+                setIsManagersOpen(false),
+            )
 
-            if (teamsRef.current && !teamsRef.current.contains(target)) {
-                setIsTeamsOpen(false)
-            }
+            closeDropdownOnOutside(teamsRef.current, target, () =>
+                setIsTeamsOpen(false),
+            )
 
-            if (statusRef.current && !statusRef.current.contains(target)) {
-                setIsStatusOpen(false)
-            }
+            closeDropdownOnOutside(statusRef.current, target, () =>
+                setIsStatusOpen(false),
+            )
         }
 
         document.addEventListener('mousedown', handleClickOutside)
@@ -113,15 +113,7 @@ export default function DepartmentForm({
     }, [data.department_status_id, statuses])
 
     function toggleManager(userId: number) {
-        if (data.manager_ids.includes(userId)) {
-            setData(
-                'manager_ids',
-                data.manager_ids.filter((id) => id !== userId),
-            )
-            return
-        }
-
-        setData('manager_ids', [...data.manager_ids, userId])
+        setData('manager_ids', toggleId(data.manager_ids, userId))
     }
 
     function removeManager(userId: number) {
@@ -132,15 +124,7 @@ export default function DepartmentForm({
     }
 
     function toggleTeam(teamId: number) {
-        if (data.team_ids.includes(teamId)) {
-            setData(
-                'team_ids',
-                data.team_ids.filter((id) => id !== teamId),
-            )
-            return
-        }
-
-        setData('team_ids', [...data.team_ids, teamId])
+        setData('team_ids', toggleId(data.team_ids, teamId))
     }
 
     function removeTeam(teamId: number) {
@@ -159,6 +143,24 @@ export default function DepartmentForm({
         }
 
         post(submitUrl)
+    }
+
+    function closeDropdownOnOutside(
+        element: HTMLElement | null,
+        target: Node,
+        close: () => void,
+    ) {
+        if (!element?.contains(target)) {
+            close()
+        }
+    }
+
+    function toggleId(ids: number[], id: number) {
+        if (ids.includes(id)) {
+            return ids.filter((currentId) => currentId !== id)
+        }
+
+        return [...ids, id]
     }
 
     const pageTitle = isEdit ? 'Edit Department' : 'Create Department'
