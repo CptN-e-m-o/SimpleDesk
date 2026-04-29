@@ -8,27 +8,25 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('permission_groups', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name')->unique();
+            $table->string('key');
             $table->string('label');
-            $table->text('description')->nullable();
-
+            $table->enum('panel', ['admin', 'agent', 'client', 'general'])->default('general');
             $table->enum('type', ['user', 'agent'])->default('user');
 
-            $table->boolean('is_system')->default(false);
-            $table->boolean('is_default')->default(false);
+            $table->unsignedInteger('sort_order')->default(0);
 
-            $table->softDeletes();
             $table->timestamps();
 
-            $table->index('type');
+            $table->unique(['key', 'panel', 'type']);
+            $table->index(['type', 'panel']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('permission_groups');
     }
 };

@@ -11,7 +11,7 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminRole = Role::where('name', 'admin')->firstOrFail();
+        $adminRole = Role::where('name', 'super-admin')->firstOrFail();
 
         $admin = User::updateOrCreate(
             ['email' => 'admin@test.com'],
@@ -22,6 +22,6 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        $admin->roles()->syncWithoutDetaching([$adminRole->id]);
+        $admin->roles()->sync([$adminRole->id]);
     }
 }
