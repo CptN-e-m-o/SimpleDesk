@@ -63,7 +63,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 50,
             ],
             [
-                'key' => 'agent.contacts.switch_to_agent_roles',
+                'key' => 'agent.contacts.switch_agent_roles',
                 'label' => 'Switch to agent roles',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -79,7 +79,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 70,
             ],
             [
-                'key' => 'agent.contacts.change_password_for_user',
+                'key' => 'agent.contacts.change_password_user',
                 'label' => 'Change the password for a user (who has only client panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -87,7 +87,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 80,
             ],
             [
-                'key' => 'agent.contacts.change_password_for_agent',
+                'key' => 'agent.contacts.change_password_agent',
                 'label' => 'Change the password for an agent (who has agent panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -103,7 +103,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 100,
             ],
             [
-                'key' => 'agent.contacts.deactivate_account_for_user',
+                'key' => 'agent.contacts.deactivate_account_user',
                 'label' => 'Deactivate the account for a user (who has only client panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -111,7 +111,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 110,
             ],
             [
-                'key' => 'agent.contacts.deactivate_account_for_agent',
+                'key' => 'agent.contacts.deactivate_account_agent',
                 'label' => 'Deactivate the account for an agent (who has agent panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -119,7 +119,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 120,
             ],
             [
-                'key' => 'agent.contacts.restore_the_account',
+                'key' => 'agent.contacts.restore_account',
                 'label' => 'Change password',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -127,7 +127,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 130,
             ],
             [
-                'key' => 'agent.contacts.restore_account_for_user',
+                'key' => 'agent.contacts.restore_account_user',
                 'label' => 'Restore the account for a user (who has only client panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -135,7 +135,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 140,
             ],
             [
-                'key' => 'agent.contacts.restore_account_for_agent',
+                'key' => 'agent.contacts.restore_account_agent',
                 'label' => 'Restore the account for an agent (who has agent panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -143,7 +143,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 150,
             ],
             [
-                'key' => 'agent.contacts.delete_the_account',
+                'key' => 'agent.contacts.delete_account',
                 'label' => 'Delete the account',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -151,7 +151,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 160,
             ],
             [
-                'key' => 'agent.contacts.delete_account_for_user',
+                'key' => 'agent.contacts.delete_account_user',
                 'label' => 'Delete the account for a user (who has only client panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -159,7 +159,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 170,
             ],
             [
-                'key' => 'agent.contacts.delete_account_for_agent',
+                'key' => 'agent.contacts.delete_account_agent',
                 'label' => 'Delete the account for an agent (who has agent panel permissions)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -198,7 +198,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 220,
             ],
             [
-                'key' => 'agent.contacts.create_or_edit_organization',
+                'key' => 'agent.contacts.create_edit_organization',
                 'label' => 'Create or edit organization',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -206,7 +206,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 230,
             ],
             [
-                'key' => 'agent.contacts.actions_on_organization',
+                'key' => 'agent.contacts.actions_organization',
                 'label' => 'Actions on organization',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -222,7 +222,7 @@ class PermissionAgentContactsSeeder extends Seeder
                 'sort_order' => 250,
             ],
             [
-                'key' => 'agent.contacts.link_or_unlink_contacts',
+                'key' => 'agent.contacts.link_unlink_contacts',
                 'label' => 'Link or unlink contacts',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',

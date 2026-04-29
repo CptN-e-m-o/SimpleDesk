@@ -54,7 +54,7 @@ class PermissionAgentSoftwareLicensesSeeder extends Seeder
                 'sort_order' => 40,
             ],
             [
-                'key' => 'agent.contracts.check_out_check_in_actions',
+                'key' => 'agent.contracts.check_out_check_actions',
                 'label' => 'Check-out/Check-in actions',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',

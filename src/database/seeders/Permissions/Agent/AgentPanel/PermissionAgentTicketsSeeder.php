@@ -24,37 +24,37 @@ class PermissionAgentTicketsSeeder extends Seeder
 
         $permissions = [
             [
-                'key' => 'agent.tickets.create_a_ticket',
+                'key' => 'agent.tickets.create_ticket',
                 'label' => 'Create a Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'agent.add_ons.respond_a_ticket',
+                'key' => 'agent.add_ons.respond_ticket',
                 'label' => 'Respond a Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
             ],
             [
-                'key' => 'agent.add_ons.reply_a_ticket',
+                'key' => 'agent.add_ons.reply_ticket',
                 'label' => 'Reply a Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'agent.add_ons.respond_a_ticket',
+                'parent_key' => 'agent.add_ons.respond_ticket',
                 'sort_order' => 30,
             ],
             [
-                'key' => 'agent.add_ons.add_an_internal_notes',
+                'key' => 'agent.add_ons.add_internal_notes',
                 'label' => 'Add an Internal Notes',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'agent.add_ons.respond_a_ticket',
+                'parent_key' => 'agent.add_ons.respond_ticket',
                 'sort_order' => 40,
             ],
             [
-                'key' => 'agent.tickets.forward_a_ticket',
+                'key' => 'agent.tickets.forward_ticket',
                 'label' => 'Forward a Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -137,7 +137,7 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'sort_order' => 150,
             ],
             [
-                'key' => 'agent.tickets.merge_a_ticket',
+                'key' => 'agent.tickets.merge_ticket',
                 'label' => 'Merge a Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -167,14 +167,14 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'sort_order' => 190,
             ],
             [
-                'key' => 'agent.tickets.delete_a_ticket',
+                'key' => 'agent.tickets.delete_ticket',
                 'label' => 'Edit a Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 200,
             ],
             [
-                'key' => 'agent.tickets.export_a_ticket',
+                'key' => 'agent.tickets.export_ticket',
                 'label' => 'Export a Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -188,7 +188,7 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'sort_order' => 220,
             ],
             [
-                'key' => 'agent.tickets.shows_all_the_tickets',
+                'key' => 'agent.tickets.shows_all_tickets',
                 'label' => 'Shows all the Tickets',
                 'type' => 'agent',
                 'ui_type' => 'radio',
@@ -196,7 +196,7 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'sort_order' => 230,
             ],
             [
-                'key' => 'agent.tickets.shows_the_department_tickets',
+                'key' => 'agent.tickets.shows_department_tickets',
                 'label' => 'Shows the Department Tickets',
                 'type' => 'agent',
                 'ui_type' => 'radio',
@@ -273,7 +273,7 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'sort_order' => 330,
             ],
             [
-                'key' => 'agent.tickets.add_or_detach_tickets_in_the_service_desk',
+                'key' => 'agent.tickets.add_or_detach_tickets_service_desk',
                 'label' => 'Add or detach tickets in the Service Desk',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',

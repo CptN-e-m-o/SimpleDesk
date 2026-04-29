@@ -39,7 +39,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 20,
             ],
             [
-                'key' => 'agent.contacts.create_or_edit_canned_responses',
+                'key' => 'agent.contacts.create_edit_canned_responses',
                 'label' => 'Create or edit canned responses',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -47,7 +47,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 30,
             ],
             [
-                'key' => 'agent.contacts.delete_the_canned_responses',
+                'key' => 'agent.contacts.delete_canned_responses',
                 'label' => 'Delete the canned responses',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -70,7 +70,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 60,
             ],
             [
-                'key' => 'agent.contacts.add_or_edit_categories',
+                'key' => 'agent.contacts.add_edit_categories',
                 'label' => 'Add or edit categories',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -102,7 +102,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 100,
             ],
             [
-                'key' => 'agent.contacts.add_or_edit_articles',
+                'key' => 'agent.contacts.add_edit_articles',
                 'label' => 'Add or edit articles',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -118,7 +118,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 120,
             ],
             [
-                'key' => 'agent.contacts.delete_an_article',
+                'key' => 'agent.contacts.delete_article',
                 'label' => 'Delete an article',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -134,7 +134,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 140,
             ],
             [
-                'key' => 'agent.contacts.add_or_edit_template',
+                'key' => 'agent.contacts.add_edit_template',
                 'label' => 'Add or edit template',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -158,7 +158,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 170,
             ],
             [
-                'key' => 'agent.contacts.add_or_edit_pages',
+                'key' => 'agent.contacts.add_edit_pages',
                 'label' => 'Add or edit pages',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -166,7 +166,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 180,
             ],
             [
-                'key' => 'agent.contacts.publish_the_page',
+                'key' => 'agent.contacts.publish_page',
                 'label' => 'Publish page',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -190,7 +190,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 210,
             ],
             [
-                'key' => 'agent.contacts.approve_or_unapprove_comments',
+                'key' => 'agent.contacts.approve_unapprove_comments',
                 'label' => 'Approve or Un-approve comments',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -221,7 +221,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 250,
             ],
             [
-                'key' => 'agent.contacts.add_or_edit_tickets',
+                'key' => 'agent.contacts.add_edit_tickets',
                 'label' => 'Add or edit tickets',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
