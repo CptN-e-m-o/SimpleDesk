@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
@@ -69,6 +70,12 @@ Route::middleware('auth')->group(function () {
                 ->name('departments.force-delete')
                 ->withTrashed();
 
+            //Role routes
+            Route::get('roles/create/{type}', [RoleController::class, 'create'])
+                ->whereIn('type', ['user', 'agent'])
+                ->name('roles.create.typed');
+
+            Route::resource('roles', RoleController::class);
         });
     });
 

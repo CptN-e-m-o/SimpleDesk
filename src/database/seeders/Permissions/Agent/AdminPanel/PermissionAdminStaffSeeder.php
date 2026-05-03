@@ -25,28 +25,28 @@ class PermissionAdminStaffSeeder extends Seeder
         $permissions = [
             [
                 'key' => 'admin.staff.manage_agents',
-                'label' => 'Manage Agents',
+                'label' => 'Manage agents',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
                 'key' => 'admin.staff.manage_roles',
-                'label' => 'Manage Roles',
+                'label' => 'Manage roles',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
             ],
             [
                 'key' => 'admin.staff.manage_departments',
-                'label' => 'Manage Departments',
+                'label' => 'Manage departments',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 30,
             ],
             [
                 'key' => 'admin.staff.manage_teams',
-                'label' => 'Manage Teams',
+                'label' => 'Manage teams',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 40,

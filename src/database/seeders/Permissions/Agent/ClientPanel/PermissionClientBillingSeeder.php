@@ -12,30 +12,62 @@ class PermissionClientBillingSeeder extends Seeder
     {
         $group = PermissionGroup::updateOrCreate(
             [
-                'key' => 'billing',
-                'panel' => 'client',
+                'key' => 'software_licenses',
+                'panel' => 'agent',
                 'type' => 'agent',
             ],
             [
-                'label' => 'Billing',
-                'sort_order' => 10,
+                'label' => 'Software Licenses',
+                'sort_order' => 90,
             ]
         );
 
         $permissions = [
             [
-                'key' => 'agent.contracts.shows_owned_package',
-                'label' => 'Shows their owned package',
+                'key' => 'agent.contracts.create_software_license',
+                'label' => 'Create software license',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'agent.contracts.purchase_package',
-                'label' => 'Purchase package',
+                'key' => 'agent.contracts.view_software_licenses',
+                'label' => 'View software licenses',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
+            ],
+            [
+                'key' => 'agent.contracts.edit_software_licenses',
+                'label' => 'Edit software licenses',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'parent_key' => 'agent.contacts.view_software_licenses',
+                'sort_order' => 30,
+            ],
+            [
+                'key' => 'agent.contracts.delete_software_licenses',
+                'label' => 'Delete software licenses',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'parent_key' => 'agent.contacts.view_software_licenses',
+                'sort_order' => 40,
+            ],
+            [
+                'key' => 'agent.contracts.check_out_check_in_actions',
+                'label' => 'Check-out/Check-in actions',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'parent_key' => 'agent.contacts.view_software_licenses',
+                'sort_order' => 50,
+            ],
+            [
+                'key' => 'agent.contracts.export_schedule_report',
+                'label' => 'Export/Schedule the report',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'parent_key' => 'agent.contacts.view_software_licenses',
+                'sort_order' => 60,
             ],
         ];
 

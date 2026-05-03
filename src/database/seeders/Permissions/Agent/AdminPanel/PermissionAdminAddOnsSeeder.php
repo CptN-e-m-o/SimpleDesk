@@ -25,21 +25,21 @@ class PermissionAdminAddOnsSeeder extends Seeder
         $permissions = [
             [
                 'key' => 'admin.add_ons.manage_plugins',
-                'label' => 'Manage Plugins',
+                'label' => 'Manage plugins',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
                 'key' => 'admin.add_ons.manage_modules',
-                'label' => 'Manage Modules',
+                'label' => 'Manage modules',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
             ],
             [
                 'key' => 'admin.add_ons.manage_modules.billing',
-                'label' => 'Manage Billing',
+                'label' => 'Manage billing module',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'parent_key' => 'admin.add_ons.manage_modules',
@@ -47,7 +47,7 @@ class PermissionAdminAddOnsSeeder extends Seeder
             ],
             [
                 'key' => 'admin.add_ons.manage_modules.timetrack',
-                'label' => 'Manage TimeTrack',
+                'label' => 'Manage TimeTrack module',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'parent_key' => 'admin.add_ons.manage_modules',

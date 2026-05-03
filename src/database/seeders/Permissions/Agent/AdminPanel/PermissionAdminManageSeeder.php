@@ -60,14 +60,14 @@ class PermissionAdminManageSeeder extends Seeder
             ],
             [
                 'key' => 'admin.manage.manage_ticket_fields',
-                'label' => 'Manage Tickets Fields',
+                'label' => 'Manage Ticket Fields',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 60,
             ],
             [
                 'key' => 'admin.manage.manage_approval_workflow',
-                'label' => 'Manage Tickets Fields',
+                'label' => 'Manage Approval Workflow',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 70,

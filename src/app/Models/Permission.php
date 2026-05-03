@@ -43,7 +43,19 @@ class Permission extends Model
         return $this->belongsTo(PermissionGroup::class, 'permission_group_id');
     }
 
-    public function parent(): BelongsTo
+    public function children()
+    {
+        return $this->hasMany(Permission::class, 'parent_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
+    }
+
+    public function parent()
     {
         return $this->belongsTo(Permission::class, 'parent_id');
     }

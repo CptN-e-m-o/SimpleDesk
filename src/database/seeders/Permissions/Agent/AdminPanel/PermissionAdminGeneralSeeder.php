@@ -25,14 +25,14 @@ class PermissionAdminGeneralSeeder extends Seeder
         $permissions = [
             [
                 'key' => 'admin.general.manage_emails',
-                'label' => 'Manage Emails',
+                'label' => 'Manage email settings',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
                 'key' => 'admin.general.manage_drivers_integrations',
-                'label' => 'Manage Drivers Integrations',
+                'label' => 'Manage driver integrations',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
@@ -46,14 +46,14 @@ class PermissionAdminGeneralSeeder extends Seeder
             ],
             [
                 'key' => 'admin.general.manage_notify',
-                'label' => 'Manage Notify',
+                'label' => 'Manage notifications',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 40,
             ],
             [
                 'key' => 'admin.general.manage_debugging_options',
-                'label' => 'Manage Debugging Options',
+                'label' => 'Manage debugging options',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 50,

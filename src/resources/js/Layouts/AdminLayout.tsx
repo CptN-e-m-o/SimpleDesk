@@ -100,9 +100,10 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                     },
                     {
                         label: 'Roles',
-                        href: '#',
+                        href: route('admin.roles.index'),
                         icon: Shield,
-                        isActive: () => false,
+                        isActive: (currentUrl: string) =>
+                            currentUrl === '/admin/roles' || currentUrl.startsWith('/admin/roles/'),
                     },
                     {
                         label: 'Departments',

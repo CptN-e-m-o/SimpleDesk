@@ -12,59 +12,30 @@ class PermissionClientTicketsSeeder extends Seeder
     {
         $group = PermissionGroup::updateOrCreate(
             [
-                'key' => 'tickets',
+                'key' => 'billing',
                 'panel' => 'client',
                 'type' => 'agent',
             ],
             [
-                'label' => 'Clients',
+                'label' => 'Billing',
                 'sort_order' => 10,
             ]
         );
 
         $permissions = [
             [
-                'key' => 'client.agent.tickets.create',
-                'label' => 'Create ticket',
+                'key' => 'agent.contracts.shows_owned_package',
+                'label' => 'Shows their owned package',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'client.agent.tickets.respond',
-                'label' => 'Respond a ticket',
+                'key' => 'agent.contracts.purchase_package',
+                'label' => 'Purchase package',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
-            ],
-            [
-                'key' => 'client.agent.tickets.change_status',
-                'label' => 'Change status',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 30,
-            ],
-            [
-                'key' => 'client.agent.tickets.visibility',
-                'label' => 'Tickets visibility',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 40,
-            ],
-            [
-                'key' => 'client.agent.tickets.visibility.requester',
-                'label' => 'View Requester Tickets',
-                'type' => 'agent',
-                'ui_type' => 'radio',
-                'parent_key' => 'client.agent.tickets.visibility',
-                'sort_order' => 50,
-            ],
-            [
-                'key' => 'client.agent.tickets.collaborator.view',
-                'label' => 'Show tickets where I’m added as a collaborator',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 60,
             ],
         ];
 

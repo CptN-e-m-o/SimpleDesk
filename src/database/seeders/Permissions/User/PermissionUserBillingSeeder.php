@@ -24,63 +24,18 @@ class PermissionUserBillingSeeder extends Seeder
 
         $permissions = [
             [
-                'key' => 'tickets.create',
-                'label' => 'Create ticket',
+                'key' => 'billing.owned_package',
+                'label' => 'View owned package',
                 'type' => 'user',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'tickets.create_with_organization_assets',
-                'label' => 'Organization members can attach their organization assets while creating a ticket with this permission',
+                'key' => 'billing.purchase_package',
+                'label' => 'Purchase package',
                 'type' => 'user',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'tickets.create',
                 'sort_order' => 20,
-            ],
-            [
-                'key' => 'tickets.respond',
-                'label' => 'Respond a ticket',
-                'type' => 'user',
-                'ui_type' => 'checkbox',
-                'sort_order' => 30,
-            ],
-            [
-                'key' => 'tickets.change_status',
-                'label' => 'Change status',
-                'type' => 'user',
-                'ui_type' => 'checkbox',
-                'sort_order' => 40,
-            ],
-            [
-                'key' => 'tickets.visibility',
-                'label' => 'Tickets visibility',
-                'type' => 'user',
-                'ui_type' => 'checkbox',
-                'sort_order' => 50,
-            ],
-            [
-                'key' => 'tickets.visibility.requester',
-                'label' => 'View Requester Tickets',
-                'type' => 'user',
-                'ui_type' => 'radio',
-                'parent_key' => 'tickets.visibility',
-                'sort_order' => 60,
-            ],
-            [
-                'key' => 'tickets.visibility.organization',
-                'label' => 'View Organization Tickets',
-                'type' => 'user',
-                'ui_type' => 'radio',
-                'parent_key' => 'tickets.visibility',
-                'sort_order' => 70,
-            ],
-            [
-                'key' => 'tickets.collaborator.view',
-                'label' => 'Show tickets where I’m added as a collaborator',
-                'type' => 'user',
-                'ui_type' => 'checkbox',
-                'sort_order' => 80,
             ],
         ];
 

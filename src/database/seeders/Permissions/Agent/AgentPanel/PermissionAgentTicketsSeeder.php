@@ -168,7 +168,7 @@ class PermissionAgentTicketsSeeder extends Seeder
             ],
             [
                 'key' => 'agent.tickets.delete_ticket',
-                'label' => 'Edit a Ticket',
+                'label' => 'Delete Ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 200,

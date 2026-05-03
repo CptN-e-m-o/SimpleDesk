@@ -11,7 +11,7 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminRole = Role::where('name', 'super-admin')->firstOrFail();
+        $adminRole = Role::where('name', 'admin')->firstOrFail();
 
         $admin = User::updateOrCreate(
             ['email' => 'admin@test.com'],
