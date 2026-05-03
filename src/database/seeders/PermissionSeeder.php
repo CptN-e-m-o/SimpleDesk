@@ -11,6 +11,7 @@ use Database\Seeders\Permissions\Agent\AdminPanel\PermissionAdminTicketsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentAssetsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentChangesSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentContactsSeeder;
+use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentContractsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentProblemsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentReleasesSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentReportsSeeder;
@@ -49,7 +50,7 @@ class PermissionSeeder extends Seeder
             PermissionAgentChangesSeeder::class,
             PermissionAgentReleasesSeeder::class,
             PermissionAgentAssetsSeeder::class,
-            PermissionAgentContactsSeeder::class,
+            PermissionAgentContractsSeeder::class,
             PermissionAgentSoftwareLicensesSeeder::class,
             PermissionClientBillingSeeder::class,
             PermissionClientTicketsSeeder::class,

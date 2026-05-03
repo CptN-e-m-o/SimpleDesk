@@ -24,26 +24,26 @@ class PermissionGeneralNotificationsSeeder extends Seeder
 
         $permissions = [
             [
-                'key' => 'general.notifications.notification',
-                'label' => 'Notification',
+                'key' => 'agent.general.notifications.enabled',
+                'label' => 'Notifications',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'general.notifications.receive_agent_notifications',
+                'key' => 'agent.general.notifications.receive_agent_notifications',
                 'label' => 'Receive agent notifications',
                 'type' => 'agent',
                 'ui_type' => 'radio',
-                'parent_key' => 'general.notifications.notification',
+                'parent_key' => 'agent.general.notifications.enabled',
                 'sort_order' => 20,
             ],
             [
-                'key' => 'general.notifications.receive_admin_notifications',
+                'key' => 'agent.general.notifications.receive_admin_notifications',
                 'label' => 'Receive admin notifications',
                 'type' => 'agent',
                 'ui_type' => 'radio',
-                'parent_key' => 'general.notifications.notification',
+                'parent_key' => 'agent.general.notifications.enabled',
                 'sort_order' => 30,
             ],
         ];

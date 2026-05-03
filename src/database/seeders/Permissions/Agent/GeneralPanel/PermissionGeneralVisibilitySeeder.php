@@ -24,19 +24,30 @@ class PermissionGeneralVisibilitySeeder extends Seeder
 
         $permissions = [
             [
-                'key' => 'general.visibility.show_health_alert_icon',
+                'key' => 'agent.general.visibility.show_health_alert_icon',
                 'label' => 'Show the health alert icon',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'general.visibility.display_all_labels',
-                'label' => 'Display all labels even if not associated with a department manager or team lead',
+                'key' => 'agent.general.visibility.display_all_labels',
+                'label' => 'Display all labels (even if not assigned to a department manager or team lead)',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
             ],
         ];
+
+        foreach ($permissions as $permission) {
+            Permission::updateOrCreate(
+                ['key' => $permission['key']],
+                [
+                    ...$permission,
+                    'permission_group_id' => $group->id,
+                    'parent_id' => null,
+                ]
+            );
+        }
     }
 }

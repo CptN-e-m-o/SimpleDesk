@@ -24,7 +24,7 @@ class PermissionGeneralNetworkDiscoverySeeder extends Seeder
 
         $permissions = [
             [
-                'key' => 'general.network_discovery.sync_detected_assets',
+                'key' => 'agent.general.network_discovery.sync_detected_assets',
                 'label' => 'Sync assets detected through network discovery',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',

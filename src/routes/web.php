@@ -75,7 +75,16 @@ Route::middleware('auth')->group(function () {
                 ->whereIn('type', ['user', 'agent'])
                 ->name('roles.create.typed');
 
-            Route::resource('roles', RoleController::class);
+            Route::patch('roles/{role}/restore', [RoleController::class, 'restore'])
+                ->withTrashed()
+                ->name('roles.restore');
+
+            Route::delete('roles/{role}/force-delete', [RoleController::class, 'forceDelete'])
+                ->withTrashed()
+                ->name('roles.force-delete');
+
+            Route::resource('roles', RoleController::class)
+                ->except(['show']);
         });
     });
 

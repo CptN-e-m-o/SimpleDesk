@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\Permissions\Agent\GeneralPanel;
 
+use App\Models\Permission;
 use App\Models\PermissionGroup;
 use Illuminate\Database\Seeder;
 
@@ -23,12 +24,23 @@ class PermissionGeneralSecuritySeeder extends Seeder
 
         $permissions = [
             [
-                'key' => 'general.security.allow_login_offline',
+                'key' => 'agent.general.security.allow_login_when_offline',
                 'label' => 'Allow login even when the system is offline',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
         ];
+
+        foreach ($permissions as $permission) {
+            Permission::updateOrCreate(
+                ['key' => $permission['key']],
+                [
+                    ...$permission,
+                    'permission_group_id' => $group->id,
+                    'parent_id' => null,
+                ]
+            );
+        }
     }
 }

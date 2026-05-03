@@ -24,14 +24,14 @@ class PermissionClientTicketsSeeder extends Seeder
 
         $permissions = [
             [
-                'key' => 'agent.contracts.shows_owned_package',
-                'label' => 'Shows their owned package',
+                'key' => 'agent.billing.owned_package',
+                'label' => 'View owned package',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'agent.contracts.purchase_package',
+                'key' => 'agent.billing.purchase_package',
                 'label' => 'Purchase package',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -40,22 +40,12 @@ class PermissionClientTicketsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            $parentKey = $permission['parent_key'] ?? null;
-
-            unset($permission['parent_key']);
-
-            $parentId = null;
-
-            if ($parentKey) {
-                $parentId = Permission::where('key', $parentKey)->value('id');
-            }
-
             Permission::updateOrCreate(
                 ['key' => $permission['key']],
                 [
                     ...$permission,
                     'permission_group_id' => $group->id,
-                    'parent_id' => $parentId,
+                    'parent_id' => null,
                 ]
             );
         }

@@ -12,61 +12,58 @@ class PermissionClientBillingSeeder extends Seeder
     {
         $group = PermissionGroup::updateOrCreate(
             [
-                'key' => 'software_licenses',
-                'panel' => 'agent',
+                'key' => 'tickets',
+                'panel' => 'client',
                 'type' => 'agent',
             ],
             [
-                'label' => 'Software Licenses',
-                'sort_order' => 90,
+                'label' => 'Tickets',
+                'sort_order' => 20,
             ]
         );
 
         $permissions = [
             [
-                'key' => 'agent.contracts.create_software_license',
-                'label' => 'Create software license',
+                'key' => 'agent.client.tickets.create',
+                'label' => 'Create ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'agent.contracts.view_software_licenses',
-                'label' => 'View software licenses',
+                'key' => 'agent.client.tickets.respond',
+                'label' => 'Respond to ticket',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
             ],
             [
-                'key' => 'agent.contracts.edit_software_licenses',
-                'label' => 'Edit software licenses',
+                'key' => 'agent.client.tickets.change_status',
+                'label' => 'Change status',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'agent.contacts.view_software_licenses',
                 'sort_order' => 30,
             ],
             [
-                'key' => 'agent.contracts.delete_software_licenses',
-                'label' => 'Delete software licenses',
+                'key' => 'agent.client.tickets.visibility',
+                'label' => 'Tickets visibility',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'agent.contacts.view_software_licenses',
                 'sort_order' => 40,
             ],
             [
-                'key' => 'agent.contracts.check_out_check_in_actions',
-                'label' => 'Check-out/Check-in actions',
+                'key' => 'agent.client.tickets.visibility.requester',
+                'label' => 'View requester tickets',
                 'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'parent_key' => 'agent.contacts.view_software_licenses',
+                'ui_type' => 'radio',
+                'parent_key' => 'agent.client.tickets.visibility',
                 'sort_order' => 50,
             ],
             [
-                'key' => 'agent.contracts.export_schedule_report',
-                'label' => 'Export/Schedule the report',
+                'key' => 'agent.client.tickets.collaborator.view',
+                'label' => 'Show tickets where I’m added as a collaborator',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'agent.contacts.view_software_licenses',
                 'sort_order' => 60,
             ],
         ];
