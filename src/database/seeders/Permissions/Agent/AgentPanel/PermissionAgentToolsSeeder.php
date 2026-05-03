@@ -48,7 +48,7 @@ class PermissionAgentToolsSeeder extends Seeder
             ],
             [
                 'key' => 'agent.tools.delete_canned_responses',
-                'label' => 'Delete the canned responses',
+                'label' => 'Delete canned responses',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'parent_key' => 'agent.tools.canned_responses',
@@ -70,7 +70,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 60,
             ],
             [
-                'key' => 'agent.tools.add_edit_categories',
+                'key' => 'agent.tools.add_or_edit_categories',
                 'label' => 'Add or edit categories',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -102,7 +102,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 100,
             ],
             [
-                'key' => 'agent.tools.add_edit_articles',
+                'key' => 'agent.tools.add_or_edit_articles',
                 'label' => 'Add or edit articles',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -114,7 +114,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'label' => 'Publish article',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'agent.tools.add_edit_articles',
+                'parent_key' => 'agent.tools.add_or_edit_articles',
                 'sort_order' => 120,
             ],
             [
@@ -158,7 +158,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 170,
             ],
             [
-                'key' => 'agent.tools.add_edit_pages',
+                'key' => 'agent.tools.add_or_edit_pages',
                 'label' => 'Add or edit pages',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
@@ -170,7 +170,7 @@ class PermissionAgentToolsSeeder extends Seeder
                 'label' => 'Publish page',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'parent_key' => 'agent.tools.add_edit_pages',
+                'parent_key' => 'agent.tools.add_or_edit_pages',
                 'sort_order' => 190,
             ],
             [
@@ -191,7 +191,7 @@ class PermissionAgentToolsSeeder extends Seeder
             ],
             [
                 'key' => 'agent.tools.approve_unapprove_comments',
-                'label' => 'Approve or Un-approve comments',
+                'label' => 'Approve or unapprove comments',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'parent_key' => 'agent.tools.comments',
@@ -221,16 +221,16 @@ class PermissionAgentToolsSeeder extends Seeder
                 'sort_order' => 250,
             ],
             [
-                'key' => 'agent.tools.add_edit_tickets',
-                'label' => 'Add or edit tickets',
+                'key' => 'agent.tools.add_edit_recurring_tickets',
+                'label' => 'Add or edit recurring tickets',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'parent_key' => 'agent.tools.recurring_tickets',
                 'sort_order' => 260,
             ],
             [
-                'key' => 'agent.tools.delete_tickets',
-                'label' => 'Delete tickets',
+                'key' => 'agent.tools.delete_recurring_tickets',
+                'label' => 'Delete recurring tickets',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'parent_key' => 'agent.tools.recurring_tickets',
