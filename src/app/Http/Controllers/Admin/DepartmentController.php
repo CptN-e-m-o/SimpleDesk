@@ -12,12 +12,15 @@ use App\Services\Admin\DepartmentService;
 use App\Support\Departments\DepartmentStatusOptions;
 use App\Support\Departments\DepartmentTeamOptions;
 use App\Support\Departments\DepartmentUserOptions;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DepartmentController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         protected DepartmentService $departmentService,
         protected DepartmentUserOptions $departmentUserOptions,
@@ -27,6 +30,7 @@ class DepartmentController extends Controller
 
     public function index(): Response
     {
+        $this->authorize('viewAny', Department::class);
         $departments = Department::query()
             ->withTrashed()
             ->with([
@@ -43,6 +47,8 @@ class DepartmentController extends Controller
 
     public function create(): Response
     {
+        $this->authorize('create', Department::class);
+
         return Inertia::render('Admin/Departments/Create', [
             'users' => $this->departmentUserOptions->options(),
             'teams' => $this->departmentTeamOptions->options(),
@@ -52,6 +58,7 @@ class DepartmentController extends Controller
 
     public function store(StoreDepartmentRequest $request): RedirectResponse
     {
+        $this->authorize('create', Department::class);
         $this->departmentService->create($request->validated());
 
         return redirect()
@@ -61,6 +68,8 @@ class DepartmentController extends Controller
 
     public function show(Department $department): Response
     {
+        $this->authorize('view', $department);
+
         $department->load([
             'status:id,name,code,color',
             'managers:id,name,email',
@@ -75,6 +84,8 @@ class DepartmentController extends Controller
 
     public function edit(Department $department): Response
     {
+        $this->authorize('update', $department);
+
         $department->load([
             'managers:id,name,email',
             'teams:id,name',
@@ -90,6 +101,8 @@ class DepartmentController extends Controller
 
     public function update(UpdateDepartmentRequest $request, Department $department): RedirectResponse
     {
+        $this->authorize('update', $department);
+
         $this->departmentService->update($department, $request->validated());
 
         return redirect()
@@ -99,6 +112,8 @@ class DepartmentController extends Controller
 
     public function destroy(Department $department): RedirectResponse
     {
+        $this->authorize('delete', $department);
+
         $department->delete();
 
         return redirect()
@@ -108,6 +123,8 @@ class DepartmentController extends Controller
 
     public function restore(Department $department): RedirectResponse
     {
+        $this->authorize('restore', $department);
+
         $department->restore();
 
         return redirect()
@@ -117,6 +134,7 @@ class DepartmentController extends Controller
 
     public function forceDelete(Department $department): RedirectResponse
     {
+        $this->authorize('forceDelete', $department);
         $department->forceDelete();
 
         return redirect()
