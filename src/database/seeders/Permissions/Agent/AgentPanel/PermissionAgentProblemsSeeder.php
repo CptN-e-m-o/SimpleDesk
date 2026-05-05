@@ -79,9 +79,10 @@ class PermissionAgentProblemsSeeder extends Seeder
             ],
             [
                 'key' => 'agent.problems.attach_or_detach',
-                'label' => 'Attach or detach problems',
+                'label' => 'Link or unlink problems to tickets',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
+                'parent_key' => 'agent.problems.view',
                 'sort_order' => 80,
             ],
         ];

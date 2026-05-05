@@ -12,79 +12,40 @@ class PermissionClientBillingSeeder extends Seeder
     {
         $group = PermissionGroup::updateOrCreate(
             [
-                'key' => 'tickets',
+                'key' => 'billing',
                 'panel' => 'client',
                 'type' => 'agent',
             ],
             [
-                'label' => 'Tickets',
-                'sort_order' => 20,
+                'label' => 'Billing',
+                'sort_order' => 10,
             ]
         );
 
         $permissions = [
             [
-                'key' => 'agent.client.tickets.create',
-                'label' => 'Create ticket',
+                'key' => 'agent.billing.owned_package',
+                'label' => 'View owned package',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 10,
             ],
             [
-                'key' => 'agent.client.tickets.respond',
-                'label' => 'Respond to ticket',
+                'key' => 'agent.billing.purchase_package',
+                'label' => 'Purchase package',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
                 'sort_order' => 20,
             ],
-            [
-                'key' => 'agent.client.tickets.change_status',
-                'label' => 'Change status',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 30,
-            ],
-            [
-                'key' => 'agent.client.tickets.visibility',
-                'label' => 'Tickets visibility',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 40,
-            ],
-            [
-                'key' => 'agent.client.tickets.visibility.requester',
-                'label' => 'View requester tickets',
-                'type' => 'agent',
-                'ui_type' => 'radio',
-                'parent_key' => 'agent.client.tickets.visibility',
-                'sort_order' => 50,
-            ],
-            [
-                'key' => 'agent.client.tickets.collaborator.view',
-                'label' => 'Show tickets where I’m added as a collaborator',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 60,
-            ],
         ];
 
         foreach ($permissions as $permission) {
-            $parentKey = $permission['parent_key'] ?? null;
-
-            unset($permission['parent_key']);
-
-            $parentId = null;
-
-            if ($parentKey) {
-                $parentId = Permission::where('key', $parentKey)->value('id');
-            }
-
             Permission::updateOrCreate(
                 ['key' => $permission['key']],
                 [
                     ...$permission,
                     'permission_group_id' => $group->id,
-                    'parent_id' => $parentId,
+                    'parent_id' => null,
                 ]
             );
         }

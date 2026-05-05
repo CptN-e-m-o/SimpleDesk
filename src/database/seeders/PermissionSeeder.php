@@ -18,8 +18,8 @@ use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentReportsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentSoftwareLicensesSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentTicketsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentToolsSeeder;
-use Database\Seeders\Permissions\Agent\ClientPanel\PermissionClientBillingSeeder;
 use Database\Seeders\Permissions\Agent\ClientPanel\PermissionClientTicketsSeeder;
+use Database\Seeders\Permissions\Agent\ClientPanel\PermissionClientBillingSeeder;
 use Database\Seeders\Permissions\Agent\GeneralPanel\PermissionGeneralNetworkDiscoverySeeder;
 use Database\Seeders\Permissions\Agent\GeneralPanel\PermissionGeneralNotificationsSeeder;
 use Database\Seeders\Permissions\Agent\GeneralPanel\PermissionGeneralSecuritySeeder;
@@ -52,8 +52,8 @@ class PermissionSeeder extends Seeder
             PermissionAgentAssetsSeeder::class,
             PermissionAgentContractsSeeder::class,
             PermissionAgentSoftwareLicensesSeeder::class,
-            PermissionClientBillingSeeder::class,
             PermissionClientTicketsSeeder::class,
+            PermissionClientBillingSeeder::class,
             PermissionGeneralNotificationsSeeder::class,
             PermissionGeneralVisibilitySeeder::class,
             PermissionGeneralSecuritySeeder::class,
