@@ -44,48 +44,57 @@ Route::middleware('auth')->group(function () {
             })->name('tickets');
         });
     });
-    Route::middleware('role:admin')->group(function () {
-        Route::prefix('admin')->name('admin.')->group(function () {
-            Route::get('/dashboard', function () {
-                return Inertia::render('Admin/Dashboard');
-            })->name('dashboard');
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', function () {
+            return Inertia::render('Admin/Dashboard');
+        })
+            ->middleware('permission:admin.manage.manage_dashboard')
+            ->name('dashboard');
 
-            // Team routes
-            Route::resource('teams', TeamController::class);
-            Route::patch('/teams/{team}/restore', [TeamController::class, 'restore'])
-                ->name('teams.restore')
-                ->withTrashed();
+        Route::resource('teams', TeamController::class)
+            ->middleware('permission:admin.staff.manage_teams');
 
-            Route::delete('/teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
-                ->name('teams.force-delete')
-                ->withTrashed();
+        Route::patch('/teams/{team}/restore', [TeamController::class, 'restore'])
+            ->middleware('permission:admin.staff.manage_teams')
+            ->name('teams.restore')
+            ->withTrashed();
 
-            // Department routes
-            Route::resource('departments', DepartmentController::class);
-            Route::patch('/departments/{department}/restore', [DepartmentController::class, 'restore'])
-                ->name('departments.restore')
-                ->withTrashed();
+        Route::delete('/teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
+            ->middleware('super-admin')
+            ->name('teams.force-delete')
+            ->withTrashed();
 
-            Route::delete('/departments/{department}/force-delete', [DepartmentController::class, 'forceDelete'])
-                ->name('departments.force-delete')
-                ->withTrashed();
+        Route::resource('departments', DepartmentController::class)
+            ->middleware('permission:admin.staff.manage_departments');
 
-            //Role routes
-            Route::get('roles/create/{type}', [RoleController::class, 'create'])
-                ->whereIn('type', ['user', 'agent'])
-                ->name('roles.create.typed');
+        Route::patch('/departments/{department}/restore', [DepartmentController::class, 'restore'])
+            ->middleware('permission:admin.staff.manage_departments')
+            ->name('departments.restore')
+            ->withTrashed();
 
-            Route::patch('roles/{role}/restore', [RoleController::class, 'restore'])
-                ->withTrashed()
-                ->name('roles.restore');
+        Route::delete('/departments/{department}/force-delete', [DepartmentController::class, 'forceDelete'])
+            ->middleware('super-admin')
+            ->name('departments.force-delete')
+            ->withTrashed();
 
-            Route::delete('roles/{role}/force-delete', [RoleController::class, 'forceDelete'])
-                ->withTrashed()
-                ->name('roles.force-delete');
+        Route::get('roles/create/{type}', [RoleController::class, 'create'])
+            ->whereIn('type', ['user', 'agent'])
+            ->middleware('permission:admin.staff.manage_roles')
+            ->name('roles.create.typed');
 
-            Route::resource('roles', RoleController::class)
-                ->except(['show']);
-        });
+        Route::patch('roles/{role}/restore', [RoleController::class, 'restore'])
+            ->withTrashed()
+            ->middleware('permission:admin.staff.manage_roles')
+            ->name('roles.restore');
+
+        Route::delete('roles/{role}/force-delete', [RoleController::class, 'forceDelete'])
+            ->withTrashed()
+            ->middleware('super-admin')
+            ->name('roles.force-delete');
+
+        Route::resource('roles', RoleController::class)
+            ->except(['show'])
+            ->middleware('permission:admin.staff.manage_roles');
     });
 
     Route::post('/logout', function (Request $request) {
