@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckPermission
 {
-    public function handle(Request $request, Closure $next, string ...$permissions): Response
+    public function handle(Request $request, Closure $next, string $permissions): Response
     {
         $user = $request->user();
 
@@ -16,7 +16,7 @@ class CheckPermission
             abort(401);
         }
 
-        foreach ($permissions as $permission) {
+        foreach (explode('|', $permissions) as $permission) {
             if ($user->hasPermission($permission)) {
                 return $next($request);
             }

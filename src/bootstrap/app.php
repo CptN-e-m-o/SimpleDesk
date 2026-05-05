@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,8 +23,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => CheckPermission::class,
+            'super_admin' => EnsureSuperAdmin::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $_): void {
-        // Exception configuration.
+    ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->respond(function ($response, Throwable $exception, Request $request) {
+            return Inertia::render('Errors/Error', [
+                'status' => $response->getStatusCode(),
+            ])
+                ->toResponse($request)
+                ->setStatusCode($response->getStatusCode());
+        });
     })->create();

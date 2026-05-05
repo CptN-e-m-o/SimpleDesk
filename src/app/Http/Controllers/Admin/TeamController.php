@@ -11,12 +11,15 @@ use App\Models\Admin\Team;
 use App\Services\Admin\TeamService;
 use App\Support\Teams\TeamDepartmentOptions;
 use App\Support\Teams\TeamEligibleUsers;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TeamController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         protected TeamService $teamService,
         protected TeamEligibleUsers $teamEligibleUsers,
@@ -25,6 +28,8 @@ class TeamController extends Controller
 
     public function index(): Response
     {
+        $this->authorize('viewAny', Team::class);
+
         $teams = Team::query()
             ->withTrashed()
             ->with(['members:id,name'])
@@ -39,6 +44,8 @@ class TeamController extends Controller
 
     public function create(): Response
     {
+        $this->authorize('create', Team::class);
+
         return Inertia::render('Admin/Teams/Create', [
             'departments' => $this->teamDepartmentOptions->options(),
             'users' => $this->teamEligibleUsers->forSelect(),
@@ -47,6 +54,7 @@ class TeamController extends Controller
 
     public function store(StoreTeamRequest $request): RedirectResponse
     {
+        $this->authorize('create', Team::class);
         $this->teamService->create($request->validated());
 
         return redirect()
@@ -56,6 +64,8 @@ class TeamController extends Controller
 
     public function show(Team $team): Response
     {
+        $this->authorize('view', $team);
+
         $team->load([
             'members' => function ($query) {
                 $query->select('users.id', 'name', 'email');
@@ -69,6 +79,8 @@ class TeamController extends Controller
 
     public function edit(Team $team): Response
     {
+        $this->authorize('update', $team);
+
         $team->load([
             'departments:id,name,slug',
             'members:id,name,email',
@@ -83,6 +95,8 @@ class TeamController extends Controller
 
     public function update(UpdateTeamRequest $request, Team $team): RedirectResponse
     {
+        $this->authorize('update', $team);
+
         $this->teamService->update($team, $request->validated());
 
         return redirect()
@@ -92,6 +106,8 @@ class TeamController extends Controller
 
     public function destroy(Team $team): RedirectResponse
     {
+        $this->authorize('delete', $team);
+
         $team->delete();
 
         return redirect()
@@ -101,6 +117,8 @@ class TeamController extends Controller
 
     public function restore(Team $team): RedirectResponse
     {
+        $this->authorize('restore', $team);
+
         $team->restore();
 
         return redirect()
@@ -110,6 +128,7 @@ class TeamController extends Controller
 
     public function forceDelete(Team $team): RedirectResponse
     {
+        $this->authorize('forceDelete', $team);
         $team->forceDelete();
 
         return redirect()

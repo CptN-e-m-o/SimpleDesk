@@ -28,6 +28,7 @@ import {
 type Role = {
     id: number
     name: string
+    label: string
     description?: string | null
     is_system: boolean
     is_deleted: boolean
@@ -385,7 +386,7 @@ export default function Index({ roles = [] }: Props) {
                                                                 : 'text-gray-900'
                                                         }`}
                                                     >
-                                                        {role.name}
+                                                        {role.label}
                                                     </p>
                                                     <p className="mt-1 text-sm text-gray-500">
                                                         Role #{role.id}
@@ -638,17 +639,33 @@ function RoleActions({
                     : 'flex items-center justify-end gap-2'
             }
         >
-            <Link
-                href={route('admin.roles.edit', role.id)}
-                className={
-                    mobile
-                        ? 'inline-flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
-                        : 'inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
-                }
-            >
-                <Pencil className="h-4 w-4" />
-                {mobile ? 'Edit' : null}
-            </Link>
+            {role.is_system ? (
+                <button
+                    type="button"
+                    disabled
+                    title="System roles cannot be edited"
+                    className={
+                        mobile
+                            ? 'inline-flex h-10 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-400'
+                            : 'inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-400'
+                    }
+                >
+                    <Pencil className="h-4 w-4" />
+                    {mobile ? 'System role' : null}
+                </button>
+            ) : (
+                <Link
+                    href={route('admin.roles.edit', role.id)}
+                    className={
+                        mobile
+                            ? 'inline-flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
+                            : 'inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
+                    }
+                >
+                    <Pencil className="h-4 w-4" />
+                    {mobile ? 'Edit' : null}
+                </Link>
+            )}
 
             {!role.is_system ? (
                 <button

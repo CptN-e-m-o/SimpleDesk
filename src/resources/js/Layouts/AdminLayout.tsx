@@ -36,8 +36,9 @@ import {
     DropdownMenuItem,
 } from '@/Components/ui/dropdown-menu'
 import { route } from 'ziggy-js'
+import { usePermissions } from '@/hooks/usePermissions'
 
-import type { SharedData } from '../types'
+import type { SharedData } from '@/types'
 
 type Props = {
     readonly title?: string
@@ -49,6 +50,8 @@ type NavItem = {
     href: string
     icon: ComponentType<{ className?: string }>
     isActive: (url: string) => boolean
+    permission?: string
+    permissions?: string[]
 }
 
 type NavSection = {
@@ -65,6 +68,15 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
     const { props, url } = usePage<SharedData>()
     const user = props.auth.user
     const [locale, setLocale] = useState<'EN' | 'RU'>('EN')
+
+    const { can, canAny } = usePermissions()
+
+    const canAccessAgentPanel = canAny([
+        'agent.tickets.visibility.assigned',
+        'agent.tickets.visibility.team',
+        'agent.tickets.visibility.department',
+        'agent.tickets.visibility.all',
+    ])
 
     const sections: NavSection[] = useMemo(
         () => [
@@ -102,6 +114,7 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         label: 'Roles',
                         href: route('admin.roles.index'),
                         icon: Shield,
+                        permission: 'admin.staff.manage_roles',
                         isActive: (currentUrl: string) =>
                             currentUrl === '/admin/roles' || currentUrl.startsWith('/admin/roles/'),
                     },
@@ -109,6 +122,7 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         label: 'Departments',
                         href: route('admin.departments.index'),
                         icon: Building2,
+                        permission: 'admin.staff.manage_departments',
                         isActive: (currentUrl: string) =>
                             currentUrl === '/admin/departments' || currentUrl.startsWith('/admin/departments/'),
                     },
@@ -116,6 +130,7 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         label: 'Teams',
                         href: route('admin.teams.index'),
                         icon: UsersRound,
+                        permission: 'admin.staff.manage_teams',
                         isActive: (currentUrl: string) =>
                             currentUrl === '/admin/teams' || currentUrl.startsWith('/admin/teams/'),
                     },

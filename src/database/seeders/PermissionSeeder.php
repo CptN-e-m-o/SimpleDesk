@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+
 use Database\Seeders\Permissions\Agent\AdminPanel\PermissionAdminAddOnsSeeder;
 use Database\Seeders\Permissions\Agent\AdminPanel\PermissionAdminGeneralSeeder;
 use Database\Seeders\Permissions\Agent\AdminPanel\PermissionAdminManageSeeder;
@@ -18,8 +19,8 @@ use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentReportsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentSoftwareLicensesSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentTicketsSeeder;
 use Database\Seeders\Permissions\Agent\AgentPanel\PermissionAgentToolsSeeder;
-use Database\Seeders\Permissions\Agent\ClientPanel\PermissionClientTicketsSeeder;
 use Database\Seeders\Permissions\Agent\ClientPanel\PermissionClientBillingSeeder;
+use Database\Seeders\Permissions\Agent\ClientPanel\PermissionClientTicketsSeeder;
 use Database\Seeders\Permissions\Agent\GeneralPanel\PermissionGeneralNetworkDiscoverySeeder;
 use Database\Seeders\Permissions\Agent\GeneralPanel\PermissionGeneralNotificationsSeeder;
 use Database\Seeders\Permissions\Agent\GeneralPanel\PermissionGeneralSecuritySeeder;

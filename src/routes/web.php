@@ -34,15 +34,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/replies', [TicketReplyController::class, 'store'])
         ->name('tickets.replies.store');
 
-    Route::middleware('role:admin,agent')->group(function () {
-        Route::get('/dashboard', function () {
-            return Inertia::render('Dashboard');
-        })->name('dashboard');
-        Route::prefix('agent')->name('agent.')->group(function () {
-            Route::get('/tickets', function () {
-                return Inertia::render('Tickets/Agent/Index');
-            })->name('tickets');
-        });
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })
+        ->middleware('permission:agent.tickets.visibility.assigned|agent.tickets.visibility.team|agent.tickets.visibility.department|agent.tickets.visibility.all')
+        ->name('dashboard');
+
+    Route::prefix('agent')->name('agent.')->group(function () {
+        Route::get('/tickets', function () {
+            return Inertia::render('Tickets/Agent/Index');
+        })
+            ->middleware('permission:agent.tickets.visibility.assigned|agent.tickets.visibility.team|agent.tickets.visibility.department|agent.tickets.visibility.all')
+            ->name('tickets');
     });
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', function () {
@@ -60,7 +63,7 @@ Route::middleware('auth')->group(function () {
             ->withTrashed();
 
         Route::delete('/teams/{team}/force-delete', [TeamController::class, 'forceDelete'])
-            ->middleware('super-admin')
+            ->middleware('super_admin')
             ->name('teams.force-delete')
             ->withTrashed();
 
@@ -73,7 +76,7 @@ Route::middleware('auth')->group(function () {
             ->withTrashed();
 
         Route::delete('/departments/{department}/force-delete', [DepartmentController::class, 'forceDelete'])
-            ->middleware('super-admin')
+            ->middleware('super_admin')
             ->name('departments.force-delete')
             ->withTrashed();
 
@@ -89,7 +92,7 @@ Route::middleware('auth')->group(function () {
 
         Route::delete('roles/{role}/force-delete', [RoleController::class, 'forceDelete'])
             ->withTrashed()
-            ->middleware('super-admin')
+            ->middleware('super_admin')
             ->name('roles.force-delete');
 
         Route::resource('roles', RoleController::class)

@@ -10,7 +10,7 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         Role::updateOrCreate(
-            ['name' => 'super-admin'],
+            ['name' => 'super_admin'],
             [
                 'label' => 'Super Admin',
                 'description' => 'The Super Admin possesses the highest level of privileges within the system, enabling unrestricted access to all features and actions. It is mandatory to have at least one Super Admin account configured in the system.',

@@ -19,7 +19,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasPermissions;
+    use HasFactory, HasPermissions, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -52,7 +52,6 @@ class User extends Authenticatable
             ->whereIn('name', $roles)
             ->exists();
     }
-
 
     public function requestedTickets(): HasMany
     {

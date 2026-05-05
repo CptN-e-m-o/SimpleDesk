@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-
 use App\Models\Permission;
 use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -19,11 +17,11 @@ class RolePermissionSeeder extends Seeder
         */
 
         $this->syncByQuery(
-            'super-admin',
+            'super_admin',
             Permission::query()->where('type', 'agent')
         );
 
-        $this->syncByQuery('admin', [
+        $this->syncByKeys('admin', [
             // General
             'admin.general.manage_notify',
             // Manage
@@ -228,7 +226,7 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         $this->syncByKeys('agent', [
-            //Tickets
+            // Tickets
             'agent.tickets.create',
             'agent.tickets.respond',
             'agent.tickets.reply',
@@ -252,12 +250,12 @@ class RolePermissionSeeder extends Seeder
             'agent.tickets.edit_own_time_tracks',
             'agent.tickets.delete_time_tracks',
             'agent.tickets.delete_own_time_tracks',
-            //Tools
+            // Tools
             'agent.tools.canned_responses',
             'agent.tools.access_all_canned_responses',
             'agent.tools.articles',
             'agent.tools.access_all_articles',
-            //Problems
+            // Problems
             'agent.problems.create',
             'agent.problems.view',
             'agent.problems.edit',
@@ -268,7 +266,7 @@ class RolePermissionSeeder extends Seeder
             'agent.organizations.view',
             'agent.organizations.create_or_edit',
             'agent.organizations.link_or_unlink_contacts',
-            //Reports
+            // Reports
             'agent.reports.analytics',
             'agent.reports.helpdesk',
             // Changes
@@ -294,7 +292,7 @@ class RolePermissionSeeder extends Seeder
             'agent.client.tickets.visibility',
             'agent.client.tickets.visibility.requester',
             'agent.client.tickets.collaborator.view',
-            //General Panel
+            // General Panel
             'agent.general.notifications.enabled',
             'agent.general.notifications.receive_agent_notifications',
         ]);
