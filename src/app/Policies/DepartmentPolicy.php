@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Admin\Department;
 use App\Models\User;
 
 class DepartmentPolicy
@@ -12,7 +11,7 @@ class DepartmentPolicy
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function view(User $user, Department $department): bool
+    public function view(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
@@ -22,22 +21,22 @@ class DepartmentPolicy
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function update(User $user, Department $department): bool
+    public function update(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function delete(User $user, Department $department): bool
+    public function delete(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function restore(User $user, Department $department): bool
+    public function restore(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function forceDelete(User $user, Department $department): bool
+    public function forceDelete(User $user): bool
     {
         return $user->isSuperAdmin();
     }

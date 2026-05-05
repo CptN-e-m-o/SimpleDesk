@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Admin\Team;
 use App\Models\User;
 
 class TeamPolicy
@@ -12,7 +11,7 @@ class TeamPolicy
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function view(User $user, Team $team): bool
+    public function view(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
@@ -22,22 +21,22 @@ class TeamPolicy
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function update(User $user, Team $team): bool
+    public function update(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function delete(User $user, Team $team): bool
+    public function delete(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function restore(User $user, Team $team): bool
+    public function restore(User $user): bool
     {
         return $user->hasPermission('admin.staff.manage_teams');
     }
 
-    public function forceDelete(User $user, Team $team): bool
+    public function forceDelete(User $user): bool
     {
         return $user->isSuperAdmin();
     }
