@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import { ChevronDown } from 'lucide-react'
-import type { SharedData } from '../types'
+import type { SharedData } from '@/types'
 import { hasAnyRole } from '@/lib/roles'
 import { route } from 'ziggy-js'
+import {usePermissions} from "@/hooks/usePermissions";
 
 type Props = {
     readonly children: ReactNode
@@ -11,6 +12,7 @@ type Props = {
 
 export default function PublicLayout({ children }: Props) {
     const { props } = usePage<SharedData>()
+    const { canAny } = usePermissions();
     const user = props.auth?.user
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -53,7 +55,12 @@ export default function PublicLayout({ children }: Props) {
                                     My Tickets
                                 </Link>
 
-                                {hasAnyRole(user, ['admin', 'agent']) && (
+                                {canAny([
+                                    'agent.tickets.visibility.assigned',
+                                    'agent.tickets.visibility.team',
+                                    'agent.tickets.visibility.department',
+                                    'agent.tickets.visibility.all'
+                                ]) && (
                                     <Link
                                         href={route('dashboard')}
                                         className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"

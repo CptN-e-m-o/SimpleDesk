@@ -20,7 +20,7 @@ export default function Index() {
         {
             title: 'Roles',
             description: 'Configure admin and agent roles for your help desk team.',
-            href: '#',
+            href: route('admin.roles.index'),
             icon: ShieldCheck,
         },
         {

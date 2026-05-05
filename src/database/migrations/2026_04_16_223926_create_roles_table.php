@@ -10,11 +10,20 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
+
             $table->string('name')->unique();
             $table->string('label');
             $table->text('description')->nullable();
+
+            $table->enum('type', ['user', 'agent'])->default('user');
+
+            $table->boolean('is_system')->default(false);
+            $table->boolean('is_default')->default(false);
+
             $table->softDeletes();
             $table->timestamps();
+
+            $table->index('type');
         });
     }
 

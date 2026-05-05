@@ -13,15 +13,17 @@ class AdminUserSeeder extends Seeder
     {
         $adminRole = Role::where('name', 'admin')->firstOrFail();
 
-        $admin = User::updateOrCreate(
-            ['email' => 'admin@test.com'],
-            [
-                'name' => 'Administrator',
-                'email_verified_at' => now(),
-                'password' => Hash::make('password'),
-            ]
-        );
+        for ($i = 1; $i <= 6; $i++) {
+            $admin = User::updateOrCreate(
+                ['email' => "admin{$i}@example.com"],
+                [
+                    'name' => "Admin {$i}",
+                    'email_verified_at' => now(),
+                    'password' => Hash::make('password'),
+                ]
+            );
 
-        $admin->roles()->syncWithoutDetaching([$adminRole->id]);
+            $admin->roles()->syncWithoutDetaching([$adminRole->id]);
+        }
     }
 }

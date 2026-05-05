@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Admin\Department;
 use App\Models\Admin\Team;
+use App\Models\Concerns\HasPermissions;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -18,7 +19,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasPermissions, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -50,21 +51,6 @@ class User extends Authenticatable
         return $this->roles()
             ->whereIn('name', $roles)
             ->exists();
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->hasRole('admin');
-    }
-
-    public function isAgent(): bool
-    {
-        return $this->hasRole('agent');
-    }
-
-    public function isUser(): bool
-    {
-        return $this->hasRole('user');
     }
 
     public function requestedTickets(): HasMany

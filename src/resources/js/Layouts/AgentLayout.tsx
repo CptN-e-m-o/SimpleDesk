@@ -22,8 +22,8 @@ import {
     DropdownMenuItem,
 } from '@/Components/ui/dropdown-menu'
 
-import type { SharedData } from '../types'
-import { isAdmin } from '@/lib/roles'
+import type { SharedData } from '@/types'
+import { usePermissions } from '@/hooks/usePermissions'
 
 type Props = {
     readonly title?: string
@@ -37,8 +37,25 @@ function logout() {
 export default function AgentLayout({ title = 'Dashboard', children }: Props) {
     const { props, url } = usePage<SharedData>()
     const user = props.auth.user
-    const isAdminUser = isAdmin(user)
+    const { canAny, can } = usePermissions()
     const [locale, setLocale] = useState<'EN' | 'RU'>('EN')
+
+    const canAccessAdminPanel = canAny([
+        'admin.manage.manage_dashboard',
+        'admin.staff.manage_agents',
+        'admin.staff.manage_roles',
+        'admin.staff.manage_departments',
+        'admin.staff.manage_teams',
+    ])
+
+    const canAccessAgentTickets = canAny([
+        'agent.tickets.visibility.assigned',
+        'agent.tickets.visibility.team',
+        'agent.tickets.visibility.department',
+        'agent.tickets.visibility.all',
+    ])
+
+    const canCreateClientTicket = can('agent.client.tickets.create')
 
     const navigation = [
         {
@@ -46,31 +63,30 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
             href: '/',
             icon: Ticket,
             isActive: (url: string) => url === '/',
+            visible: true,
         },
         {
             label: 'Dashboard',
             href: route('dashboard'),
             icon: LayoutDashboard,
             isActive: (url: string) => url === '/dashboard' || url.startsWith('/dashboard/'),
+            visible: canAccessAgentTickets,
         },
         {
             label: 'Tickets',
             href: route('agent.tickets'),
             icon: Ticket,
-            isActive: (url: string) => url === '/tickets' || url.startsWith('/tickets/'),
+            isActive: (url: string) => url === '/agent/tickets' || url.startsWith('/agent/tickets/'),
+            visible: canAccessAgentTickets,
         },
-        ...(isAdminUser
-            ? [
-                {
-                    label: 'Admin panel',
-                    href: route('admin.dashboard'),
-                    icon: Shield,
-                    isActive: (url: string) =>
-                        url === '/admin' || url.startsWith('/admin'),
-                },
-            ]
-            : []),
-    ]
+        {
+            label: 'Admin panel',
+            href: route('admin.dashboard'),
+            icon: Shield,
+            isActive: (url: string) => url === '/admin' || url.startsWith('/admin'),
+            visible: canAccessAdminPanel,
+        },
+    ].filter((item) => item.visible)
 
 
     return (
@@ -176,18 +192,20 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
                             </div>
 
                             <div className="flex items-center gap-2 sm:gap-3">
-                                <Link
-                                    href="#"
-                                    className="
-                                        hidden h-14 items-center gap-2 rounded-2xl bg-gray-900
-                                        px-5 text-sm font-medium text-white
-                                        transition hover:bg-gray-800
-                                        sm:inline-flex
-                                    "
-                                >
-                                    <Plus className="h-5 w-5" />
-                                    New ticket
-                                </Link>
+                                {canCreateClientTicket && (
+                                    <Link
+                                        href={route('tickets.create')}
+                                        className="
+                                            hidden h-14 items-center gap-2 rounded-2xl bg-gray-900
+                                            px-5 text-sm font-medium text-white
+                                            transition hover:bg-gray-800
+                                            sm:inline-flex
+                                        "
+                                    >
+                                        <Plus className="h-5 w-5" />
+                                        New ticket
+                                    </Link>
+                                )}
 
                                 <Link
                                     href="#"
