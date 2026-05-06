@@ -10,7 +10,16 @@ class PermissionAdminServiceDeskSeeder extends Seeder
 {
     public function run(): void
     {
-        $group = PermissionGroup::updateOrCreate(
+        $group = $this->createServiceDeskGroup();
+
+        foreach ($this->permissions() as $permission) {
+            $this->upsertPermission($permission, $group->id);
+        }
+    }
+
+    private function createServiceDeskGroup(): PermissionGroup
+    {
+        return PermissionGroup::updateOrCreate(
             [
                 'key' => 'service_desk',
                 'panel' => 'admin',
@@ -21,8 +30,11 @@ class PermissionAdminServiceDeskSeeder extends Seeder
                 'sort_order' => 70,
             ]
         );
+    }
 
-        $permissions = [
+    private function permissions(): array
+    {
+        return [
             [
                 'key' => 'admin.service_desk.manage_products',
                 'label' => 'Manage products',
@@ -143,26 +155,32 @@ class PermissionAdminServiceDeskSeeder extends Seeder
                 'sort_order' => 170,
             ],
         ];
+    }
 
-        foreach ($permissions as $permission) {
-            $parentKey = $permission['parent_key'] ?? null;
+    private function upsertPermission(array $permission, int $groupId): void
+    {
+        $parentKey = $permission['parent_key'] ?? null;
 
-            unset($permission['parent_key']);
+        unset($permission['parent_key']);
 
-            $parentId = null;
+        $parentId = $this->resolveParentId($parentKey);
 
-            if ($parentKey) {
-                $parentId = Permission::where('key', $parentKey)->value('id');
-            }
+        Permission::updateOrCreate(
+            ['key' => $permission['key']],
+            [
+                ...$permission,
+                'permission_group_id' => $groupId,
+                'parent_id' => $parentId,
+            ]
+        );
+    }
 
-            Permission::updateOrCreate(
-                ['key' => $permission['key']],
-                [
-                    ...$permission,
-                    'permission_group_id' => $group->id,
-                    'parent_id' => $parentId,
-                ]
-            );
+    private function resolveParentId(?string $parentKey): ?int
+    {
+        if (! $parentKey) {
+            return null;
         }
+
+        return Permission::where('key', $parentKey)->value('id');
     }
 }
