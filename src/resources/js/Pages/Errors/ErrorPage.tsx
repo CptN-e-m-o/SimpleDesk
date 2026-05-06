@@ -24,7 +24,7 @@ const messages: Record<number, { title: string; description: string }> = {
     },
 }
 
-export default function Error({ status }: Readonly<Props>) {
+export default function ErrorPage({ status }: Readonly<Props>) {
     const message = messages[status] ?? {
         title: 'Something went wrong',
         description: 'An unexpected error occurred.',

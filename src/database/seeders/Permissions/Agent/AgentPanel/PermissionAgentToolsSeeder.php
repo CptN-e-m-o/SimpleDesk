@@ -35,6 +35,20 @@ class PermissionAgentToolsSeeder extends Seeder
     private function permissions(): array
     {
         return [
+            ...$this->cannedResponsePermissions(),
+            ...$this->knowledgeBasePermissions(),
+            ...$this->categoryPermissions(),
+            ...$this->articlePermissions(),
+            ...$this->templatePermissions(),
+            ...$this->pagePermissions(),
+            ...$this->commentPermissions(),
+            ...$this->recurringTicketPermissions(),
+        ];
+    }
+
+    private function cannedResponsePermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.canned_responses',
                 'label' => 'Canned responses',
@@ -66,6 +80,12 @@ class PermissionAgentToolsSeeder extends Seeder
                 'parent_key' => 'agent.tools.canned_responses',
                 'sort_order' => 40,
             ],
+        ];
+    }
+
+    private function knowledgeBasePermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.knowledge_base',
                 'label' => 'Knowledge Base',
@@ -73,6 +93,20 @@ class PermissionAgentToolsSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 50,
             ],
+            [
+                'key' => 'agent.tools.settings',
+                'label' => 'Settings',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'parent_key' => 'agent.tools.knowledge_base',
+                'sort_order' => 240,
+            ],
+        ];
+    }
+
+    private function categoryPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.categories',
                 'label' => 'Categories',
@@ -97,6 +131,12 @@ class PermissionAgentToolsSeeder extends Seeder
                 'parent_key' => 'agent.tools.categories',
                 'sort_order' => 80,
             ],
+        ];
+    }
+
+    private function articlePermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.articles',
                 'label' => 'Articles',
@@ -137,6 +177,12 @@ class PermissionAgentToolsSeeder extends Seeder
                 'parent_key' => 'agent.tools.articles',
                 'sort_order' => 130,
             ],
+        ];
+    }
+
+    private function templatePermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.templates',
                 'label' => 'Templates',
@@ -161,6 +207,12 @@ class PermissionAgentToolsSeeder extends Seeder
                 'parent_key' => 'agent.tools.templates',
                 'sort_order' => 160,
             ],
+        ];
+    }
+
+    private function pagePermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.pages',
                 'label' => 'Pages',
@@ -193,6 +245,12 @@ class PermissionAgentToolsSeeder extends Seeder
                 'parent_key' => 'agent.tools.pages',
                 'sort_order' => 200,
             ],
+        ];
+    }
+
+    private function commentPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.comments',
                 'label' => 'Comments',
@@ -217,14 +275,12 @@ class PermissionAgentToolsSeeder extends Seeder
                 'parent_key' => 'agent.tools.comments',
                 'sort_order' => 230,
             ],
-            [
-                'key' => 'agent.tools.settings',
-                'label' => 'Settings',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'parent_key' => 'agent.tools.knowledge_base',
-                'sort_order' => 240,
-            ],
+        ];
+    }
+
+    private function recurringTicketPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tools.recurring_tickets',
                 'label' => 'Recurring tickets',
@@ -248,7 +304,6 @@ class PermissionAgentToolsSeeder extends Seeder
                 'parent_key' => 'agent.tools.recurring_tickets',
                 'sort_order' => 270,
             ],
-
         ];
     }
 

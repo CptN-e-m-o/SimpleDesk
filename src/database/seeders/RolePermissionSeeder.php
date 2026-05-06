@@ -29,9 +29,7 @@ class RolePermissionSeeder extends Seeder
     {
         $this->syncByKeys('user', [
             'tickets.create',
-
             'tickets.respond',
-
             'tickets.visibility',
             'tickets.visibility.requester',
         ]);
@@ -39,9 +37,7 @@ class RolePermissionSeeder extends Seeder
         $this->syncByKeys('organization-user', [
             'tickets.create',
             'tickets.create_with_organization_assets',
-
             'tickets.respond',
-
             'tickets.visibility',
             'tickets.visibility.organization',
         ]);
@@ -62,10 +58,23 @@ class RolePermissionSeeder extends Seeder
     private function adminPermissions(): array
     {
         return [
+            ...$this->adminPanelPermissions(),
+            ...$this->adminServiceDeskPermissions(),
+            ...$this->adminStaffAndTicketPermissions(),
+            ...$this->adminAgentAssetPermissions(),
+            ...$this->adminAgentChangePermissions(),
+            ...$this->adminAgentContactPermissions(),
+            ...$this->adminAgentServicePermissions(),
+            ...$this->adminAgentTicketPermissions(),
+            ...$this->adminAgentToolPermissions(),
+            ...$this->adminAgentGeneralPermissions(),
+        ];
+    }
 
-            // General
+    private function adminPanelPermissions(): array
+    {
+        return [
             'admin.general.manage_notify',
-            // Manage
             'admin.manage.manage_help_topics',
             'admin.manage.manage_sla_plans',
             'admin.manage.manage_business_hours',
@@ -77,13 +86,17 @@ class RolePermissionSeeder extends Seeder
             'admin.manage.manage_widgets',
             'admin.manage.manage_daily_report',
             'admin.manage.manage_dashboard',
-            // Settings
             'admin.settings.manage_company',
             'admin.settings.manage_contact_options',
             'admin.settings.manage_languages',
             'admin.settings.manage_social_widget_settings',
             'admin.settings.manage_client_panel_filter',
-            // Service Desk
+        ];
+    }
+
+    private function adminServiceDeskPermissions(): array
+    {
+        return [
             'admin.service_desk.manage_products',
             'admin.service_desk.manage_procurement_modes',
             'admin.service_desk.manage_contract_types',
@@ -97,11 +110,15 @@ class RolePermissionSeeder extends Seeder
             'admin.service_desk.manage_cmdb_relations',
             'admin.service_desk.manage_statuses',
             'admin.service_desk.manage_manufacturers',
-            // Staff
+        ];
+    }
+
+    private function adminStaffAndTicketPermissions(): array
+    {
+        return [
             'admin.staff.manage_agents',
             'admin.staff.manage_teams',
             'admin.staff.manage_departments',
-            // Tickets
             'admin.tickets.manage_ticket_settings',
             'admin.tickets.manage_status',
             'admin.tickets.manage_labels',
@@ -114,16 +131,25 @@ class RolePermissionSeeder extends Seeder
             'admin.tickets.manage_location',
             'admin.tickets.manage_template',
             'admin.tickets.manage_pdf_template',
-            // Add-ons
             'admin.add_ons.manage_modules',
             'admin.add_ons.manage_modules.timetrack',
-            // Assets
+        ];
+    }
+
+    private function adminAgentAssetPermissions(): array
+    {
+        return [
             'agent.assets.create',
             'agent.assets.view',
             'agent.assets.edit',
             'agent.assets.delete',
             'agent.assets.attach_or_detach',
-            // Changes
+        ];
+    }
+
+    private function adminAgentChangePermissions(): array
+    {
+        return [
             'agent.changes.create',
             'agent.changes.view',
             'agent.changes.edit',
@@ -138,7 +164,12 @@ class RolePermissionSeeder extends Seeder
             'agent.changes.discussions.add_or_edit_comment',
             'agent.changes.discussions.delete_comment',
             'agent.changes.attach_or_detach',
-            // Contacts
+        ];
+    }
+
+    private function adminAgentContactPermissions(): array
+    {
+        return [
             'agent.contacts.view',
             'agent.contacts.create_or_edit',
             'agent.contacts.actions',
@@ -163,7 +194,12 @@ class RolePermissionSeeder extends Seeder
             'agent.organizations.add_manager',
             'agent.organizations.link_or_unlink_contacts',
             'agent.organizations.delete',
-            // Contracts
+        ];
+    }
+
+    private function adminAgentServicePermissions(): array
+    {
+        return [
             'agent.contracts.create',
             'agent.contracts.create_type',
             'agent.contracts.create_vendor',
@@ -173,31 +209,32 @@ class RolePermissionSeeder extends Seeder
             'agent.contracts.extend_or_renew',
             'agent.contracts.set_expiry_reminder',
             'agent.contracts.attach_or_detach',
-            // Problems
             'agent.problems.create',
             'agent.problems.view',
             'agent.problems.edit',
             'agent.problems.close',
             'agent.problems.attach_or_detach_plannings',
             'agent.problems.attach_or_detach',
-            // Releases
             'agent.releases.create',
             'agent.releases.view',
             'agent.releases.edit',
             'agent.releases.mark_complete',
             'agent.releases.attach_or_detach_plannings',
             'agent.releases.attach_or_detach',
-            // Reports
             'agent.reports.analytics',
             'agent.reports.helpdesk',
             'agent.reports.service_desk',
             'agent.reports.settings',
-            // Software licenses
             'agent.software_licenses.create',
             'agent.software_licenses.view',
             'agent.software_licenses.edit',
             'agent.software_licenses.check_in_out',
-            // Tickets
+        ];
+    }
+
+    private function adminAgentTicketPermissions(): array
+    {
+        return [
             'agent.tickets.create',
             'agent.tickets.respond',
             'agent.tickets.reply',
@@ -222,7 +259,12 @@ class RolePermissionSeeder extends Seeder
             'agent.tickets.delete_time_tracks',
             'agent.tickets.delete_everyone_time_tracks',
             'agent.tickets.attach_service_desk',
-            // Tools
+        ];
+    }
+
+    private function adminAgentToolPermissions(): array
+    {
+        return [
             'agent.tools.canned_responses',
             'agent.tools.access_all_canned_responses',
             'agent.tools.create_edit_canned_responses',
@@ -249,30 +291,42 @@ class RolePermissionSeeder extends Seeder
             'agent.tools.recurring_tickets',
             'agent.tools.add_edit_recurring_tickets',
             'agent.tools.delete_recurring_tickets',
-            // Billing
+        ];
+    }
+
+    private function adminAgentGeneralPermissions(): array
+    {
+        return [
             'agent.billing.owned_package',
-            // Client tickets
             'agent.client.tickets.create',
             'agent.client.tickets.respond',
             'agent.client.tickets.change_status',
             'agent.client.tickets.visibility',
             'agent.client.tickets.visibility.requester',
             'agent.client.tickets.collaborator.view',
-            // General - Notifications
             'agent.general.notifications.enabled',
             'agent.general.notifications.receive_admin_notifications',
-            // General - Visibility
             'agent.general.visibility.show_health_alert_icon',
             'agent.general.visibility.display_all_labels',
-
         ];
     }
 
     private function agentPermissions(): array
     {
         return [
+            ...$this->agentTicketPermissions(),
+            ...$this->agentToolPermissions(),
+            ...$this->agentProblemPermissions(),
+            ...$this->agentContactPermissions(),
+            ...$this->agentChangePermissions(),
+            ...$this->agentAssetPermissions(),
+            ...$this->agentGeneralPermissions(),
+        ];
+    }
 
-            // Tickets
+    private function agentTicketPermissions(): array
+    {
+        return [
             'agent.tickets.create',
             'agent.tickets.respond',
             'agent.tickets.reply',
@@ -296,26 +350,45 @@ class RolePermissionSeeder extends Seeder
             'agent.tickets.edit_own_time_tracks',
             'agent.tickets.delete_time_tracks',
             'agent.tickets.delete_own_time_tracks',
-            // Tools
+        ];
+    }
+
+    private function agentToolPermissions(): array
+    {
+        return [
             'agent.tools.canned_responses',
             'agent.tools.access_all_canned_responses',
             'agent.tools.articles',
             'agent.tools.access_all_articles',
-            // Problems
+        ];
+    }
+
+    private function agentProblemPermissions(): array
+    {
+        return [
             'agent.problems.create',
             'agent.problems.view',
             'agent.problems.edit',
             'agent.problems.attach_or_detach_plannings',
-            // Contacts
+        ];
+    }
+
+    private function agentContactPermissions(): array
+    {
+        return [
             'agent.contacts.view',
             'agent.contacts.create_or_edit',
             'agent.organizations.view',
             'agent.organizations.create_or_edit',
             'agent.organizations.link_or_unlink_contacts',
-            // Reports
             'agent.reports.analytics',
             'agent.reports.helpdesk',
-            // Changes
+        ];
+    }
+
+    private function agentChangePermissions(): array
+    {
+        return [
             'agent.changes.create',
             'agent.changes.view',
             'agent.changes.edit',
@@ -323,25 +396,32 @@ class RolePermissionSeeder extends Seeder
             'agent.changes.attach_or_detach',
             'agent.changes.discussions.actions',
             'agent.changes.discussions.add_or_edit_comment',
-            // Assets
+        ];
+    }
+
+    private function agentAssetPermissions(): array
+    {
+        return [
             'agent.assets.create',
             'agent.assets.view',
             'agent.assets.edit',
             'agent.assets.attach_or_detach',
-            // Software licenses
             'agent.software_licenses.view',
             'agent.software_licenses.check_in_out',
-            // Client tickets (agent as requester)
+        ];
+    }
+
+    private function agentGeneralPermissions(): array
+    {
+        return [
             'agent.client.tickets.create',
             'agent.client.tickets.respond',
             'agent.client.tickets.change_status',
             'agent.client.tickets.visibility',
             'agent.client.tickets.visibility.requester',
             'agent.client.tickets.collaborator.view',
-            // General Panel
             'agent.general.notifications.enabled',
             'agent.general.notifications.receive_agent_notifications',
-
         ];
     }
 

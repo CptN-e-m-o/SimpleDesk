@@ -35,6 +35,18 @@ class PermissionAgentTicketsSeeder extends Seeder
     private function permissions(): array
     {
         return [
+            ...$this->baseTicketPermissions(),
+            ...$this->internalNotePermissions(),
+            ...$this->conversationPermissions(),
+            ...$this->propertyPermissions(),
+            ...$this->visibilityPermissions(),
+            ...$this->timeTrackPermissions(),
+        ];
+    }
+
+    private function baseTicketPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tickets.create',
                 'label' => 'Create ticket',
@@ -79,6 +91,47 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 60,
             ],
+            [
+                'key' => 'agent.tickets.merge',
+                'label' => 'Merge ticket',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 160,
+            ],
+            [
+                'key' => 'agent.tickets.delete',
+                'label' => 'Delete ticket',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 200,
+            ],
+            [
+                'key' => 'agent.tickets.export',
+                'label' => 'Export ticket',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 210,
+            ],
+            [
+                'key' => 'agent.tickets.view_approval_pending',
+                'label' => 'View approval pending tickets',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 270,
+            ],
+            [
+                'key' => 'agent.tickets.attach_service_desk',
+                'label' => 'Add or detach tickets in Service Desk',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 340,
+            ],
+        ];
+    }
+
+    private function internalNotePermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tickets.edit_internal_notes',
                 'label' => 'Edit internal notes',
@@ -125,6 +178,12 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'parent_key' => 'agent.tickets.delete_internal_notes',
                 'sort_order' => 120,
             ],
+        ];
+    }
+
+    private function conversationPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tickets.delete_conversations',
                 'label' => 'Delete conversations',
@@ -148,13 +207,12 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'parent_key' => 'agent.tickets.delete_conversations',
                 'sort_order' => 150,
             ],
-            [
-                'key' => 'agent.tickets.merge',
-                'label' => 'Merge ticket',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 160,
-            ],
+        ];
+    }
+
+    private function propertyPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tickets.edit_properties',
                 'label' => 'Edit ticket properties',
@@ -178,20 +236,12 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'parent_key' => 'agent.tickets.edit_properties',
                 'sort_order' => 190,
             ],
-            [
-                'key' => 'agent.tickets.delete',
-                'label' => 'Delete ticket',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 200,
-            ],
-            [
-                'key' => 'agent.tickets.export',
-                'label' => 'Export ticket',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 210,
-            ],
+        ];
+    }
+
+    private function visibilityPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tickets.visibility',
                 'label' => 'Tickets visibility',
@@ -231,13 +281,12 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'parent_key' => 'agent.tickets.visibility',
                 'sort_order' => 260,
             ],
-            [
-                'key' => 'agent.tickets.view_approval_pending',
-                'label' => 'View approval pending tickets',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 270,
-            ],
+        ];
+    }
+
+    private function timeTrackPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tickets.edit_time_tracks',
                 'label' => 'Edit time tracks',
@@ -284,14 +333,6 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'parent_key' => 'agent.tickets.delete_time_tracks',
                 'sort_order' => 330,
             ],
-            [
-                'key' => 'agent.tickets.attach_service_desk',
-                'label' => 'Add or detach tickets in Service Desk',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 340,
-            ],
-
         ];
     }
 
