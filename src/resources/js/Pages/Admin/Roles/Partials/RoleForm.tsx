@@ -425,7 +425,7 @@ export default function RoleForm({
                                                         }
                                                         className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
                                                     />
-                                                    Select All
+                                                    <span>Select All</span>
                                                 </label>
                                             </div>
 
@@ -478,13 +478,7 @@ export default function RoleForm({
     )
 }
 
-function PermissionNode({
-                            permission,
-                            parent,
-                            depth = 0,
-                            isChecked,
-                            togglePermissionNode,
-                        }: {
+type PermissionNodeProps = Readonly<{
     permission: RolePermission
     parent?: RolePermission
     depth?: number
@@ -493,7 +487,15 @@ function PermissionNode({
         permission: RolePermission,
         parent?: RolePermission,
     ) => void
-}) {
+}>
+
+function PermissionNode({
+                            permission,
+                            parent,
+                            depth = 0,
+                            isChecked,
+                            togglePermissionNode,
+                        }: PermissionNodeProps) {
     const disabled = parent ? !isChecked(parent.id) : false
     const hasChildren = permission.children.length > 0
 

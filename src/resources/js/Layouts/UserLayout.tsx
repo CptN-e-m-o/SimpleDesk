@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import { ChevronDown } from 'lucide-react'
 import type { SharedData } from '@/types'
-import { hasAnyRole } from '@/lib/roles'
 import { route } from 'ziggy-js'
 import {usePermissions} from "@/hooks/usePermissions";
 
