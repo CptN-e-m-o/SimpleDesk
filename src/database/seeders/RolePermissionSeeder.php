@@ -10,18 +10,59 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Agent roles
-        |--------------------------------------------------------------------------
-        */
+        $this->seedAgentRoles();
+        $this->seedUserRoles();
+    }
 
+    private function seedAgentRoles(): void
+    {
         $this->syncByQuery(
             'super_admin',
             Permission::query()->where('type', 'agent')
         );
 
-        $this->syncByKeys('admin', [
+        $this->syncByKeys('admin', $this->adminPermissions());
+        $this->syncByKeys('agent', $this->agentPermissions());
+    }
+
+    private function seedUserRoles(): void
+    {
+        $this->syncByKeys('user', [
+            'tickets.create',
+
+            'tickets.respond',
+
+            'tickets.visibility',
+            'tickets.visibility.requester',
+        ]);
+
+        $this->syncByKeys('organization-user', [
+            'tickets.create',
+            'tickets.create_with_organization_assets',
+
+            'tickets.respond',
+
+            'tickets.visibility',
+            'tickets.visibility.organization',
+        ]);
+
+        $this->syncByKeys('collaborators', [
+            'tickets.collaborator.view',
+        ]);
+
+        $this->syncByKeys('agent-collaborators', [
+            'agent.tickets.visibility',
+            'agent.tickets.visibility.assigned',
+            'agent.client.tickets.collaborator.view',
+            'agent.client.tickets.visibility',
+            'agent.client.tickets.visibility.requester',
+        ]);
+    }
+
+    private function adminPermissions(): array
+    {
+        return [
+
             // General
             'admin.general.manage_notify',
             // Manage
@@ -223,9 +264,14 @@ class RolePermissionSeeder extends Seeder
             // General - Visibility
             'agent.general.visibility.show_health_alert_icon',
             'agent.general.visibility.display_all_labels',
-        ]);
 
-        $this->syncByKeys('agent', [
+        ];
+    }
+
+    private function agentPermissions(): array
+    {
+        return [
+
             // Tickets
             'agent.tickets.create',
             'agent.tickets.respond',
@@ -295,44 +341,8 @@ class RolePermissionSeeder extends Seeder
             // General Panel
             'agent.general.notifications.enabled',
             'agent.general.notifications.receive_agent_notifications',
-        ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | User roles
-        |--------------------------------------------------------------------------
-        */
-
-        $this->syncByKeys('user', [
-            'tickets.create',
-
-            'tickets.respond',
-
-            'tickets.visibility',
-            'tickets.visibility.requester',
-        ]);
-
-        $this->syncByKeys('organization-user', [
-            'tickets.create',
-            'tickets.create_with_organization_assets',
-
-            'tickets.respond',
-
-            'tickets.visibility',
-            'tickets.visibility.organization',
-        ]);
-
-        $this->syncByKeys('collaborators', [
-            'tickets.collaborator.view',
-        ]);
-
-        $this->syncByKeys('agent-collaborators', [
-            'agent.tickets.visibility',
-            'agent.tickets.visibility.assigned',
-            'agent.client.tickets.collaborator.view',
-            'agent.client.tickets.visibility',
-            'agent.client.tickets.visibility.requester',
-        ]);
+        ];
     }
 
     private function syncByKeys(string $roleName, array $permissionKeys): void
