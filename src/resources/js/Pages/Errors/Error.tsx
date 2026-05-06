@@ -24,7 +24,7 @@ const messages: Record<number, { title: string; description: string }> = {
     },
 }
 
-export default function Error({ status }: Props) {
+export default function Error({ status }: Readonly<Props>) {
     const message = messages[status] ?? {
         title: 'Something went wrong',
         description: 'An unexpected error occurred.',
@@ -53,7 +53,7 @@ export default function Error({ status }: Props) {
                     <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                         <button
                             type="button"
-                            onClick={() => window.history.back()}
+                            onClick={() => globalThis.history.back()}
                             className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                         >
                             <ArrowLeft className="h-4 w-4" />

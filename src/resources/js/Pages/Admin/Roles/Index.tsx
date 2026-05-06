@@ -26,14 +26,14 @@ import {
 } from '@/Components/ui/alert-dialog'
 
 type Role = {
-    id: number
-    name: string
-    label: string
-    description?: string | null
-    is_system: boolean
-    is_deleted: boolean
-    deleted_at?: string | null
-    updated_at?: string | null
+    readonly id: number
+    readonly name: string
+    readonly label: string
+    readonly description?: string | null
+    readonly is_system: boolean
+    readonly is_deleted: boolean
+    readonly deleted_at?: string | null
+    readonly updated_at?: string | null
 }
 
 type Props = {
@@ -593,14 +593,14 @@ function RoleActions({
                          role,
                          mobile = false,
                          openActionDialog,
-                     }: {
+                     }: Readonly<{
     role: Role
     mobile?: boolean
     openActionDialog: (
         type: 'delete' | 'restore' | 'force-delete',
         role: Role,
     ) => void
-}) {
+}>)  {
     if (role.is_deleted) {
         return (
             <div
@@ -667,7 +667,7 @@ function RoleActions({
                 </Link>
             )}
 
-            {!role.is_system ? (
+            {role.is_system ? null : (
                 <button
                     type="button"
                     onClick={() => openActionDialog('delete', role)}
@@ -675,7 +675,7 @@ function RoleActions({
                 >
                     <Trash2 className="h-4 w-4" />
                 </button>
-            ) : null}
+            )}
         </div>
     )
 }
