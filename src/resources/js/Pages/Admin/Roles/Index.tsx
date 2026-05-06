@@ -224,13 +224,24 @@ export default function Index({ roles = [] }: Props) {
 
     const isRestore = roleAction?.type === 'restore'
 
-    const buttonText = processing
-        ? 'Processing...'
-        : roleAction?.type === 'restore'
-            ? 'Restore Role'
-            : roleAction?.type === 'force-delete'
-                ? 'Delete Permanently'
-                : 'Delete Role'
+    let buttonText: string;
+
+    if (processing) {
+        buttonText = 'Processing...';
+    } else {
+        switch (roleAction?.type) {
+            case 'restore':
+                buttonText = 'Restore Role';
+                break;
+
+            case 'force-delete':
+                buttonText = 'Delete Permanently';
+                break;
+
+            default:
+                buttonText = 'Delete Role';
+        }
+    }
 
     const buttonClass = isRestore
         ? 'bg-emerald-600 hover:bg-emerald-700'

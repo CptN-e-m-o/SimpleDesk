@@ -59,6 +59,12 @@ function collectPermissionTreeIds(permission: RolePermission): number[] {
     ]
 }
 
+function scrollToGroup(groupKey: string) {
+    document
+        .getElementById(`permission-group-${groupKey}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 export default function RoleForm({
                                      mode,
                                      type,
@@ -119,14 +125,17 @@ export default function RoleForm({
         }
 
         if (permission.ui_type === 'radio' && parent) {
-            const siblingIds = parent.children
-                .filter((child) => child.ui_type === 'radio')
-                .map((child) => child.id)
+            const siblingIds = new Set(
+                parent.children
+                    .filter((child) => child.ui_type === 'radio')
+                    .map((child) => child.id)
+            )
 
-            ids = ids.filter((id) => !siblingIds.includes(id))
+            ids = ids.filter((id) => !siblingIds.has(id))
             ids.push(permission.id)
 
             setData('permission_ids', Array.from(new Set(ids)))
+
             return
         }
 
@@ -168,11 +177,6 @@ export default function RoleForm({
         )
     }
 
-    function scrollToGroup(groupKey: string) {
-        document
-            .getElementById(`permission-group-${groupKey}`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
 
     return (
         <AdminLayout title={pageTitle}>
@@ -317,6 +321,7 @@ export default function RoleForm({
                                     <input
                                         id="is-default"
                                         type="checkbox"
+                                        aria-label="Make default role"
                                         checked={data.is_default}
                                         disabled={isSystem}
                                         onChange={(e) =>

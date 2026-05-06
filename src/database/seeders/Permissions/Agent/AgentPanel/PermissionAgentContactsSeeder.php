@@ -35,6 +35,14 @@ class PermissionAgentContactsSeeder extends Seeder
     private function permissions(): array
     {
         return [
+            ...$this->contactPermissions(),
+            ...$this->organizationPermissions(),
+        ];
+    }
+
+    private function contactPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.contacts.view',
                 'label' => 'View contacts',
@@ -202,6 +210,12 @@ class PermissionAgentContactsSeeder extends Seeder
                 'parent_key' => 'agent.contacts.view',
                 'sort_order' => 210,
             ],
+        ];
+    }
+
+    private function organizationPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.organizations.view',
                 'label' => 'View organizations',

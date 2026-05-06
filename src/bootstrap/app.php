@@ -27,8 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->respond(function ($response, Request $request) {
-            return Inertia::render('Errors/Error', [
+        $exceptions->respond(function ($response, Throwable $exception, Request $request) {
+            return Inertia::render('Errors/ErrorPage', [
                 'status' => $response->getStatusCode(),
             ])
                 ->toResponse($request)
