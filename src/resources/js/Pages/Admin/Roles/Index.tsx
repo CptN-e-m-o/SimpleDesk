@@ -578,7 +578,9 @@ export default function Index({ roles = [] }: Props) {
     )
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat(
+    { label, value }: Readonly<{ label: string; value: number }>,
+) {
     return (
         <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
