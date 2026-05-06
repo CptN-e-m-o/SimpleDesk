@@ -10,7 +10,16 @@ class PermissionAgentTicketsSeeder extends Seeder
 {
     public function run(): void
     {
-        $group = PermissionGroup::updateOrCreate(
+        $group = $this->createOrUpdateGroup();
+
+        foreach ($this->permissions() as $permission) {
+            $this->createOrUpdatePermission($group->id, $permission);
+        }
+    }
+
+    private function createOrUpdateGroup(): PermissionGroup
+    {
+        return PermissionGroup::updateOrCreate(
             [
                 'key' => 'tickets',
                 'panel' => 'agent',
@@ -21,8 +30,11 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'sort_order' => 10,
             ]
         );
+    }
 
-        $permissions = [
+    private function permissions(): array
+    {
+        return [
             [
                 'key' => 'agent.tickets.create',
                 'label' => 'Create ticket',
@@ -279,27 +291,32 @@ class PermissionAgentTicketsSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 340,
             ],
+
         ];
+    }
 
-        foreach ($permissions as $permission) {
-            $parentKey = $permission['parent_key'] ?? null;
+    private function createOrUpdatePermission(int $groupId, array $permission): void
+    {
+        $parentKey = $permission['parent_key'] ?? null;
 
-            unset($permission['parent_key']);
+        unset($permission['parent_key']);
 
-            $parentId = null;
+        Permission::updateOrCreate(
+            ['key' => $permission['key']],
+            [
+                ...$permission,
+                'permission_group_id' => $groupId,
+                'parent_id' => $this->resolveParentId($parentKey),
+            ]
+        );
+    }
 
-            if ($parentKey) {
-                $parentId = Permission::where('key', $parentKey)->value('id');
-            }
-
-            Permission::updateOrCreate(
-                ['key' => $permission['key']],
-                [
-                    ...$permission,
-                    'permission_group_id' => $group->id,
-                    'parent_id' => $parentId,
-                ]
-            );
+    private function resolveParentId(?string $parentKey): ?int
+    {
+        if (! $parentKey) {
+            return null;
         }
+
+        return Permission::where('key', $parentKey)->value('id');
     }
 }
