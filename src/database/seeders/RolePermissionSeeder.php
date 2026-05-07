@@ -118,7 +118,9 @@ class RolePermissionSeeder extends Seeder
         return [
             'admin.staff.manage_agents',
             'admin.staff.manage_teams',
+            'admin.staff.assign_to_team',
             'admin.staff.manage_departments',
+            'admin.staff.assign_as_department_manager',
             'admin.tickets.manage_ticket_settings',
             'admin.tickets.manage_status',
             'admin.tickets.manage_labels',
@@ -382,6 +384,9 @@ class RolePermissionSeeder extends Seeder
 
             'agent.general.notifications.enabled',
             'agent.general.notifications.receive_agent_notifications',
+
+            'admin.staff.assign_to_team',
+            'admin.staff.assign_as_department_manager',
         ];
     }
 

@@ -21,18 +21,22 @@ class TeamMemberSeeder extends Seeder
             fn ($collection) => $collection->prepend($admin)
         );
 
+        if ($teamAssignableUsers->isEmpty()) {
+            return;
+        }
+
         $teams = Team::all();
 
         foreach ($teams as $team) {
-            $members = $teamAssignableUsers->shuffle()->take(rand(2, 4));
+            $members = $teamAssignableUsers
+                ->shuffle()
+                ->take(min(rand(2, 4), $teamAssignableUsers->count()));
 
             $syncData = [];
 
             foreach ($members->values() as $index => $member) {
                 $syncData[$member->id] = [
                     'is_lead' => $index === 0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ];
             }
 

@@ -27,7 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->respond(function ($response, Request $request) {
+        $exceptions->respond(function ($response, Throwable $exception, Request $request) {
+            if (app()->environment('local')) {
+                return $response;
+            }
+
             return Inertia::render('Errors/ErrorPage', [
                 'status' => $response->getStatusCode(),
             ])

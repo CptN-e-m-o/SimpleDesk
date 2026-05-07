@@ -32,7 +32,9 @@ class TeamController extends Controller
 
         $teams = Team::query()
             ->withTrashed()
-            ->with(['members:id,name'])
+            ->with([
+                'members:id,first_name,last_name,email',
+            ])
             ->withCount('members')
             ->latest()
             ->get();
@@ -55,6 +57,7 @@ class TeamController extends Controller
     public function store(StoreTeamRequest $request): RedirectResponse
     {
         $this->authorize('create', Team::class);
+
         $this->teamService->create($request->validated());
 
         return redirect()
@@ -68,7 +71,12 @@ class TeamController extends Controller
 
         $team->load([
             'members' => function ($query) {
-                $query->select('users.id', 'name', 'email');
+                $query->select(
+                    'users.id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                );
             },
         ]);
 
@@ -83,7 +91,7 @@ class TeamController extends Controller
 
         $team->load([
             'departments:id,name,slug',
-            'members:id,name,email',
+            'members:id,first_name,last_name,email',
         ]);
 
         return Inertia::render('Admin/Teams/Edit', [
@@ -129,6 +137,7 @@ class TeamController extends Controller
     public function forceDelete(Team $team): RedirectResponse
     {
         $this->authorize('forceDelete', $team);
+
         $team->forceDelete();
 
         return redirect()

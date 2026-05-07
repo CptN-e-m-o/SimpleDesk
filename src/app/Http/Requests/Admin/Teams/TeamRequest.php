@@ -15,6 +15,15 @@ class TeamRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'departments' => $this->departments ?? [],
+            'member_ids' => $this->member_ids ?? [],
+            'lead_user_id' => $this->lead_user_id === '' ? null : $this->lead_user_id,
+        ]);
+    }
+
     public function rules(): array
     {
         $eligibleUserIds = app(TeamEligibleUsers::class)->ids();
@@ -45,7 +54,7 @@ class TeamRequest extends FormRequest
 
             $leadUserId = $this->input('lead_user_id');
 
-            if ($leadUserId !== null && $leadUserId !== '' && ! $memberIds->contains((int) $leadUserId)) {
+            if ($leadUserId !== null && ! $memberIds->contains((int) $leadUserId)) {
                 $validator->errors()->add(
                     'lead_user_id',
                     'The selected team lead must also be a team member.'

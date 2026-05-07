@@ -14,12 +14,41 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable([
+    'email',
+    'username',
+
+    'first_name',
+    'last_name',
+
+    'location',
+
+    'phone_country_iso2',
+    'phone_country_code',
+    'phone_number',
+    'phone_ext',
+
+    'mobile_country_iso2',
+    'mobile_country_code',
+    'mobile_number',
+
+    'timezone',
+    'signature',
+
+    'email_verified_at',
+    'password',
+    'is_active',
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasPermissions, Notifiable;
+
+    protected $appends = [
+        'name',
+        'full_name',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -31,8 +60,20 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
+
+    public function getNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}") ?: $this->email;
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
 
     public function roles(): BelongsToMany
     {
