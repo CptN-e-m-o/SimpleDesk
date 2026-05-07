@@ -43,6 +43,17 @@ class PermissionAgentContactsSeeder extends Seeder
     private function contactPermissions(): array
     {
         return [
+            ...$this->baseContactPermissions(),
+            ...$this->contactRolePermissions(),
+            ...$this->contactPasswordPermissions(),
+            ...$this->contactAccountStatusPermissions(),
+            ...$this->contactExtraPermissions(),
+        ];
+    }
+
+    private function baseContactPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.contacts.view',
                 'label' => 'View contacts',
@@ -66,6 +77,12 @@ class PermissionAgentContactsSeeder extends Seeder
                 'parent_key' => 'agent.contacts.view',
                 'sort_order' => 30,
             ],
+        ];
+    }
+
+    private function contactRolePermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.contacts.change_role',
                 'label' => 'Change role',
@@ -90,6 +107,12 @@ class PermissionAgentContactsSeeder extends Seeder
                 'parent_key' => 'agent.contacts.change_role',
                 'sort_order' => 60,
             ],
+        ];
+    }
+
+    private function contactPasswordPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.contacts.change_password',
                 'label' => 'Change password',
@@ -114,6 +137,12 @@ class PermissionAgentContactsSeeder extends Seeder
                 'parent_key' => 'agent.contacts.change_password',
                 'sort_order' => 90,
             ],
+        ];
+    }
+
+    private function contactAccountStatusPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.contacts.deactivate_account',
                 'label' => 'Deactivate account',
@@ -186,6 +215,12 @@ class PermissionAgentContactsSeeder extends Seeder
                 'parent_key' => 'agent.contacts.delete_account',
                 'sort_order' => 180,
             ],
+        ];
+    }
+
+    private function contactExtraPermissions(): array
+    {
+        return [
             [
                 'key' => 'agent.contacts.disable_2fa',
                 'label' => 'Disable 2FA',
@@ -284,7 +319,7 @@ class PermissionAgentContactsSeeder extends Seeder
 
     private function resolveParentId(?string $parentKey): ?int
     {
-        if (!$parentKey) {
+        if (! $parentKey) {
             return null;
         }
 

@@ -314,19 +314,6 @@ class RolePermissionSeeder extends Seeder
     private function agentPermissions(): array
     {
         return [
-            ...$this->agentTicketPermissions(),
-            ...$this->agentToolPermissions(),
-            ...$this->agentProblemPermissions(),
-            ...$this->agentContactPermissions(),
-            ...$this->agentChangePermissions(),
-            ...$this->agentAssetPermissions(),
-            ...$this->agentGeneralPermissions(),
-        ];
-    }
-
-    private function agentTicketPermissions(): array
-    {
-        return [
             'agent.tickets.create',
             'agent.tickets.respond',
             'agent.tickets.reply',
@@ -350,45 +337,26 @@ class RolePermissionSeeder extends Seeder
             'agent.tickets.edit_own_time_tracks',
             'agent.tickets.delete_time_tracks',
             'agent.tickets.delete_own_time_tracks',
-        ];
-    }
 
-    private function agentToolPermissions(): array
-    {
-        return [
             'agent.tools.canned_responses',
             'agent.tools.access_all_canned_responses',
             'agent.tools.articles',
             'agent.tools.access_all_articles',
-        ];
-    }
 
-    private function agentProblemPermissions(): array
-    {
-        return [
             'agent.problems.create',
             'agent.problems.view',
             'agent.problems.edit',
             'agent.problems.attach_or_detach_plannings',
-        ];
-    }
 
-    private function agentContactPermissions(): array
-    {
-        return [
             'agent.contacts.view',
             'agent.contacts.create_or_edit',
             'agent.organizations.view',
             'agent.organizations.create_or_edit',
             'agent.organizations.link_or_unlink_contacts',
+
             'agent.reports.analytics',
             'agent.reports.helpdesk',
-        ];
-    }
 
-    private function agentChangePermissions(): array
-    {
-        return [
             'agent.changes.create',
             'agent.changes.view',
             'agent.changes.edit',
@@ -396,30 +364,22 @@ class RolePermissionSeeder extends Seeder
             'agent.changes.attach_or_detach',
             'agent.changes.discussions.actions',
             'agent.changes.discussions.add_or_edit_comment',
-        ];
-    }
 
-    private function agentAssetPermissions(): array
-    {
-        return [
             'agent.assets.create',
             'agent.assets.view',
             'agent.assets.edit',
             'agent.assets.attach_or_detach',
+
             'agent.software_licenses.view',
             'agent.software_licenses.check_in_out',
-        ];
-    }
 
-    private function agentGeneralPermissions(): array
-    {
-        return [
             'agent.client.tickets.create',
             'agent.client.tickets.respond',
             'agent.client.tickets.change_status',
             'agent.client.tickets.visibility',
             'agent.client.tickets.visibility.requester',
             'agent.client.tickets.collaborator.view',
+
             'agent.general.notifications.enabled',
             'agent.general.notifications.receive_agent_notifications',
         ];
