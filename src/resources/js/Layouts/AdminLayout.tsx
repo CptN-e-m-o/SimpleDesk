@@ -52,6 +52,7 @@ type NavItem = {
     isActive: (url: string) => boolean
     permission?: string
     permissions?: string[]
+    visible?: boolean
 }
 
 type NavSection = {
@@ -78,8 +79,8 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
         'agent.tickets.visibility.all',
     ])
 
-    const sections: NavSection[] = useMemo(
-        () => [
+    const sections: NavSection[] = useMemo(() => {
+        const navSections: NavSection[] = [
             {
                 title: 'Main',
                 collapsible: false,
@@ -96,7 +97,9 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         href: route('dashboard'),
                         icon: Briefcase,
                         isActive: (currentUrl: string) =>
-                            currentUrl === '/dashboard' || currentUrl.startsWith('/dashboard/'),
+                            currentUrl === '/dashboard' ||
+                            currentUrl.startsWith('/dashboard/'),
+                        visible: canAccessAgentPanel,
                     },
                 ],
             },
@@ -116,7 +119,8 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         icon: Shield,
                         permission: 'admin.staff.manage_roles',
                         isActive: (currentUrl: string) =>
-                            currentUrl === '/admin/roles' || currentUrl.startsWith('/admin/roles/'),
+                            currentUrl === '/admin/roles' ||
+                            currentUrl.startsWith('/admin/roles/'),
                     },
                     {
                         label: 'Departments',
@@ -124,7 +128,8 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         icon: Building2,
                         permission: 'admin.staff.manage_departments',
                         isActive: (currentUrl: string) =>
-                            currentUrl === '/admin/departments' || currentUrl.startsWith('/admin/departments/'),
+                            currentUrl === '/admin/departments' ||
+                            currentUrl.startsWith('/admin/departments/'),
                     },
                     {
                         label: 'Teams',
@@ -132,7 +137,8 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         icon: UsersRound,
                         permission: 'admin.staff.manage_teams',
                         isActive: (currentUrl: string) =>
-                            currentUrl === '/admin/teams' || currentUrl.startsWith('/admin/teams/'),
+                            currentUrl === '/admin/teams' ||
+                            currentUrl.startsWith('/admin/teams/'),
                     },
                 ],
             },
@@ -238,9 +244,29 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                     },
                 ],
             },
-        ],
-        [],
-    )
+        ]
+
+        return navSections
+            .map((section) => ({
+                ...section,
+                items: section.items.filter((item) => {
+                    if (item.visible === false) {
+                        return false
+                    }
+
+                    if (item.permission) {
+                        return can(item.permission)
+                    }
+
+                    if (item.permissions) {
+                        return canAny(item.permissions)
+                    }
+
+                    return true
+                }),
+            }))
+            .filter((section) => section.items.length > 0)
+    }, [can, canAny, canAccessAgentPanel])
 
     const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
         const state: Record<string, boolean> = {}
