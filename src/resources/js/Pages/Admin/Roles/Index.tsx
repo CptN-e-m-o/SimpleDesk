@@ -24,17 +24,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/Components/ui/alert-dialog'
-
-type Role = {
-    readonly id: number
-    readonly name: string
-    readonly label: string
-    readonly description?: string | null
-    readonly is_system: boolean
-    readonly is_deleted: boolean
-    readonly deleted_at?: string | null
-    readonly updated_at?: string | null
-}
+import { getRoleStatusClasses, getRoleStatusLabel, Role } from './shared'
 
 type Props = {
     readonly roles?: Role[]
@@ -54,24 +44,6 @@ const dialogTitles: Record<string, string> = {
     restore: 'Restore role?',
     'force-delete': 'Delete role permanently?',
     delete: 'Delete role?',
-}
-
-function getRoleStatusLabel(role: Role) {
-    if (role.is_deleted) return 'Deleted'
-    if (role.is_system) return 'System'
-    return 'Custom'
-}
-
-function getRoleStatusClasses(role: Role) {
-    if (role.is_deleted) {
-        return 'bg-rose-50 text-rose-700 ring-rose-200'
-    }
-
-    if (role.is_system) {
-        return 'bg-sky-50 text-sky-700 ring-sky-200'
-    }
-
-    return 'bg-emerald-50 text-emerald-700 ring-emerald-200'
 }
 
 function getDialogDescription(action?: RoleAction) {

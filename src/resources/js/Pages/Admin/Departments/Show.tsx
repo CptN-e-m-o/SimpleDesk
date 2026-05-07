@@ -16,13 +16,7 @@ import {
 } from 'lucide-react'
 import { route } from 'ziggy-js'
 import { useMemo, useState } from 'react'
-
-type DepartmentStatus = {
-    id: number
-    name: string
-    code: string
-    color?: string | null
-} | null
+import { DepartmentStatus, formatDepartmentType, getDepartmentTypeClasses } from './shared'
 
 type DepartmentUser = {
     id: number
@@ -56,22 +50,6 @@ type DepartmentData = {
 
 type Props = {
     readonly department: DepartmentData
-}
-
-function formatDepartmentType(type: string) {
-    if (!type) return '—'
-
-    return type
-        .split(/[_\s-]+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ')
-}
-
-function getTypeClasses(type: string) {
-    return type === 'private'
-        ? 'bg-violet-50 text-violet-700 ring-violet-200'
-        : 'bg-sky-50 text-sky-700 ring-sky-200'
 }
 
 export default function Show({ department }: Props) {
@@ -108,7 +86,7 @@ export default function Show({ department }: Props) {
 
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                             <span
-                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTypeClasses(department.type)}`}
+                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getDepartmentTypeClasses(department.type)}`}
                             >
                                 {formatDepartmentType(department.type)}
                             </span>
@@ -192,7 +170,7 @@ export default function Show({ department }: Props) {
                                             Type
                                         </span>
                                         <span
-                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTypeClasses(department.type)}`}
+                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getDepartmentTypeClasses(department.type)}`}
                                         >
                                             {formatDepartmentType(department.type)}
                                         </span>
