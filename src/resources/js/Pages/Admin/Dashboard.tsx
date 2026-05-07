@@ -14,7 +14,7 @@ export default function Index() {
         {
             title: 'Agents',
             description: 'Manage support agents, permissions, and account access.',
-            href: '#',
+            href: route('admin.agents.index'),
             icon: UserCog,
         },
         {
