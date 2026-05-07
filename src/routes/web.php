@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
             ->middleware('permission:admin.staff.manage_roles');
 
         Route::resource('agents', AgentController::class)
+            ->withTrashed(['show', 'edit', 'update'])
             ->middleware('permission:admin.staff.manage_agents');
 
         Route::get('users/{agent}', [AgentController::class, 'showUser'])

@@ -26,6 +26,8 @@ export type Agent = {
     roles: AgentRole[]
     two_factor_confirmed_at?: string | null
     signature?: string | null
+    phone_country_iso2?: string | null
+    mobile_country_iso2?: string | null
 }
 
 export function getPhone(agent: Agent) {
