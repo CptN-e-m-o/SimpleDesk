@@ -25,28 +25,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/Components/ui/alert-dialog'
-
-type DepartmentManager = {
-    id: number
-    name: string
-}
-
-type DepartmentStatus = {
-    name: string
-    code: string
-    color?: string | null
-} | null
-
-type Department = {
-    id: number
-    name: string
-    type: string
-    is_default: boolean
-    is_deleted: boolean
-    deleted_at?: string | null
-    managers: DepartmentManager[]
-    status?: DepartmentStatus
-}
+import {
+    Department,
+    formatDepartmentType,
+    getDepartmentSearchStatus,
+    getDepartmentStatusClasses,
+    getDepartmentStatusLabel,
+} from './shared'
 
 type Props = {
     readonly departments?: Department[]
@@ -61,40 +46,6 @@ type DepartmentAction =
 
 type SortField = 'name' | 'type'
 type SortDirection = 'asc' | 'desc'
-
-function formatDepartmentType(type: string) {
-    if (!type) return '—'
-
-    return type
-        .split(/[_\s-]+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ')
-}
-
-function getStatusClasses(department: Department) {
-    if (department.is_deleted) {
-        return 'bg-rose-50 text-rose-700 ring-rose-200'
-    }
-
-    if (department.is_default) {
-        return 'bg-sky-50 text-sky-700 ring-sky-200'
-    }
-
-    return 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-}
-
-function getStatusLabel(department: Department) {
-    if (department.is_deleted) return 'Deleted'
-    if (department.is_default) return 'Default'
-    return 'Active'
-}
-
-function getDepartmentSearchStatus(department: Department) {
-    if (department.is_deleted) return 'deleted'
-    if (department.is_default) return 'default'
-    return 'active'
-}
 
 const dialogTitles: Record<string, string> = {
     restore: 'Restore department?',
@@ -644,9 +595,9 @@ export default function Index({ departments = [] }: Props) {
                                                     </div>
 
                                                     <span
-                                                        className={`inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(department)}`}
+                                                        className={`inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getDepartmentStatusClasses(department)}`}
                                                     >
-                                                        {getStatusLabel(
+                                                        {getDepartmentStatusLabel(
                                                             department,
                                                         )}
                                                     </span>

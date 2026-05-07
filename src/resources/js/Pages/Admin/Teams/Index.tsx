@@ -26,18 +26,7 @@ import {
     AlertDialogTitle,
 } from '@/Components/ui/alert-dialog'
 
-type Team = {
-    id: number
-    name: string
-    members_count: number
-    is_active: boolean
-    is_deleted: boolean
-    deleted_at?: string | null
-    lead?: {
-        id: number
-        name: string
-    } | null
-}
+import { Team, getTeamSearchStatus, getTeamStatusClasses, getTeamStatusLabel } from './shared'
 
 type Props = {
     readonly teams?: Team[]
@@ -52,27 +41,6 @@ type TeamAction =
 
 type SortField = 'name' | 'members_count'
 type SortDirection = 'asc' | 'desc'
-
-function getStatusClasses(team: Team) {
-    if (team.is_deleted) {
-        return 'bg-rose-50 text-rose-700 ring-rose-200'
-    }
-
-    return team.is_active
-        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-        : 'bg-amber-50 text-amber-700 ring-amber-200'
-}
-
-function getStatusLabel(team: Team) {
-    if (team.is_deleted) return 'Deleted'
-    return team.is_active ? 'Active' : 'Inactive'
-}
-
-const getTeamStatus = (team: Team) => {
-    if (team.is_deleted) return 'deleted'
-    if (team.is_active) return 'active'
-    return 'inactive'
-}
 
 const dialogTitles: Record<string, string> = {
     restore: 'Restore team?',
@@ -144,7 +112,7 @@ export default function Index({ teams = [] }: Props) {
 
         return teams.filter((team) => {
             const leadName = team.lead?.name?.toLowerCase() ?? ''
-            const status = getTeamStatus(team)
+            const status = getTeamSearchStatus(team)
 
             return (
                 team.name.toLowerCase().includes(query) ||
@@ -451,9 +419,9 @@ export default function Index({ teams = [] }: Props) {
 
                                                 <td className="px-6 py-5">
                                                         <span
-                                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(team)}`}
+                                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTeamStatusClasses(team)}`}
                                                         >
-                                                            {getStatusLabel(team)}
+                                                            {getTeamStatusLabel(team)}
                                                         </span>
                                                 </td>
 
@@ -562,9 +530,9 @@ export default function Index({ teams = [] }: Props) {
                                                 </div>
 
                                                 <span
-                                                    className={`inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(team)}`}
+                                                    className={`inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTeamStatusClasses(team)}`}
                                                 >
-                                                    {getStatusLabel(team)}
+                                                    {getTeamStatusLabel(team)}
                                                 </span>
                                             </div>
 

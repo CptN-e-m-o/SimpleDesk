@@ -30,6 +30,8 @@ type TeamDepartment = {
     slug: string
 }
 
+import { getTeamStatusClasses, getTeamStatusLabel } from './shared'
+
 type TeamData = {
     id: number
     name: string
@@ -47,13 +49,6 @@ type TeamData = {
 
 type Props = {
     readonly team: TeamData
-}
-
-
-function getStatusClasses(isActive: boolean) {
-    return isActive
-        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-        : 'bg-rose-50 text-rose-700 ring-rose-200'
 }
 
 
@@ -91,9 +86,9 @@ export default function Show({ team }: Props) {
 
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                             <span
-                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(team.is_active)}`}
+                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTeamStatusClasses({ is_active: team.is_active, is_deleted: false })}`}
                             >
-                                {team.is_active ? 'Active' : 'Inactive'}
+                                {getTeamStatusLabel({ is_active: team.is_active, is_deleted: false })}
                             </span>
 
                             <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-200">
@@ -186,9 +181,9 @@ export default function Show({ team }: Props) {
                                             Status
                                         </span>
                                         <span
-                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(team.is_active)}`}
+                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getTeamStatusClasses({ is_active: team.is_active, is_deleted: false })}`}
                                         >
-                                            {team.is_active ? 'Active' : 'Inactive'}
+                                            {getTeamStatusLabel({ is_active: team.is_active, is_deleted: false })}
                                         </span>
                                     </div>
 
