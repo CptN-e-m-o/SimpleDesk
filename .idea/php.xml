@@ -135,6 +135,13 @@
       <path value="$PROJECT_DIR$/src/vendor/larastan/larastan" />
       <path value="$PROJECT_DIR$/src/vendor/phpstan/phpstan" />
       <path value="$PROJECT_DIR$/src/vendor/iamcal/sql-parser" />
+      <path value="$PROJECT_DIR$/src/vendor/jenssegers/agent" />
+      <path value="$PROJECT_DIR$/src/vendor/jaybizzle/crawler-detect" />
+      <path value="$PROJECT_DIR$/src/vendor/mobiledetect/mobiledetectlib" />
+      <path value="$PROJECT_DIR$/src/vendor/torann/geoip" />
+      <path value="$PROJECT_DIR$/src/vendor/maxmind/web-service-common" />
+      <path value="$PROJECT_DIR$/src/vendor/geoip2/geoip2" />
+      <path value="$PROJECT_DIR$/src/vendor/maxmind-db/reader" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />

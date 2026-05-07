@@ -2,7 +2,7 @@
 
 namespace App\Support\Departments;
 
-use App\Models\User;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Admin\Department;
 use App\Models\Admin\Team;
 use App\Models\Role;
-use App\Models\User;
+use App\Models\User\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 

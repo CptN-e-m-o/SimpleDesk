@@ -17,8 +17,22 @@ import {
     Trash2,
     UserRound,
     Users,
+    CheckCircle2,
+    XCircle,
+    MailCheck,
+    MailX,
+    ShieldCheck,
+    ShieldOff,
+    ChevronDown,
+    UserCog
 } from 'lucide-react'
 import {JSX, useMemo, useState} from 'react'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/Components/ui/dropdown-menu'
 import { route } from 'ziggy-js'
 import {
     AlertDialog,
@@ -57,6 +71,7 @@ type Agent = {
     deleted_at?: string | null
     email_verified_at?: string | null
     roles: AgentRole[]
+    two_factor_confirmed_at?: string | null
 }
 
 type Props = {
@@ -136,6 +151,75 @@ function getDialogDescription(action?: AgentAction) {
             Agent <span className="font-semibold text-gray-900">{name}</span>{' '}
             will be soft deleted and can be restored later.
         </>
+    )
+}
+
+function AccountInfo({ agent }: { agent: Agent }) {
+    const hasPhone = getPhone(agent) !== '—' || getMobile(agent) !== '—'
+
+    return (
+        <div className="flex items-center gap-2">
+            <StatusIcon
+                active={Boolean(agent.email_verified_at)}
+                activeIcon={MailCheck}
+                inactiveIcon={MailX}
+                activeTitle="Email verified"
+                inactiveTitle="Email not verified"
+            />
+
+            <StatusIcon
+                active={hasPhone}
+                activeIcon={Phone}
+                inactiveIcon={Phone}
+                activeTitle="Phone added"
+                inactiveTitle="Phone not added"
+            />
+
+            <StatusIcon
+                active={Boolean(agent.two_factor_confirmed_at)}
+                activeIcon={ShieldCheck}
+                inactiveIcon={ShieldOff}
+                activeTitle="2FA enabled"
+                inactiveTitle="2FA disabled"
+            />
+
+            <StatusIcon
+                active={!agent.is_deleted && agent.is_active}
+                activeIcon={CheckCircle2}
+                inactiveIcon={XCircle}
+                activeTitle="Account active"
+                inactiveTitle={agent.is_deleted ? 'Account deleted' : 'Account inactive'}
+            />
+        </div>
+    )
+}
+
+function StatusIcon({
+                        active,
+                        activeIcon: ActiveIcon,
+                        inactiveIcon: InactiveIcon,
+                        activeTitle,
+                        inactiveTitle,
+                    }: {
+    active: boolean
+    activeIcon: typeof MailCheck
+    inactiveIcon: typeof MailX
+    activeTitle: string
+    inactiveTitle: string
+}) {
+    const Icon = active ? ActiveIcon : InactiveIcon
+
+    return (
+        <span
+            title={active ? activeTitle : inactiveTitle}
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ring-inset ${
+                active
+                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                    : 'bg-gray-50 text-gray-400 ring-gray-200'
+            }`}
+        >
+            <Icon className="h-4 w-4" />
+        </span>
     )
 }
 
@@ -350,20 +434,13 @@ export default function Index({ agents = [] }: Props) {
                                             />
 
                                             <SortableTh
-                                                label="User name"
-                                                field="username"
-                                                onSort={handleSort}
-                                                renderIcon={renderSortIcon}
-                                            />
-
-                                            <SortableTh
                                                 label="Email"
                                                 field="email"
                                                 onSort={handleSort}
                                                 renderIcon={renderSortIcon}
                                             />
 
-                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            <th className="w-72 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                                                 Phone
                                             </th>
 
@@ -371,11 +448,11 @@ export default function Index({ agents = [] }: Props) {
                                                 Role
                                             </th>
 
-                                            <th className="w-56 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                Status
+                                            <th className="w-48 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Account info
                                             </th>
 
-                                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            <th className="w-40 px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
                                                 Actions
                                             </th>
                                         </tr>
@@ -402,14 +479,11 @@ export default function Index({ agents = [] }: Props) {
                                                         >
                                                             {agent.name || '—'}
                                                         </p>
+
                                                         <p className="mt-1 text-sm text-gray-500">
-                                                            Agent #{agent.id}
+                                                            @{agent.username} · Agent #{agent.id}
                                                         </p>
                                                     </div>
-                                                </td>
-
-                                                <td className="px-6 py-5 text-sm font-medium text-gray-700">
-                                                    {agent.username}
                                                 </td>
 
                                                 <td className="px-6 py-5">
@@ -419,15 +493,16 @@ export default function Index({ agents = [] }: Props) {
                                                     </div>
                                                 </td>
 
-                                                <td className="px-6 py-5 text-sm text-gray-600">
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <Phone className="h-4 w-4 text-gray-400" />
-                                                            {getPhone(agent)}
+                                                <td className="w-72 px-6 py-5 text-sm text-gray-600">
+                                                    <div className="space-y-1.5">
+                                                        <div className="flex items-center gap-2 whitespace-nowrap">
+                                                            <Phone className="h-4 w-4 shrink-0 text-gray-400" />
+                                                            <span>{getPhone(agent)}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <Smartphone className="h-4 w-4 text-gray-400" />
-                                                            {getMobile(agent)}
+
+                                                        <div className="flex items-center gap-2 whitespace-nowrap">
+                                                            <Smartphone className="h-4 w-4 shrink-0 text-gray-400" />
+                                                            <span>{getMobile(agent)}</span>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -449,27 +524,11 @@ export default function Index({ agents = [] }: Props) {
                                                     </div>
                                                 </td>
 
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                            <span
-                                                                className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(agent)}`}
-                                                            >
-                                                                {getStatusLabel(agent)}
-                                                            </span>
-
-                                                        {agent.email_verified_at ? (
-                                                            <span className="inline-flex whitespace-nowrap rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                                                                    Email verified
-                                                                </span>
-                                                        ) : (
-                                                            <span className="inline-flex whitespace-nowrap rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
-                                                                    Email not verified
-                                                                </span>
-                                                        )}
-                                                    </div>
+                                                <td className="w-48 px-6 py-5">
+                                                    <AccountInfo agent={agent} />
                                                 </td>
 
-                                                <td className="px-6 py-5">
+                                                <td className="w-40 px-6 py-5">
                                                     <AgentActions
                                                         agent={agent}
                                                         onAction={openActionDialog}
@@ -694,11 +753,11 @@ function AgentActions({
 }) {
     if (agent.is_deleted) {
         return (
-            <div className={mobile ? 'grid gap-2 sm:grid-cols-2' : 'flex items-center justify-end gap-2'}>
+            <div className={mobile ? 'flex items-center gap-2' : 'flex shrink-0 items-center justify-end gap-2'}>
                 <button
                     type="button"
                     onClick={() => onAction('restore', agent)}
-                    className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                    className="inline-flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
                 >
                     <RotateCcw className="h-4 w-4" />
                     Restore
@@ -707,7 +766,7 @@ function AgentActions({
                 <button
                     type="button"
                     onClick={() => onAction('force-delete', agent)}
-                    className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+                    className="inline-flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
                 >
                     <ShieldAlert className="h-4 w-4" />
                     Delete permanently
@@ -718,16 +777,43 @@ function AgentActions({
 
     return (
         <div className={mobile ? 'flex items-center gap-2' : 'flex items-center justify-end gap-2'}>
-            <Link
-                href={route('admin.agents.show', agent.id)}
-                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
-            >
-                <Eye className="h-4 w-4" />
-            </Link>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button
+                        type="button"
+                        className="inline-flex h-10 cursor-pointer items-center justify-center gap-1 rounded-2xl border border-gray-200 bg-white px-3 text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                    >
+                        <Eye className="h-4 w-4" />
+                        <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-52 rounded-2xl">
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route('admin.agents.show', agent.id)}
+                            className="flex cursor-pointer items-center gap-2"
+                        >
+                            <UserCog className="h-4 w-4" />
+                            View as agent
+                        </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                        <Link
+                            href={route('admin.users.show', agent.id)}
+                            className="flex cursor-pointer items-center gap-2"
+                        >
+                            <Eye className="h-4 w-4" />
+                            View as user
+                        </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
 
             <Link
                 href={route('admin.agents.edit', agent.id)}
-                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
             >
                 <Pencil className="h-4 w-4" />
             </Link>
@@ -735,7 +821,7 @@ function AgentActions({
             <button
                 type="button"
                 onClick={() => onAction('delete', agent)}
-                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
             >
                 <Trash2 className="h-4 w-4" />
             </button>

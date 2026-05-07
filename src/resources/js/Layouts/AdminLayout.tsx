@@ -109,9 +109,11 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                 items: [
                     {
                         label: 'Agents',
-                        href: '#',
+                        href: route('admin.agents.index'),
                         icon: UserCog,
-                        isActive: () => false,
+                        isActive: (currentUrl: string) =>
+                            currentUrl === '/admin/agents' ||
+                            currentUrl.startsWith('/admin/agents/'),
                     },
                     {
                         label: 'Roles',
@@ -577,7 +579,7 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                                 </a>
                             </div>
 
-                            <div className="font-medium text-gray-600">Admin version 0.0.1</div>
+                            <div className="font-medium text-gray-600">Admin version 0.0.4</div>
                         </div>
                     </footer>
                 </div>

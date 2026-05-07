@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
 use App\Models\Admin\Department;
 use App\Models\Admin\Team;
 use App\Models\Concerns\HasPermissions;
+use App\Models\Role;
+use App\Models\Ticket;
+use App\Models\TicketReply;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -51,11 +54,6 @@ class User extends Authenticatable
         'full_name',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -138,5 +136,15 @@ class User extends Authenticatable
             ->withPivot('is_manager')
             ->wherePivot('is_manager', true)
             ->withTimestamps();
+    }
+
+    public function loginSessions(): HasMany
+    {
+        return $this->hasMany(UserLoginSession::class);
+    }
+
+    public function securityEvents(): HasMany
+    {
+        return $this->hasMany(UserSecurityEvent::class);
     }
 }

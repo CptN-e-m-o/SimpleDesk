@@ -116,7 +116,7 @@ export default function AuthLayout({ title, description, children }: Props) {
 
                             <div className="mt-8 flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between lg:hidden">
                                 <span>Copyright © 2026. All rights reserved.</span>
-                                <span className="font-medium text-gray-600">Version 0.0.1</span>
+                                <span className="font-medium text-gray-600">Version 0.0.4</span>
                             </div>
                         </div>
                     </div>

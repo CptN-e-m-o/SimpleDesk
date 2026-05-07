@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Admin\Team;
-use App\Models\User;
+use App\Models\User\User;
 use Illuminate\Database\Seeder;
 
 class TeamMemberSeeder extends Seeder

@@ -103,6 +103,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('agents', AgentController::class)
             ->middleware('permission:admin.staff.manage_agents');
 
+        Route::get('users/{agent}', [AgentController::class, 'showUser'])
+            ->withTrashed()
+            ->middleware('permission:admin.staff.manage_agents')
+            ->name('users.show');
+
         Route::patch('agents/{agent}/restore', [AgentController::class, 'restore'])
             ->withTrashed()
             ->middleware('permission:admin.staff.manage_agents')

@@ -128,6 +128,13 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/iamcal/sql-parser" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/larastan/larastan" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/phpstan/phpstan" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/geoip2/geoip2" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/jaybizzle/crawler-detect" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/jenssegers/agent" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/maxmind-db/reader" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/maxmind/web-service-common" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/mobiledetect/mobiledetectlib" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/torann/geoip" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

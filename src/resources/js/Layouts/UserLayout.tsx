@@ -122,7 +122,7 @@ export default function PublicLayout({ children }: Props) {
                         </a>
                     </div>
 
-                    <div className="font-medium text-gray-600">Version 0.0.1</div>
+                    <div className="font-medium text-gray-600">Version 0.0.4</div>
                 </div>
             </footer>
         </div>
