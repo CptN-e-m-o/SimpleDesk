@@ -31,10 +31,11 @@ class DepartmentController extends Controller
     public function index(): Response
     {
         $this->authorize('viewAny', Department::class);
+
         $departments = Department::query()
             ->withTrashed()
             ->with([
-                'managers:id,name,email',
+                'managers:id,first_name,last_name,email',
                 'status:id,name,color,code',
             ])
             ->latest()
@@ -59,6 +60,7 @@ class DepartmentController extends Controller
     public function store(StoreDepartmentRequest $request): RedirectResponse
     {
         $this->authorize('create', Department::class);
+
         $this->departmentService->create($request->validated());
 
         return redirect()
@@ -72,9 +74,9 @@ class DepartmentController extends Controller
 
         $department->load([
             'status:id,name,code,color',
-            'managers:id,name,email',
+            'managers:id,first_name,last_name,email',
             'teams:id,name',
-            'users:id,name,email',
+            'users:id,first_name,last_name,email',
         ]);
 
         return Inertia::render('Admin/Departments/Show', [
@@ -87,7 +89,7 @@ class DepartmentController extends Controller
         $this->authorize('update', $department);
 
         $department->load([
-            'managers:id,name,email',
+            'managers:id,first_name,last_name,email',
             'teams:id,name',
         ]);
 
@@ -135,6 +137,7 @@ class DepartmentController extends Controller
     public function forceDelete(Department $department): RedirectResponse
     {
         $this->authorize('forceDelete', $department);
+
         $department->forceDelete();
 
         return redirect()

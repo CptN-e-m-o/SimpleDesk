@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TeamController;
@@ -98,6 +99,25 @@ Route::middleware('auth')->group(function () {
         Route::resource('roles', RoleController::class)
             ->except(['show'])
             ->middleware('permission:admin.staff.manage_roles');
+
+        Route::resource('agents', AgentController::class)
+            ->withTrashed(['show', 'edit', 'update'])
+            ->middleware('permission:admin.staff.manage_agents');
+
+        Route::get('users/{agent}', [AgentController::class, 'showUser'])
+            ->withTrashed()
+            ->middleware('permission:admin.staff.manage_agents')
+            ->name('users.show');
+
+        Route::patch('agents/{agent}/restore', [AgentController::class, 'restore'])
+            ->withTrashed()
+            ->middleware('permission:admin.staff.manage_agents')
+            ->name('agents.restore');
+
+        Route::delete('agents/{agent}/force-delete', [AgentController::class, 'forceDelete'])
+            ->withTrashed()
+            ->middleware('super_admin')
+            ->name('agents.force-delete');
     });
 
     Route::post('/logout', function (Request $request) {

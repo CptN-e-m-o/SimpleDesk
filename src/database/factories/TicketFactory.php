@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Ticket;
 use App\Models\TicketCategory;
-use App\Models\User;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TicketFactory extends Factory

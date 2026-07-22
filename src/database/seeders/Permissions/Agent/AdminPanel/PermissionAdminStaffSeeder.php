@@ -45,11 +45,25 @@ class PermissionAdminStaffSeeder extends Seeder
                 'sort_order' => 30,
             ],
             [
+                'key' => 'admin.staff.assign_as_department_manager',
+                'label' => 'Can be assigned as department manager',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 40,
+            ],
+            [
                 'key' => 'admin.staff.manage_teams',
                 'label' => 'Manage teams',
                 'type' => 'agent',
                 'ui_type' => 'checkbox',
-                'sort_order' => 40,
+                'sort_order' => 50,
+            ],
+            [
+                'key' => 'admin.staff.assign_to_team',
+                'label' => 'Can be assigned to teams',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 60,
             ],
         ];
 

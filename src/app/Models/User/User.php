@@ -1,38 +1,78 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
 use App\Models\Admin\Department;
 use App\Models\Admin\Team;
 use App\Models\Concerns\HasPermissions;
+use App\Models\Role;
+use App\Models\Ticket;
+use App\Models\TicketReply;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable([
+    'email',
+    'username',
+
+    'first_name',
+    'last_name',
+
+    'location',
+
+    'phone_country_iso2',
+    'phone_country_code',
+    'phone_number',
+    'phone_ext',
+
+    'mobile_country_iso2',
+    'mobile_country_code',
+    'mobile_number',
+
+    'timezone',
+    'signature',
+
+    'email_verified_at',
+    'password',
+    'is_active',
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasPermissions, Notifiable;
+    use HasFactory, HasPermissions, Notifiable, SoftDeletes;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    protected $appends = [
+        'name',
+        'full_name',
+    ];
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
+
+    public function getNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}") ?: $this->email;
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
 
     public function roles(): BelongsToMany
     {
@@ -96,5 +136,15 @@ class User extends Authenticatable
             ->withPivot('is_manager')
             ->wherePivot('is_manager', true)
             ->withTimestamps();
+    }
+
+    public function loginSessions(): HasMany
+    {
+        return $this->hasMany(UserLoginSession::class);
+    }
+
+    public function securityEvents(): HasMany
+    {
+        return $this->hasMany(UserSecurityEvent::class);
     }
 }

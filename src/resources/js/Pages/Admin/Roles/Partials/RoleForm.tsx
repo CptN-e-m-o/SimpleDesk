@@ -6,9 +6,11 @@ import {
     ArrowLeft,
     BadgeCheck,
     Save,
+    Search,
     ShieldCheck,
+    X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { route } from 'ziggy-js'
 import type {
@@ -38,12 +40,6 @@ function getSubmitText(isEdit: boolean, processing: boolean) {
     return isEdit ? 'Save Changes' : 'Create Role'
 }
 
-function toggleId(ids: number[], id: number) {
-    return ids.includes(id)
-        ? ids.filter((currentId) => currentId !== id)
-        : [...ids, id]
-}
-
 function collectPermissionIds(group: RolePermissionGroup) {
     return group.permissions.flatMap((permission) =>
         collectPermissionTreeIds(permission),
@@ -57,6 +53,30 @@ function collectPermissionTreeIds(permission: RolePermission): number[] {
             collectPermissionTreeIds(child),
         ),
     ]
+}
+
+function filterPermissionTree(
+    permission: RolePermission,
+    query: string,
+): RolePermission | null {
+    if (!query) return permission
+
+    const children = permission.children
+        .map((child) => filterPermissionTree(child, query))
+        .filter((child): child is RolePermission => child !== null)
+
+    const ownMatch =
+        permission.label.toLowerCase().includes(query) ||
+        permission.description?.toLowerCase().includes(query)
+
+    if (!ownMatch && children.length === 0) {
+        return null
+    }
+
+    return {
+        ...permission,
+        children,
+    }
 }
 
 function scrollToGroup(groupKey: string) {
@@ -76,6 +96,7 @@ export default function RoleForm({
     const [activePanelKey, setActivePanelKey] = useState(
         permissionPanels[0]?.key ?? 'general',
     )
+    const [permissionSearch, setPermissionSearch] = useState('')
 
     const { data, setData, post, put, processing, errors } =
         useForm<RoleFormData>(initialData)
@@ -84,12 +105,62 @@ export default function RoleForm({
     const pageTitle = getPageTitle(isEdit, type)
     const submitText = getSubmitText(isEdit, processing)
 
+    const normalizedPermissionSearch = permissionSearch.toLowerCase().trim()
+
+    const visiblePermissionPanels = useMemo(() => {
+        if (!normalizedPermissionSearch) return permissionPanels
+
+        return permissionPanels.filter((panel) =>
+            panel.groups.some((group) =>
+                group.permissions.some(
+                    (permission) =>
+                        filterPermissionTree(
+                            permission,
+                            normalizedPermissionSearch,
+                        ) !== null,
+                ),
+            ),
+        )
+    }, [permissionPanels, normalizedPermissionSearch])
+
+    useEffect(() => {
+        if (
+            visiblePermissionPanels.length > 0 &&
+            !visiblePermissionPanels.some(
+                (panel) => panel.key === activePanelKey,
+            )
+        ) {
+            setActivePanelKey(visiblePermissionPanels[0].key)
+        }
+    }, [activePanelKey, visiblePermissionPanels])
+
     const activePanel = useMemo(() => {
         return (
-            permissionPanels.find((panel) => panel.key === activePanelKey) ??
-            permissionPanels[0]
+            visiblePermissionPanels.find((panel) => panel.key === activePanelKey) ??
+            visiblePermissionPanels[0]
         )
-    }, [activePanelKey, permissionPanels])
+    }, [activePanelKey, visiblePermissionPanels])
+
+    const filteredGroups = useMemo(() => {
+        if (!activePanel) return []
+
+        return activePanel.groups
+            .map((group) => ({
+                ...group,
+                permissions: group.permissions
+                    .map((permission) =>
+                        filterPermissionTree(
+                            permission,
+                            normalizedPermissionSearch,
+                        ),
+                    )
+                    .filter(
+                        (permission): permission is RolePermission =>
+                            permission !== null,
+                    ),
+            }))
+            .filter((group) => group.permissions.length > 0)
+    }, [activePanel, normalizedPermissionSearch])
 
     function submit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -100,18 +171,6 @@ export default function RoleForm({
         }
 
         post(submitUrl)
-    }
-
-    function togglePermission(permission: RolePermission) {
-        let ids = toggleId(data.permission_ids, permission.id)
-
-        if (data.permission_ids.includes(permission.id)) {
-            const treeIds = collectPermissionTreeIds(permission)
-
-            ids = ids.filter((id) => !treeIds.includes(id))
-        }
-
-        setData('permission_ids', ids)
     }
 
     function togglePermissionNode(
@@ -128,14 +187,13 @@ export default function RoleForm({
             const siblingIds = new Set(
                 parent.children
                     .filter((child) => child.ui_type === 'radio')
-                    .map((child) => child.id)
+                    .map((child) => child.id),
             )
 
             ids = ids.filter((id) => !siblingIds.has(id))
             ids.push(permission.id)
 
             setData('permission_ids', Array.from(new Set(ids)))
-
             return
         }
 
@@ -156,7 +214,10 @@ export default function RoleForm({
 
     function isGroupSelected(group: RolePermissionGroup) {
         const ids = collectPermissionIds(group)
-        return ids.length > 0 && ids.every((id) => data.permission_ids.includes(id))
+        return (
+            ids.length > 0 &&
+            ids.every((id) => data.permission_ids.includes(id))
+        )
     }
 
     function toggleGroup(group: RolePermissionGroup) {
@@ -176,7 +237,6 @@ export default function RoleForm({
             Array.from(new Set([...data.permission_ids, ...groupIds])),
         )
     }
-
 
     return (
         <AdminLayout title={pageTitle}>
@@ -241,7 +301,9 @@ export default function RoleForm({
                                     id="role-label"
                                     type="text"
                                     value={data.label}
-                                    onChange={(e) => setData('label', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('label', e.target.value)
+                                    }
                                     placeholder="Example: Organization User"
                                     className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
                                 />
@@ -266,7 +328,9 @@ export default function RoleForm({
                                     type="text"
                                     value={data.name}
                                     disabled={isSystem}
-                                    onChange={(e) => setData('name', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
                                     placeholder="organization_user"
                                     className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100 disabled:bg-gray-50 disabled:text-gray-400"
                                 />
@@ -325,7 +389,10 @@ export default function RoleForm({
                                         checked={data.is_default}
                                         disabled={isSystem}
                                         onChange={(e) =>
-                                            setData('is_default', e.target.checked)
+                                            setData(
+                                                'is_default',
+                                                e.target.checked,
+                                            )
                                         }
                                         className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
                                     />
@@ -337,7 +404,10 @@ export default function RoleForm({
 
                                         <span className="mt-1 block text-sm leading-6 text-gray-500">
                                             Use this role as default for new{' '}
-                                            {type === 'agent' ? 'agents' : 'users'}.
+                                            {type === 'agent'
+                                                ? 'agents'
+                                                : 'users'}
+                                            .
                                         </span>
                                     </span>
                                 </label>
@@ -360,13 +430,42 @@ export default function RoleForm({
                             </p>
                         </div>
 
+                        <div className="border-b border-gray-200 bg-white px-6 py-5">
+                            <div className="relative max-w-2xl">
+                                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+                                <input
+                                    type="text"
+                                    value={permissionSearch}
+                                    onChange={(e) =>
+                                        setPermissionSearch(e.target.value)
+                                    }
+                                    placeholder="Search permissions by name or description..."
+                                    className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 pl-12 pr-12 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                                />
+
+                                {permissionSearch ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setPermissionSearch('')}
+                                        className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-xl text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                                        aria-label="Clear permission search"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                ) : null}
+                            </div>
+                        </div>
+
                         <div className="border-b border-gray-200 px-6 pt-5">
                             <div className="flex flex-wrap gap-2">
-                                {permissionPanels.map((panel) => (
+                                {visiblePermissionPanels.map((panel) => (
                                     <button
                                         key={panel.key}
                                         type="button"
-                                        onClick={() => setActivePanelKey(panel.key)}
+                                        onClick={() =>
+                                            setActivePanelKey(panel.key)
+                                        }
                                         className={`rounded-t-2xl border px-4 py-3 text-sm font-medium transition ${
                                             activePanel?.key === panel.key
                                                 ? 'border-gray-200 border-b-white bg-white text-sky-700'
@@ -380,74 +479,105 @@ export default function RoleForm({
                         </div>
 
                         {activePanel ? (
-                            <>
-                                <div className="border-b border-gray-100 bg-gray-50/70 px-6 py-4">
-                                    <div className="flex flex-wrap items-center gap-2 text-sm">
-                                        <span className="font-semibold text-gray-700">
-                                            Scroll To:
-                                        </span>
-
-                                        {activePanel.groups.map((group, index) => (
-                                            <span key={group.id}>
-                                                {index > 0 ? (
-                                                    <span className="mx-1 text-gray-300">
-                                                        |
-                                                    </span>
-                                                ) : null}
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        scrollToGroup(group.key)
-                                                    }
-                                                    className="font-medium text-sky-600 transition hover:text-sky-700"
-                                                >
-                                                    {group.label}
-                                                </button>
+                            filteredGroups.length > 0 ? (
+                                <>
+                                    <div className="border-b border-gray-100 bg-gray-50/70 px-6 py-4">
+                                        <div className="flex flex-wrap items-center gap-2 text-sm">
+                                            <span className="font-semibold text-gray-700">
+                                                Scroll To:
                                             </span>
+
+                                            {filteredGroups.map((group, index) => (
+                                                <span key={group.id}>
+                                                    {index > 0 ? (
+                                                        <span className="mx-1 text-gray-300">
+                                                            |
+                                                        </span>
+                                                    ) : null}
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            scrollToGroup(
+                                                                group.key,
+                                                            )
+                                                        }
+                                                        className="font-medium text-sky-600 transition hover:text-sky-700"
+                                                    >
+                                                        {group.label}
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid gap-5 p-6 xl:grid-cols-2">
+                                        {filteredGroups.map((group) => (
+                                            <div
+                                                key={group.id}
+                                                id={`permission-group-${group.key}`}
+                                                className="scroll-mt-6 overflow-hidden rounded-[24px] border border-gray-200 bg-gray-50"
+                                            >
+                                                <div className="flex items-center justify-between gap-4 border-b border-gray-200 bg-white px-5 py-4">
+                                                    <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
+                                                        {group.label}
+                                                    </h3>
+
+                                                    <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-500">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isGroupSelected(
+                                                                group,
+                                                            )}
+                                                            onChange={() =>
+                                                                toggleGroup(group)
+                                                            }
+                                                            className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                                                        />
+                                                        <span>Select All</span>
+                                                    </label>
+                                                </div>
+
+                                                <div className="space-y-4 p-5">
+                                                    {group.permissions.map(
+                                                        (permission) => (
+                                                            <PermissionNode
+                                                                key={
+                                                                    permission.id
+                                                                }
+                                                                permission={
+                                                                    permission
+                                                                }
+                                                                isChecked={
+                                                                    isChecked
+                                                                }
+                                                                togglePermissionNode={
+                                                                    togglePermissionNode
+                                                                }
+                                                            />
+                                                        ),
+                                                    )}
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
+                                </>
+                            ) : (
+                                <div className="p-10 text-center">
+                                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 ring-1 ring-gray-200">
+                                        <Search className="h-6 w-6 text-gray-400" />
+                                    </div>
+
+                                    <h3 className="mt-4 text-sm font-semibold text-gray-900">
+                                        No permissions found
+                                    </h3>
+
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Try another search term or clear the search
+                                        field.
+                                    </p>
                                 </div>
-
-                                <div className="grid gap-5 p-6 xl:grid-cols-2">
-                                    {activePanel.groups.map((group) => (
-                                        <div
-                                            key={group.id}
-                                            id={`permission-group-${group.key}`}
-                                            className="scroll-mt-6 overflow-hidden rounded-[24px] border border-gray-200 bg-gray-50"
-                                        >
-                                            <div className="flex items-center justify-between gap-4 border-b border-gray-200 bg-white px-5 py-4">
-                                                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
-                                                    {group.label}
-                                                </h3>
-
-                                                <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-500">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isGroupSelected(group)}
-                                                        onChange={() =>
-                                                            toggleGroup(group)
-                                                        }
-                                                        className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                                                    />
-                                                    <span>Select All</span>
-                                                </label>
-                                            </div>
-
-                                            <div className="space-y-4 p-5">
-                                                {group.permissions.map((permission) => (
-                                                    <PermissionNode
-                                                        key={permission.id}
-                                                        permission={permission}
-                                                        isChecked={isChecked}
-                                                        togglePermissionNode={togglePermissionNode}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
+                            )
                         ) : (
                             <div className="p-6 text-sm text-gray-500">
                                 No permissions available for this role type.

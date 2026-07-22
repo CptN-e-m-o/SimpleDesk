@@ -79,9 +79,9 @@ class TicketController extends Controller
 
         $ticket->load([
             'category:id,name',
-            'requester:id,name,email',
-            'assignee:id,name,email',
-            'replies.user:id,name,email',
+            'requester:id,first_name,last_name,email',
+            'assignee:id,first_name,last_name,email',
+            'replies.user:id,first_name,last_name,email',
         ]);
 
         return Inertia::render('Tickets/User/Show', [
@@ -99,44 +99,39 @@ class TicketController extends Controller
                 'last_reply_at' => $ticket->last_reply_at?->toDateTimeString(),
                 'resolved_at' => $ticket->resolved_at?->toDateTimeString(),
                 'closed_at' => $ticket->closed_at?->toDateTimeString(),
-                'category' => $ticket->category
-                    ? [
-                        'id' => $ticket->category->id,
-                        'name' => $ticket->category->name,
-                    ]
-                    : null,
-                'requester' => $ticket->requester
-                    ? [
-                        'id' => $ticket->requester->id,
-                        'name' => $ticket->requester->name,
-                        'email' => $ticket->requester->email,
-                    ]
-                    : null,
-                'assignee' => $ticket->assignee
-                    ? [
-                        'id' => $ticket->assignee->id,
-                        'name' => $ticket->assignee->name,
-                        'email' => $ticket->assignee->email,
-                    ]
-                    : null,
+
+                'category' => $ticket->category ? [
+                    'id' => $ticket->category->id,
+                    'name' => $ticket->category->name,
+                ] : null,
+
+                'requester' => $ticket->requester ? [
+                    'id' => $ticket->requester->id,
+                    'name' => $ticket->requester->name,
+                    'email' => $ticket->requester->email,
+                ] : null,
+
+                'assignee' => $ticket->assignee ? [
+                    'id' => $ticket->assignee->id,
+                    'name' => $ticket->assignee->name,
+                    'email' => $ticket->assignee->email,
+                ] : null,
+
                 'replies' => $ticket->replies
                     ->sortBy('created_at')
                     ->values()
-                    ->map(function ($reply) {
-                        return [
-                            'id' => $reply->id,
-                            'message' => $reply->message,
-                            'is_internal' => (bool) $reply->is_internal,
-                            'created_at' => $reply->created_at?->toDateTimeString(),
-                            'user' => $reply->user
-                                ? [
-                                    'id' => $reply->user->id,
-                                    'name' => $reply->user->name,
-                                    'email' => $reply->user->email,
-                                ]
-                                : null,
-                        ];
-                    }),
+                    ->map(fn ($reply) => [
+                        'id' => $reply->id,
+                        'message' => $reply->message,
+                        'is_internal' => (bool) $reply->is_internal,
+                        'created_at' => $reply->created_at?->toDateTimeString(),
+
+                        'user' => $reply->user ? [
+                            'id' => $reply->user->id,
+                            'name' => $reply->user->name,
+                            'email' => $reply->user->email,
+                        ] : null,
+                    ]),
             ],
         ]);
     }
@@ -144,7 +139,10 @@ class TicketController extends Controller
     protected function generateTicketNumber(): string
     {
         do {
-            $ticketNumber = 'SD-'.now()->format('Y').'-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
+            $ticketNumber = 'SD-'
+                . now()->format('Y')
+                . '-'
+                . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
         } while (Ticket::query()->where('ticket_number', $ticketNumber)->exists());
 
         return $ticketNumber;

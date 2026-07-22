@@ -303,7 +303,7 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
                             </div>
 
                             <div className="font-medium text-gray-600">
-                                Version 0.0.1
+                                Version 0.0.4
                             </div>
                         </div>
                     </footer>
