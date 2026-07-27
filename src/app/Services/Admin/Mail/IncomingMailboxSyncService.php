@@ -6,10 +6,10 @@ use App\Data\Admin\Mail\IncomingCursorData;
 use App\Data\Admin\Mail\IncomingMailboxSyncResultData;
 use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
 use App\Enums\Admin\Mail\MailboxChannelDirection;
+use App\Exceptions\Admin\Mail\AllMailChannelsFailedException;
 use App\Exceptions\Admin\Mail\MailDriverException;
-use App\Exceptions\Mail\AllMailChannelsFailedException;
-use App\Exceptions\Mail\MailDriverNotRegisteredException;
-use App\Exceptions\Mail\NoAvailableMailChannelException;
+use App\Exceptions\Admin\Mail\MailDriverNotRegisteredException;
+use App\Exceptions\Admin\Mail\NoAvailableMailChannelException;
 use App\Models\Admin\Mail\Mailbox;
 use App\Models\Admin\Mail\MailboxChannel;
 use App\Models\Admin\Mail\MailboxChannelSyncState;
@@ -32,14 +32,15 @@ class IncomingMailboxSyncService
     public function synchronize(
         Mailbox $mailbox
     ): IncomingMailboxSyncResultData {
-        $channels = $this->selector->incomingCandidates(
-            $mailbox
-        );
+        $channels = $this
+            ->selector
+            ->incomingCandidates($mailbox);
 
         if ($channels->isEmpty()) {
             throw new NoAvailableMailChannelException(
                 mailboxId: $mailbox->id,
-                direction: MailboxChannelDirection::Incoming,
+                direction:
+                MailboxChannelDirection::Incoming,
             );
         }
 
@@ -54,12 +55,17 @@ class IncomingMailboxSyncService
             } catch (MailDriverException $exception) {
                 $failures[] = [
                     'channel_id' => $channel->id,
-                    'driver' => $channel->driver->value,
-                    'message' => $exception->getMessage(),
-                    'exception' => $exception::class,
+                    'driver' =>
+                        $channel->driver->value,
+                    'message' =>
+                        $exception->getMessage(),
+                    'exception' =>
+                        $exception::class,
                 ];
 
-                if (!$exception->failoverAllowed()) {
+                if (
+                    !$exception->failoverAllowed()
+                ) {
                     break;
                 }
             } catch (
@@ -67,16 +73,20 @@ class IncomingMailboxSyncService
             ) {
                 $failures[] = [
                     'channel_id' => $channel->id,
-                    'driver' => $channel->driver->value,
-                    'message' => $exception->getMessage(),
-                    'exception' => $exception::class,
+                    'driver' =>
+                        $channel->driver->value,
+                    'message' =>
+                        $exception->getMessage(),
+                    'exception' =>
+                        $exception::class,
                 ];
             }
         }
 
         throw new AllMailChannelsFailedException(
             mailboxId: $mailbox->id,
-            direction: MailboxChannelDirection::Incoming,
+            direction:
+            MailboxChannelDirection::Incoming,
             failures: $failures,
         );
     }
@@ -113,7 +123,12 @@ class IncomingMailboxSyncService
 
                 $pages++;
 
-                foreach ($result->messages as $message) {
+                $pageMessages = [];
+
+                foreach (
+                    $result->messages
+                    as $message
+                ) {
                     $fetched++;
 
                     $persistenceResult =
@@ -122,35 +137,49 @@ class IncomingMailboxSyncService
                             message: $message,
                         );
 
-                    if ($persistenceResult->duplicate) {
+                    if (
+                        $persistenceResult->duplicate
+                    ) {
                         $duplicates++;
                     } else {
                         $stored++;
                     }
 
-                    $this->acknowledger->acknowledge(
-                        channel: $channel,
-                        message: $message,
-                        action: $this->acknowledgeAction(
-                            $channel
-                        ),
-                    );
+                    $pageMessages[] = $message;
+                }
 
-                    $acknowledged++;
+                if ($pageMessages !== []) {
+                    $acknowledged +=
+                        $this->acknowledger
+                            ->acknowledgeMany(
+                                channel: $channel,
+                                messages: $pageMessages,
+                                action:
+                                $this->acknowledgeAction(
+                                    $channel
+                                ),
+                            );
                 }
 
                 $this->validateCursorProgress(
                     currentCursor: $cursor,
-                    nextCursor: $result->nextCursor,
+                    nextCursor:
+                    $result->nextCursor,
                     hasMore: $result->hasMore,
                 );
 
-                if ($result->nextCursor !== null) {
-                    $cursor = new IncomingCursorData(
-                        mailboxChannelId: $channel->id,
-                        value: $result->nextCursor,
-                        metadata: $result->metadata,
-                    );
+                if (
+                    $result->nextCursor !== null
+                ) {
+                    $cursor =
+                        new IncomingCursorData(
+                            mailboxChannelId:
+                            $channel->id,
+                            value:
+                            $result->nextCursor,
+                            metadata:
+                            $result->metadata,
+                        );
                 }
 
                 $this->savePageProgress(
@@ -165,7 +194,8 @@ class IncomingMailboxSyncService
                 $hasMore = $result->hasMore;
             } while (
                 $hasMore
-                && $pages < $this->maxPagesPerRun
+                && $pages
+                < $this->maxPagesPerRun
             );
 
             $this->markSyncCompleted(
@@ -193,34 +223,56 @@ class IncomingMailboxSyncService
                 acknowledged: $acknowledged,
                 truncated:
                 $hasMore
-                && $pages >= $this->maxPagesPerRun,
+                && $pages
+                >= $this->maxPagesPerRun,
                 nextCursor: $cursor?->value,
             );
         } catch (MailDriverException $exception) {
             $this->markSyncFailed(
                 state: $state,
-                errorCode: $exception->driverErrorCode(),
-                errorMessage: $exception->getMessage(),
+                errorCode:
+                $exception->driverErrorCode(),
+                errorMessage:
+                $exception->getMessage(),
             );
 
-            if ($exception->affectsChannelHealth()) {
+            if (
+                $exception
+                    ->affectsChannelHealth()
+            ) {
                 $this->health->markFailure(
                     channel: $channel,
-                    errorCode: $exception->driverErrorCode(),
-                    errorMessage: $exception->getMessage(),
+                    errorCode:
+                    $exception
+                        ->driverErrorCode(),
+                    errorMessage:
+                    $exception->getMessage(),
                 );
             }
 
-            if ($stored > 0 || $duplicates > 0) {
+            /*
+             * После частичного сохранения переключаться
+             * на другой драйвер в середине синхронизации
+             * небезопасно.
+             */
+            if (
+                $stored > 0
+                || $duplicates > 0
+            ) {
                 throw new MailDriverException(
-                    message: $exception->getMessage(),
+                    message:
+                    $exception->getMessage(),
                     driverErrorCode:
-                    $exception->driverErrorCode(),
-                    retryable: $exception->retryable(),
+                    $exception
+                        ->driverErrorCode(),
+                    retryable:
+                    $exception->retryable(),
                     failoverAllowed: false,
                     affectsChannelHealth:
-                    $exception->affectsChannelHealth(),
-                    context: $exception->context(),
+                    $exception
+                        ->affectsChannelHealth(),
+                    context:
+                    $exception->context(),
                     previous: $exception,
                 );
             }
@@ -229,8 +281,10 @@ class IncomingMailboxSyncService
         } catch (Throwable $exception) {
             $this->markSyncFailed(
                 state: $state,
-                errorCode: 'mailbox_sync_failed',
-                errorMessage: $exception->getMessage(),
+                errorCode:
+                'mailbox_sync_failed',
+                errorMessage:
+                $exception->getMessage(),
             );
 
             throw $exception;
@@ -248,7 +302,9 @@ class IncomingMailboxSyncService
         return new IncomingCursorData(
             mailboxChannelId: $channel->id,
             value: $state->cursor,
-            metadata: $state->cursor_metadata ?? [],
+            metadata:
+            $state->cursor_metadata
+            ?? [],
         );
     }
 
@@ -260,9 +316,10 @@ class IncomingMailboxSyncService
         ] ?? null;
 
         if (is_string($value)) {
-            $action = IncomingAcknowledgeAction::tryFrom(
-                $value
-            );
+            $action =
+                IncomingAcknowledgeAction::tryFrom(
+                    $value
+                );
 
             if ($action !== null) {
                 return $action;
@@ -281,12 +338,16 @@ class IncomingMailboxSyncService
             return;
         }
 
-        if ($nextCursor === null || $nextCursor === '') {
+        if (
+            $nextCursor === null
+            || $nextCursor === ''
+        ) {
             throw new MailDriverException(
                 message:
                 'Mail driver returned hasMore=true '
                 . 'without a next cursor.',
-                driverErrorCode: 'missing_next_cursor',
+                driverErrorCode:
+                'missing_next_cursor',
                 retryable: false,
                 failoverAllowed: false,
                 affectsChannelHealth: true,
@@ -295,13 +356,15 @@ class IncomingMailboxSyncService
 
         if (
             $currentCursor !== null
-            && $currentCursor->value === $nextCursor
+            && $currentCursor->value
+            === $nextCursor
         ) {
             throw new MailDriverException(
                 message:
                 'Mail driver did not advance '
                 . 'the synchronization cursor.',
-                driverErrorCode: 'cursor_not_advanced',
+                driverErrorCode:
+                'cursor_not_advanced',
                 retryable: false,
                 failoverAllowed: false,
                 affectsChannelHealth: true,
@@ -329,11 +392,14 @@ class IncomingMailboxSyncService
     ): void {
         $state->forceFill([
             'cursor' => $cursor?->value,
-            'cursor_metadata' => $cursor?->metadata,
+            'cursor_metadata' =>
+                $cursor?->metadata,
             'last_fetched_count' => $fetched,
             'last_stored_count' => $stored,
-            'last_duplicate_count' => $duplicates,
-            'last_acknowledged_count' => $acknowledged,
+            'last_duplicate_count' =>
+                $duplicates,
+            'last_acknowledged_count' =>
+                $acknowledged,
         ])->save();
     }
 
@@ -347,14 +413,18 @@ class IncomingMailboxSyncService
     ): void {
         $state->forceFill([
             'cursor' => $cursor?->value,
-            'cursor_metadata' => $cursor?->metadata,
-            'last_sync_completed_at' => now(),
+            'cursor_metadata' =>
+                $cursor?->metadata,
+            'last_sync_completed_at' =>
+                now(),
             'last_sync_failed_at' => null,
             'consecutive_failures' => 0,
             'last_fetched_count' => $fetched,
             'last_stored_count' => $stored,
-            'last_duplicate_count' => $duplicates,
-            'last_acknowledged_count' => $acknowledged,
+            'last_duplicate_count' =>
+                $duplicates,
+            'last_acknowledged_count' =>
+                $acknowledged,
             'last_error_code' => null,
             'last_error_message' => null,
         ])->save();
@@ -369,8 +439,10 @@ class IncomingMailboxSyncService
             'last_sync_failed_at' => now(),
             'consecutive_failures' =>
                 $state->consecutive_failures + 1,
-            'last_error_code' => $errorCode,
-            'last_error_message' => $errorMessage,
+            'last_error_code' =>
+                $errorCode,
+            'last_error_message' =>
+                $errorMessage,
         ])->save();
     }
 }

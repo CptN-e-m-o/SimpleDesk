@@ -149,7 +149,7 @@ class MailServiceProvider extends ServiceProvider
             ): IncomingEmailMessagePersister {
                 return new IncomingEmailMessagePersister(
                     keys: $app->make(
-                        \App\Services\Mail\MailMessageIdempotencyKeyFactory::class
+                        \App\Services\Admin\Mail\MailMessageIdempotencyKeyFactory::class
                     ),
                     rawStorage: $app->make(
                         RawEmailStorageService::class
@@ -185,13 +185,13 @@ class MailServiceProvider extends ServiceProvider
                         MailChannelSelector::class
                     ),
                     fetcher: $app->make(
-                        \App\Services\Mail\IncomingMailFetchService::class
+                        \App\Services\Admin\Mail\IncomingMailFetchService::class
                     ),
                     persister: $app->make(
                         IncomingEmailMessagePersister::class
                     ),
                     acknowledger: $app->make(
-                        \App\Services\Mail\IncomingMailAcknowledger::class
+                        \App\Services\Admin\Mail\IncomingMailAcknowledger::class
                     ),
                     health: $app->make(
                         MailChannelHealthRecorder::class

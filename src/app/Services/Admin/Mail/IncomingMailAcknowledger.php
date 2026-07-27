@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Mail;
+namespace App\Services\Admin\Mail;
 
 use App\Data\Admin\Mail\NormalizedInboundMessageData;
 use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
@@ -25,6 +25,25 @@ class IncomingMailAcknowledger
         $driver->acknowledge(
             channel: $channel,
             message: $message,
+            action: $action,
+        );
+    }
+
+    /**
+     * @param array<int, NormalizedInboundMessageData> $messages
+     */
+    public function acknowledgeMany(
+        MailboxChannel $channel,
+        array $messages,
+        IncomingAcknowledgeAction $action,
+    ): int {
+        $driver = $this->drivers->incoming(
+            $channel->driver
+        );
+
+        return $driver->acknowledgeMany(
+            channel: $channel,
+            messages: $messages,
             action: $action,
         );
     }

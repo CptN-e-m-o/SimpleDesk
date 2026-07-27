@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Mail;
+namespace App\Services\Admin\Mail;
 
 use App\Data\Admin\Mail\IncomingCursorData;
 use App\Data\Admin\Mail\IncomingFetchResultData;

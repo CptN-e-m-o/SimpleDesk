@@ -9,12 +9,8 @@ return [
 
     'drivers' => [
         'incoming' => [
-            /*
-             * На следующем этапе:
-             *
-             * 'imap' =>
-             *     App\Services\Mail\Drivers\Imap\ImapMailDriver::class,
-             */
+            'imap' =>
+                App\Services\Admin\Mail\Drivers\Imap\ImapMailDriver::class,
         ],
 
         'outgoing' => [
@@ -66,6 +62,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | IMAP
+    |--------------------------------------------------------------------------
+    */
+
+    'imap' => [
+        'store_raw_message' => env(
+            'MAIL_IMAP_STORE_RAW_MESSAGE',
+            true,
+        ),
+
+        'max_raw_message_bytes' => env(
+            'MAIL_IMAP_MAX_RAW_MESSAGE_BYTES',
+            50 * 1024 * 1024,
+        ),
+
+        'max_attachment_bytes' => env(
+            'MAIL_IMAP_MAX_ATTACHMENT_BYTES',
+            25 * 1024 * 1024,
+        ),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Incoming synchronization
     |--------------------------------------------------------------------------
     */
@@ -89,27 +108,16 @@ return [
     */
 
     'outgoing' => [
-        /*
-         * Максимальный размер одного сохранённого
-         * вложения до MIME/base64-кодирования.
-         */
         'max_attachment_bytes' => env(
             'MAIL_MAX_ATTACHMENT_BYTES',
             25 * 1024 * 1024,
         ),
 
-        /*
-         * Максимальный общий размер всех вложений.
-         */
         'max_total_attachment_bytes' => env(
             'MAIL_MAX_TOTAL_ATTACHMENT_BYTES',
             40 * 1024 * 1024,
         ),
 
-        /*
-         * Перед отправкой проверяем, что файл
-         * не был повреждён или заменён.
-         */
         'verify_attachment_checksums' => env(
             'MAIL_VERIFY_ATTACHMENT_CHECKSUMS',
             true,

@@ -29,4 +29,13 @@ interface IncomingMailDriver
         NormalizedInboundMessageData $message,
         IncomingAcknowledgeAction $action,
     ): void;
+
+    /**
+     * @param array<int, NormalizedInboundMessageData> $messages
+     */
+    public function acknowledgeMany(
+        MailboxChannel $channel,
+        array $messages,
+        IncomingAcknowledgeAction $action,
+    ): int;
 }
