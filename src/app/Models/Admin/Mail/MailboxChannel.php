@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MailboxChannel extends Model
 {
@@ -68,6 +69,11 @@ class MailboxChannel extends Model
             MailProviderConnection::class,
             'provider_connection_id'
         );
+    }
+
+    public function syncState(): HasOne
+    {
+        return $this->hasOne(MailboxChannelSyncState::class);
     }
 
     public function subscriptions(): HasMany

@@ -5,6 +5,8 @@ namespace App\Models\Admin\Mail;
 use App\Enums\Mail\EmailMessageDirection;
 use App\Enums\Mail\EmailMessageStatus;
 use App\Enums\Mail\MailboxDriver;
+use App\Models\Ticket;
+use App\Models\TicketReply;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -37,6 +39,8 @@ class EmailMessage extends Model
         'metadata',
         'raw_message_disk',
         'raw_message_path',
+        'raw_message_size',
+        'raw_message_checksum',
         'received_at',
         'queued_at',
         'processing_started_at',
@@ -61,6 +65,7 @@ class EmailMessage extends Model
             'reply_to_recipients' => 'array',
             'headers' => 'array',
             'metadata' => 'array',
+            'raw_message_size' => 'integer',
             'received_at' => 'immutable_datetime',
             'queued_at' => 'immutable_datetime',
             'processing_started_at' => 'immutable_datetime',
@@ -91,8 +96,22 @@ class EmailMessage extends Model
         return $this->belongsTo(TicketReply::class);
     }
 
+    public function attachments(): HasMany
+    {
+        return $this
+            ->hasMany(EmailAttachment::class)
+            ->orderBy('position');
+    }
+
     public function webhookEvents(): HasMany
     {
         return $this->hasMany(EmailWebhookEvent::class);
+    }
+
+    public function attempts(): HasMany
+    {
+        return $this
+            ->hasMany(EmailMessageAttempt::class)
+            ->orderBy('attempt_number');
     }
 }

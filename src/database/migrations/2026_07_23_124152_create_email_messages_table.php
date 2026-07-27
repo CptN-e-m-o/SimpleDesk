@@ -36,7 +36,9 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->string('direction', 20);
-            $table->string('driver', 50);
+
+            $table->string('driver', 50)->nullable();
+
             $table->string('status', 30);
 
             $table->string('idempotency_key', 128)->unique();
@@ -68,6 +70,8 @@ return new class extends Migration
 
             $table->string('raw_message_disk', 100)->nullable();
             $table->text('raw_message_path')->nullable();
+            $table->unsignedBigInteger('raw_message_size')->nullable();
+            $table->char('raw_message_checksum', 64)->nullable();
 
             $table->timestampTz('received_at')->nullable();
             $table->timestampTz('queued_at')->nullable();
