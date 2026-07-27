@@ -2,10 +2,10 @@
 
 namespace App\Services\Admin\Mail;
 
-use App\Data\Mail\IncomingCursorData;
-use App\Data\Mail\IncomingMailboxSyncResultData;
-use App\Enums\Mail\IncomingAcknowledgeAction;
-use App\Enums\Mail\MailboxChannelDirection;
+use App\Data\Admin\Mail\IncomingCursorData;
+use App\Data\Admin\Mail\IncomingMailboxSyncResultData;
+use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
 use App\Exceptions\Admin\Mail\MailDriverException;
 use App\Exceptions\Mail\AllMailChannelsFailedException;
 use App\Exceptions\Mail\MailDriverNotRegisteredException;

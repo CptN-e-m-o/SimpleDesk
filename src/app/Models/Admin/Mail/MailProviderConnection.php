@@ -2,8 +2,8 @@
 
 namespace App\Models\Admin\Mail;
 
-use App\Enums\Mail\MailAuthenticationType;
-use App\Enums\Mail\MailboxHealthStatus;
+use App\Enums\Admin\Mail\MailAuthenticationType;
+use App\Enums\Admin\Mail\MailboxHealthStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;

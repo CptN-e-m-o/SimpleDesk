@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Data\Mail;
+namespace App\Data\Admin\Mail;
 
-use App\Enums\Mail\MailboxDriver;
+use App\Enums\Admin\Mail\MailboxDriver;
 use InvalidArgumentException;
 
 final readonly class IncomingFetchResultData

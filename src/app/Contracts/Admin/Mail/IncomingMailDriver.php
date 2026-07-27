@@ -2,12 +2,12 @@
 
 namespace App\Contracts\Admin\Mail;
 
-use App\Data\Mail\IncomingCursorData;
-use App\Data\Mail\IncomingFetchResultData;
-use App\Data\Mail\MailConnectionTestResultData;
-use App\Data\Mail\NormalizedInboundMessageData;
-use App\Enums\Mail\IncomingAcknowledgeAction;
-use App\Enums\Mail\MailboxDriver;
+use App\Data\Admin\Mail\IncomingCursorData;
+use App\Data\Admin\Mail\IncomingFetchResultData;
+use App\Data\Admin\Mail\MailConnectionTestResultData;
+use App\Data\Admin\Mail\NormalizedInboundMessageData;
+use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
+use App\Enums\Admin\Mail\MailboxDriver;
 use App\Models\Admin\Mail\MailboxChannel;
 
 interface IncomingMailDriver

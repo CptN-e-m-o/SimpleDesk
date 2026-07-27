@@ -2,9 +2,9 @@
 
 namespace App\Models\Admin\Mail;
 
-use App\Enums\Mail\EmailMessageDirection;
-use App\Enums\Mail\EmailMessageStatus;
-use App\Enums\Mail\MailboxDriver;
+use App\Enums\Admin\Mail\EmailMessageDirection;
+use App\Enums\Admin\Mail\EmailMessageStatus;
+use App\Enums\Admin\Mail\MailboxDriver;
 use App\Models\Ticket;
 use App\Models\TicketReply;
 use Illuminate\Database\Eloquent\Model;

@@ -2,7 +2,7 @@
 
 namespace App\Models\Admin\Mail;
 
-use App\Enums\Mail\EmailWebhookEventStatus;
+use App\Enums\Admin\Mail\EmailWebhookEventStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

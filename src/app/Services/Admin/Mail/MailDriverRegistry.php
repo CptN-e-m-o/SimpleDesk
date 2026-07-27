@@ -4,8 +4,8 @@ namespace App\Services\Admin\Mail;
 
 use App\Contracts\Admin\Mail\IncomingMailDriver;
 use App\Contracts\Admin\Mail\OutgoingMailDriver;
-use App\Enums\Mail\MailboxChannelDirection;
-use App\Enums\Mail\MailboxDriver;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
+use App\Enums\Admin\Mail\MailboxDriver;
 use App\Exceptions\Admin\Mail\InvalidMailDriverException;
 use App\Exceptions\Admin\Mail\MailDriverNotRegisteredException;
 use Illuminate\Contracts\Container\Container;

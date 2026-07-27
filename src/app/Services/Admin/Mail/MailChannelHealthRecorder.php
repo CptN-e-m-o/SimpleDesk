@@ -2,7 +2,7 @@
 
 namespace App\Services\Admin\Mail;
 
-use App\Enums\Mail\MailboxHealthStatus;
+use App\Enums\Admin\Mail\MailboxHealthStatus;
 use App\Models\Admin\Mail\MailboxChannel;
 
 class MailChannelHealthRecorder

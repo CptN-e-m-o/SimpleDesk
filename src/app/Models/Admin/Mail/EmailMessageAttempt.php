@@ -2,8 +2,8 @@
 
 namespace App\Models\Admin\Mail;
 
-use App\Enums\Mail\EmailMessageAttemptStatus;
-use App\Enums\Mail\MailboxDriver;
+use App\Enums\Admin\Mail\EmailMessageAttemptStatus;
+use App\Enums\Admin\Mail\MailboxDriver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

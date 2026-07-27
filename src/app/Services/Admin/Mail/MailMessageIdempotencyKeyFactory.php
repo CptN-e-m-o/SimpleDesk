@@ -2,7 +2,7 @@
 
 namespace App\Services\Admin\Mail;
 
-use App\Data\Mail\NormalizedInboundMessageData;
+use App\Data\Admin\Mail\NormalizedInboundMessageData;
 use App\Models\Admin\Mail\MailboxChannel;
 
 class MailMessageIdempotencyKeyFactory

@@ -2,8 +2,8 @@
 
 namespace App\Services\Admin\Mail;
 
-use App\Enums\Mail\MailboxChannelDirection;
-use App\Enums\Mail\MailboxHealthStatus;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
+use App\Enums\Admin\Mail\MailboxHealthStatus;
 use App\Models\Admin\Mail\Mailbox;
 use App\Models\Admin\Mail\MailboxChannel;
 use Illuminate\Support\Collection;

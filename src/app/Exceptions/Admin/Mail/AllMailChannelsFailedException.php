@@ -2,7 +2,7 @@
 
 namespace App\Exceptions\Admin\Mail;
 
-use App\Enums\Mail\MailboxChannelDirection;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
 use RuntimeException;
 
 class AllMailChannelsFailedException extends RuntimeException

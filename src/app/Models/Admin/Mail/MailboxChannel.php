@@ -2,10 +2,10 @@
 
 namespace App\Models\Admin\Mail;
 
-use App\Enums\Mail\MailAuthenticationType;
-use App\Enums\Mail\MailboxChannelDirection;
-use App\Enums\Mail\MailboxDriver;
-use App\Enums\Mail\MailboxHealthStatus;
+use App\Enums\Admin\Mail\MailAuthenticationType;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
+use App\Enums\Admin\Mail\MailboxDriver;
+use App\Enums\Admin\Mail\MailboxHealthStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

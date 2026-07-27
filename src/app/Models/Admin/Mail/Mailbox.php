@@ -2,7 +2,7 @@
 
 namespace App\Models\Admin\Mail;
 
-use App\Enums\Mail\MailboxChannelDirection;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
 use App\Models\Admin\Department;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

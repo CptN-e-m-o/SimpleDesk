@@ -3,14 +3,14 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Mail drivers
+    | Registered mail drivers
     |--------------------------------------------------------------------------
     */
 
     'drivers' => [
         'incoming' => [
             /*
-             * Будет добавлено после реализации:
+             * На следующем этапе:
              *
              * 'imap' =>
              *     App\Services\Mail\Drivers\Imap\ImapMailDriver::class,
@@ -18,18 +18,14 @@ return [
         ],
 
         'outgoing' => [
-            /*
-             * Будет добавлено после реализации:
-             *
-             * 'smtp' =>
-             *     App\Services\Mail\Drivers\Smtp\SmtpMailDriver::class,
-             */
+            'smtp' =>
+                App\Services\Admin\Mail\Drivers\Smtp\SmtpMailDriver::class,
         ],
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Mail storage
+    | Message and attachment storage
     |--------------------------------------------------------------------------
     */
 
@@ -52,7 +48,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Queue names
+    | Mail queues
     |--------------------------------------------------------------------------
     */
 
@@ -77,20 +73,47 @@ return [
     'sync' => [
         'batch_size' => 100,
 
-        /*
-         * Ограничивает объём одной queue job.
-         */
         'max_pages_per_run' => 10,
 
+        'default_post_fetch_action' =>
+            'mark_read',
+
+        'message_processing_lock_seconds' =>
+            600,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Outgoing email
+    |--------------------------------------------------------------------------
+    */
+
+    'outgoing' => [
         /*
-         * Что делать с письмом после успешного сохранения.
+         * Максимальный размер одного сохранённого
+         * вложения до MIME/base64-кодирования.
          */
-        'default_post_fetch_action' => 'mark_read',
+        'max_attachment_bytes' => env(
+            'MAIL_MAX_ATTACHMENT_BYTES',
+            25 * 1024 * 1024,
+        ),
 
         /*
-         * Через сколько незавершённое сохранение можно повторить.
+         * Максимальный общий размер всех вложений.
          */
-        'message_processing_lock_seconds' => 600,
+        'max_total_attachment_bytes' => env(
+            'MAIL_MAX_TOTAL_ATTACHMENT_BYTES',
+            40 * 1024 * 1024,
+        ),
+
+        /*
+         * Перед отправкой проверяем, что файл
+         * не был повреждён или заменён.
+         */
+        'verify_attachment_checksums' => env(
+            'MAIL_VERIFY_ATTACHMENT_CHECKSUMS',
+            true,
+        ),
     ],
 
     /*
@@ -100,11 +123,9 @@ return [
     */
 
     'failover' => [
-        'failed_channel_cooldown_seconds' => 300,
+        'failed_channel_cooldown_seconds' =>
+            300,
 
-        /*
-         * Через сколько зависшую отправку можно захватить повторно.
-         */
         'sending_lock_seconds' => 600,
     ],
 
@@ -119,6 +140,7 @@ return [
             'tries' => 5,
             'timeout' => 300,
             'lock_seconds' => 600,
+
             'backoff' => [
                 30,
                 120,
@@ -131,6 +153,7 @@ return [
             'tries' => 5,
             'timeout' => 300,
             'lock_seconds' => 600,
+
             'backoff' => [
                 30,
                 120,

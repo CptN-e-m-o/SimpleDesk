@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Mail;
+namespace App\Enums\Admin\Mail;
 
 enum EmailAttachmentScanStatus: string
 {

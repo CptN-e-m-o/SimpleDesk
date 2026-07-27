@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Data\Mail;
+namespace App\Data\Admin\Mail;
 
 use App\Models\Admin\Mail\EmailMessage;
 use InvalidArgumentException;
@@ -27,6 +27,7 @@ final readonly class OutgoingEmailMessageData
         public ?string $htmlBody,
         public array $headers = [],
         public array $attachments = [],
+        public ?string $internetMessageId = null,
         public ?string $inReplyToMessageId = null,
         public array $references = [],
         public array $metadata = [],
@@ -44,8 +45,12 @@ final readonly class OutgoingEmailMessageData
         }
     }
 
+    /**
+     * @param array<int, MailAttachmentData> $attachments
+     */
     public static function fromEmailMessage(
-        EmailMessage $message
+        EmailMessage $message,
+        array $attachments = [],
     ): self {
         $from = null;
 
@@ -75,7 +80,8 @@ final readonly class OutgoingEmailMessageData
             textBody: $message->text_body,
             htmlBody: $message->html_body,
             headers: $message->headers ?? [],
-            attachments: [],
+            attachments: $attachments,
+            internetMessageId: $message->internet_message_id,
             inReplyToMessageId: $message->in_reply_to_message_id,
             references: $message->reference_message_ids ?? [],
             metadata: $message->metadata ?? [],

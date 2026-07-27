@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Data\Mail;
+namespace App\Data\Admin\Mail;
 
 use InvalidArgumentException;
 use JsonSerializable;

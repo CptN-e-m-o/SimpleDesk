@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Admin\Mail;
 
-use App\Enums\Mail\EmailMessageStatus;
+use App\Enums\Admin\Mail\EmailMessageStatus;
 use App\Models\Admin\Mail\EmailMessage;
 use App\Services\Admin\Mail\OutgoingMailFailoverService;
 use Illuminate\Contracts\Queue\ShouldQueue;

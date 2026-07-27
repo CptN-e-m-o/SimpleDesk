@@ -2,17 +2,20 @@
 
 namespace App\Providers;
 
-use App\Enums\Mail\IncomingAcknowledgeAction;
+use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
+use App\Services\Admin\Mail\Drivers\Smtp\SmtpTransportFactory;
 use App\Services\Admin\Mail\IncomingEmailMessagePersister;
 use App\Services\Admin\Mail\IncomingMailboxSyncService;
 use App\Services\Admin\Mail\MailAttachmentStorageService;
 use App\Services\Admin\Mail\MailChannelHealthRecorder;
 use App\Services\Admin\Mail\MailChannelSelector;
 use App\Services\Admin\Mail\MailDriverRegistry;
+use App\Services\Admin\Mail\OutgoingEmailMessageFactory;
 use App\Services\Admin\Mail\OutgoingMailFailoverService;
 use App\Services\Admin\Mail\RawEmailStorageService;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Mail\MailManager;
 use Illuminate\Support\ServiceProvider;
 
 class MailServiceProvider extends ServiceProvider
@@ -22,6 +25,19 @@ class MailServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             config_path('simpledesk-mail.php'),
             'simpledesk-mail',
+        );
+
+        $this->app->singleton(
+            SmtpTransportFactory::class,
+            function (
+                Application $app
+            ): SmtpTransportFactory {
+                return new SmtpTransportFactory(
+                    mailManager: $app->make(
+                        MailManager::class
+                    ),
+                );
+            }
         );
 
         $this->app->singleton(
@@ -47,7 +63,8 @@ class MailServiceProvider extends ServiceProvider
             MailChannelSelector::class,
             function (): MailChannelSelector {
                 return new MailChannelSelector(
-                    failedChannelCooldownSeconds: (int) config(
+                    failedChannelCooldownSeconds:
+                    (int) config(
                         'simpledesk-mail.failover.failed_channel_cooldown_seconds',
                         300,
                     ),
@@ -98,6 +115,34 @@ class MailServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            OutgoingEmailMessageFactory::class,
+            function (
+                Application $app
+            ): OutgoingEmailMessageFactory {
+                return new OutgoingEmailMessageFactory(
+                    filesystem: $app->make(
+                        FilesystemFactory::class
+                    ),
+                    maxAttachmentBytes:
+                    (int) config(
+                        'simpledesk-mail.outgoing.max_attachment_bytes',
+                        25 * 1024 * 1024,
+                    ),
+                    maxTotalAttachmentBytes:
+                    (int) config(
+                        'simpledesk-mail.outgoing.max_total_attachment_bytes',
+                        40 * 1024 * 1024,
+                    ),
+                    verifyChecksums:
+                    (bool) config(
+                        'simpledesk-mail.outgoing.verify_attachment_checksums',
+                        true,
+                    ),
+                );
+            }
+        );
+
+        $this->app->singleton(
             IncomingEmailMessagePersister::class,
             function (
                 Application $app
@@ -112,7 +157,8 @@ class MailServiceProvider extends ServiceProvider
                     attachmentStorage: $app->make(
                         MailAttachmentStorageService::class
                     ),
-                    processingLockSeconds: (int) config(
+                    processingLockSeconds:
+                    (int) config(
                         'simpledesk-mail.sync.message_processing_lock_seconds',
                         600,
                     ),
@@ -178,7 +224,11 @@ class MailServiceProvider extends ServiceProvider
                     health: $app->make(
                         MailChannelHealthRecorder::class
                     ),
-                    sendingLockSeconds: (int) config(
+                    messageFactory: $app->make(
+                        OutgoingEmailMessageFactory::class
+                    ),
+                    sendingLockSeconds:
+                    (int) config(
                         'simpledesk-mail.failover.sending_lock_seconds',
                         600,
                     ),

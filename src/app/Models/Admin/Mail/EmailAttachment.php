@@ -2,7 +2,7 @@
 
 namespace App\Models\Admin\Mail;
 
-use App\Enums\Mail\EmailAttachmentScanStatus;
+use App\Enums\Admin\Mail\EmailAttachmentScanStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

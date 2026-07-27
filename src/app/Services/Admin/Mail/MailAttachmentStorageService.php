@@ -2,8 +2,8 @@
 
 namespace App\Services\Admin\Mail;
 
-use App\Data\Mail\MailAttachmentData;
-use App\Enums\Mail\EmailAttachmentScanStatus;
+use App\Data\Admin\Mail\MailAttachmentData;
+use App\Enums\Admin\Mail\EmailAttachmentScanStatus;
 use App\Exceptions\Admin\Mail\MailStorageException;
 use App\Models\Admin\Mail\EmailAttachment;
 use App\Models\Admin\Mail\EmailMessage;

@@ -2,8 +2,8 @@
 
 namespace App\Exceptions\Admin\Mail;
 
-use App\Enums\Mail\MailboxChannelDirection;
-use App\Enums\Mail\MailboxDriver;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
+use App\Enums\Admin\Mail\MailboxDriver;
 use RuntimeException;
 
 class MailDriverNotRegisteredException extends RuntimeException

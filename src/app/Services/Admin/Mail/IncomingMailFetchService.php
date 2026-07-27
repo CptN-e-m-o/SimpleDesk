@@ -2,9 +2,9 @@
 
 namespace App\Services\Mail;
 
-use App\Data\Mail\IncomingCursorData;
-use App\Data\Mail\IncomingFetchResultData;
-use App\Enums\Mail\MailboxChannelDirection;
+use App\Data\Admin\Mail\IncomingCursorData;
+use App\Data\Admin\Mail\IncomingFetchResultData;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
 use App\Models\Admin\Mail\MailboxChannel;
 use InvalidArgumentException;
 

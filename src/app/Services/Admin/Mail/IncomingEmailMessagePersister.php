@@ -2,11 +2,11 @@
 
 namespace App\Services\Admin\Mail;
 
-use App\Data\Mail\MailAddressData;
-use App\Data\Mail\NormalizedInboundMessageData;
-use App\Data\Mail\PersistedInboundMessageData;
-use App\Enums\Mail\EmailMessageDirection;
-use App\Enums\Mail\EmailMessageStatus;
+use App\Data\Admin\Mail\MailAddressData;
+use App\Data\Admin\Mail\NormalizedInboundMessageData;
+use App\Data\Admin\Mail\PersistedInboundMessageData;
+use App\Enums\Admin\Mail\EmailMessageDirection;
+use App\Enums\Admin\Mail\EmailMessageStatus;
 use App\Events\Admin\Mail\InboundEmailStored;
 use App\Exceptions\Admin\Mail\InboundMessageAlreadyProcessingException;
 use App\Models\Admin\Mail\EmailMessage;

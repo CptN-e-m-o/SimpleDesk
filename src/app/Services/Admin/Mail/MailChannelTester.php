@@ -2,8 +2,8 @@
 
 namespace App\Services\Admin\Mail;
 
-use App\Data\Mail\MailConnectionTestResultData;
-use App\Enums\Mail\MailboxChannelDirection;
+use App\Data\Admin\Mail\MailConnectionTestResultData;
+use App\Enums\Admin\Mail\MailboxChannelDirection;
 use App\Exceptions\Admin\Mail\MailDriverException;
 use App\Models\Admin\Mail\MailboxChannel;
 

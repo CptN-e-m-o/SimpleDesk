@@ -2,8 +2,8 @@
 
 namespace App\Services\Mail;
 
-use App\Data\Mail\NormalizedInboundMessageData;
-use App\Enums\Mail\IncomingAcknowledgeAction;
+use App\Data\Admin\Mail\NormalizedInboundMessageData;
+use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
 use App\Models\Admin\Mail\MailboxChannel;
 
 class IncomingMailAcknowledger
