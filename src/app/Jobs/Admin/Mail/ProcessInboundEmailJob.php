@@ -2,11 +2,14 @@
 
 namespace App\Jobs\Admin\Mail;
 
+use App\Enums\Admin\Mail\EmailQuarantineStage;
 use App\Exceptions\Admin\Mail\InboundEmailTicketingException;
+use App\Services\Admin\Mail\Quarantine\EmailMessageQuarantineService;
 use App\Services\Admin\Mail\Ticketing\InboundEmailTicketProcessor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Throwable;
 
 class ProcessInboundEmailJob implements ShouldQueue
 {
@@ -35,7 +38,7 @@ class ProcessInboundEmailJob implements ShouldQueue
         return [
             (
             new WithoutOverlapping(
-                "inbound-email-ticketing:"
+                'inbound-email-ticketing:'
                 . $this->emailMessageId
             )
             )
@@ -63,10 +66,15 @@ class ProcessInboundEmailJob implements ShouldQueue
     }
 
     public function handle(
-        InboundEmailTicketProcessor $processor
+        InboundEmailTicketProcessor $processor,
+        EmailMessageQuarantineService $quarantine,
     ): void {
         try {
             $processor->process(
+                $this->emailMessageId
+            );
+
+            $quarantine->resolveForEmail(
                 $this->emailMessageId
             );
         } catch (
@@ -79,6 +87,38 @@ class ProcessInboundEmailJob implements ShouldQueue
             }
 
             throw $exception;
+        }
+    }
+
+    public function failed(
+        ?Throwable $exception
+    ): void {
+        if (
+            !(bool) config(
+                'simpledesk-mail-quarantine.enabled',
+                true
+            )
+        ) {
+            return;
+        }
+
+        try {
+            app(
+                EmailMessageQuarantineService::class
+            )->quarantine(
+                emailMessageId:
+                $this->emailMessageId,
+
+                stage:
+                EmailQuarantineStage::InboundTicketing,
+
+                exception:
+                $exception,
+            );
+        } catch (Throwable $quarantineException) {
+            report(
+                $quarantineException
+            );
         }
     }
 }

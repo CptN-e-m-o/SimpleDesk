@@ -5,6 +5,7 @@ namespace App\Services\Admin\Mail\ReplyParsing;
 use App\Data\Admin\Mail\ParsedInboundEmailContentData;
 use App\Models\Admin\Mail\EmailMessage;
 use DOMDocument;
+use DOMElement;
 use DOMNode;
 use DOMXPath;
 use Throwable;
@@ -14,11 +15,24 @@ class InboundEmailReplyParser
     public function parse(
         EmailMessage $message
     ): ParsedInboundEmailContentData {
+        $parsingEnabled = (bool) config(
+            'simpledesk-mail-reply-parsing.enabled',
+            true
+        );
+
+        $stripQuotedText = $parsingEnabled
+            && (bool) config(
+                'simpledesk-mail-reply-parsing.strip_quoted_text',
+                true
+            );
+
         [
             $originalBody,
             $source,
+            $htmlQuotedTextRemoved,
         ] = $this->sourceBody(
-            $message
+            message: $message,
+            stripHtmlQuotedText: $stripQuotedText,
         );
 
         $originalBody = $this->normalizeText(
@@ -29,12 +43,7 @@ class InboundEmailReplyParser
             $originalBody
         );
 
-        if (
-            !(bool) config(
-                'simpledesk-mail-reply-parsing.enabled',
-                true
-            )
-        ) {
+        if (!$parsingEnabled) {
             $body = $this->limitBody(
                 $originalBody
             );
@@ -50,21 +59,23 @@ class InboundEmailReplyParser
         }
 
         $body = $originalBody;
-        $quotedTextRemoved = false;
+
+        $quotedTextRemoved =
+            $htmlQuotedTextRemoved;
+
         $signatureRemoved = false;
 
-        if (
-            (bool) config(
-                'simpledesk-mail-reply-parsing.strip_quoted_text',
-                true
-            )
-        ) {
+        if ($stripQuotedText) {
             [
                 $body,
-                $quotedTextRemoved,
+                $plainTextQuoteRemoved,
             ] = $this->stripQuotedText(
                 $body
             );
+
+            $quotedTextRemoved =
+                $quotedTextRemoved
+                || $plainTextQuoteRemoved;
         }
 
         if (
@@ -117,10 +128,11 @@ class InboundEmailReplyParser
     }
 
     /**
-     * @return array{0: string, 1: string}
+     * @return array{0: string, 1: string, 2: bool}
      */
     private function sourceBody(
-        EmailMessage $message
+        EmailMessage $message,
+        bool $stripHtmlQuotedText,
     ): array {
         $textBody = trim(
             (string) $message->text_body
@@ -142,15 +154,24 @@ class InboundEmailReplyParser
             return [
                 $textBody,
                 'text',
+                false,
             ];
         }
 
         if ($htmlBody !== '') {
+            [
+                $htmlText,
+                $quotedTextRemoved,
+            ] = $this->htmlToText(
+                html: $htmlBody,
+                stripQuotedText:
+                $stripHtmlQuotedText,
+            );
+
             return [
-                $this->htmlToText(
-                    $htmlBody
-                ),
+                $htmlText,
                 'html',
+                $quotedTextRemoved,
             ];
         }
 
@@ -158,12 +179,14 @@ class InboundEmailReplyParser
             return [
                 $textBody,
                 'text',
+                false,
             ];
         }
 
         return [
             '',
             'empty',
+            false,
         ];
     }
 
@@ -424,7 +447,8 @@ class InboundEmailReplyParser
                     $line
                 ) === 1
             ) {
-                $matchedHeaders['from'] = true;
+                $matchedHeaders['from'] =
+                    true;
             }
 
             if (
@@ -433,7 +457,8 @@ class InboundEmailReplyParser
                     $line
                 ) === 1
             ) {
-                $matchedHeaders['date'] = true;
+                $matchedHeaders['date'] =
+                    true;
             }
 
             if (
@@ -442,7 +467,8 @@ class InboundEmailReplyParser
                     $line
                 ) === 1
             ) {
-                $matchedHeaders['to'] = true;
+                $matchedHeaders['to'] =
+                    true;
             }
 
             if (
@@ -451,7 +477,8 @@ class InboundEmailReplyParser
                     $line
                 ) === 1
             ) {
-                $matchedHeaders['subject'] = true;
+                $matchedHeaders['subject'] =
+                    true;
             }
         }
 
@@ -647,14 +674,26 @@ class InboundEmailReplyParser
         ];
     }
 
+    /**
+     * @return array{0: string, 1: bool}
+     */
     private function htmlToText(
-        string $html
-    ): string {
+        string $html,
+        bool $stripQuotedText,
+    ): array {
         $html = trim($html);
 
         if ($html === '') {
-            return '';
+            return [
+                '',
+                false,
+            ];
         }
+
+        $previousLibxmlState =
+            libxml_use_internal_errors(
+                true
+            );
 
         try {
             $document = new DOMDocument(
@@ -662,31 +701,34 @@ class InboundEmailReplyParser
                 'UTF-8'
             );
 
-            $previousState =
-                libxml_use_internal_errors(
-                    true
-                );
+            $wrappedHtml =
+                '<?xml encoding="UTF-8">'
+                . '<!DOCTYPE html>'
+                . '<html>'
+                . '<head>'
+                . '<meta charset="UTF-8">'
+                . '</head>'
+                . '<body>'
+                . '<div id="simpledesk-reply-parser-root">'
+                . $html
+                . '</div>'
+                . '</body>'
+                . '</html>';
 
             $loaded = $document->loadHTML(
-                '<?xml encoding="UTF-8">'
-                . $html,
-                LIBXML_HTML_NOIMPLIED
-                | LIBXML_HTML_NODEFDTD
-                | LIBXML_NONET
+                $wrappedHtml,
+                LIBXML_NONET
                 | LIBXML_NOERROR
                 | LIBXML_NOWARNING,
             );
 
-            libxml_clear_errors();
-
-            libxml_use_internal_errors(
-                $previousState
-            );
-
             if (!$loaded) {
-                return $this->fallbackHtmlToText(
-                    $html
-                );
+                return [
+                    $this->fallbackHtmlToText(
+                        $html
+                    ),
+                    false,
+                ];
             }
 
             $xpath = new DOMXPath(
@@ -700,62 +742,117 @@ class InboundEmailReplyParser
                 . '|//head'
                 . '|//template'
                 . '|//noscript'
-                . '|//blockquote'
             );
 
-            $this->removeNodes(
-                $xpath,
-                '//*[contains('
-                . 'concat(" ", normalize-space(@class), " "),'
-                . '" gmail_quote "'
-                . ')]'
-            );
+            $quotedTextRemoved = false;
 
-            $this->removeNodes(
-                $xpath,
-                '//*[contains('
-                . 'concat(" ", normalize-space(@class), " "),'
-                . '" gmail_extra "'
-                . ')]'
-            );
+            if ($stripQuotedText) {
+                $removedNodes = 0;
 
-            $this->removeNodes(
-                $xpath,
-                '//*[contains('
-                . 'concat(" ", normalize-space(@class), " "),'
-                . '" yahoo_quoted "'
-                . ')]'
-            );
+                $removedNodes +=
+                    $this->removeNodes(
+                        $xpath,
+                        '//blockquote'
+                    );
 
-            $this->removeNodes(
-                $xpath,
-                '//*[contains('
-                . 'concat(" ", normalize-space(@class), " "),'
-                . '" moz-cite-prefix "'
-                . ')]'
-            );
+                $removedNodes +=
+                    $this->removeNodes(
+                        $xpath,
+                        '//*[contains('
+                        . 'concat(" ", normalize-space(@class), " "),'
+                        . '" gmail_quote "'
+                        . ')]'
+                    );
 
-            $this->removeNodes(
-                $xpath,
-                '//*[@id="divRplyFwdMsg"]'
-                . '|//*[@id="appendonsend"]'
-            );
+                $removedNodes +=
+                    $this->removeNodes(
+                        $xpath,
+                        '//*[contains('
+                        . 'concat(" ", normalize-space(@class), " "),'
+                        . '" gmail_extra "'
+                        . ')]'
+                    );
 
-            $cleanHtml =
-                $document->saveHTML();
+                $removedNodes +=
+                    $this->removeNodes(
+                        $xpath,
+                        '//*[contains('
+                        . 'concat(" ", normalize-space(@class), " "),'
+                        . '" yahoo_quoted "'
+                        . ')]'
+                    );
 
-            if (!is_string($cleanHtml)) {
-                return $this->fallbackHtmlToText(
-                    $html
-                );
+                $removedNodes +=
+                    $this->removeNodes(
+                        $xpath,
+                        '//*[contains('
+                        . 'concat(" ", normalize-space(@class), " "),'
+                        . '" moz-cite-prefix "'
+                        . ')]'
+                    );
+
+                $removedNodes +=
+                    $this->removeNodes(
+                        $xpath,
+                        '//*[@id="divRplyFwdMsg"]'
+                        . '|//*[@id="appendonsend"]'
+                    );
+
+                $quotedTextRemoved =
+                    $removedNodes > 0;
             }
 
-            return $this->fallbackHtmlToText(
-                $cleanHtml
+            $rootNodeList = $xpath->query(
+                '//*[@id="simpledesk-reply-parser-root"]'
             );
+
+            if (
+                $rootNodeList === false
+                || $rootNodeList->length === 0
+            ) {
+                return [
+                    $this->fallbackHtmlToText(
+                        $html
+                    ),
+                    false,
+                ];
+            }
+
+            $rootNode = $rootNodeList->item(
+                0
+            );
+
+            if (!$rootNode instanceof DOMElement) {
+                return [
+                    $this->fallbackHtmlToText(
+                        $html
+                    ),
+                    false,
+                ];
+            }
+
+            $cleanHtml = $this->innerHtml(
+                $rootNode
+            );
+
+            return [
+                $this->fallbackHtmlToText(
+                    $cleanHtml
+                ),
+                $quotedTextRemoved,
+            ];
         } catch (Throwable) {
-            return $this->fallbackHtmlToText(
-                $html
+            return [
+                $this->fallbackHtmlToText(
+                    $html
+                ),
+                false,
+            ];
+        } finally {
+            libxml_clear_errors();
+
+            libxml_use_internal_errors(
+                $previousLibxmlState
             );
         }
     }
@@ -763,11 +860,13 @@ class InboundEmailReplyParser
     private function removeNodes(
         DOMXPath $xpath,
         string $query
-    ): void {
-        $nodes = $xpath->query($query);
+    ): int {
+        $nodes = $xpath->query(
+            $query
+        );
 
         if ($nodes === false) {
-            return;
+            return 0;
         }
 
         $items = [];
@@ -775,6 +874,8 @@ class InboundEmailReplyParser
         foreach ($nodes as $node) {
             $items[] = $node;
         }
+
+        $removed = 0;
 
         foreach (
             array_reverse($items)
@@ -790,7 +891,37 @@ class InboundEmailReplyParser
             $node->parentNode->removeChild(
                 $node
             );
+
+            $removed++;
         }
+
+        return $removed;
+    }
+
+    private function innerHtml(
+        DOMNode $node
+    ): string {
+        $document =
+            $node->ownerDocument;
+
+        if (!$document instanceof DOMDocument) {
+            return '';
+        }
+
+        $html = '';
+
+        foreach ($node->childNodes as $child) {
+            $childHtml =
+                $document->saveHTML(
+                    $child
+                );
+
+            if (is_string($childHtml)) {
+                $html .= $childHtml;
+            }
+        }
+
+        return $html;
     }
 
     private function fallbackHtmlToText(
