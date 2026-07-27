@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands\Mail;
+namespace App\Console\Commands\Admin\Mail;
 
 use App\Jobs\Admin\Mail\SyncIncomingMailboxJob;
 use App\Models\Admin\Mail\Mailbox;

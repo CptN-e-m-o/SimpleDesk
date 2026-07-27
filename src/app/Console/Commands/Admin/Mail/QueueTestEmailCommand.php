@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands\Mail;
+namespace App\Console\Commands\Admin\Mail;
 
 use App\Data\Admin\Mail\MailAddressData;
 use App\Data\Admin\Mail\MailAttachmentData;

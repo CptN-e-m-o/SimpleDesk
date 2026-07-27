@@ -2,10 +2,13 @@
 
 namespace App\Models\Admin;
 
+use App\Models\Admin\Mail\Mailbox;
+use App\Models\Ticket;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Department extends Model
@@ -29,27 +32,56 @@ class Department extends Model
 
     public function status(): BelongsTo
     {
-        return $this->belongsTo(DepartmentStatus::class, 'department_status_id');
+        return $this->belongsTo(
+            DepartmentStatus::class,
+            'department_status_id'
+        );
     }
 
     public function teams(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class)
+        return $this
+            ->belongsToMany(Team::class)
             ->withTimestamps();
     }
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'department_user')
+        return $this
+            ->belongsToMany(
+                User::class,
+                'department_user'
+            )
             ->withPivot('is_manager')
             ->withTimestamps();
     }
 
     public function managers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'department_user')
+        return $this
+            ->belongsToMany(
+                User::class,
+                'department_user'
+            )
             ->withPivot('is_manager')
-            ->wherePivot('is_manager', true)
+            ->wherePivot(
+                'is_manager',
+                true
+            )
             ->withTimestamps();
+    }
+
+    public function mailboxes(): HasMany
+    {
+        return $this->hasMany(
+            Mailbox::class
+        );
+    }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(
+            Ticket::class
+        );
     }
 }
