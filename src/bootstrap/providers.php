@@ -9,5 +9,6 @@ return [
     AppServiceProvider::class,
     FortifyServiceProvider::class,
     MailServiceProvider::class,
-    InboundEmailTicketingServiceProvider::class
+    InboundEmailTicketingServiceProvider::class,
+    App\Providers\Admin\Mail\MailAutomationServiceProvider::class,
 ];
