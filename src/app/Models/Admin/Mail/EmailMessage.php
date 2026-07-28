@@ -78,40 +78,63 @@ class EmailMessage extends Model
 
     public function mailbox(): BelongsTo
     {
-        return $this->belongsTo(Mailbox::class);
+        return $this->belongsTo(
+            Mailbox::class
+        );
     }
 
     public function mailboxChannel(): BelongsTo
     {
-        return $this->belongsTo(MailboxChannel::class);
+        return $this->belongsTo(
+            MailboxChannel::class
+        );
     }
 
     public function ticket(): BelongsTo
     {
-        return $this->belongsTo(Ticket::class);
+        return $this->belongsTo(
+            Ticket::class
+        );
     }
 
     public function ticketReply(): BelongsTo
     {
-        return $this->belongsTo(TicketReply::class);
+        return $this->belongsTo(
+            TicketReply::class
+        );
     }
 
     public function attachments(): HasMany
     {
         return $this
-            ->hasMany(EmailAttachment::class)
+            ->hasMany(
+                EmailAttachment::class
+            )
+            ->orderBy('position');
+    }
+
+    public function attachmentRejections(): HasMany
+    {
+        return $this
+            ->hasMany(
+                EmailAttachmentRejection::class
+            )
             ->orderBy('position');
     }
 
     public function webhookEvents(): HasMany
     {
-        return $this->hasMany(EmailWebhookEvent::class);
+        return $this->hasMany(
+            EmailWebhookEvent::class
+        );
     }
 
     public function attempts(): HasMany
     {
         return $this
-            ->hasMany(EmailMessageAttempt::class)
+            ->hasMany(
+                EmailMessageAttempt::class
+            )
             ->orderBy('attempt_number');
     }
 }

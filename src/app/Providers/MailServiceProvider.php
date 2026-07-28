@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
 use App\Services\Admin\Mail\Drivers\Smtp\SmtpTransportFactory;
+use App\Services\Admin\Mail\InboundNormalizationFailurePersister;
 use App\Services\Admin\Mail\IncomingEmailMessagePersister;
 use App\Services\Admin\Mail\IncomingMailboxSyncService;
 use App\Services\Admin\Mail\MailAttachmentStorageService;
@@ -12,7 +13,9 @@ use App\Services\Admin\Mail\MailChannelSelector;
 use App\Services\Admin\Mail\MailDriverRegistry;
 use App\Services\Admin\Mail\OutgoingEmailMessageFactory;
 use App\Services\Admin\Mail\OutgoingMailFailoverService;
+use App\Services\Admin\Mail\Quarantine\EmailMessageQuarantineService;
 use App\Services\Admin\Mail\RawEmailStorageService;
+use App\Services\Admin\Mail\RejectedEmailAttachmentPersister;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Mail\MailManager;
@@ -157,6 +160,10 @@ class MailServiceProvider extends ServiceProvider
                     attachmentStorage: $app->make(
                         MailAttachmentStorageService::class
                     ),
+                    rejectedAttachments:
+                    $app->make(
+                        RejectedEmailAttachmentPersister::class
+                    ),
                     processingLockSeconds:
                     (int) config(
                         'simpledesk-mail.sync.message_processing_lock_seconds',
@@ -190,8 +197,16 @@ class MailServiceProvider extends ServiceProvider
                     persister: $app->make(
                         IncomingEmailMessagePersister::class
                     ),
+                    normalizationFailures:
+                    $app->make(
+                        InboundNormalizationFailurePersister::class
+                    ),
                     acknowledger: $app->make(
                         \App\Services\Admin\Mail\IncomingMailAcknowledger::class
+                    ),
+                    quarantine:
+                    $app->make(
+                        EmailMessageQuarantineService::class
                     ),
                     health: $app->make(
                         MailChannelHealthRecorder::class

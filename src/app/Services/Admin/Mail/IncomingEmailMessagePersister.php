@@ -9,6 +9,7 @@ use App\Enums\Admin\Mail\EmailMessageDirection;
 use App\Enums\Admin\Mail\EmailMessageStatus;
 use App\Events\Admin\Mail\InboundEmailStored;
 use App\Exceptions\Admin\Mail\InboundMessageAlreadyProcessingException;
+use App\Exceptions\Admin\Mail\InboundMessagePersistenceException;
 use App\Models\Admin\Mail\EmailMessage;
 use App\Models\Admin\Mail\MailboxChannel;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class IncomingEmailMessagePersister
         private readonly MailMessageIdempotencyKeyFactory $keys,
         private readonly RawEmailStorageService $rawStorage,
         private readonly MailAttachmentStorageService $attachmentStorage,
+        private readonly RejectedEmailAttachmentPersister $rejectedAttachments,
         private readonly int $processingLockSeconds,
     ) {
     }
@@ -48,8 +50,14 @@ class IncomingEmailMessagePersister
             );
         }
 
+        $failureCode =
+            'inbound_persistence_failed';
+
         try {
             if ($message->rawMessage !== null) {
+                $failureCode =
+                    'raw_message_storage_failed';
+
                 $this->rawStorage->store(
                     emailMessage: $emailMessage,
                     rawMessage: $message->rawMessage,
@@ -60,6 +68,9 @@ class IncomingEmailMessagePersister
                 array_values($message->attachments)
                 as $position => $attachment
             ) {
+                $failureCode =
+                    'attachment_storage_failed';
+
                 $this->attachmentStorage->store(
                     emailMessage: $emailMessage,
                     attachment: $attachment,
@@ -67,35 +78,102 @@ class IncomingEmailMessagePersister
                 );
             }
 
+            $failureCode =
+                'attachment_rejection_persistence_failed';
+
+            $this->rejectedAttachments->persist(
+                emailMessage: $emailMessage,
+                attachments:
+                $message->rejectedAttachments,
+            );
+
+            $failureCode =
+                'inbound_message_finalize_failed';
+
+            $metadata = is_array(
+                $emailMessage->metadata
+            )
+                ? $emailMessage->metadata
+                : [];
+
+            $metadata['attachment_processing'] = [
+                'stored_count' =>
+                    count($message->attachments),
+
+                'rejected_count' =>
+                    count(
+                        $message->rejectedAttachments
+                    ),
+
+                'completed_at' =>
+                    now()->toIso8601String(),
+            ];
+
             $emailMessage->forceFill([
-                'status' => EmailMessageStatus::Received,
+                'status' =>
+                    EmailMessageStatus::Received,
+
+                'metadata' => $metadata,
+
                 'processing_started_at' => null,
+
                 'failed_at' => null,
                 'failure_code' => null,
                 'failure_message' => null,
             ])->save();
+
+            $failureCode =
+                'inbound_event_dispatch_failed';
 
             InboundEmailStored::dispatch(
                 $emailMessage->id
             );
 
             return new PersistedInboundMessageData(
-                emailMessage: $emailMessage->fresh(
-                    'attachments'
-                ),
+                emailMessage:
+                $emailMessage->fresh([
+                    'attachments',
+                    'attachmentRejections',
+                ]),
+
                 created: $created,
                 duplicate: false,
             );
         } catch (Throwable $exception) {
             $emailMessage->forceFill([
-                'status' => EmailMessageStatus::Failed,
+                'status' =>
+                    EmailMessageStatus::Failed,
+
                 'processing_started_at' => null,
+
                 'failed_at' => now(),
-                'failure_code' => 'inbound_persistence_failed',
-                'failure_message' => $exception->getMessage(),
+
+                'failure_code' =>
+                    $failureCode,
+
+                'failure_message' =>
+                    mb_substr(
+                        $exception->getMessage(),
+                        0,
+                        10000
+                    ),
             ])->save();
 
-            throw $exception;
+            throw new InboundMessagePersistenceException(
+                emailMessageId:
+                $emailMessage->id,
+
+                errorCode:
+                $failureCode,
+
+                message:
+                $exception->getMessage(),
+
+                retryable: true,
+
+                previous:
+                $exception,
+            );
         }
     }
 
@@ -104,80 +182,93 @@ class IncomingEmailMessagePersister
         NormalizedInboundMessageData $message,
         string $idempotencyKey,
     ): array {
-        return DB::transaction(function () use (
-            $channel,
-            $message,
-            $idempotencyKey,
-        ): array {
-            $emailMessage = EmailMessage::query()
-                ->where(
-                    'idempotency_key',
-                    $idempotencyKey
-                )
-                ->lockForUpdate()
-                ->first();
+        return DB::transaction(
+            function () use (
+                $channel,
+                $message,
+                $idempotencyKey,
+            ): array {
+                $emailMessage =
+                    EmailMessage::query()
+                        ->where(
+                            'idempotency_key',
+                            $idempotencyKey
+                        )
+                        ->lockForUpdate()
+                        ->first();
 
-            if ($emailMessage !== null) {
-                if (in_array(
-                    $emailMessage->status,
-                    [
-                        EmailMessageStatus::Received,
-                        EmailMessageStatus::Processed,
-                    ],
-                    true,
-                )) {
+                if ($emailMessage !== null) {
+                    if (
+                        in_array(
+                            $emailMessage->status,
+                            [
+                                EmailMessageStatus::Received,
+                                EmailMessageStatus::Processed,
+                            ],
+                            true,
+                        )
+                    ) {
+                        return [
+                            $emailMessage,
+                            false,
+                            true,
+                        ];
+                    }
+
+                    if (
+                        $emailMessage->status
+                        === EmailMessageStatus::Processing
+                        && $emailMessage
+                            ->processing_started_at
+                        !== null
+                        && $emailMessage
+                            ->processing_started_at
+                            ->greaterThan(
+                                now()->subSeconds(
+                                    $this
+                                        ->processingLockSeconds
+                                )
+                            )
+                    ) {
+                        throw new InboundMessageAlreadyProcessingException(
+                            $emailMessage->id
+                        );
+                    }
+
+                    $emailMessage->forceFill(
+                        $this->messageAttributes(
+                            channel: $channel,
+                            message: $message,
+                            idempotencyKey:
+                            $idempotencyKey,
+                        )
+                    )->save();
+
                     return [
                         $emailMessage,
                         false,
-                        true,
+                        false,
                     ];
                 }
 
-                if (
-                    $emailMessage->status
-                    === EmailMessageStatus::Processing
-                    && $emailMessage->processing_started_at !== null
-                    && $emailMessage->processing_started_at
-                        ->greaterThan(
-                            now()->subSeconds(
-                                $this->processingLockSeconds
+                $emailMessage =
+                    EmailMessage::query()
+                        ->create(
+                            $this->messageAttributes(
+                                channel: $channel,
+                                message: $message,
+                                idempotencyKey:
+                                $idempotencyKey,
                             )
-                        )
-                ) {
-                    throw new InboundMessageAlreadyProcessingException(
-                        $emailMessage->id
-                    );
-                }
-
-                $emailMessage->forceFill(
-                    $this->messageAttributes(
-                        channel: $channel,
-                        message: $message,
-                        idempotencyKey: $idempotencyKey,
-                    )
-                )->save();
+                        );
 
                 return [
                     $emailMessage,
-                    false,
+                    true,
                     false,
                 ];
             }
-
-            $emailMessage = EmailMessage::query()->create(
-                $this->messageAttributes(
-                    channel: $channel,
-                    message: $message,
-                    idempotencyKey: $idempotencyKey,
-                )
-            );
-
-            return [
-                $emailMessage,
-                true,
-                false,
-            ];
-        });
+        );
     }
 
     private function messageAttributes(
@@ -186,38 +277,85 @@ class IncomingEmailMessagePersister
         string $idempotencyKey,
     ): array {
         return [
-            'mailbox_id' => $channel->mailbox_id,
-            'mailbox_channel_id' => $channel->id,
-            'direction' => EmailMessageDirection::Incoming,
-            'driver' => $channel->driver,
-            'status' => EmailMessageStatus::Processing,
-            'idempotency_key' => $idempotencyKey,
+            'mailbox_id' =>
+                $channel->mailbox_id,
+
+            'mailbox_channel_id' =>
+                $channel->id,
+
+            'direction' =>
+                EmailMessageDirection::Incoming,
+
+            'driver' =>
+                $channel->driver,
+
+            'status' =>
+                EmailMessageStatus::Processing,
+
+            'idempotency_key' =>
+                $idempotencyKey,
+
             'external_message_id' =>
                 $message->externalMessageId,
+
             'internet_message_id' =>
                 $message->internetMessageId,
+
             'in_reply_to_message_id' =>
                 $message->inReplyToMessageId,
+
             'reference_message_ids' =>
                 $message->references,
-            'sender_address' => $message->from->address,
-            'sender_name' => $message->from->name,
+
+            'sender_address' =>
+                $message->from->address,
+
+            'sender_name' =>
+                $message->from->name,
+
             'to_recipients' =>
-                $this->addressesToArray($message->to),
+                $this->addressesToArray(
+                    $message->to
+                ),
+
             'cc_recipients' =>
-                $this->addressesToArray($message->cc),
+                $this->addressesToArray(
+                    $message->cc
+                ),
+
             'bcc_recipients' =>
-                $this->addressesToArray($message->bcc),
+                $this->addressesToArray(
+                    $message->bcc
+                ),
+
             'reply_to_recipients' =>
-                $this->addressesToArray($message->replyTo),
-            'subject' => $message->subject,
-            'text_body' => $message->textBody,
-            'html_body' => $message->htmlBody,
-            'headers' => $message->headers,
-            'metadata' => $message->metadata,
-            'received_at' => $message->receivedAt,
-            'processing_started_at' => now(),
+                $this->addressesToArray(
+                    $message->replyTo
+                ),
+
+            'subject' =>
+                $message->subject,
+
+            'text_body' =>
+                $message->textBody,
+
+            'html_body' =>
+                $message->htmlBody,
+
+            'headers' =>
+                $message->headers,
+
+            'metadata' =>
+                $message->metadata,
+
+            'received_at' =>
+                $message->receivedAt,
+
+            'processing_started_at' =>
+                now(),
+
             'processed_at' => null,
+
             'failed_at' => null,
             'failure_code' => null,
             'failure_message' => null,
@@ -231,8 +369,9 @@ class IncomingEmailMessagePersister
         array $addresses
     ): array {
         return array_map(
-            static fn (MailAddressData $address): array =>
-            $address->toArray(),
+            static fn (
+                MailAddressData $address
+            ): array => $address->toArray(),
             $addresses,
         );
     }

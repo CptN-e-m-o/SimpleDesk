@@ -9,6 +9,7 @@ final readonly class IncomingFetchResultData
 {
     /**
      * @param array<int, NormalizedInboundMessageData> $messages
+     * @param array<int, FailedInboundMessageData> $failures
      */
     public function __construct(
         public array $messages,
@@ -17,11 +18,27 @@ final readonly class IncomingFetchResultData
         public array $metadata = [],
         public ?int $mailboxChannelId = null,
         public ?MailboxDriver $driver = null,
+        public array $failures = [],
     ) {
         foreach ($messages as $message) {
-            if (!$message instanceof NormalizedInboundMessageData) {
+            if (
+                !$message
+                    instanceof NormalizedInboundMessageData
+            ) {
                 throw new InvalidArgumentException(
                     'Fetched message must be normalized.'
+                );
+            }
+        }
+
+        foreach ($failures as $failure) {
+            if (
+                !$failure
+                    instanceof FailedInboundMessageData
+            ) {
+                throw new InvalidArgumentException(
+                    'Fetch failure must be an instance '
+                    . 'of FailedInboundMessageData.'
                 );
             }
         }
@@ -38,6 +55,7 @@ final readonly class IncomingFetchResultData
             metadata: $this->metadata,
             mailboxChannelId: $mailboxChannelId,
             driver: $driver,
+            failures: $this->failures,
         );
     }
 }

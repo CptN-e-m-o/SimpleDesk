@@ -14,6 +14,7 @@ final readonly class NormalizedInboundMessageData
      * @param array<int, MailAddressData> $replyTo
      * @param array<int, string> $references
      * @param array<int, MailAttachmentData> $attachments
+     * @param array<int, RejectedMailAttachmentData> $rejectedAttachments
      */
     public function __construct(
         public string $externalMessageId,
@@ -33,6 +34,7 @@ final readonly class NormalizedInboundMessageData
         public array $references = [],
         public array $metadata = [],
         public ?string $rawMessage = null,
+        public array $rejectedAttachments = [],
     ) {
         if (trim($externalMessageId) === '') {
             throw new InvalidArgumentException(
@@ -44,11 +46,17 @@ final readonly class NormalizedInboundMessageData
         $this->assertAddresses($cc);
         $this->assertAddresses($bcc);
         $this->assertAddresses($replyTo);
+
         $this->assertAttachments($attachments);
+
+        $this->assertRejectedAttachments(
+            $rejectedAttachments
+        );
     }
 
-    private function assertAddresses(array $addresses): void
-    {
+    private function assertAddresses(
+        array $addresses
+    ): void {
         foreach ($addresses as $address) {
             if (!$address instanceof MailAddressData) {
                 throw new InvalidArgumentException(
@@ -58,12 +66,29 @@ final readonly class NormalizedInboundMessageData
         }
     }
 
-    private function assertAttachments(array $attachments): void
-    {
+    private function assertAttachments(
+        array $attachments
+    ): void {
         foreach ($attachments as $attachment) {
             if (!$attachment instanceof MailAttachmentData) {
                 throw new InvalidArgumentException(
                     'Attachment must be an instance of MailAttachmentData.'
+                );
+            }
+        }
+    }
+
+    private function assertRejectedAttachments(
+        array $attachments
+    ): void {
+        foreach ($attachments as $attachment) {
+            if (
+                !$attachment
+                    instanceof RejectedMailAttachmentData
+            ) {
+                throw new InvalidArgumentException(
+                    'Rejected attachment must be an instance '
+                    . 'of RejectedMailAttachmentData.'
                 );
             }
         }
