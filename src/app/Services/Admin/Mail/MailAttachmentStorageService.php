@@ -106,6 +106,25 @@ class MailAttachmentStorageService
         }
     }
 
+    public function delete(
+        EmailAttachment $attachment
+    ): void {
+        $storage = $this->filesystem->disk(
+            $attachment->disk
+        );
+
+        if (
+            $attachment->path !== ''
+            && $storage->exists($attachment->path)
+        ) {
+            $storage->delete($attachment->path);
+        }
+
+        if ($attachment->exists) {
+            $attachment->delete();
+        }
+    }
+
     private function fileMetadata(
         MailAttachmentData $attachment
     ): array {
@@ -136,7 +155,7 @@ class MailAttachmentStorageService
 
         if ($checksum === false || $size === false) {
             throw new MailStorageException(
-                "Unable to inspect attachment "
+                'Unable to inspect attachment '
                 . "[{$attachment->fileName}]."
             );
         }
@@ -155,7 +174,7 @@ class MailAttachmentStorageService
         if ($attachment->content !== null) {
             if (!$storage->put($path, $attachment->content)) {
                 throw new MailStorageException(
-                    "Unable to store attachment "
+                    'Unable to store attachment '
                     . "[{$attachment->fileName}]."
                 );
             }
@@ -170,7 +189,7 @@ class MailAttachmentStorageService
 
         if ($stream === false) {
             throw new MailStorageException(
-                "Unable to open attachment "
+                'Unable to open attachment '
                 . "[{$attachment->fileName}]."
             );
         }
@@ -178,7 +197,7 @@ class MailAttachmentStorageService
         try {
             if (!$storage->writeStream($path, $stream)) {
                 throw new MailStorageException(
-                    "Unable to store attachment "
+                    'Unable to store attachment '
                     . "[{$attachment->fileName}]."
                 );
             }

@@ -108,6 +108,11 @@ return [
     */
 
     'outgoing' => [
+        'max_attachment_count' => env(
+            'MAIL_MAX_ATTACHMENT_COUNT',
+            10,
+        ),
+
         'max_attachment_bytes' => env(
             'MAIL_MAX_ATTACHMENT_BYTES',
             25 * 1024 * 1024,
@@ -118,8 +123,35 @@ return [
             40 * 1024 * 1024,
         ),
 
+        'allowed_attachment_mime_types' => [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain',
+        ],
+
         'verify_attachment_checksums' => env(
             'MAIL_VERIFY_ATTACHMENT_CHECKSUMS',
+            true,
+        ),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attachment downloads
+    |--------------------------------------------------------------------------
+    */
+
+    'downloads' => [
+        'allowed_scan_statuses' => [
+            'not_scanned',
+            'clean',
+        ],
+
+        'verify_checksums' => env(
+            'MAIL_DOWNLOAD_VERIFY_CHECKSUMS',
             true,
         ),
     ],

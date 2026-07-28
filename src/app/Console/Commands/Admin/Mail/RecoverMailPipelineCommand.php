@@ -70,11 +70,6 @@ class RecoverMailPipelineCommand extends Command
                         ->outgoingQueuedDispatched,
                 ],
                 [
-                    'Ticket replies dispatched',
-                    $result
-                        ->ticketRepliesDispatched,
-                ],
-                [
                     'Total actions',
                     $result
                         ->totalActions(),

@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\Admin\Mail\EmailAttachmentDownloadController;
+use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
 use Illuminate\Http\Request;
@@ -35,6 +37,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/replies', [TicketReplyController::class, 'store'])
         ->name('tickets.replies.store');
 
+    Route::get(
+        '/mail/attachments/{attachment}/download',
+        EmailAttachmentDownloadController::class
+    )->name('mail.attachments.download');
+
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })
@@ -42,12 +49,20 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
 
     Route::prefix('agent')->name('agent.')->group(function () {
+        Route::post(
+            '/tickets/{ticket}/email-replies',
+            [AgentTicketEmailReplyController::class, 'store']
+        )
+            ->middleware('permission:agent.tickets.reply')
+            ->name('tickets.email-replies.store');
+
         Route::get('/tickets', function () {
             return Inertia::render('Tickets/Agent/Index');
         })
             ->middleware('permission:agent.tickets.visibility.assigned|agent.tickets.visibility.team|agent.tickets.visibility.department|agent.tickets.visibility.all')
             ->name('tickets');
     });
+
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', function () {
             return Inertia::render('Admin/Dashboard');

@@ -9,7 +9,6 @@ final readonly class MailRecoveryResultData
         public int $incomingReceivedDispatched,
         public int $outgoingStuckReset,
         public int $outgoingQueuedDispatched,
-        public int $ticketRepliesDispatched,
     ) {
     }
 
@@ -18,7 +17,6 @@ final readonly class MailRecoveryResultData
         return $this->incomingStuckReset
             + $this->incomingReceivedDispatched
             + $this->outgoingStuckReset
-            + $this->outgoingQueuedDispatched
-            + $this->ticketRepliesDispatched;
+            + $this->outgoingQueuedDispatched;
     }
 }

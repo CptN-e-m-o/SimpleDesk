@@ -3,6 +3,7 @@
 namespace App\Services\Admin\Mail\Ticketing;
 
 use App\Data\Admin\Mail\MailAddressData;
+use App\Data\Admin\Mail\MailAttachmentData;
 use App\Data\Admin\Mail\OutgoingEmailMessageData;
 use App\Enums\Admin\Mail\EmailMessageDirection;
 use App\Enums\Admin\Mail\EmailMessageStatus;
@@ -22,14 +23,19 @@ class TicketReplyEmailService
     ) {
     }
 
+    /**
+     * @param array<int, MailAttachmentData> $attachments
+     */
     public function queue(
         int $ticketReplyId,
         bool $dispatch = true,
+        array $attachments = [],
     ): EmailMessage {
         return DB::transaction(
             function () use (
                 $ticketReplyId,
                 $dispatch,
+                $attachments,
             ): EmailMessage {
                 $reply = TicketReply::query()
                     ->lockForUpdate()
@@ -57,29 +63,6 @@ class TicketReplyEmailService
                 $this->assertReplyCanBeSent(
                     $reply
                 );
-
-                $existingMessage =
-                    EmailMessage::query()
-                        ->where(
-                            'ticket_reply_id',
-                            $reply->id
-                        )
-                        ->where(
-                            'direction',
-                            EmailMessageDirection::Outgoing
-                                ->value
-                        )
-                        ->first();
-
-                if ($existingMessage !== null) {
-                    if ($dispatch) {
-                        $this->dispatchExistingMessage(
-                            $existingMessage
-                        );
-                    }
-
-                    return $existingMessage;
-                }
 
                 $ticket = $reply->ticket;
 
@@ -115,6 +98,67 @@ class TicketReplyEmailService
                         errorCode:
                         'ticket_mailbox_disabled',
                         retryable: false,
+                    );
+                }
+
+                $existingMessage =
+                    EmailMessage::query()
+                        ->where(
+                            'ticket_reply_id',
+                            $reply->id
+                        )
+                        ->where(
+                            'direction',
+                            EmailMessageDirection::Outgoing
+                                ->value
+                        )
+                        ->first();
+
+                if ($existingMessage !== null) {
+                    if ($attachments !== []) {
+                        if (in_array(
+                            $existingMessage->status,
+                            [
+                                EmailMessageStatus::Sending,
+                                EmailMessageStatus::Sent,
+                                EmailMessageStatus::Delivered,
+                                EmailMessageStatus::Rejected,
+                                EmailMessageStatus::Bounced,
+                                EmailMessageStatus::Complained,
+                            ],
+                            true,
+                        )) {
+                            throw new TicketReplyEmailException(
+                                message:
+                                "Ticket reply [{$reply->id}] "
+                                . 'email can no longer be changed.',
+                                errorCode:
+                                'ticket_reply_email_immutable',
+                                retryable: false,
+                            );
+                        }
+
+                        return $this->outgoingQueue->queue(
+                            mailbox: $mailbox,
+                            message:
+                            OutgoingEmailMessageData::fromEmailMessage(
+                                message: $existingMessage,
+                                attachments: $attachments,
+                            ),
+                            ticketId: $ticket->id,
+                            ticketReplyId: $reply->id,
+                            dispatch: $dispatch,
+                        );
+                    }
+
+                    if ($dispatch) {
+                        $this->dispatchExistingMessage(
+                            $existingMessage
+                        );
+                    }
+
+                    return $existingMessage->loadMissing(
+                        'attachments'
                     );
                 }
 
@@ -226,7 +270,7 @@ class TicketReplyEmailService
                                 (string) $reply->id,
                         ],
 
-                        attachments: [],
+                        attachments: $attachments,
 
                         internetMessageId: null,
 
@@ -302,17 +346,57 @@ class TicketReplyEmailService
                 retryable: false,
             );
         }
+
+        $ticket = $reply->ticket;
+        $author = $reply->user;
+
+        if ($author === null) {
+            throw new TicketReplyEmailException(
+                message:
+                "Ticket reply [{$reply->id}] "
+                . 'has no author.',
+                errorCode:
+                'ticket_reply_author_missing',
+                retryable: false,
+            );
+        }
+
+        if (
+            $ticket !== null
+            && $ticket->requester_id === $author->id
+        ) {
+            throw new TicketReplyEmailException(
+                message:
+                "Ticket reply [{$reply->id}] "
+                . 'was created by the requester and must not '
+                . 'be sent back to the requester.',
+                errorCode:
+                'requester_ticket_reply',
+                retryable: false,
+            );
+        }
+
+        if (!$author->hasPermission('agent.tickets.reply')) {
+            throw new TicketReplyEmailException(
+                message:
+                "Ticket reply author [{$author->id}] "
+                . 'is not allowed to send ticket email replies.',
+                errorCode:
+                'ticket_reply_author_not_agent',
+                retryable: false,
+            );
+        }
     }
 
     private function dispatchExistingMessage(
         EmailMessage $emailMessage
     ): void {
-        if (in_array(
+        if (!in_array(
             $emailMessage->status,
             [
-                EmailMessageStatus::Sent,
-                EmailMessageStatus::Delivered,
-                EmailMessageStatus::Sending,
+                EmailMessageStatus::Preparing,
+                EmailMessageStatus::Queued,
+                EmailMessageStatus::Failed,
             ],
             true,
         )) {

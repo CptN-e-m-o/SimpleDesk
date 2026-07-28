@@ -16,6 +16,7 @@ class OutgoingEmailQueueService
 {
     public function __construct(
         private readonly MailAttachmentStorageService $attachmentStorage,
+        private readonly OutgoingMailAttachmentValidator $attachmentValidator,
         private readonly MailInternetMessageIdFactory $messageIds,
     ) {
     }
@@ -32,6 +33,10 @@ class OutgoingEmailQueueService
                 "Mailbox [{$mailbox->id}] is disabled."
             );
         }
+
+        $this->attachmentValidator->validate(
+            $message->attachments
+        );
 
         $from = $message->from
             ?? new MailAddressData(
@@ -103,30 +108,56 @@ class OutgoingEmailQueueService
                 ]
             );
 
-        if (!$emailMessage->wasRecentlyCreated) {
+        if ($this->isImmutable($emailMessage)) {
             return $emailMessage->loadMissing(
                 'attachments'
             );
         }
+
+        $storedInThisCall = [];
 
         try {
             foreach (
                 array_values($message->attachments)
                 as $position => $attachment
             ) {
-                $this->attachmentStorage->store(
-                    emailMessage: $emailMessage,
-                    attachment: $attachment,
-                    position: $position,
-                );
+                $storedAttachment =
+                    $this->attachmentStorage->store(
+                        emailMessage: $emailMessage,
+                        attachment: $attachment,
+                        position: $position,
+                    );
+
+                if ($storedAttachment->wasRecentlyCreated) {
+                    $storedInThisCall[] =
+                        $storedAttachment;
+                }
             }
 
-            $emailMessage->forceFill([
-                'status' => EmailMessageStatus::Queued,
-                'queued_at' => now(),
-            ])->save();
+            if (in_array(
+                $emailMessage->status,
+                [
+                    EmailMessageStatus::Preparing,
+                    EmailMessageStatus::Failed,
+                ],
+                true,
+            )) {
+                $emailMessage->forceFill([
+                    'status' => EmailMessageStatus::Queued,
+                    'queued_at' => now(),
+                    'processing_started_at' => null,
+                    'processed_at' => null,
+                    'failed_at' => null,
+                    'failure_code' => null,
+                    'failure_message' => null,
+                ])->save();
+            }
 
-            if ($dispatch) {
+            if (
+                $dispatch
+                && $emailMessage->status
+                === EmailMessageStatus::Queued
+            ) {
                 SendOutgoingEmailJob::dispatch(
                     $emailMessage->id
                 )
@@ -143,17 +174,49 @@ class OutgoingEmailQueueService
                 'attachments'
             );
         } catch (Throwable $exception) {
-            $emailMessage->forceFill([
-                'status' => EmailMessageStatus::Failed,
-                'failed_at' => now(),
-                'failure_code' =>
-                    'outgoing_preparation_failed',
-                'failure_message' =>
-                    $exception->getMessage(),
-            ])->save();
+            foreach (
+                array_reverse($storedInThisCall)
+                as $storedAttachment
+            ) {
+                try {
+                    $this->attachmentStorage->delete(
+                        $storedAttachment
+                    );
+                } catch (Throwable $cleanupException) {
+                    report($cleanupException);
+                }
+            }
+
+            if (!$this->isImmutable($emailMessage)) {
+                $emailMessage->forceFill([
+                    'status' => EmailMessageStatus::Failed,
+                    'failed_at' => now(),
+                    'failure_code' =>
+                        'outgoing_preparation_failed',
+                    'failure_message' =>
+                        $exception->getMessage(),
+                ])->save();
+            }
 
             throw $exception;
         }
+    }
+
+    private function isImmutable(
+        EmailMessage $emailMessage
+    ): bool {
+        return in_array(
+            $emailMessage->status,
+            [
+                EmailMessageStatus::Sending,
+                EmailMessageStatus::Sent,
+                EmailMessageStatus::Delivered,
+                EmailMessageStatus::Rejected,
+                EmailMessageStatus::Bounced,
+                EmailMessageStatus::Complained,
+            ],
+            true,
+        );
     }
 
     /**

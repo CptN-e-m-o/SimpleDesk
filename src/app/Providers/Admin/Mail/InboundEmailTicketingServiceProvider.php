@@ -4,8 +4,6 @@ namespace App\Providers\Admin\Mail;
 
 use App\Events\Admin\Mail\InboundEmailStored;
 use App\Jobs\Admin\Mail\ProcessInboundEmailJob;
-use App\Models\TicketReply;
-use App\Observers\Admin\Mail\TicketReplyObserver;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
@@ -26,10 +24,6 @@ class InboundEmailTicketingServiceProvider extends
     public function boot(
         Dispatcher $events
     ): void {
-        TicketReply::observe(
-            TicketReplyObserver::class
-        );
-
         $events->listen(
             InboundEmailStored::class,
             function (

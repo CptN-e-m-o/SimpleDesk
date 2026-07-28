@@ -4,10 +4,8 @@ namespace App\Services\Admin\Mail\Automation;
 
 use App\Data\Admin\Mail\MailRecoveryResultData;
 use App\Jobs\Admin\Mail\ProcessInboundEmailJob;
-use App\Jobs\Admin\Mail\QueueTicketReplyEmailJob;
 use App\Jobs\Admin\Mail\SendOutgoingEmailJob;
 use App\Models\Admin\Mail\EmailMessage;
-use App\Models\TicketReply;
 use BackedEnum;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Support\Facades\Cache;
@@ -49,11 +47,6 @@ class MailPipelineRecoveryService
                 $limit
             );
 
-        $ticketRepliesDispatched =
-            $this->dispatchUnsentTicketReplies(
-                $limit
-            );
-
         return new MailRecoveryResultData(
             incomingStuckReset:
             $incomingStuckReset,
@@ -66,9 +59,6 @@ class MailPipelineRecoveryService
 
             outgoingQueuedDispatched:
             $outgoingQueuedDispatched,
-
-            ticketRepliesDispatched:
-            $ticketRepliesDispatched,
         );
     }
 
@@ -388,70 +378,6 @@ class MailPipelineRecoveryService
         return $dispatched;
     }
 
-    private function dispatchUnsentTicketReplies(
-        int $limit
-    ): int {
-        $graceSeconds = max(
-            0,
-            (int) config(
-                'simpledesk-mail-automation.recovery.grace_seconds',
-                120
-            )
-        );
-
-        $cutoff = now()->subSeconds(
-            $graceSeconds
-        );
-
-        $ids = TicketReply::query()
-            ->where('is_internal', false)
-            ->where(
-                'created_at',
-                '<=',
-                $cutoff
-            )
-            ->whereDoesntHave(
-                'incomingEmailMessage'
-            )
-            ->whereDoesntHave(
-                'outgoingEmailMessage'
-            )
-            ->whereHas(
-                'ticket',
-                function ($query): void {
-                    $query
-                        ->whereNotNull(
-                            'mailbox_id'
-                        )
-                        ->whereHas(
-                            'mailbox',
-                            fn ($query) =>
-                            $query->where(
-                                'is_active',
-                                true
-                            )
-                        );
-                }
-            )
-            ->orderBy('id')
-            ->limit($limit)
-            ->pluck('id');
-
-        $dispatched = 0;
-
-        foreach ($ids as $ticketReplyId) {
-            if (
-                $this->dispatchTicketReplyPreparation(
-                    (int) $ticketReplyId
-                )
-            ) {
-                $dispatched++;
-            }
-        }
-
-        return $dispatched;
-    }
-
     private function dispatchInboundProcessing(
         int $emailMessageId
     ): bool {
@@ -504,42 +430,6 @@ class MailPipelineRecoveryService
             $pendingDispatch =
                 SendOutgoingEmailJob::dispatch(
                     $emailMessageId
-                );
-
-            $this->configureDispatch(
-                pendingDispatch:
-                $pendingDispatch,
-
-                queue: (string) config(
-                    'simpledesk-mail-automation.recovery.outgoing_queue',
-                    'mail-outgoing'
-                ),
-            );
-
-            return true;
-        } catch (Throwable $exception) {
-            Cache::forget($lockKey);
-
-            throw $exception;
-        }
-    }
-
-    private function dispatchTicketReplyPreparation(
-        int $ticketReplyId
-    ): bool {
-        $lockKey = sprintf(
-            'simpledesk:mail:recovery:ticket-reply:%d',
-            $ticketReplyId
-        );
-
-        if (!$this->claim($lockKey)) {
-            return false;
-        }
-
-        try {
-            $pendingDispatch =
-                QueueTicketReplyEmailJob::dispatch(
-                    $ticketReplyId
                 );
 
             $this->configureDispatch(

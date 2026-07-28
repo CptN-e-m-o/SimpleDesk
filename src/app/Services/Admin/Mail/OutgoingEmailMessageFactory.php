@@ -86,6 +86,7 @@ class OutgoingEmailMessageFactory
         if (in_array(
             $attachment->scan_status,
             [
+                EmailAttachmentScanStatus::Pending,
                 EmailAttachmentScanStatus::Infected,
                 EmailAttachmentScanStatus::Failed,
             ],

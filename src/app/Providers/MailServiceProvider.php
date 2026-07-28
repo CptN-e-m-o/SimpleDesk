@@ -7,11 +7,13 @@ use App\Services\Admin\Mail\Drivers\Smtp\SmtpTransportFactory;
 use App\Services\Admin\Mail\InboundNormalizationFailurePersister;
 use App\Services\Admin\Mail\IncomingEmailMessagePersister;
 use App\Services\Admin\Mail\IncomingMailboxSyncService;
+use App\Services\Admin\Mail\MailAttachmentDownloadService;
 use App\Services\Admin\Mail\MailAttachmentStorageService;
 use App\Services\Admin\Mail\MailChannelHealthRecorder;
 use App\Services\Admin\Mail\MailChannelSelector;
 use App\Services\Admin\Mail\MailDriverRegistry;
 use App\Services\Admin\Mail\OutgoingEmailMessageFactory;
+use App\Services\Admin\Mail\OutgoingMailAttachmentValidator;
 use App\Services\Admin\Mail\OutgoingMailFailoverService;
 use App\Services\Admin\Mail\Quarantine\EmailMessageQuarantineService;
 use App\Services\Admin\Mail\RawEmailStorageService;
@@ -112,6 +114,54 @@ class MailServiceProvider extends ServiceProvider
                     rootPath: (string) config(
                         'simpledesk-mail.storage.attachments_path',
                         'mail/attachments'
+                    ),
+                );
+            }
+        );
+
+        $this->app->singleton(
+            OutgoingMailAttachmentValidator::class,
+            function (): OutgoingMailAttachmentValidator {
+                return new OutgoingMailAttachmentValidator(
+                    allowedMimeTypes: (array) config(
+                        'simpledesk-mail.outgoing.allowed_attachment_mime_types',
+                        []
+                    ),
+                    maxAttachmentCount: (int) config(
+                        'simpledesk-mail.outgoing.max_attachment_count',
+                        10
+                    ),
+                    maxAttachmentBytes: (int) config(
+                        'simpledesk-mail.outgoing.max_attachment_bytes',
+                        25 * 1024 * 1024,
+                    ),
+                    maxTotalAttachmentBytes: (int) config(
+                        'simpledesk-mail.outgoing.max_total_attachment_bytes',
+                        40 * 1024 * 1024,
+                    ),
+                );
+            }
+        );
+
+        $this->app->singleton(
+            MailAttachmentDownloadService::class,
+            function (
+                Application $app
+            ): MailAttachmentDownloadService {
+                return new MailAttachmentDownloadService(
+                    filesystem: $app->make(
+                        FilesystemFactory::class
+                    ),
+                    allowedScanStatuses: (array) config(
+                        'simpledesk-mail.downloads.allowed_scan_statuses',
+                        [
+                            'not_scanned',
+                            'clean',
+                        ]
+                    ),
+                    verifyChecksums: (bool) config(
+                        'simpledesk-mail.downloads.verify_checksums',
+                        true
                     ),
                 );
             }
