@@ -17,13 +17,16 @@ class OutgoingEmailMessageFactory
         private readonly int $maxAttachmentBytes,
         private readonly int $maxTotalAttachmentBytes,
         private readonly bool $verifyChecksums,
+        private readonly ?bool $antivirusEnabled = null,
     ) {
     }
 
     public function make(
         EmailMessage $emailMessage
     ): OutgoingEmailMessageData {
-        $emailMessage->loadMissing('attachments');
+        $emailMessage->loadMissing(
+            'attachments'
+        );
 
         $attachments = [];
         $totalSize = 0;
@@ -83,15 +86,22 @@ class OutgoingEmailMessageFactory
             );
         }
 
-        if (in_array(
-            $attachment->scan_status,
-            [
-                EmailAttachmentScanStatus::Pending,
-                EmailAttachmentScanStatus::Infected,
-                EmailAttachmentScanStatus::Failed,
-            ],
-            true,
-        )) {
+        $allowedScanStatuses = $this->antivirusEnabled()
+            ? [
+                EmailAttachmentScanStatus::Clean,
+            ]
+            : [
+                EmailAttachmentScanStatus::NotScanned,
+                EmailAttachmentScanStatus::Clean,
+            ];
+
+        if (
+            !in_array(
+                $attachment->scan_status,
+                $allowedScanStatuses,
+                true,
+            )
+        ) {
             throw new MailStorageException(
                 "Attachment [{$attachment->file_name}] "
                 . 'cannot be sent because of its scan status.'
@@ -104,6 +114,15 @@ class OutgoingEmailMessageFactory
                 . 'is quarantined.'
             );
         }
+    }
+
+    private function antivirusEnabled(): bool
+    {
+        return $this->antivirusEnabled
+            ?? (bool) config(
+                'simpledesk-mail-antivirus.enabled',
+                false
+            );
     }
 
     private function readAttachment(
@@ -138,7 +157,10 @@ class OutgoingEmailMessageFactory
             $this->verifyChecksums
             && !hash_equals(
                 $attachment->checksum_sha256,
-                hash('sha256', $contents)
+                hash(
+                    'sha256',
+                    $contents
+                )
             )
         ) {
             throw new MailStorageException(

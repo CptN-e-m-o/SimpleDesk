@@ -1,0 +1,16 @@
+services:
+  clamav:
+    image: clamav/clamav-debian:1.5.3_base
+    restart: unless-stopped
+    expose:
+      - "3310"
+    environment:
+      CLAMD_STARTUP_TIMEOUT: 1800
+      FRESHCLAM_CHECKS: 24
+    volumes:
+      - clamav-data:/var/lib/clamav
+    networks:
+      - simpledesk
+
+volumes:
+  clamav-data:

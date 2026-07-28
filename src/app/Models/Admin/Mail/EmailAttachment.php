@@ -22,7 +22,11 @@ class EmailAttachment extends Model
         'content_id',
         'is_inline',
         'scan_status',
+        'scan_started_at',
+        'scan_attempts',
         'scanned_at',
+        'scan_failure_code',
+        'scan_failure_message',
         'quarantined_at',
         'scan_result',
         'metadata',
@@ -35,6 +39,8 @@ class EmailAttachment extends Model
             'size' => 'integer',
             'is_inline' => 'boolean',
             'scan_status' => EmailAttachmentScanStatus::class,
+            'scan_started_at' => 'immutable_datetime',
+            'scan_attempts' => 'integer',
             'scanned_at' => 'immutable_datetime',
             'quarantined_at' => 'immutable_datetime',
             'scan_result' => 'array',
@@ -44,6 +50,8 @@ class EmailAttachment extends Model
 
     public function emailMessage(): BelongsTo
     {
-        return $this->belongsTo(EmailMessage::class);
+        return $this->belongsTo(
+            EmailMessage::class
+        );
     }
 }

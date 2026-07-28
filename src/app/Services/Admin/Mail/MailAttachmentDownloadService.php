@@ -23,7 +23,9 @@ class MailAttachmentDownloadService
     public function download(
         EmailAttachment $attachment
     ): StreamedResponse {
-        $this->assertDownloadable($attachment);
+        $this->assertDownloadable(
+            $attachment
+        );
 
         $storage = $this->filesystem->disk(
             $attachment->disk
@@ -110,10 +112,19 @@ class MailAttachmentDownloadService
             ? $scanStatus
             : $scanStatus->value;
 
+        $allowedScanStatuses = (bool) config(
+            'simpledesk-mail-antivirus.enabled',
+            false
+        )
+            ? [
+                'clean',
+            ]
+            : $this->allowedScanStatuses;
+
         if (
             !in_array(
                 $status,
-                $this->allowedScanStatuses,
+                $allowedScanStatuses,
                 true
             )
         ) {
@@ -138,7 +149,9 @@ class MailAttachmentDownloadService
         }
 
         try {
-            $context = hash_init('sha256');
+            $context = hash_init(
+                'sha256'
+            );
 
             hash_update_stream(
                 $context,

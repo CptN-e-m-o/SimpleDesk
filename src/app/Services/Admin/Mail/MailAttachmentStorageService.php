@@ -7,7 +7,9 @@ use App\Enums\Admin\Mail\EmailAttachmentScanStatus;
 use App\Exceptions\Admin\Mail\MailStorageException;
 use App\Models\Admin\Mail\EmailAttachment;
 use App\Models\Admin\Mail\EmailMessage;
+use App\Services\Admin\Mail\Antivirus\AttachmentScanDispatcher;
 use Illuminate\Contracts\Filesystem\Factory;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
 use Throwable;
@@ -18,6 +20,8 @@ class MailAttachmentStorageService
         private readonly Factory $filesystem,
         private readonly string $disk,
         private readonly string $rootPath,
+        private readonly ?AttachmentScanDispatcher $scanDispatcher = null,
+        private readonly ?bool $antivirusEnabled = null,
     ) {
     }
 
@@ -58,7 +62,9 @@ class MailAttachmentStorageService
             fileName: $attachment->fileName,
         );
 
-        $storage = $this->filesystem->disk($this->disk);
+        $storage = $this->filesystem->disk(
+            $this->disk
+        );
 
         $this->writeAttachment(
             storage: $storage,
@@ -67,22 +73,44 @@ class MailAttachmentStorageService
         );
 
         try {
-            return $emailMessage->attachments()->create([
-                'position' => $position,
-                'external_id' => $attachment->externalId,
-                'deduplication_key' => $deduplicationKey,
-                'file_name' => $attachment->fileName,
-                'mime_type' => $attachment->mimeType,
-                'size' => $size,
-                'disk' => $this->disk,
-                'path' => $path,
-                'checksum_sha256' => $checksum,
-                'content_id' => $attachment->contentId,
-                'is_inline' => $attachment->inline,
-                'scan_status' =>
-                    EmailAttachmentScanStatus::NotScanned,
-                'metadata' => $attachment->metadata,
-            ]);
+            $storedAttachment = $emailMessage
+                ->attachments()
+                ->create([
+                    'position' => $position,
+                    'external_id' => $attachment->externalId,
+                    'deduplication_key' => $deduplicationKey,
+                    'file_name' => $attachment->fileName,
+                    'mime_type' => $attachment->mimeType,
+                    'size' => $size,
+                    'disk' => $this->disk,
+                    'path' => $path,
+                    'checksum_sha256' => $checksum,
+                    'content_id' => $attachment->contentId,
+                    'is_inline' => $attachment->inline,
+                    'scan_status' => $this->antivirusEnabled()
+                        ? EmailAttachmentScanStatus::Pending
+                        : EmailAttachmentScanStatus::NotScanned,
+                    'scan_started_at' => null,
+                    'scan_attempts' => 0,
+                    'scanned_at' => null,
+                    'scan_failure_code' => null,
+                    'scan_failure_message' => null,
+                    'quarantined_at' => null,
+                    'scan_result' => null,
+                    'metadata' => $attachment->metadata,
+                ]);
+
+            if ($this->antivirusEnabled()) {
+                try {
+                    $this->scanDispatcher()->dispatch(
+                        $storedAttachment->id
+                    );
+                } catch (Throwable $exception) {
+                    report($exception);
+                }
+            }
+
+            return $storedAttachment;
         } catch (QueryException $exception) {
             $storage->delete($path);
 
@@ -109,6 +137,15 @@ class MailAttachmentStorageService
     public function delete(
         EmailAttachment $attachment
     ): void {
+        if (
+            $this->scanDispatcher !== null
+            || $this->antivirusEnabled()
+        ) {
+            $this->scanDispatcher()->releaseClaim(
+                $attachment->id
+            );
+        }
+
         $storage = $this->filesystem->disk(
             $attachment->disk
         );
@@ -117,7 +154,9 @@ class MailAttachmentStorageService
             $attachment->path !== ''
             && $storage->exists($attachment->path)
         ) {
-            $storage->delete($attachment->path);
+            $storage->delete(
+                $attachment->path
+            );
         }
 
         if ($attachment->exists) {
@@ -130,7 +169,10 @@ class MailAttachmentStorageService
     ): array {
         if ($attachment->content !== null) {
             return [
-                hash('sha256', $attachment->content),
+                hash(
+                    'sha256',
+                    $attachment->content
+                ),
                 strlen($attachment->content),
             ];
         }
@@ -151,9 +193,14 @@ class MailAttachmentStorageService
             $attachment->temporaryPath
         );
 
-        $size = filesize($attachment->temporaryPath);
+        $size = filesize(
+            $attachment->temporaryPath
+        );
 
-        if ($checksum === false || $size === false) {
+        if (
+            $checksum === false
+            || $size === false
+        ) {
             throw new MailStorageException(
                 'Unable to inspect attachment '
                 . "[{$attachment->fileName}]."
@@ -167,12 +214,17 @@ class MailAttachmentStorageService
     }
 
     private function writeAttachment(
-        object $storage,
+        Filesystem $storage,
         string $path,
         MailAttachmentData $attachment,
     ): void {
         if ($attachment->content !== null) {
-            if (!$storage->put($path, $attachment->content)) {
+            if (
+                !$storage->put(
+                    $path,
+                    $attachment->content
+                )
+            ) {
                 throw new MailStorageException(
                     'Unable to store attachment '
                     . "[{$attachment->fileName}]."
@@ -195,7 +247,12 @@ class MailAttachmentStorageService
         }
 
         try {
-            if (!$storage->writeStream($path, $stream)) {
+            if (
+                !$storage->writeStream(
+                    $path,
+                    $stream
+                )
+            ) {
                 throw new MailStorageException(
                     'Unable to store attachment '
                     . "[{$attachment->fileName}]."
@@ -206,11 +263,29 @@ class MailAttachmentStorageService
         }
     }
 
+    private function antivirusEnabled(): bool
+    {
+        return $this->antivirusEnabled
+            ?? (bool) config(
+                'simpledesk-mail-antivirus.enabled',
+                false
+            );
+    }
+
+    private function scanDispatcher(): AttachmentScanDispatcher
+    {
+        return $this->scanDispatcher
+            ?? app(
+                AttachmentScanDispatcher::class
+            );
+    }
+
     private function makeStoragePath(
         EmailMessage $emailMessage,
         string $fileName,
     ): string {
-        $createdAt = $emailMessage->created_at ?? now();
+        $createdAt = $emailMessage->created_at
+            ?? now();
 
         $extension = strtolower(
             (string) pathinfo(
