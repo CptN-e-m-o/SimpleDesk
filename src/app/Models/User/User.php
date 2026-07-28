@@ -8,7 +8,7 @@ use App\Models\Concerns\HasPermissions;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\TicketReply;
-use Database\Factories\UserFactory;
+use Database\Factories\User\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

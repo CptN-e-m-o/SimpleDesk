@@ -23,7 +23,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tickets', function (Blueprint $table): void {
-            $table->dropConstrainedForeignId('mailbox_id');
+            $table->dropIndex(
+                'tickets_mailbox_id_index'
+            );
+        });
+
+        Schema::table('tickets', function (Blueprint $table): void {
+            $table->dropConstrainedForeignId(
+                'mailbox_id'
+            );
         });
     }
 };
