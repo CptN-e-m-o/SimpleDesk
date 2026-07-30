@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\Mail\EmailAttachmentDownloadController;
+use App\Http\Controllers\Admin\Mail\MailboxChannelController;
+use App\Http\Controllers\Admin\Mail\MailboxController;
+use App\Http\Controllers\Admin\Mail\MailProviderConnectionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TeamController;
-use App\Http\Controllers\Admin\Mail\EmailAttachmentDownloadController;
 use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
@@ -49,18 +52,15 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
 
     Route::prefix('agent')->name('agent.')->group(function () {
-        Route::post(
-            '/tickets/{ticket}/email-replies',
-            [AgentTicketEmailReplyController::class, 'store']
-        )
-            ->middleware('permission:agent.tickets.reply')
-            ->name('tickets.email-replies.store');
-
         Route::get('/tickets', function () {
             return Inertia::render('Tickets/Agent/Index');
         })
             ->middleware('permission:agent.tickets.visibility.assigned|agent.tickets.visibility.team|agent.tickets.visibility.department|agent.tickets.visibility.all')
             ->name('tickets');
+
+        Route::post('/tickets/{ticket}/email-replies', [AgentTicketEmailReplyController::class, 'store'])
+            ->middleware('permission:agent.tickets.reply')
+            ->name('tickets.email-replies.store');
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -133,6 +133,89 @@ Route::middleware('auth')->group(function () {
             ->withTrashed()
             ->middleware('super_admin')
             ->name('agents.force-delete');
+
+        Route::prefix('email')->name('email.')->group(function () {
+            Route::get('/mailboxes', [MailboxController::class, 'index'])
+                ->middleware('permission:admin.mail.view|admin.mail.manage_mailboxes')
+                ->name('mailboxes.index');
+
+            Route::post('/mailboxes', [MailboxController::class, 'store'])
+                ->middleware('permission:admin.mail.manage_mailboxes')
+                ->name('mailboxes.store');
+
+            Route::get('/mailboxes/{mailbox}', [MailboxController::class, 'show'])
+                ->middleware('permission:admin.mail.view|admin.mail.manage_mailboxes')
+                ->name('mailboxes.show');
+
+            Route::put('/mailboxes/{mailbox}', [MailboxController::class, 'update'])
+                ->middleware('permission:admin.mail.manage_mailboxes')
+                ->name('mailboxes.update');
+
+            Route::delete('/mailboxes/{mailbox}', [MailboxController::class, 'destroy'])
+                ->middleware('permission:admin.mail.manage_mailboxes')
+                ->name('mailboxes.destroy');
+
+            Route::get(
+                '/mailboxes/{mailbox}/channels',
+                [MailboxChannelController::class, 'index']
+            )
+                ->middleware('permission:admin.mail.view|admin.mail.manage_channels')
+                ->name('mailboxes.channels.index');
+
+            Route::post(
+                '/mailboxes/{mailbox}/channels',
+                [MailboxChannelController::class, 'store']
+            )
+                ->middleware('permission:admin.mail.manage_channels')
+                ->name('mailboxes.channels.store');
+
+            Route::get('/channels/{channel}', [MailboxChannelController::class, 'show'])
+                ->middleware('permission:admin.mail.view|admin.mail.manage_channels')
+                ->name('channels.show');
+
+            Route::put('/channels/{channel}', [MailboxChannelController::class, 'update'])
+                ->middleware('permission:admin.mail.manage_channels')
+                ->name('channels.update');
+
+            Route::delete('/channels/{channel}', [MailboxChannelController::class, 'destroy'])
+                ->middleware('permission:admin.mail.manage_channels')
+                ->name('channels.destroy');
+
+            Route::get(
+                '/provider-connections',
+                [MailProviderConnectionController::class, 'index']
+            )
+                ->middleware('permission:admin.mail.view|admin.mail.manage_provider_connections')
+                ->name('provider-connections.index');
+
+            Route::post(
+                '/provider-connections',
+                [MailProviderConnectionController::class, 'store']
+            )
+                ->middleware('permission:admin.mail.manage_provider_connections')
+                ->name('provider-connections.store');
+
+            Route::get(
+                '/provider-connections/{providerConnection}',
+                [MailProviderConnectionController::class, 'show']
+            )
+                ->middleware('permission:admin.mail.view|admin.mail.manage_provider_connections')
+                ->name('provider-connections.show');
+
+            Route::put(
+                '/provider-connections/{providerConnection}',
+                [MailProviderConnectionController::class, 'update']
+            )
+                ->middleware('permission:admin.mail.manage_provider_connections')
+                ->name('provider-connections.update');
+
+            Route::delete(
+                '/provider-connections/{providerConnection}',
+                [MailProviderConnectionController::class, 'destroy']
+            )
+                ->middleware('permission:admin.mail.manage_provider_connections')
+                ->name('provider-connections.destroy');
+        });
     });
 
     Route::post('/logout', function (Request $request) {

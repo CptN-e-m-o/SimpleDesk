@@ -32,6 +32,16 @@ class AgentTicketEmailReplyFlowTest extends TestCase
         Storage::fake('local');
         Queue::fake();
 
+        /*
+         * Этот набор проверяет базовый pipeline ответа агента.
+         * Антивирусный pipeline проверяется отдельно в
+         * EmailAttachmentAntivirusFlowTest.
+         */
+        config()->set(
+            'simpledesk-mail-antivirus.enabled',
+            false
+        );
+
         config()->set(
             'simpledesk-mail.storage.disk',
             'local'
@@ -98,13 +108,11 @@ class AgentTicketEmailReplyFlowTest extends TestCase
                 ),
                 [
                     'message' => 'Please check the attached file.',
-
                     'attachments' => [
-                        UploadedFile::fake()
-                            ->createWithContent(
-                                'diagnostic.txt',
-                                $contents
-                            ),
+                        UploadedFile::fake()->createWithContent(
+                            'diagnostic.txt',
+                            $contents
+                        ),
                     ],
                 ]
             );
@@ -442,7 +450,6 @@ class AgentTicketEmailReplyFlowTest extends TestCase
                 ),
                 [
                     'message' => 'This upload must be rejected.',
-
                     'attachments' => [
                         UploadedFile::fake()->create(
                             'payload.bin',
@@ -509,7 +516,6 @@ class AgentTicketEmailReplyFlowTest extends TestCase
                 ),
                 [
                     'message' => 'This upload is too large.',
-
                     'attachments' => [
                         UploadedFile::fake()->create(
                             'large.txt',

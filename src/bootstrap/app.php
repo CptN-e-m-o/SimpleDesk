@@ -22,15 +22,41 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             SyncUserLoginSession::class,
         ]);
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => CheckPermission::class,
             'super_admin' => EnsureSuperAdmin::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->respond(function ($response, Throwable $exception, Request $request) {
-            if (app()->environment('local')) {
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->respond(function (
+            $response,
+            Throwable $exception,
+            Request $request,
+        ) {
+            if (
+                app()->environment([
+                    'local',
+                    'testing',
+                ])
+                || $request->expectsJson()
+            ) {
+                return $response;
+            }
+
+            if (
+                !in_array(
+                    $response->getStatusCode(),
+                    [
+                        403,
+                        404,
+                        500,
+                        503,
+                    ],
+                    true,
+                )
+            ) {
                 return $response;
             }
 
@@ -38,6 +64,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 'status' => $response->getStatusCode(),
             ])
                 ->toResponse($request)
-                ->setStatusCode($response->getStatusCode());
+                ->setStatusCode(
+                    $response->getStatusCode()
+                );
         });
-    })->create();
+    })
+    ->create();

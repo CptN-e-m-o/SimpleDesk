@@ -4,6 +4,7 @@ namespace App\Models\Admin\Mail;
 
 use App\Enums\Admin\Mail\MailAuthenticationType;
 use App\Enums\Admin\Mail\MailboxHealthStatus;
+use App\Enums\Admin\Mail\MailProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -38,6 +39,7 @@ class MailProviderConnection extends Model
     protected function casts(): array
     {
         return [
+            'provider' => MailProvider::class,
             'auth_type' => MailAuthenticationType::class,
             'configuration' => 'array',
             'secret_configuration' => 'encrypted:array',

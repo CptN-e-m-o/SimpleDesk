@@ -86,9 +86,19 @@ class MailboxChannel extends Model
         return $this->hasMany(EmailMessage::class);
     }
 
+    public function messageAttempts(): HasMany
+    {
+        return $this->hasMany(EmailMessageAttempt::class);
+    }
+
     public function webhookEvents(): HasMany
     {
         return $this->hasMany(EmailWebhookEvent::class);
+    }
+
+    public function quarantines(): HasMany
+    {
+        return $this->hasMany(EmailMessageQuarantine::class);
     }
 
     public function scopeEnabled(Builder $query): Builder
