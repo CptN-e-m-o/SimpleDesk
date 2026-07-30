@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\Mail\AttachmentAntivirusConnectionTestController;
 use App\Http\Controllers\Admin\Mail\EmailAttachmentDownloadController;
 use App\Http\Controllers\Admin\Mail\MailboxChannelController;
 use App\Http\Controllers\Admin\Mail\MailboxController;
+use App\Http\Controllers\Admin\Mail\MailboxChannelConnectionTestController;
 use App\Http\Controllers\Admin\Mail\MailProviderConnectionController;
+use App\Http\Controllers\Admin\Mail\MailProviderConnectionTestController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
@@ -135,6 +138,18 @@ Route::middleware('auth')->group(function () {
             ->name('agents.force-delete');
 
         Route::prefix('email')->name('email.')->group(function () {
+            Route::post('/channels/{channel}/test', MailboxChannelConnectionTestController::class)
+                ->middleware('permission:admin.mail.test_connections')
+                ->name('channels.test');
+
+            Route::post('/provider-connections/{providerConnection}/test', MailProviderConnectionTestController::class)
+                ->middleware('permission:admin.mail.test_connections')
+                ->name('provider-connections.test');
+
+            Route::post('/antivirus/test', AttachmentAntivirusConnectionTestController::class)
+                ->middleware('permission:admin.mail.test_connections')
+                ->name('antivirus.test');
+
             Route::get('/mailboxes', [MailboxController::class, 'index'])
                 ->middleware('permission:admin.mail.view|admin.mail.manage_mailboxes')
                 ->name('mailboxes.index');
