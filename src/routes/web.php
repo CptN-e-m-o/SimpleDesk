@@ -14,6 +14,11 @@ use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
+use App\Http\Controllers\Admin\Mail\EmailAttachmentRescanController;
+use App\Http\Controllers\Admin\Mail\EmailQuarantineIgnoreController;
+use App\Http\Controllers\Admin\Mail\EmailQuarantineRetryController;
+use App\Http\Controllers\Admin\Mail\MailboxManualSyncController;
+use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -138,6 +143,26 @@ Route::middleware('auth')->group(function () {
             ->name('agents.force-delete');
 
         Route::prefix('email')->name('email.')->group(function () {
+            Route::post('/mailboxes/{mailbox}/sync', MailboxManualSyncController::class)
+                ->middleware('permission:admin.mail.sync_mailboxes')
+                ->name('mailboxes.sync');
+
+            Route::post('/messages/{message}/retry', OutgoingEmailRetryController::class)
+                ->middleware('permission:admin.mail.retry_messages')
+                ->name('messages.retry');
+
+            Route::post('/attachments/{attachment}/rescan', EmailAttachmentRescanController::class)
+                ->middleware('permission:admin.mail.rescan_attachments')
+                ->name('attachments.rescan');
+
+            Route::post('/quarantines/{quarantine}/retry', EmailQuarantineRetryController::class)
+                ->middleware('permission:admin.mail.manage_quarantine')
+                ->name('quarantines.retry');
+
+            Route::post('/quarantines/{quarantine}/ignore', EmailQuarantineIgnoreController::class)
+                ->middleware('permission:admin.mail.manage_quarantine')
+                ->name('quarantines.ignore');
+
             Route::post('/channels/{channel}/test', MailboxChannelConnectionTestController::class)
                 ->middleware('permission:admin.mail.test_connections')
                 ->name('channels.test');

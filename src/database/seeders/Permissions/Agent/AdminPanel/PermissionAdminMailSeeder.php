@@ -59,6 +59,21 @@ class PermissionAdminMailSeeder extends Seeder
                 'label' => 'Manage email quarantine',
                 'sort_order' => 70,
             ],
+            [
+                'key' => 'admin.mail.sync_mailboxes',
+                'label' => 'Synchronize mailboxes manually',
+                'sort_order' => 80,
+            ],
+            [
+                'key' => 'admin.mail.retry_messages',
+                'label' => 'Retry outgoing email messages',
+                'sort_order' => 90,
+            ],
+            [
+                'key' => 'admin.mail.rescan_attachments',
+                'label' => 'Rescan email attachments',
+                'sort_order' => 100,
+            ],
         ];
 
         $permissionIds = [];
