@@ -19,6 +19,12 @@ use App\Http\Controllers\Admin\Mail\EmailQuarantineIgnoreController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineRetryController;
 use App\Http\Controllers\Admin\Mail\MailboxManualSyncController;
 use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
+use App\Http\Controllers\Admin\Mail\EmailAttachmentDiagnosticsController;
+use App\Http\Controllers\Admin\Mail\EmailAttachmentRejectionDiagnosticsController;
+use App\Http\Controllers\Admin\Mail\EmailMessageDiagnosticsController;
+use App\Http\Controllers\Admin\Mail\EmailQuarantineDiagnosticsController;
+use App\Http\Controllers\Admin\Mail\MailDiagnosticsController;
+use App\Http\Controllers\Admin\Mail\MailboxDiagnosticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -143,6 +149,30 @@ Route::middleware('auth')->group(function () {
             ->name('agents.force-delete');
 
         Route::prefix('email')->name('email.')->group(function () {
+            Route::get('/diagnostics', MailDiagnosticsController::class)
+                ->middleware('permission:admin.mail.view_diagnostics')
+                ->name('diagnostics.overview');
+
+            Route::get('/mailboxes/{mailbox}/diagnostics', MailboxDiagnosticsController::class)
+                ->middleware('permission:admin.mail.view_diagnostics')
+                ->name('mailboxes.diagnostics');
+
+            Route::get('/messages', EmailMessageDiagnosticsController::class)
+                ->middleware('permission:admin.mail.view_diagnostics')
+                ->name('diagnostics.messages');
+
+            Route::get('/attachments', EmailAttachmentDiagnosticsController::class)
+                ->middleware('permission:admin.mail.view_diagnostics')
+                ->name('diagnostics.attachments');
+
+            Route::get('/quarantines', EmailQuarantineDiagnosticsController::class)
+                ->middleware('permission:admin.mail.view_diagnostics')
+                ->name('diagnostics.quarantines');
+
+            Route::get('/rejected-attachments', EmailAttachmentRejectionDiagnosticsController::class)
+                ->middleware('permission:admin.mail.view_diagnostics')
+                ->name('diagnostics.rejected-attachments');
+
             Route::post('/mailboxes/{mailbox}/sync', MailboxManualSyncController::class)
                 ->middleware('permission:admin.mail.sync_mailboxes')
                 ->name('mailboxes.sync');
