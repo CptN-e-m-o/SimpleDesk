@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\SyncUserLoginSession;
+use App\Http\Middleware\MailAdminAuditMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => CheckPermission::class,
             'super_admin' => EnsureSuperAdmin::class,
+            'mail.audit' => MailAdminAuditMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

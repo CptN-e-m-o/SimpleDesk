@@ -74,6 +74,11 @@ class PermissionAdminMailSeeder extends Seeder
                 'label' => 'Rescan email attachments',
                 'sort_order' => 100,
             ],
+            [
+                'key' => 'admin.mail.view_audit',
+                'label' => 'View email administrative audit',
+                'sort_order' => 110,
+            ],
         ];
 
         $permissionIds = [];

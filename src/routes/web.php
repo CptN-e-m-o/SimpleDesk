@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\Mail\EmailMessageDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\MailDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\MailboxDiagnosticsController;
+use App\Http\Controllers\Admin\Mail\MailAdminAuditLogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -149,6 +150,10 @@ Route::middleware('auth')->group(function () {
             ->name('agents.force-delete');
 
         Route::prefix('email')->name('email.')->group(function () {
+            Route::get('/audit-logs', MailAdminAuditLogController::class)
+                ->middleware('permission:admin.mail.view_audit')
+                ->name('audit-logs.index');
+
             Route::get('/diagnostics', MailDiagnosticsController::class)
                 ->middleware('permission:admin.mail.view_diagnostics')
                 ->name('diagnostics.overview');
@@ -174,35 +179,59 @@ Route::middleware('auth')->group(function () {
                 ->name('diagnostics.rejected-attachments');
 
             Route::post('/mailboxes/{mailbox}/sync', MailboxManualSyncController::class)
-                ->middleware('permission:admin.mail.sync_mailboxes')
+                ->middleware([
+                    'permission:admin.mail.sync_mailboxes',
+                    'mail.audit:mailbox_sync_requested',
+                ])
                 ->name('mailboxes.sync');
 
             Route::post('/messages/{message}/retry', OutgoingEmailRetryController::class)
-                ->middleware('permission:admin.mail.retry_messages')
+                ->middleware([
+                    'permission:admin.mail.retry_messages',
+                    'mail.audit:outgoing_message_retry_requested',
+                ])
                 ->name('messages.retry');
 
             Route::post('/attachments/{attachment}/rescan', EmailAttachmentRescanController::class)
-                ->middleware('permission:admin.mail.rescan_attachments')
+                ->middleware([
+                    'permission:admin.mail.rescan_attachments',
+                    'mail.audit:attachment_rescan_requested',
+                ])
                 ->name('attachments.rescan');
 
             Route::post('/quarantines/{quarantine}/retry', EmailQuarantineRetryController::class)
-                ->middleware('permission:admin.mail.manage_quarantine')
+                ->middleware([
+                    'permission:admin.mail.manage_quarantine',
+                    'mail.audit:quarantine_retry_requested',
+                ])
                 ->name('quarantines.retry');
 
             Route::post('/quarantines/{quarantine}/ignore', EmailQuarantineIgnoreController::class)
-                ->middleware('permission:admin.mail.manage_quarantine')
+                ->middleware([
+                    'permission:admin.mail.manage_quarantine',
+                    'mail.audit:quarantine_ignored',
+                ])
                 ->name('quarantines.ignore');
 
             Route::post('/channels/{channel}/test', MailboxChannelConnectionTestController::class)
-                ->middleware('permission:admin.mail.test_connections')
+                ->middleware([
+                    'permission:admin.mail.test_connections',
+                    'mail.audit:channel_connection_tested',
+                ])
                 ->name('channels.test');
 
             Route::post('/provider-connections/{providerConnection}/test', MailProviderConnectionTestController::class)
-                ->middleware('permission:admin.mail.test_connections')
+                ->middleware([
+                    'permission:admin.mail.test_connections',
+                    'mail.audit:provider_connection_tested',
+                ])
                 ->name('provider-connections.test');
 
             Route::post('/antivirus/test', AttachmentAntivirusConnectionTestController::class)
-                ->middleware('permission:admin.mail.test_connections')
+                ->middleware([
+                    'permission:admin.mail.test_connections',
+                    'mail.audit:antivirus_connection_tested',
+                ])
                 ->name('antivirus.test');
 
             Route::get('/mailboxes', [MailboxController::class, 'index'])
@@ -210,7 +239,10 @@ Route::middleware('auth')->group(function () {
                 ->name('mailboxes.index');
 
             Route::post('/mailboxes', [MailboxController::class, 'store'])
-                ->middleware('permission:admin.mail.manage_mailboxes')
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_created',
+                ])
                 ->name('mailboxes.store');
 
             Route::get('/mailboxes/{mailbox}', [MailboxController::class, 'show'])
@@ -218,11 +250,17 @@ Route::middleware('auth')->group(function () {
                 ->name('mailboxes.show');
 
             Route::put('/mailboxes/{mailbox}', [MailboxController::class, 'update'])
-                ->middleware('permission:admin.mail.manage_mailboxes')
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_updated',
+                ])
                 ->name('mailboxes.update');
 
             Route::delete('/mailboxes/{mailbox}', [MailboxController::class, 'destroy'])
-                ->middleware('permission:admin.mail.manage_mailboxes')
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_deleted',
+                ])
                 ->name('mailboxes.destroy');
 
             Route::get(
@@ -236,7 +274,10 @@ Route::middleware('auth')->group(function () {
                 '/mailboxes/{mailbox}/channels',
                 [MailboxChannelController::class, 'store']
             )
-                ->middleware('permission:admin.mail.manage_channels')
+                ->middleware([
+                    'permission:admin.mail.manage_channels',
+                    'mail.audit:channel_created',
+                ])
                 ->name('mailboxes.channels.store');
 
             Route::get('/channels/{channel}', [MailboxChannelController::class, 'show'])
@@ -244,11 +285,17 @@ Route::middleware('auth')->group(function () {
                 ->name('channels.show');
 
             Route::put('/channels/{channel}', [MailboxChannelController::class, 'update'])
-                ->middleware('permission:admin.mail.manage_channels')
+                ->middleware([
+                    'permission:admin.mail.manage_channels',
+                    'mail.audit:channel_updated',
+                ])
                 ->name('channels.update');
 
             Route::delete('/channels/{channel}', [MailboxChannelController::class, 'destroy'])
-                ->middleware('permission:admin.mail.manage_channels')
+                ->middleware([
+                    'permission:admin.mail.manage_channels',
+                    'mail.audit:channel_deleted',
+                ])
                 ->name('channels.destroy');
 
             Route::get(
@@ -258,11 +305,11 @@ Route::middleware('auth')->group(function () {
                 ->middleware('permission:admin.mail.view|admin.mail.manage_provider_connections')
                 ->name('provider-connections.index');
 
-            Route::post(
-                '/provider-connections',
-                [MailProviderConnectionController::class, 'store']
-            )
-                ->middleware('permission:admin.mail.manage_provider_connections')
+            Route::post('/provider-connections', [MailProviderConnectionController::class, 'store'])
+                ->middleware([
+                    'permission:admin.mail.manage_provider_connections',
+                    'mail.audit:provider_connection_created',
+                ])
                 ->name('provider-connections.store');
 
             Route::get(
@@ -272,18 +319,18 @@ Route::middleware('auth')->group(function () {
                 ->middleware('permission:admin.mail.view|admin.mail.manage_provider_connections')
                 ->name('provider-connections.show');
 
-            Route::put(
-                '/provider-connections/{providerConnection}',
-                [MailProviderConnectionController::class, 'update']
-            )
-                ->middleware('permission:admin.mail.manage_provider_connections')
+            Route::put('/provider-connections/{providerConnection}', [MailProviderConnectionController::class, 'update'])
+                ->middleware([
+                    'permission:admin.mail.manage_provider_connections',
+                    'mail.audit:provider_connection_updated',
+                ])
                 ->name('provider-connections.update');
 
-            Route::delete(
-                '/provider-connections/{providerConnection}',
-                [MailProviderConnectionController::class, 'destroy']
-            )
-                ->middleware('permission:admin.mail.manage_provider_connections')
+            Route::delete('/provider-connections/{providerConnection}', [MailProviderConnectionController::class, 'destroy'])
+                ->middleware([
+                    'permission:admin.mail.manage_provider_connections',
+                    'mail.audit:provider_connection_deleted',
+                ])
                 ->name('provider-connections.destroy');
         });
     });
