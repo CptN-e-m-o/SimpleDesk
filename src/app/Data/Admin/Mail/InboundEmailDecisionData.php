@@ -10,6 +10,5 @@ final readonly class InboundEmailDecisionData
         public bool $shouldProcess,
         public InboundEmailClassification $classification,
         public string $reason,
-    ) {
-    }
+    ) {}
 }

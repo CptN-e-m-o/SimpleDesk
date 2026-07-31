@@ -9,8 +9,7 @@ final readonly class MailRecoveryResultData
         public int $incomingReceivedDispatched,
         public int $outgoingStuckReset,
         public int $outgoingQueuedDispatched,
-    ) {
-    }
+    ) {}
 
     public function totalActions(): int
     {

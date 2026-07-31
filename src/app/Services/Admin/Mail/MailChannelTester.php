@@ -12,21 +12,18 @@ class MailChannelTester
     public function __construct(
         private readonly MailDriverRegistry $drivers,
         private readonly MailChannelHealthRecorder $health,
-    ) {
-    }
+    ) {}
 
     public function test(
         MailboxChannel $channel
     ): MailConnectionTestResultData {
         try {
             $result = match ($channel->direction) {
-                MailboxChannelDirection::Incoming =>
-                $this->drivers
+                MailboxChannelDirection::Incoming => $this->drivers
                     ->incoming($channel->driver)
                     ->test($channel),
 
-                MailboxChannelDirection::Outgoing =>
-                $this->drivers
+                MailboxChannelDirection::Outgoing => $this->drivers
                     ->outgoing($channel->driver)
                     ->test($channel),
             };

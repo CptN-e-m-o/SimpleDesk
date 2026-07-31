@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin\Mail\Jobs;
 
+use App\Data\Admin\Mail\OutgoingSendResultData;
 use App\Enums\Admin\Mail\EmailMessageDirection;
 use App\Enums\Admin\Mail\EmailMessageStatus;
 use App\Jobs\Admin\Mail\SendOutgoingEmailJob;
@@ -12,10 +13,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Str;
 use Mockery;
+use ReflectionClass;
 use RuntimeException;
 use Tests\TestCase;
-use App\Data\Admin\Mail\OutgoingSendResultData;
-use ReflectionClass;
 
 class SendOutgoingEmailJobTest extends TestCase
 {
@@ -361,139 +361,102 @@ class SendOutgoingEmailJobTest extends TestCase
         $mailbox = Mailbox::query()->create([
             'name' => "Outgoing Job Mailbox {$token}",
 
-            'email_address' =>
-                "outgoing-job-{$token}@example.test",
+            'email_address' => "outgoing-job-{$token}@example.test",
 
-            'display_name' =>
-                'Outgoing Job Mailbox',
+            'display_name' => 'Outgoing Job Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
 
         return EmailMessage::query()->create(
             array_merge(
                 [
-                    'mailbox_id' =>
-                        $mailbox->id,
+                    'mailbox_id' => $mailbox->id,
 
-                    'mailbox_channel_id' =>
-                        null,
+                    'mailbox_channel_id' => null,
 
-                    'ticket_id' =>
-                        null,
+                    'ticket_id' => null,
 
-                    'ticket_reply_id' =>
-                        null,
+                    'ticket_reply_id' => null,
 
-                    'direction' =>
-                        EmailMessageDirection::Outgoing,
+                    'direction' => EmailMessageDirection::Outgoing,
 
-                    'driver' =>
-                        null,
+                    'driver' => null,
 
-                    'status' =>
-                        $status,
+                    'status' => $status,
 
-                    'idempotency_key' =>
-                        "outgoing-job-test-{$token}",
+                    'idempotency_key' => "outgoing-job-test-{$token}",
 
-                    'external_message_id' =>
-                        null,
+                    'external_message_id' => null,
 
-                    'internet_message_id' =>
-                        "<outgoing-job-{$token}@example.test>",
+                    'internet_message_id' => "<outgoing-job-{$token}@example.test>",
 
-                    'in_reply_to_message_id' =>
-                        null,
+                    'in_reply_to_message_id' => null,
 
-                    'reference_message_ids' =>
-                        [],
+                    'reference_message_ids' => [],
 
-                    'sender_address' =>
-                        $mailbox->email_address,
+                    'sender_address' => $mailbox->email_address,
 
-                    'sender_name' =>
-                        $mailbox->display_name,
+                    'sender_name' => $mailbox->display_name,
 
                     'to_recipients' => [
                         [
-                            'address' =>
-                                "customer-{$token}@example.test",
+                            'address' => "customer-{$token}@example.test",
 
-                            'name' =>
-                                'Test Customer',
+                            'name' => 'Test Customer',
                         ],
                     ],
 
-                    'cc_recipients' =>
-                        [],
+                    'cc_recipients' => [],
 
-                    'bcc_recipients' =>
-                        [],
+                    'bcc_recipients' => [],
 
-                    'reply_to_recipients' =>
-                        [],
+                    'reply_to_recipients' => [],
 
-                    'subject' =>
-                        'Outgoing job test',
+                    'subject' => 'Outgoing job test',
 
-                    'text_body' =>
-                        'Outgoing job test message.',
+                    'text_body' => 'Outgoing job test message.',
 
-                    'html_body' =>
-                        null,
+                    'html_body' => null,
 
-                    'headers' =>
-                        [],
+                    'headers' => [],
 
-                    'metadata' =>
-                        [],
+                    'metadata' => [],
 
-                    'queued_at' =>
-                        $status === EmailMessageStatus::Queued
+                    'queued_at' => $status === EmailMessageStatus::Queued
                             ? now()
                             : null,
 
-                    'processing_started_at' =>
-                        $status === EmailMessageStatus::Sending
+                    'processing_started_at' => $status === EmailMessageStatus::Sending
                             ? now()
                             : null,
 
-                    'sent_at' =>
-                        in_array(
-                            $status,
-                            [
-                                EmailMessageStatus::Sent,
-                                EmailMessageStatus::Delivered,
-                            ],
-                            true
-                        )
+                    'sent_at' => in_array(
+                        $status,
+                        [
+                            EmailMessageStatus::Sent,
+                            EmailMessageStatus::Delivered,
+                        ],
+                        true
+                    )
                             ? now()
                             : null,
 
-                    'delivered_at' =>
-                        $status === EmailMessageStatus::Delivered
+                    'delivered_at' => $status === EmailMessageStatus::Delivered
                             ? now()
                             : null,
 
-                    'failed_at' =>
-                        null,
+                    'failed_at' => null,
 
-                    'failure_code' =>
-                        null,
+                    'failure_code' => null,
 
-                    'failure_message' =>
-                        null,
+                    'failure_message' => null,
                 ],
                 $attributes
             )

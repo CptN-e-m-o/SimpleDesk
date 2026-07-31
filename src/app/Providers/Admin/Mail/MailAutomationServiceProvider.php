@@ -21,8 +21,8 @@ class MailAutomationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (
-            !$this->app->runningInConsole()
-            || !(bool) config(
+            ! $this->app->runningInConsole()
+            || ! (bool) config(
                 'simpledesk-mail-automation.enabled',
                 true
             )
@@ -59,7 +59,7 @@ class MailAutomationServiceProvider extends ServiceProvider
         Schedule $schedule
     ): void {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-automation.sync.enabled',
                 true
             )
@@ -99,7 +99,7 @@ class MailAutomationServiceProvider extends ServiceProvider
         Schedule $schedule
     ): void {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-automation.recovery.enabled',
                 true
             )
@@ -139,7 +139,7 @@ class MailAutomationServiceProvider extends ServiceProvider
         Schedule $schedule
     ): void {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-automation.attachment_recovery.enabled',
                 true
             )
@@ -174,7 +174,7 @@ class MailAutomationServiceProvider extends ServiceProvider
         Schedule $schedule
     ): void {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-automation.health.enabled',
                 true
             )
@@ -214,7 +214,7 @@ class MailAutomationServiceProvider extends ServiceProvider
         Schedule $schedule
     ): void {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-automation.retention.enabled',
                 true
             )

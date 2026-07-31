@@ -7,8 +7,8 @@ use DateTimeImmutable;
 final readonly class OutgoingSendResultData
 {
     /**
-     * @param array<int, MailAddressData> $acceptedRecipients
-     * @param array<int, MailAddressData> $rejectedRecipients
+     * @param  array<int, MailAddressData>  $acceptedRecipients
+     * @param  array<int, MailAddressData>  $rejectedRecipients
      */
     public function __construct(
         public ?string $externalMessageId,
@@ -18,6 +18,5 @@ final readonly class OutgoingSendResultData
         public DateTimeImmutable $sentAt,
         public array $providerResponse = [],
         public array $metadata = [],
-    ) {
-    }
+    ) {}
 }

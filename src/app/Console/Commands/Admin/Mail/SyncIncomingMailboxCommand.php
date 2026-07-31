@@ -32,7 +32,7 @@ class SyncIncomingMailboxCommand extends Command
             return self::FAILURE;
         }
 
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             $this->error(
                 'Mailbox is disabled.'
             );
@@ -52,7 +52,7 @@ class SyncIncomingMailboxCommand extends Command
 
             $this->info(
                 "Mailbox [{$mailbox->id}] "
-                . 'synchronization was queued.'
+                .'synchronization was queued.'
             );
 
             return self::SUCCESS;

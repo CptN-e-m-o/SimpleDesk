@@ -16,7 +16,7 @@ class ConfiguredAttachmentScanJobDispatcher
         );
 
         if (
-            !is_string($jobClass)
+            ! is_string($jobClass)
             || trim($jobClass) === ''
         ) {
             throw new MailAdminActionException(
@@ -28,7 +28,7 @@ class ConfiguredAttachmentScanJobDispatcher
 
         $jobClass = trim($jobClass);
 
-        if (!class_exists($jobClass)) {
+        if (! class_exists($jobClass)) {
             throw new MailAdminActionException(
                 message: "The configured attachment scan job [{$jobClass}] does not exist.",
                 errorCode: 'attachment_scan_job_missing',
@@ -47,7 +47,7 @@ class ConfiguredAttachmentScanJobDispatcher
             );
         }
 
-        if (!$job instanceof ShouldQueue) {
+        if (! $job instanceof ShouldQueue) {
             throw new MailAdminActionException(
                 message: "The configured attachment scan job [{$jobClass}] must implement ShouldQueue.",
                 errorCode: 'attachment_scan_job_not_queueable',

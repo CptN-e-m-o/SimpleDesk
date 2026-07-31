@@ -17,8 +17,7 @@ class MailboxChannelController extends Controller
 {
     public function __construct(
         private readonly MailboxChannelAdminService $channels,
-    ) {
-    }
+    ) {}
 
     public function index(
         Mailbox $mailbox

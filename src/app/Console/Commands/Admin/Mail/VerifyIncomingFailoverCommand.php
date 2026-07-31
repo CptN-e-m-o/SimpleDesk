@@ -192,10 +192,10 @@ class VerifyIncomingFailoverCommand extends Command
                 ])
             );
 
-            if (!$connectionTest->successful) {
+            if (! $connectionTest->successful) {
                 throw new RuntimeException(
                     'Primary IMAP recovery connection test failed: '
-                    . $connectionTest->message
+                    .$connectionTest->message
                 );
             }
 
@@ -217,8 +217,8 @@ class VerifyIncomingFailoverCommand extends Command
             if ($phaseThreeResult->duplicates < 2) {
                 throw new RuntimeException(
                     'Phase 3 expected at least 2 duplicates '
-                    . 'already stored through fallback, got '
-                    . "{$phaseThreeResult->duplicates}."
+                    .'already stored through fallback, got '
+                    ."{$phaseThreeResult->duplicates}."
                 );
             }
 
@@ -362,9 +362,9 @@ class VerifyIncomingFailoverCommand extends Command
         ) {
             throw new RuntimeException(
                 ucfirst($phase)
-                . " message [{$message->id}] was stored "
-                . "through channel [{$message->mailbox_channel_id}] "
-                . "instead of [{$expectedChannel->id}]."
+                ." message [{$message->id}] was stored "
+                ."through channel [{$message->mailbox_channel_id}] "
+                ."instead of [{$expectedChannel->id}]."
             );
         }
 
@@ -386,7 +386,7 @@ class VerifyIncomingFailoverCommand extends Command
         if ($count !== 1) {
             throw new RuntimeException(
                 'Expected exactly one stored message '
-                . "with subject [{$subject}], got {$count}."
+                ."with subject [{$subject}], got {$count}."
             );
         }
 
@@ -417,16 +417,14 @@ class VerifyIncomingFailoverCommand extends Command
 
             from: new MailAddressData(
                 address: $senderMailbox->email_address,
-                name:
-                $senderMailbox->display_name
+                name: $senderMailbox->display_name
                 ?? $senderMailbox->name,
             ),
 
             to: [
                 new MailAddressData(
                     address: $targetMailbox->email_address,
-                    name:
-                    $targetMailbox->display_name
+                    name: $targetMailbox->display_name
                     ?? $targetMailbox->name,
                 ),
             ],
@@ -437,25 +435,21 @@ class VerifyIncomingFailoverCommand extends Command
 
             subject: $subject,
 
-            textBody:
-            "SimpleDesk IMAP failover verification.\n"
-            . "Phase: {$phase}\n"
-            . "Token: {$token}",
+            textBody: "SimpleDesk IMAP failover verification.\n"
+            ."Phase: {$phase}\n"
+            ."Token: {$token}",
 
             htmlBody: null,
 
             headers: [
-                'X-SimpleDesk-Integration-Test' =>
-                    $token,
+                'X-SimpleDesk-Integration-Test' => $token,
 
-                'X-SimpleDesk-Failover-Phase' =>
-                    $phase,
+                'X-SimpleDesk-Failover-Phase' => $phase,
             ],
 
             attachments: [],
 
-            internetMessageId:
-            $messageIds->make(
+            internetMessageId: $messageIds->make(
                 mailbox: $senderMailbox,
                 idempotencyKey: $idempotencyKey,
             ),
@@ -465,13 +459,11 @@ class VerifyIncomingFailoverCommand extends Command
             references: [],
 
             metadata: [
-                'source' =>
-                    'incoming_failover_verification',
+                'source' => 'incoming_failover_verification',
 
                 'phase' => $phase,
 
-                'verification_token' =>
-                    $token,
+                'verification_token' => $token,
             ],
         );
 
@@ -536,14 +528,14 @@ class VerifyIncomingFailoverCommand extends Command
         );
 
         throw new RuntimeException(
-            "IMAP did not store verification message "
-            . "[{$subject}] within {$timeout} seconds. "
-            . 'Last channel: '
-            . (
+            'IMAP did not store verification message '
+            ."[{$subject}] within {$timeout} seconds. "
+            .'Last channel: '
+            .(
                 $lastResult?->mailboxChannelId
                 ?? 'none'
             )
-            . '.'
+            .'.'
         );
     }
 
@@ -565,7 +557,7 @@ class VerifyIncomingFailoverCommand extends Command
             );
         }
 
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             throw new RuntimeException(
                 "{$role} mailbox [{$id}] is disabled."
             );
@@ -598,10 +590,8 @@ class VerifyIncomingFailoverCommand extends Command
         $this->assertChannel(
             channel: $channel,
             mailbox: $mailbox,
-            direction:
-            MailboxChannelDirection::Incoming,
-            driver:
-            MailboxDriver::Imap,
+            direction: MailboxChannelDirection::Incoming,
+            driver: MailboxDriver::Imap,
             role: 'Primary',
         );
 
@@ -621,14 +611,12 @@ class VerifyIncomingFailoverCommand extends Command
         $this->assertChannel(
             channel: $channel,
             mailbox: $mailbox,
-            direction:
-            MailboxChannelDirection::Outgoing,
-            driver:
-            MailboxDriver::Smtp,
+            direction: MailboxChannelDirection::Outgoing,
+            driver: MailboxDriver::Smtp,
             role: 'Sender',
         );
 
-        if (!$channel->is_enabled) {
+        if (! $channel->is_enabled) {
             throw new RuntimeException(
                 "Sender channel [{$channel->id}] is disabled."
             );
@@ -656,7 +644,7 @@ class VerifyIncomingFailoverCommand extends Command
         ) {
             throw new RuntimeException(
                 "{$role} channel [{$channel->id}] "
-                . "does not belong to mailbox [{$mailbox->id}]."
+                ."does not belong to mailbox [{$mailbox->id}]."
             );
         }
 
@@ -666,7 +654,7 @@ class VerifyIncomingFailoverCommand extends Command
         ) {
             throw new RuntimeException(
                 "{$role} channel [{$channel->id}] must be "
-                . "{$direction->value}/{$driver->value}."
+                ."{$direction->value}/{$driver->value}."
             );
         }
 
@@ -674,14 +662,14 @@ class VerifyIncomingFailoverCommand extends Command
             $channel->provider_connection_id !== null
             && (
                 $channel->providerConnection === null
-                || !$channel
+                || ! $channel
                     ->providerConnection
                     ->is_active
             )
         ) {
             throw new RuntimeException(
                 "{$role} channel [{$channel->id}] "
-                . 'has an inactive provider connection.'
+                .'has an inactive provider connection.'
             );
         }
     }
@@ -721,14 +709,11 @@ class VerifyIncomingFailoverCommand extends Command
                     MailboxChannel $channel
                 ): array => [
                     $channel->id => [
-                        'is_enabled' =>
-                            $channel->is_enabled,
+                        'is_enabled' => $channel->is_enabled,
 
-                        'is_primary' =>
-                            $channel->is_primary,
+                        'is_primary' => $channel->is_primary,
 
-                        'failover_order' =>
-                            $channel->failover_order,
+                        'failover_order' => $channel->failover_order,
                     ],
                 ]
             );
@@ -825,8 +810,7 @@ class VerifyIncomingFailoverCommand extends Command
             'is_primary' => false,
             'failover_order' => 1,
 
-            'health_status' =>
-                MailboxHealthStatus::Healthy,
+            'health_status' => MailboxHealthStatus::Healthy,
 
             'last_checked_at' => null,
             'last_success_at' => null,
@@ -854,16 +838,13 @@ class VerifyIncomingFailoverCommand extends Command
             ->updateOrCreate(
                 [],
                 [
-                    'cursor' =>
-                        $state?->cursor,
+                    'cursor' => $state?->cursor,
 
-                    'cursor_metadata' =>
-                        $state?->cursor_metadata,
+                    'cursor_metadata' => $state?->cursor_metadata,
 
                     'last_sync_started_at' => null,
 
-                    'last_sync_completed_at' =>
-                        $state?->last_sync_completed_at,
+                    'last_sync_completed_at' => $state?->last_sync_completed_at,
 
                     'last_sync_failed_at' => null,
 
@@ -906,29 +887,25 @@ class VerifyIncomingFailoverCommand extends Command
             ]);
 
         foreach (
-            $snapshots
-            as $id => $snapshot
+            $snapshots as $id => $snapshot
         ) {
             MailboxChannel::query()
                 ->whereKey(
                     (int) $id
                 )
                 ->update([
-                    'is_enabled' =>
-                        $snapshot['is_enabled'],
+                    'is_enabled' => $snapshot['is_enabled'],
 
                     'is_primary' => false,
 
-                    'failover_order' =>
-                        $snapshot['failover_order'],
+                    'failover_order' => $snapshot['failover_order'],
                 ]);
         }
 
         foreach (
-            $snapshots
-            as $id => $snapshot
+            $snapshots as $id => $snapshot
         ) {
-            if (!$snapshot['is_primary']) {
+            if (! $snapshot['is_primary']) {
                 continue;
             }
 
@@ -953,8 +930,8 @@ class VerifyIncomingFailoverCommand extends Command
         ) {
             throw new RuntimeException(
                 "{$phase} synchronization used channel "
-                . "[{$result->mailboxChannelId}] instead of "
-                . "[{$expectedChannelId}]."
+                ."[{$result->mailboxChannelId}] instead of "
+                ."[{$expectedChannelId}]."
             );
         }
     }

@@ -12,7 +12,7 @@ use Throwable;
 class IncomingMailboxSyncDispatcher
 {
     /**
-     * @param array<int, int|string> $mailboxIds
+     * @param  array<int, int|string>  $mailboxIds
      */
     public function dispatch(
         array $mailboxIds = [],
@@ -72,7 +72,7 @@ class IncomingMailboxSyncDispatcher
                 $mailboxId
             );
 
-            if (!$this->claim($lockKey)) {
+            if (! $this->claim($lockKey)) {
                 continue;
             }
 

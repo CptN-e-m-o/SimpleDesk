@@ -32,8 +32,7 @@ return [
         false
     ),
 
-    'empty_body_fallback' =>
-        'Ответ не содержит нового текстового содержимого.',
+    'empty_body_fallback' => 'Ответ не содержит нового текстового содержимого.',
 
     'max_body_characters' => env(
         'MAIL_REPLY_PARSING_MAX_BODY_CHARACTERS',

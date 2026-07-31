@@ -17,6 +17,5 @@ final readonly class IncomingMailboxSyncResultData
         public int $acknowledged,
         public bool $truncated,
         public ?string $nextCursor,
-    ) {
-    }
+    ) {}
 }

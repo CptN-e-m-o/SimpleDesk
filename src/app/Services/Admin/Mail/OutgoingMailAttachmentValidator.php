@@ -8,18 +8,17 @@ use App\Exceptions\Admin\Mail\MailStorageException;
 class OutgoingMailAttachmentValidator
 {
     /**
-     * @param array<int, string> $allowedMimeTypes
+     * @param  array<int, string>  $allowedMimeTypes
      */
     public function __construct(
         private readonly array $allowedMimeTypes,
         private readonly int $maxAttachmentCount,
         private readonly int $maxAttachmentBytes,
         private readonly int $maxTotalAttachmentBytes,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array<int, MailAttachmentData> $attachments
+     * @param  array<int, MailAttachmentData>  $attachments
      */
     public function validate(array $attachments): void
     {
@@ -32,14 +31,14 @@ class OutgoingMailAttachmentValidator
         $totalSize = 0;
 
         foreach ($attachments as $attachment) {
-            if (!$attachment instanceof MailAttachmentData) {
+            if (! $attachment instanceof MailAttachmentData) {
                 throw new MailStorageException(
                     'Outgoing attachment must be an instance of '
-                    . MailAttachmentData::class . '.'
+                    .MailAttachmentData::class.'.'
                 );
             }
 
-            if (!$attachment->hasContent()) {
+            if (! $attachment->hasContent()) {
                 throw new MailStorageException(
                     "Attachment [{$attachment->fileName}] has no content."
                 );
@@ -50,14 +49,14 @@ class OutgoingMailAttachmentValidator
             if ($size > $this->maxAttachmentBytes) {
                 throw new MailStorageException(
                     "Attachment [{$attachment->fileName}] exceeds "
-                    . 'the configured size limit.'
+                    .'the configured size limit.'
                 );
             }
 
-            if (!$this->mimeTypeIsAllowed($attachment->mimeType)) {
+            if (! $this->mimeTypeIsAllowed($attachment->mimeType)) {
                 throw new MailStorageException(
                     "Attachment [{$attachment->fileName}] has "
-                    . "a disallowed MIME type [{$attachment->mimeType}]."
+                    ."a disallowed MIME type [{$attachment->mimeType}]."
                 );
             }
 
@@ -66,7 +65,7 @@ class OutgoingMailAttachmentValidator
             if ($totalSize > $this->maxTotalAttachmentBytes) {
                 throw new MailStorageException(
                     'Outgoing email attachments exceed '
-                    . 'the configured total size limit.'
+                    .'the configured total size limit.'
                 );
             }
         }
@@ -81,12 +80,12 @@ class OutgoingMailAttachmentValidator
 
         if (
             $attachment->temporaryPath === null
-            || !is_file($attachment->temporaryPath)
-            || !is_readable($attachment->temporaryPath)
+            || ! is_file($attachment->temporaryPath)
+            || ! is_readable($attachment->temporaryPath)
         ) {
             throw new MailStorageException(
                 "Attachment [{$attachment->fileName}] "
-                . 'has no readable local content.'
+                .'has no readable local content.'
             );
         }
 

@@ -39,7 +39,7 @@ class CheckMailChannelsHealthCommand extends Command
 
         if (
             $direction !== ''
-            && !in_array(
+            && ! in_array(
                 $direction,
                 array_map(
                     static fn (MailboxChannelDirection $case): string => $case->value,

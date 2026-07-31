@@ -9,8 +9,7 @@ class MailConnectionTestResultSanitizer
 {
     public function __construct(
         private readonly MailSensitiveDataRedactor $redactor,
-    ) {
-    }
+    ) {}
 
     public function sanitize(
         MailConnectionTestResultData $result

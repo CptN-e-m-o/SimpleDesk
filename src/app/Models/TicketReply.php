@@ -109,6 +109,6 @@ class TicketReply extends Model
             return false;
         }
 
-        return !$this->cameFromIncomingEmail();
+        return ! $this->cameFromIncomingEmail();
     }
 }

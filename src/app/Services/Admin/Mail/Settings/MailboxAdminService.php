@@ -67,7 +67,7 @@ class MailboxAdminService
                     ),
                 ])->save();
 
-                if (!$mailbox->is_active) {
+                if (! $mailbox->is_active) {
                     $mailbox->channels()->update([
                         'is_enabled' => false,
                         'is_primary' => false,

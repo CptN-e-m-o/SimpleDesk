@@ -174,7 +174,7 @@ class PruneMailDataCommand extends Command
         if ($unknown !== []) {
             throw new RuntimeException(
                 'Unknown retention categories: '
-                . implode(', ', $unknown)
+                .implode(', ', $unknown)
             );
         }
 

@@ -10,7 +10,7 @@ class TicketReplyMailBehaviorTest extends TestCase
 {
     public function test_internal_note_cannot_be_sent_by_email(): void
     {
-        $reply = new TicketReply();
+        $reply = new TicketReply;
 
         $reply->forceFill([
             'is_internal' => true,
@@ -28,7 +28,7 @@ class TicketReplyMailBehaviorTest extends TestCase
 
     public function test_reply_created_from_incoming_email_cannot_be_sent_back(): void
     {
-        $reply = new TicketReply();
+        $reply = new TicketReply;
 
         $reply->forceFill([
             'is_internal' => false,
@@ -36,7 +36,7 @@ class TicketReplyMailBehaviorTest extends TestCase
 
         $reply->setRelation(
             'incomingEmailMessage',
-            new EmailMessage()
+            new EmailMessage
         );
 
         $this->assertTrue(
@@ -50,7 +50,7 @@ class TicketReplyMailBehaviorTest extends TestCase
 
     public function test_public_agent_reply_can_be_sent_by_email(): void
     {
-        $reply = new TicketReply();
+        $reply = new TicketReply;
 
         $reply->forceFill([
             'is_internal' => false,

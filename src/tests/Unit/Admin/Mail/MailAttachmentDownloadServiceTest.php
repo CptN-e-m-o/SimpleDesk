@@ -24,7 +24,7 @@ class MailAttachmentDownloadServiceTest extends TestCase
             $contents
         );
 
-        $attachment = new EmailAttachment();
+        $attachment = new EmailAttachment;
 
         $attachment->forceFill([
             'file_name' => 'file.txt',
@@ -121,7 +121,7 @@ class MailAttachmentDownloadServiceTest extends TestCase
 
     public function test_it_rejects_a_quarantined_attachment(): void
     {
-        $attachment = new EmailAttachment();
+        $attachment = new EmailAttachment;
 
         $attachment->forceFill([
             'file_name' => 'file.txt',

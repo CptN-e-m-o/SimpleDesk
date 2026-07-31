@@ -12,7 +12,7 @@ class AttachmentScanDispatcher
         int $emailAttachmentId
     ): bool {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-antivirus.enabled',
                 false
             )
@@ -25,7 +25,7 @@ class AttachmentScanDispatcher
         );
 
         if (
-            !Cache::add(
+            ! Cache::add(
                 $lockKey,
                 true,
                 max(

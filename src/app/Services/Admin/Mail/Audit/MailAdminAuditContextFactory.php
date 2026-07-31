@@ -16,8 +16,7 @@ class MailAdminAuditContextFactory
     public function __construct(
         private readonly MailAdminAuditResponseReader $responses,
         private readonly MailSensitiveDataRedactor $redactor,
-    ) {
-    }
+    ) {}
 
     public function make(
         MailAdminAuditEvent $event,
@@ -69,8 +68,7 @@ class MailAdminAuditContextFactory
         return $this->redactor->sanitizeArray(
             array_filter(
                 $context,
-                static fn (mixed $value): bool =>
-                    $value !== null
+                static fn (mixed $value): bool => $value !== null
                     && $value !== []
                     && $value !== ''
             )
@@ -83,8 +81,7 @@ class MailAdminAuditContextFactory
     ): array {
         return match ($event) {
             MailAdminAuditEvent::MailboxCreated,
-            MailAdminAuditEvent::MailboxUpdated
-            => $request->only([
+            MailAdminAuditEvent::MailboxUpdated => $request->only([
                 'name',
                 'email_address',
                 'display_name',
@@ -94,16 +91,13 @@ class MailAdminAuditContextFactory
             ]),
 
             MailAdminAuditEvent::ChannelCreated,
-            MailAdminAuditEvent::ChannelUpdated
-            => $this->channelRequestContext($request),
+            MailAdminAuditEvent::ChannelUpdated => $this->channelRequestContext($request),
 
             MailAdminAuditEvent::ProviderConnectionCreated,
-            MailAdminAuditEvent::ProviderConnectionUpdated
-            => $this->providerConnectionRequestContext($request),
+            MailAdminAuditEvent::ProviderConnectionUpdated => $this->providerConnectionRequestContext($request),
 
             MailAdminAuditEvent::QuarantineIgnored => [
-                'reason_provided' =>
-                    trim((string) $request->input('reason')) !== '',
+                'reason_provided' => trim((string) $request->input('reason')) !== '',
             ],
 
             default => [],
@@ -211,22 +205,20 @@ class MailAdminAuditContextFactory
         $payload = $this->responses->read($response);
         $data = $payload['data'] ?? [];
 
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return [];
         }
 
         return match ($event) {
             MailAdminAuditEvent::ChannelConnectionTested,
             MailAdminAuditEvent::ProviderConnectionTested,
-            MailAdminAuditEvent::AntivirusConnectionTested
-            => $this->connectionResultContext($data),
+            MailAdminAuditEvent::AntivirusConnectionTested => $this->connectionResultContext($data),
 
             MailAdminAuditEvent::MailboxSyncRequested,
             MailAdminAuditEvent::OutgoingMessageRetryRequested,
             MailAdminAuditEvent::AttachmentRescanRequested,
             MailAdminAuditEvent::QuarantineRetryRequested,
-            MailAdminAuditEvent::QuarantineIgnored
-            => $this->actionResultContext($data),
+            MailAdminAuditEvent::QuarantineIgnored => $this->actionResultContext($data),
 
             default => [],
         };
@@ -268,8 +260,7 @@ class MailAdminAuditContextFactory
 
         return array_filter(
             $context,
-            static fn (mixed $value): bool =>
-                $value !== null
+            static fn (mixed $value): bool => $value !== null
                 && $value !== []
                 && $value !== ''
         );
@@ -305,8 +296,7 @@ class MailAdminAuditContextFactory
 
         return array_filter(
             $context,
-            static fn (mixed $value): bool =>
-                $value !== null
+            static fn (mixed $value): bool => $value !== null
                 && $value !== []
                 && $value !== ''
         );

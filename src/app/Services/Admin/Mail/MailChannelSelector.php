@@ -12,8 +12,7 @@ class MailChannelSelector
 {
     public function __construct(
         private readonly int $failedChannelCooldownSeconds,
-    ) {
-    }
+    ) {}
 
     public function incomingCandidates(
         Mailbox $mailbox
@@ -37,7 +36,7 @@ class MailChannelSelector
         Mailbox $mailbox,
         MailboxChannelDirection $direction,
     ): Collection {
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             return collect();
         }
 
@@ -54,18 +53,16 @@ class MailChannelSelector
                     $channel->provider_connection_id !== null
                     && (
                         $channel->providerConnection === null
-                        || !$channel->providerConnection->is_active
+                        || ! $channel->providerConnection->is_active
                     )
                 ) {
                     return false;
                 }
 
                 return match ($direction) {
-                    MailboxChannelDirection::Incoming =>
-                    $channel->driver->supportsIncoming(),
+                    MailboxChannelDirection::Incoming => $channel->driver->supportsIncoming(),
 
-                    MailboxChannelDirection::Outgoing =>
-                    $channel->driver->supportsOutgoing(),
+                    MailboxChannelDirection::Outgoing => $channel->driver->supportsOutgoing(),
                 };
             });
 
@@ -74,8 +71,7 @@ class MailChannelSelector
         }
 
         $availableOutsideCooldown = $channels->reject(
-            fn (MailboxChannel $channel): bool =>
-            $this->isInsideFailedCooldown($channel)
+            fn (MailboxChannel $channel): bool => $this->isInsideFailedCooldown($channel)
         );
 
         if ($availableOutsideCooldown->isNotEmpty()) {

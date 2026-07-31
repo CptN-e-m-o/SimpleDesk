@@ -12,8 +12,7 @@ class IncomingMailFetchService
 {
     public function __construct(
         private readonly MailDriverRegistry $drivers,
-    ) {
-    }
+    ) {}
 
     public function fetch(
         MailboxChannel $channel,
@@ -26,7 +25,7 @@ class IncomingMailFetchService
         ) {
             throw new InvalidArgumentException(
                 "Mailbox channel [{$channel->id}] "
-                . 'is not an incoming channel.'
+                .'is not an incoming channel.'
             );
         }
 

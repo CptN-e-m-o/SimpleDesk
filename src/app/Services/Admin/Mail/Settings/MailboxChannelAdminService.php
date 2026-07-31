@@ -12,8 +12,7 @@ class MailboxChannelAdminService
 {
     public function __construct(
         private readonly SecretConfigurationMerger $secrets,
-    ) {
-    }
+    ) {}
 
     public function create(
         Mailbox $mailbox,
@@ -32,7 +31,7 @@ class MailboxChannelAdminService
 
                 $isPrimary = (bool) $data['is_primary']
                     || (
-                        !$hasChannelForDirection
+                        ! $hasChannelForDirection
                         && (bool) $data['is_enabled']
                     );
 

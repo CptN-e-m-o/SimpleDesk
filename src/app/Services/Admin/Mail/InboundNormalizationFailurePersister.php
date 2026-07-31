@@ -20,8 +20,7 @@ class InboundNormalizationFailurePersister
         private readonly MailMessageIdempotencyKeyFactory $keys,
         private readonly RawEmailStorageService $rawStorage,
         private readonly EmailMessageQuarantineService $quarantine,
-    ) {
-    }
+    ) {}
 
     public function persist(
         MailboxChannel $channel,
@@ -41,7 +40,6 @@ class InboundNormalizationFailurePersister
                 function () use (
                     $channel,
                     $failure,
-                    $message,
                     $idempotencyKey,
                 ): array {
                     $emailMessage =
@@ -75,8 +73,7 @@ class InboundNormalizationFailurePersister
                         $this->messageAttributes(
                             channel: $channel,
                             failure: $failure,
-                            idempotencyKey:
-                            $idempotencyKey,
+                            idempotencyKey: $idempotencyKey,
                         );
 
                     if ($emailMessage === null) {
@@ -124,11 +121,9 @@ class InboundNormalizationFailurePersister
                 );
             } catch (Throwable $exception) {
                 $rawStorageError = [
-                    'exception' =>
-                        $exception::class,
+                    'exception' => $exception::class,
 
-                    'message' =>
-                        $exception->getMessage(),
+                    'message' => $exception->getMessage(),
                 ];
             }
         }
@@ -141,52 +136,42 @@ class InboundNormalizationFailurePersister
         }
 
         $this->quarantine->quarantine(
-            emailMessageId:
-            $emailMessage->id,
+            emailMessageId: $emailMessage->id,
 
-            stage:
-            EmailQuarantineStage::InboundNormalization,
+            stage: EmailQuarantineStage::InboundNormalization,
 
             exception: null,
 
-            reasonCode:
-            $failure->errorCode,
+            reasonCode: $failure->errorCode,
 
-            reasonMessage:
-            $failure->errorMessage,
+            reasonMessage: $failure->errorMessage,
 
             metadata: array_merge(
                 $metadata,
                 [
-                    'exception_class' =>
-                        $failure->exceptionClass,
+                    'exception_class' => $failure->exceptionClass,
 
-                    'retryable' =>
-                        $failure->retryable,
+                    'retryable' => $failure->retryable,
                 ]
             ),
         );
 
         $emailMessage->forceFill([
-            'status' =>
-                EmailMessageStatus::Failed,
+            'status' => EmailMessageStatus::Failed,
 
             'failed_at' => now(),
 
-            'failure_code' =>
-                'inbound_normalization_quarantined',
+            'failure_code' => 'inbound_normalization_quarantined',
 
-            'failure_message' =>
-                mb_substr(
-                    $failure->errorMessage,
-                    0,
-                    10000
-                ),
+            'failure_message' => mb_substr(
+                $failure->errorMessage,
+                0,
+                10000
+            ),
         ])->save();
 
         return new PersistedInboundMessageData(
-            emailMessage:
-            $emailMessage->fresh(),
+            emailMessage: $emailMessage->fresh(),
 
             created: $created,
             duplicate: false,
@@ -205,119 +190,89 @@ class InboundNormalizationFailurePersister
             $message->metadata;
 
         $metadata['normalization_failure'] = [
-            'error_code' =>
-                $failure->errorCode,
+            'error_code' => $failure->errorCode,
 
-            'error_message' =>
-                $failure->errorMessage,
+            'error_message' => $failure->errorMessage,
 
-            'exception_class' =>
-                $failure->exceptionClass,
+            'exception_class' => $failure->exceptionClass,
 
-            'retryable' =>
-                $failure->retryable,
+            'retryable' => $failure->retryable,
 
-            'metadata' =>
-                $failure->metadata,
+            'metadata' => $failure->metadata,
 
-            'quarantined_at' =>
-                now()->toIso8601String(),
+            'quarantined_at' => now()->toIso8601String(),
         ];
 
         return [
-            'mailbox_id' =>
-                $channel->mailbox_id,
+            'mailbox_id' => $channel->mailbox_id,
 
-            'mailbox_channel_id' =>
-                $channel->id,
+            'mailbox_channel_id' => $channel->id,
 
-            'direction' =>
-                EmailMessageDirection::Incoming,
+            'direction' => EmailMessageDirection::Incoming,
 
-            'driver' =>
-                $channel->driver,
+            'driver' => $channel->driver,
 
-            'status' =>
-                EmailMessageStatus::Failed,
+            'status' => EmailMessageStatus::Failed,
 
-            'idempotency_key' =>
-                $idempotencyKey,
+            'idempotency_key' => $idempotencyKey,
 
-            'external_message_id' =>
-                $message->externalMessageId,
+            'external_message_id' => $message->externalMessageId,
 
-            'internet_message_id' =>
-                $message->internetMessageId,
+            'internet_message_id' => $message->internetMessageId,
 
-            'in_reply_to_message_id' =>
-                $message->inReplyToMessageId,
+            'in_reply_to_message_id' => $message->inReplyToMessageId,
 
-            'reference_message_ids' =>
-                $message->references,
+            'reference_message_ids' => $message->references,
 
-            'sender_address' =>
-                $message->from->address,
+            'sender_address' => $message->from->address,
 
-            'sender_name' =>
-                $message->from->name,
+            'sender_name' => $message->from->name,
 
-            'to_recipients' =>
-                $this->addressesToArray(
-                    $message->to
-                ),
+            'to_recipients' => $this->addressesToArray(
+                $message->to
+            ),
 
-            'cc_recipients' =>
-                $this->addressesToArray(
-                    $message->cc
-                ),
+            'cc_recipients' => $this->addressesToArray(
+                $message->cc
+            ),
 
-            'bcc_recipients' =>
-                $this->addressesToArray(
-                    $message->bcc
-                ),
+            'bcc_recipients' => $this->addressesToArray(
+                $message->bcc
+            ),
 
-            'reply_to_recipients' =>
-                $this->addressesToArray(
-                    $message->replyTo
-                ),
+            'reply_to_recipients' => $this->addressesToArray(
+                $message->replyTo
+            ),
 
-            'subject' =>
-                $message->subject,
+            'subject' => $message->subject,
 
-            'text_body' =>
-                $message->textBody,
+            'text_body' => $message->textBody,
 
-            'html_body' =>
-                $message->htmlBody,
+            'html_body' => $message->htmlBody,
 
-            'headers' =>
-                $message->headers,
+            'headers' => $message->headers,
 
-            'metadata' =>
-                $metadata,
+            'metadata' => $metadata,
 
-            'received_at' =>
-                $message->receivedAt,
+            'received_at' => $message->receivedAt,
 
             'processing_started_at' => null,
             'processed_at' => null,
 
             'failed_at' => now(),
 
-            'failure_code' =>
-                'inbound_normalization_quarantined',
+            'failure_code' => 'inbound_normalization_quarantined',
 
-            'failure_message' =>
-                mb_substr(
-                    $failure->errorMessage,
-                    0,
-                    10000
-                ),
+            'failure_message' => mb_substr(
+                $failure->errorMessage,
+                0,
+                10000
+            ),
         ];
     }
 
     /**
-     * @param array<int, MailAddressData> $addresses
+     * @param  array<int, MailAddressData>  $addresses
      */
     private function addressesToArray(
         array $addresses

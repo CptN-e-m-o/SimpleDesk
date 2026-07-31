@@ -9,14 +9,13 @@ use Illuminate\Http\UploadedFile;
 class UploadedMailAttachmentFactory
 {
     /**
-     * @param array<int, UploadedFile> $files
+     * @param  array<int, UploadedFile>  $files
      * @return array<int, MailAttachmentData>
      */
     public function makeMany(array $files): array
     {
         return array_map(
-            fn (UploadedFile $file): MailAttachmentData =>
-            $this->make($file),
+            fn (UploadedFile $file): MailAttachmentData => $this->make($file),
             array_values($files),
         );
     }
@@ -24,7 +23,7 @@ class UploadedMailAttachmentFactory
     public function make(
         UploadedFile $file
     ): MailAttachmentData {
-        if (!$file->isValid()) {
+        if (! $file->isValid()) {
             throw new MailStorageException(
                 'Uploaded attachment is not valid.'
             );
@@ -34,8 +33,8 @@ class UploadedMailAttachmentFactory
 
         if (
             $temporaryPath === false
-            || !is_file($temporaryPath)
-            || !is_readable($temporaryPath)
+            || ! is_file($temporaryPath)
+            || ! is_readable($temporaryPath)
         ) {
             throw new MailStorageException(
                 'Uploaded attachment cannot be read.'
@@ -53,7 +52,7 @@ class UploadedMailAttachmentFactory
         $mimeType = $file->getMimeType();
 
         if (
-            !is_string($mimeType)
+            ! is_string($mimeType)
             || trim($mimeType) === ''
         ) {
             $mimeType = 'application/octet-stream';

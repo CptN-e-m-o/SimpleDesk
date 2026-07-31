@@ -13,63 +13,57 @@ class InboundEmailClassifier
     ): InboundEmailDecisionData {
         if ($this->isSameMailboxSender($message)) {
             return $this->decision(
-                shouldProcess: !$this->shouldIgnore(
+                shouldProcess: ! $this->shouldIgnore(
                     'same_mailbox_sender'
                 ),
-                classification:
-                InboundEmailClassification::Loop,
+                classification: InboundEmailClassification::Loop,
                 reason: 'sender_matches_mailbox',
             );
         }
 
         if ($this->hasSimpleDeskOrigin($message)) {
             return $this->decision(
-                shouldProcess: !$this->shouldIgnore(
+                shouldProcess: ! $this->shouldIgnore(
                     'simpledesk_origin'
                 ),
-                classification:
-                InboundEmailClassification::Loop,
+                classification: InboundEmailClassification::Loop,
                 reason: 'simpledesk_origin_header',
             );
         }
 
         if ($this->isDeliveryStatusMessage($message)) {
             return $this->decision(
-                shouldProcess: !$this->shouldIgnore(
+                shouldProcess: ! $this->shouldIgnore(
                     'delivery_status'
                 ),
-                classification:
-                InboundEmailClassification::DeliveryStatus,
+                classification: InboundEmailClassification::DeliveryStatus,
                 reason: 'delivery_status_notification',
             );
         }
 
         if ($this->isAutoReply($message)) {
             return $this->decision(
-                shouldProcess: !$this->shouldIgnore(
+                shouldProcess: ! $this->shouldIgnore(
                     'auto_replies'
                 ),
-                classification:
-                InboundEmailClassification::AutoReply,
+                classification: InboundEmailClassification::AutoReply,
                 reason: 'automatic_response',
             );
         }
 
         if ($this->isBulkMessage($message)) {
             return $this->decision(
-                shouldProcess: !$this->shouldIgnore(
+                shouldProcess: ! $this->shouldIgnore(
                     'bulk'
                 ),
-                classification:
-                InboundEmailClassification::Bulk,
+                classification: InboundEmailClassification::Bulk,
                 reason: 'bulk_or_mailing_list_message',
             );
         }
 
         return $this->decision(
             shouldProcess: true,
-            classification:
-            InboundEmailClassification::Human,
+            classification: InboundEmailClassification::Human,
             reason: 'human_message',
         );
     }
@@ -96,9 +90,9 @@ class InboundEmailClassifier
         EmailMessage $message
     ): bool {
         return $this->headerValues(
-                $message,
-                'x-simpledesk-origin'
-            ) !== [];
+            $message,
+            'x-simpledesk-origin'
+        ) !== [];
     }
 
     private function isDeliveryStatusMessage(
@@ -158,20 +152,20 @@ class InboundEmailClassifier
         );
 
         return preg_match(
-                '/(?:'
-                . 'delivery status notification'
-                . '|delivery failure'
-                . '|delivery has failed'
-                . '|undeliverable'
-                . '|returned mail'
-                . '|failure notice'
-                . '|mail delivery failed'
-                . '|не доставлено'
-                . '|ошибка доставки'
-                . '|сбой доставки'
-                . ')/iu',
-                $subject
-            ) === 1;
+            '/(?:'
+            .'delivery status notification'
+            .'|delivery failure'
+            .'|delivery has failed'
+            .'|undeliverable'
+            .'|returned mail'
+            .'|failure notice'
+            .'|mail delivery failed'
+            .'|не доставлено'
+            .'|ошибка доставки'
+            .'|сбой доставки'
+            .')/iu',
+            $subject
+        ) === 1;
     }
 
     private function isMailerDaemonSender(
@@ -231,8 +225,7 @@ class InboundEmailClassifier
                 'x-autorespond',
                 'x-auto-reply',
                 'x-autoresponse',
-            ]
-            as $header
+            ] as $header
         ) {
             if (
                 $this->headerValues(
@@ -251,19 +244,19 @@ class InboundEmailClassifier
         );
 
         return preg_match(
-                '/^(?:'
-                . 'automatic reply'
-                . '|auto reply'
-                . '|autoreply'
-                . '|out of office'
-                . '|away from the office'
-                . '|автоматический ответ'
-                . '|автоответ'
-                . '|вне офиса'
-                . '|нет на рабочем месте'
-                . ')\s*[:\-]?/iu',
-                $subject
-            ) === 1;
+            '/^(?:'
+            .'automatic reply'
+            .'|auto reply'
+            .'|autoreply'
+            .'|out of office'
+            .'|away from the office'
+            .'|автоматический ответ'
+            .'|автоответ'
+            .'|вне офиса'
+            .'|нет на рабочем месте'
+            .')\s*[:\-]?/iu',
+            $subject
+        ) === 1;
     }
 
     private function isBulkMessage(
@@ -339,7 +332,7 @@ class InboundEmailClassifier
                 : [];
         }
 
-        if (!is_array($headers)) {
+        if (! is_array($headers)) {
             return [];
         }
 
@@ -356,7 +349,7 @@ class InboundEmailClassifier
                 continue;
             }
 
-            if (!is_array($values)) {
+            if (! is_array($values)) {
                 $values = [$values];
             }
 

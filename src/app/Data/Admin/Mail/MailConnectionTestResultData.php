@@ -9,8 +9,7 @@ final readonly class MailConnectionTestResultData
         public string $message,
         public ?int $latencyMilliseconds = null,
         public array $details = [],
-    ) {
-    }
+    ) {}
 
     public static function success(
         string $message,

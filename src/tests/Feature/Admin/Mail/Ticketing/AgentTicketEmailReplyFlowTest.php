@@ -166,8 +166,8 @@ class AgentTicketEmailReplyFlowTest extends TestCase
 
         $this->assertSame(
             'ticket-reply:'
-            . $reply->id
-            . ':outgoing:v1',
+            .$reply->id
+            .':outgoing:v1',
             $emailMessage->idempotency_key
         );
 
@@ -317,7 +317,7 @@ class AgentTicketEmailReplyFlowTest extends TestCase
                 'Internal note was queued for email delivery.'
             );
         } catch (
-        TicketReplyEmailException $exception
+            TicketReplyEmailException $exception
         ) {
             $this->assertSame(
                 'internal_ticket_reply',

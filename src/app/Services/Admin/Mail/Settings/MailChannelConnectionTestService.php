@@ -15,8 +15,7 @@ class MailChannelConnectionTestService
         private readonly MailChannelTester $tester,
         private readonly MailChannelHealthRecorder $health,
         private readonly MailConnectionTestResultSanitizer $sanitizer,
-    ) {
-    }
+    ) {}
 
     public function test(
         MailboxChannel $channel

@@ -148,8 +148,7 @@ class Ticket extends Model
         return match ($status) {
             self::STATUS_OPEN => 'Open',
             self::STATUS_IN_PROGRESS => 'In Progress',
-            self::STATUS_WAITING_FOR_CUSTOMER =>
-            'Waiting for Customer',
+            self::STATUS_WAITING_FOR_CUSTOMER => 'Waiting for Customer',
             self::STATUS_RESOLVED => 'Resolved',
             self::STATUS_CLOSED => 'Closed',
             default => $status,

@@ -11,14 +11,13 @@ class AttachmentScanRecoveryService
 {
     public function __construct(
         private readonly AttachmentScanDispatcher $dispatcher,
-    ) {
-    }
+    ) {}
 
     public function recover(
         ?int $limit = null
     ): AttachmentScanRecoveryResultData {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-antivirus.enabled',
                 false
             )
@@ -112,8 +111,7 @@ class AttachmentScanRecoveryService
                     $attachment->forceFill([
                         'scan_started_at' => null,
                         'scan_failure_code' => 'stuck_scan_recovered',
-                        'scan_failure_message' =>
-                            'A stuck antivirus scan was reset by recovery.',
+                        'scan_failure_message' => 'A stuck antivirus scan was reset by recovery.',
                     ])->save();
 
                     return true;
@@ -121,7 +119,7 @@ class AttachmentScanRecoveryService
                 3,
             );
 
-            if (!$wasReset) {
+            if (! $wasReset) {
                 continue;
             }
 

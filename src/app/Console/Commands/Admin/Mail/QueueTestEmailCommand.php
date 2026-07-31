@@ -45,8 +45,7 @@ class QueueTestEmailCommand extends Command
 
         try {
             $message = new OutgoingEmailMessageData(
-                idempotencyKey:
-                'smtp-test:' . Str::uuid(),
+                idempotencyKey: 'smtp-test:'.Str::uuid(),
                 from: null,
                 to: [
                     new MailAddressData(
@@ -61,13 +60,10 @@ class QueueTestEmailCommand extends Command
                     ->option('subject'),
                 textBody: (string) $this
                     ->option('text'),
-                htmlBody:
-                $this->nullableOption('html'),
-                attachments:
-                $this->attachments(),
+                htmlBody: $this->nullableOption('html'),
+                attachments: $this->attachments(),
                 metadata: [
-                    'source' =>
-                        'artisan_test_command',
+                    'source' => 'artisan_test_command',
                 ],
             );
 
@@ -77,19 +73,19 @@ class QueueTestEmailCommand extends Command
             $emailMessage = $queue->queue(
                 mailbox: $mailbox,
                 message: $message,
-                dispatch: !$sendNow,
+                dispatch: ! $sendNow,
             );
 
             $this->info(
                 "Email message [{$emailMessage->id}] "
-                . 'was prepared.'
+                .'was prepared.'
             );
 
-            if (!$sendNow) {
+            if (! $sendNow) {
                 $this->line(
                     'The message was queued. '
-                    . 'Run a worker for the configured '
-                    . 'outgoing queue.'
+                    .'Run a worker for the configured '
+                    .'outgoing queue.'
                 );
 
                 return self::SUCCESS;
@@ -105,7 +101,7 @@ class QueueTestEmailCommand extends Command
 
             $this->line(
                 'Internet Message-ID: '
-                . (
+                .(
                     $result->internetMessageId
                     ?? 'not available'
                 )
@@ -113,7 +109,7 @@ class QueueTestEmailCommand extends Command
 
             $this->line(
                 'Transport message ID: '
-                . (
+                .(
                     $result->externalMessageId
                     ?? 'not available'
                 )
@@ -137,18 +133,17 @@ class QueueTestEmailCommand extends Command
         $attachments = [];
 
         foreach (
-            (array) $this->option('attach')
-            as $path
+            (array) $this->option('attach') as $path
         ) {
             $path = (string) $path;
 
             if (
-                !is_file($path)
-                || !is_readable($path)
+                ! is_file($path)
+                || ! is_readable($path)
             ) {
                 throw new RuntimeException(
                     "Attachment [{$path}] "
-                    . 'is not a readable file.'
+                    .'is not a readable file.'
                 );
             }
 
@@ -161,15 +156,14 @@ class QueueTestEmailCommand extends Command
             if ($size === false) {
                 throw new RuntimeException(
                     'Unable to determine size '
-                    . "of attachment [{$path}]."
+                    ."of attachment [{$path}]."
                 );
             }
 
             $attachments[] =
                 new MailAttachmentData(
                     fileName: basename($path),
-                    mimeType:
-                    is_string($mimeType)
+                    mimeType: is_string($mimeType)
                         ? $mimeType
                         : 'application/octet-stream',
                     size: $size,
@@ -185,7 +179,7 @@ class QueueTestEmailCommand extends Command
     ): ?string {
         $value = $this->option($name);
 
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             return null;
         }
 

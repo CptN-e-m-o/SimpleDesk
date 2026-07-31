@@ -112,8 +112,7 @@ class AdminMailDiagnosticsTest extends TestCase
                 'health_status' => 'failed',
                 'last_error_at' => now()->subMinute(),
                 'last_error_code' => 'imap_auth_failed',
-                'last_error_message' =>
-                    'Authentication failed password=visible-secret',
+                'last_error_message' => 'Authentication failed password=visible-secret',
             ]
         );
 
@@ -131,20 +130,16 @@ class AdminMailDiagnosticsTest extends TestCase
             'mailbox_channel_id' => $incoming->id,
             'cursor' => null,
             'cursor_metadata' => [],
-            'last_sync_started_at' =>
-                now()->subMinutes(3),
+            'last_sync_started_at' => now()->subMinutes(3),
             'last_sync_completed_at' => null,
-            'last_sync_failed_at' =>
-                now()->subMinutes(2),
+            'last_sync_failed_at' => now()->subMinutes(2),
             'consecutive_failures' => 2,
             'last_fetched_count' => 0,
             'last_stored_count' => 0,
             'last_duplicate_count' => 0,
             'last_acknowledged_count' => 0,
-            'last_error_code' =>
-                'imap_sync_failed',
-            'last_error_message' =>
-                'Authorization: Bearer secret-token',
+            'last_error_code' => 'imap_sync_failed',
+            'last_error_message' => 'Authorization: Bearer secret-token',
         ]);
 
         $message = $this->createMessage(
@@ -152,8 +147,7 @@ class AdminMailDiagnosticsTest extends TestCase
             [
                 'direction' => 'outgoing',
                 'status' => 'sending',
-                'processing_started_at' =>
-                    now()->subMinutes(2),
+                'processing_started_at' => now()->subMinutes(2),
             ]
         );
 
@@ -167,8 +161,7 @@ class AdminMailDiagnosticsTest extends TestCase
         EmailAttachment::query()
             ->whereKey($attachment->id)
             ->update([
-                'updated_at' =>
-                    now()->subMinutes(2),
+                'updated_at' => now()->subMinutes(2),
             ]);
 
         $response = $this
@@ -232,16 +225,13 @@ class AdminMailDiagnosticsTest extends TestCase
         );
 
         MailboxChannelSyncState::query()->create([
-            'mailbox_channel_id' =>
-                $channel->id,
+            'mailbox_channel_id' => $channel->id,
             'cursor' => 'private-cursor',
             'cursor_metadata' => [
                 'internal' => 'not-for-api',
             ],
-            'last_sync_started_at' =>
-                now()->subMinute(),
-            'last_sync_completed_at' =>
-                now(),
+            'last_sync_started_at' => now()->subMinute(),
+            'last_sync_completed_at' => now(),
             'last_sync_failed_at' => null,
             'consecutive_failures' => 0,
             'last_fetched_count' => 4,
@@ -255,30 +245,23 @@ class AdminMailDiagnosticsTest extends TestCase
         $message = $this->createMessage(
             $mailbox,
             [
-                'mailbox_channel_id' =>
-                    $channel->id,
+                'mailbox_channel_id' => $channel->id,
 
-                'subject' =>
-                    'Customer question',
+                'subject' => 'Customer question',
 
-                'text_body' =>
-                    'Private message body',
+                'text_body' => 'Private message body',
 
-                'html_body' =>
-                    '<p>Private HTML body</p>',
+                'html_body' => '<p>Private HTML body</p>',
 
                 'headers' => [
-                    'authorization' =>
-                        'Bearer private-token',
+                    'authorization' => 'Bearer private-token',
                 ],
 
                 'metadata' => [
-                    'password' =>
-                        'private-password',
+                    'password' => 'private-password',
                 ],
 
-                'raw_message_path' =>
-                    'mail/raw/private.eml',
+                'raw_message_path' => 'mail/raw/private.eml',
             ]
         );
 
@@ -363,15 +346,11 @@ class AdminMailDiagnosticsTest extends TestCase
             [
                 'direction' => 'outgoing',
                 'status' => 'queued',
-                'queued_at' =>
-                    now()->subMinutes(2),
-                'subject' =>
-                    'Stuck delivery',
-                'text_body' =>
-                    'Secret body',
+                'queued_at' => now()->subMinutes(2),
+                'subject' => 'Stuck delivery',
+                'text_body' => 'Secret body',
                 'metadata' => [
-                    'token' =>
-                        'secret-token',
+                    'token' => 'secret-token',
                 ],
             ]
         );
@@ -382,8 +361,7 @@ class AdminMailDiagnosticsTest extends TestCase
                 'direction' => 'outgoing',
                 'status' => 'sent',
                 'sent_at' => now(),
-                'subject' =>
-                    'Completed delivery',
+                'subject' => 'Completed delivery',
             ]
         );
 
@@ -393,8 +371,7 @@ class AdminMailDiagnosticsTest extends TestCase
                 route(
                     'admin.email.diagnostics.messages',
                     [
-                        'mailbox_id' =>
-                            $mailbox->id,
+                        'mailbox_id' => $mailbox->id,
 
                         'stuck' => 1,
                     ]
@@ -444,31 +421,24 @@ class AdminMailDiagnosticsTest extends TestCase
         $attachment = $this->createAttachment(
             $message,
             [
-                'file_name' =>
-                    'infected.txt',
+                'file_name' => 'infected.txt',
 
-                'scan_status' =>
-                    'infected',
+                'scan_status' => 'infected',
 
-                'quarantined_at' =>
-                    now(),
+                'quarantined_at' => now(),
 
                 'scan_result' => [
                     'driver' => 'clamav',
 
-                    'signature' =>
-                        'Test.Signature',
+                    'signature' => 'Test.Signature',
 
-                    'message' =>
-                        'Detected token=private-token',
+                    'message' => 'Detected token=private-token',
 
-                    'raw_response' =>
-                        '/private/storage/path: FOUND',
+                    'raw_response' => '/private/storage/path: FOUND',
                 ],
 
                 'metadata' => [
-                    'storage_path' =>
-                        '/private/storage/path',
+                    'storage_path' => '/private/storage/path',
                 ],
             ]
         );
@@ -479,11 +449,9 @@ class AdminMailDiagnosticsTest extends TestCase
                 route(
                     'admin.email.diagnostics.attachments',
                     [
-                        'mailbox_id' =>
-                            $mailbox->id,
+                        'mailbox_id' => $mailbox->id,
 
-                        'scan_status' =>
-                            'infected',
+                        'scan_status' => 'infected',
 
                         'quarantined' => 1,
                     ]
@@ -545,57 +513,42 @@ class AdminMailDiagnosticsTest extends TestCase
         $message = $this->createMessage(
             $mailbox,
             [
-                'mailbox_channel_id' =>
-                    $channel->id,
+                'mailbox_channel_id' => $channel->id,
 
-                'direction' =>
-                    'incoming',
+                'direction' => 'incoming',
 
-                'driver' =>
-                    'imap',
+                'driver' => 'imap',
 
-                'status' =>
-                    'failed',
+                'status' => 'failed',
 
-                'sender_address' =>
-                    'customer@example.test',
+                'sender_address' => 'customer@example.test',
 
-                'subject' =>
-                    'Rejected attachment',
+                'subject' => 'Rejected attachment',
             ]
         );
 
         $quarantine =
             EmailMessageQuarantine::query()
                 ->create([
-                    'email_message_id' =>
-                        $message->id,
+                    'email_message_id' => $message->id,
 
-                    'mailbox_id' =>
-                        $mailbox->id,
+                    'mailbox_id' => $mailbox->id,
 
-                    'mailbox_channel_id' =>
-                        $channel->id,
+                    'mailbox_channel_id' => $channel->id,
 
-                    'stage' =>
-                        'attachment_processing',
+                    'stage' => 'attachment_processing',
 
-                    'reason_code' =>
-                        'attachment_failed',
+                    'reason_code' => 'attachment_failed',
 
-                    'reason_message' =>
-                        'Scan failed password=private-value',
+                    'reason_message' => 'Scan failed password=private-value',
 
-                    'exception_class' =>
-                        'Private\\Internal\\Exception',
+                    'exception_class' => 'Private\\Internal\\Exception',
 
                     'attempts' => 1,
 
-                    'first_quarantined_at' =>
-                        now(),
+                    'first_quarantined_at' => now(),
 
-                    'last_quarantined_at' =>
-                        now(),
+                    'last_quarantined_at' => now(),
 
                     'released_at' => null,
 
@@ -606,35 +559,30 @@ class AdminMailDiagnosticsTest extends TestCase
                     'resolution' => null,
 
                     'metadata' => [
-                        'raw' =>
-                            'private-metadata',
+                        'raw' => 'private-metadata',
                     ],
                 ]);
 
         $rejection =
             EmailAttachmentRejection::query()
                 ->create([
-                    'email_message_id' =>
-                        $message->id,
+                    'email_message_id' => $message->id,
 
                     'position' => 0,
 
                     'external_id' => null,
 
-                    'deduplication_key' =>
-                        hash(
-                            'sha256',
-                            uniqid(
-                                'rejection-',
-                                true
-                            )
-                        ),
+                    'deduplication_key' => hash(
+                        'sha256',
+                        uniqid(
+                            'rejection-',
+                            true
+                        )
+                    ),
 
-                    'file_name' =>
-                        'payload.exe',
+                    'file_name' => 'payload.exe',
 
-                    'mime_type' =>
-                        'application/octet-stream',
+                    'mime_type' => 'application/octet-stream',
 
                     'reported_size' => 2048,
 
@@ -642,15 +590,12 @@ class AdminMailDiagnosticsTest extends TestCase
 
                     'is_inline' => false,
 
-                    'reason_code' =>
-                        'mime_type_not_allowed',
+                    'reason_code' => 'mime_type_not_allowed',
 
-                    'reason_message' =>
-                        'Attachment rejected token=private-token',
+                    'reason_message' => 'Attachment rejected token=private-token',
 
                     'metadata' => [
-                        'raw_path' =>
-                            '/private/path',
+                    'raw_path' => '/private/path',
                     ],
                 ]);
 
@@ -660,11 +605,9 @@ class AdminMailDiagnosticsTest extends TestCase
                 route(
                     'admin.email.diagnostics.quarantines',
                     [
-                        'mailbox_id' =>
-                            $mailbox->id,
+                        'mailbox_id' => $mailbox->id,
 
-                        'resolution' =>
-                            'open',
+                        'resolution' => 'open',
                     ]
                 )
             )
@@ -688,11 +631,9 @@ class AdminMailDiagnosticsTest extends TestCase
                 route(
                     'admin.email.diagnostics.rejected-attachments',
                     [
-                        'mailbox_id' =>
-                            $mailbox->id,
+                        'mailbox_id' => $mailbox->id,
 
-                        'reason_code' =>
-                            'mime_type_not_allowed',
+                        'reason_code' => 'mime_type_not_allowed',
                     ]
                 )
             )
@@ -742,12 +683,10 @@ class AdminMailDiagnosticsTest extends TestCase
         $user = User::factory()->create();
 
         $role = Role::query()->create([
-            'name' =>
-                'mail-diagnostics-admin-'
-                . $user->id,
+            'name' => 'mail-diagnostics-admin-'
+                .$user->id,
 
-            'label' =>
-                'Mail diagnostics administrator',
+            'label' => 'Mail diagnostics administrator',
 
             'description' => null,
 
@@ -761,12 +700,10 @@ class AdminMailDiagnosticsTest extends TestCase
         $group =
             PermissionGroup::query()
                 ->create([
-                    'key' =>
-                        'mail-diagnostics-test-'
-                        . $user->id,
+                    'key' => 'mail-diagnostics-test-'
+                        .$user->id,
 
-                    'label' =>
-                        'Mail diagnostics test',
+                    'label' => 'Mail diagnostics test',
 
                     'panel' => 'admin',
 
@@ -780,11 +717,9 @@ class AdminMailDiagnosticsTest extends TestCase
                 ->map(
                     fn (
                         string $key
-                    ): int =>
-                    Permission::query()
+                    ): int => Permission::query()
                         ->create([
-                            'permission_group_id' =>
-                                $group->id,
+                            'permission_group_id' => $group->id,
 
                             'parent_id' => null,
 
@@ -794,14 +729,11 @@ class AdminMailDiagnosticsTest extends TestCase
 
                             'type' => 'agent',
 
-                            'ui_type' =>
-                                'checkbox',
+                            'ui_type' => 'checkbox',
 
-                            'description' =>
-                                null,
+                            'description' => null,
 
-                            'sort_order' =>
-                                1,
+                            'sort_order' => 1,
                         ])
                         ->id
                 )
@@ -830,20 +762,17 @@ class AdminMailDiagnosticsTest extends TestCase
                 [
                     'name' => 'Support',
 
-                    'email_address' =>
-                        'support-'
-                        . uniqid()
-                        . '@example.test',
+                    'email_address' => 'support-'
+                        .uniqid()
+                        .'@example.test',
 
-                    'display_name' =>
-                        'SimpleDesk Support',
+                    'display_name' => 'SimpleDesk Support',
 
                     'department_id' => null,
 
                     'is_active' => true,
 
-                    'is_default_outgoing' =>
-                        false,
+                    'is_default_outgoing' => false,
 
                     'internal_notes' => null,
                 ],
@@ -859,16 +788,13 @@ class AdminMailDiagnosticsTest extends TestCase
         return MailboxChannel::query()->create(
             array_merge(
                 [
-                    'mailbox_id' =>
-                        $mailbox->id,
+                    'mailbox_id' => $mailbox->id,
 
-                    'provider_connection_id' =>
-                        null,
+                    'provider_connection_id' => null,
 
                     'name' => 'IMAP',
 
-                    'direction' =>
-                        'incoming',
+                    'direction' => 'incoming',
 
                     'driver' => 'imap',
 
@@ -882,11 +808,9 @@ class AdminMailDiagnosticsTest extends TestCase
 
                     'configuration' => [],
 
-                    'secret_configuration' =>
-                        [],
+                    'secret_configuration' => [],
 
-                    'health_status' =>
-                        'unknown',
+                    'health_status' => 'unknown',
 
                     'last_checked_at' => null,
 
@@ -898,8 +822,7 @@ class AdminMailDiagnosticsTest extends TestCase
 
                     'last_error_code' => null,
 
-                    'last_error_message' =>
-                        null,
+                    'last_error_message' => null,
                 ],
                 $overrides
             )
@@ -913,50 +836,39 @@ class AdminMailDiagnosticsTest extends TestCase
         return EmailMessage::query()->create(
             array_merge(
                 [
-                    'mailbox_id' =>
-                        $mailbox->id,
+                    'mailbox_id' => $mailbox->id,
 
-                    'mailbox_channel_id' =>
-                        null,
+                    'mailbox_channel_id' => null,
 
                     'ticket_id' => null,
 
                     'ticket_reply_id' => null,
 
-                    'direction' =>
-                        'incoming',
+                    'direction' => 'incoming',
 
                     'driver' => 'imap',
 
                     'status' => 'received',
 
-                    'idempotency_key' =>
-                        'diagnostics-message-'
-                        . uniqid(),
+                    'idempotency_key' => 'diagnostics-message-'
+                        .uniqid(),
 
-                    'external_message_id' =>
-                        null,
+                    'external_message_id' => null,
 
-                    'internet_message_id' =>
-                        null,
+                    'internet_message_id' => null,
 
-                    'in_reply_to_message_id' =>
-                        null,
+                    'in_reply_to_message_id' => null,
 
-                    'reference_message_ids' =>
-                        [],
+                    'reference_message_ids' => [],
 
-                    'sender_address' =>
-                        'customer@example.test',
+                    'sender_address' => 'customer@example.test',
 
-                    'sender_name' =>
-                        'Customer',
+                    'sender_name' => 'Customer',
 
                     'to_recipients' => [
                         [
-                            'address' =>
-                                $mailbox
-                                    ->email_address,
+                            'address' => $mailbox
+                                ->email_address,
 
                             'name' => null,
                         ],
@@ -966,11 +878,9 @@ class AdminMailDiagnosticsTest extends TestCase
 
                     'bcc_recipients' => [],
 
-                    'reply_to_recipients' =>
-                        [],
+                    'reply_to_recipients' => [],
 
-                    'subject' =>
-                        'Diagnostic message',
+                    'subject' => 'Diagnostic message',
 
                     'text_body' => null,
 
@@ -986,15 +896,13 @@ class AdminMailDiagnosticsTest extends TestCase
 
                     'raw_message_size' => null,
 
-                    'raw_message_checksum' =>
-                        null,
+                    'raw_message_checksum' => null,
 
                     'received_at' => now(),
 
                     'queued_at' => null,
 
-                    'processing_started_at' =>
-                        null,
+                    'processing_started_at' => null,
 
                     'processed_at' => null,
 
@@ -1022,43 +930,36 @@ class AdminMailDiagnosticsTest extends TestCase
         return EmailAttachment::query()->create(
             array_merge(
                 [
-                    'email_message_id' =>
-                        $message->id,
+                    'email_message_id' => $message->id,
 
                     'position' => 0,
 
                     'external_id' => null,
 
-                    'deduplication_key' =>
-                        hash(
-                            'sha256',
-                            uniqid(
-                                'attachment-',
-                                true
-                            )
-                        ),
+                    'deduplication_key' => hash(
+                        'sha256',
+                        uniqid(
+                            'attachment-',
+                            true
+                        )
+                    ),
 
-                    'file_name' =>
-                        'document.txt',
+                    'file_name' => 'document.txt',
 
-                    'mime_type' =>
-                        'text/plain',
+                    'mime_type' => 'text/plain',
 
-                    'size' =>
-                        strlen($content),
+                    'size' => strlen($content),
 
                     'disk' => 'local',
 
-                    'path' =>
-                        'mail/attachments/'
-                        . uniqid()
-                        . '/document.txt',
+                    'path' => 'mail/attachments/'
+                        .uniqid()
+                        .'/document.txt',
 
-                    'checksum_sha256' =>
-                        hash(
-                            'sha256',
-                            $content
-                        ),
+                    'checksum_sha256' => hash(
+                        'sha256',
+                        $content
+                    ),
 
                     'content_id' => null,
 

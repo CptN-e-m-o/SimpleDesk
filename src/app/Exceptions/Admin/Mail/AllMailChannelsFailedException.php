@@ -14,7 +14,7 @@ class AllMailChannelsFailedException extends RuntimeException
     ) {
         parent::__construct(
             "All {$direction->value} channels failed "
-            . "for mailbox [{$mailboxId}]."
+            ."for mailbox [{$mailboxId}]."
         );
     }
 

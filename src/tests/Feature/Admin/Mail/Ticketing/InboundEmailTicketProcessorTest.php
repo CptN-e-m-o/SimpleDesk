@@ -298,8 +298,7 @@ class InboundEmailTicketProcessorTest extends TestCase
 
             'subject' => 'Не работает авторизация',
 
-            'text_body' =>
-                'Здравствуйте. Не могу войти в личный кабинет.',
+            'text_body' => 'Здравствуйте. Не могу войти в личный кабинет.',
 
             'html_body' => null,
             'headers' => [],
@@ -328,8 +327,7 @@ class InboundEmailTicketProcessorTest extends TestCase
 
             'disk' => 'local',
 
-            'path' =>
-                "testing/mail/{$message->id}/document.txt",
+            'path' => "testing/mail/{$message->id}/document.txt",
 
             'checksum_sha256' => hash(
                 'sha256',
@@ -353,8 +351,7 @@ class InboundEmailTicketProcessorTest extends TestCase
                 ? now()
                 : null,
 
-            'quarantined_at' =>
-                $scanStatus === EmailAttachmentScanStatus::Infected
+            'quarantined_at' => $scanStatus === EmailAttachmentScanStatus::Infected
                     ? now()
                     : null,
 
@@ -368,8 +365,7 @@ class InboundEmailTicketProcessorTest extends TestCase
         ]);
     }
 
-    private function processorThatMustStopBeforeTicketing():
-    InboundEmailTicketProcessor
+    private function processorThatMustStopBeforeTicketing(): InboundEmailTicketProcessor
     {
         $requesters = Mockery::mock(
             InboundEmailRequesterResolver::class
@@ -459,8 +455,7 @@ class InboundEmailTicketProcessorTest extends TestCase
             ->andReturn(
                 new InboundEmailDecisionData(
                     shouldProcess: true,
-                    classification:
-                    InboundEmailClassification::Human,
+                    classification: InboundEmailClassification::Human,
                     reason: 'Human test email.',
                 )
             );
@@ -474,8 +469,7 @@ class InboundEmailTicketProcessorTest extends TestCase
             ->once()
             ->andReturn(
                 new ParsedInboundEmailContentData(
-                    body:
-                    'Здравствуйте. Не могу войти в личный кабинет.',
+                    body: 'Здравствуйте. Не могу войти в личный кабинет.',
 
                     source: 'text',
 
@@ -518,7 +512,7 @@ class InboundEmailTicketProcessorTest extends TestCase
         try {
             $callback();
         } catch (
-        InboundEmailTicketingException $exception
+            InboundEmailTicketingException $exception
         ) {
             return $exception;
         }

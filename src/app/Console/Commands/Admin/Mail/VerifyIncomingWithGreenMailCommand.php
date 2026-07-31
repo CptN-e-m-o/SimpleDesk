@@ -78,7 +78,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
             if ($mode === 'direct') {
                 $outgoingMessage->refresh();
 
-                if (!in_array(
+                if (! in_array(
                     $outgoingMessage->status,
                     [
                         EmailMessageStatus::Sent,
@@ -134,7 +134,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
                 token: $verification['token'],
             );
 
-            if (!(bool) $this->option('skip-duplicate-check')) {
+            if (! (bool) $this->option('skip-duplicate-check')) {
                 $syncResult = $incomingSynchronizer->synchronize(
                     $targetMailbox
                 );
@@ -188,9 +188,9 @@ class VerifyIncomingWithGreenMailCommand extends Command
         $mailboxId = $this->argument($argument);
 
         if (filter_var(
-                $mailboxId,
-                FILTER_VALIDATE_INT
-            ) === false) {
+            $mailboxId,
+            FILTER_VALIDATE_INT
+        ) === false) {
             throw new RuntimeException(
                 "{$role} mailbox ID must be an integer."
             );
@@ -206,7 +206,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
             );
         }
 
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             throw new RuntimeException(
                 "{$role} mailbox [{$mailbox->id}] is disabled."
             );
@@ -226,16 +226,16 @@ class VerifyIncomingWithGreenMailCommand extends Command
         }
 
         foreach ([
-                     'sender' => $senderMailbox,
-                     'target' => $targetMailbox,
-                 ] as $role => $mailbox) {
+            'sender' => $senderMailbox,
+            'target' => $targetMailbox,
+        ] as $role => $mailbox) {
             if (filter_var(
-                    $mailbox->email_address,
-                    FILTER_VALIDATE_EMAIL
-                ) === false) {
+                $mailbox->email_address,
+                FILTER_VALIDATE_EMAIL
+            ) === false) {
                 throw new RuntimeException(
                     ucfirst($role)
-                    . " mailbox [{$mailbox->id}] has an invalid email address."
+                    ." mailbox [{$mailbox->id}] has an invalid email address."
                 );
             }
         }
@@ -249,7 +249,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
             )
             ->exists();
 
-        if (!$hasOutgoingSmtp) {
+        if (! $hasOutgoingSmtp) {
             throw new RuntimeException(
                 "Sender mailbox [{$senderMailbox->id}] has no enabled SMTP channel."
             );
@@ -264,13 +264,13 @@ class VerifyIncomingWithGreenMailCommand extends Command
             )
             ->exists();
 
-        if (!$hasIncomingImap) {
+        if (! $hasIncomingImap) {
             throw new RuntimeException(
                 "Target mailbox [{$targetMailbox->id}] has no enabled IMAP channel."
             );
         }
 
-        if (!(bool) config(
+        if (! (bool) config(
             'simpledesk-mail-ticketing.enabled',
             true
         )) {
@@ -286,7 +286,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
             trim((string) $this->option('mode'))
         );
 
-        if (!in_array(
+        if (! in_array(
             $mode,
             [
                 'direct',
@@ -327,25 +327,22 @@ class VerifyIncomingWithGreenMailCommand extends Command
 
         $htmlBody =
             '<p><strong>SimpleDesk inbound verification</strong></p>'
-            . "<p>Token: {$token}</p>";
+            ."<p>Token: {$token}</p>";
 
         return [
             'token' => $token,
             'subject' => $subject,
 
             'message' => new OutgoingEmailMessageData(
-                idempotencyKey:
-                "greenmail-inbound-verification:{$token}",
+                idempotencyKey: "greenmail-inbound-verification:{$token}",
 
                 from: null,
 
                 to: [
                     new MailAddressData(
-                        address:
-                        $targetMailbox->email_address,
+                        address: $targetMailbox->email_address,
 
-                        name:
-                        $targetMailbox->display_name
+                        name: $targetMailbox->display_name
                         ?? $targetMailbox->name,
                     ),
                 ],
@@ -359,24 +356,19 @@ class VerifyIncomingWithGreenMailCommand extends Command
                 htmlBody: $htmlBody,
 
                 headers: [
-                    'X-SimpleDesk-Integration-Test' =>
-                        $token,
+                    'X-SimpleDesk-Integration-Test' => $token,
                 ],
 
                 attachments: [],
 
                 metadata: [
-                    'source' =>
-                        'greenmail_inbound_verification',
+                    'source' => 'greenmail_inbound_verification',
 
-                    'verification_token' =>
-                        $token,
+                    'verification_token' => $token,
 
-                    'sender_mailbox_id' =>
-                        $senderMailbox->id,
+                    'sender_mailbox_id' => $senderMailbox->id,
 
-                    'target_mailbox_id' =>
-                        $targetMailbox->id,
+                    'target_mailbox_id' => $targetMailbox->id,
                 ],
             ),
         ];
@@ -406,7 +398,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
             if ($this->isTerminalFailure($emailMessage)) {
                 throw new RuntimeException(
                     "Outgoing email message [{$emailMessage->id}] failed: "
-                    . (
+                    .(
                         $emailMessage->failure_message
                         ?? 'unknown error'
                     )
@@ -418,9 +410,9 @@ class VerifyIncomingWithGreenMailCommand extends Command
 
         throw new RuntimeException(
             "Outgoing email message [{$emailMessage->id}] was not sent "
-            . "within {$timeoutSeconds} seconds. Current status: "
-            . $emailMessage->status->value
-            . '.'
+            ."within {$timeoutSeconds} seconds. Current status: "
+            .$emailMessage->status->value
+            .'.'
         );
     }
 
@@ -566,7 +558,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
             if ($this->isTerminalFailure($emailMessage)) {
                 throw new RuntimeException(
                     "Inbound email message [{$emailMessage->id}] failed: "
-                    . (
+                    .(
                         $emailMessage->failure_message
                         ?? 'unknown error'
                     )
@@ -578,9 +570,9 @@ class VerifyIncomingWithGreenMailCommand extends Command
 
         throw new RuntimeException(
             "Inbound email message [{$emailMessage->id}] was not processed "
-            . "within {$timeoutSeconds} seconds. Current status: "
-            . $emailMessage->status->value
-            . '. Ensure the mail-incoming worker is running.'
+            ."within {$timeoutSeconds} seconds. Current status: "
+            .$emailMessage->status->value
+            .'. Ensure the mail-incoming worker is running.'
         );
     }
 
@@ -638,7 +630,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
             'Ticket subject does not match.'
         );
 
-        if (!str_contains(
+        if (! str_contains(
             (string) $ticket->description,
             $token
         )) {
@@ -754,7 +746,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
         object $result,
     ): void {
         $this->newLine();
-        $this->line($title . ':');
+        $this->line($title.':');
 
         $this->table(
             [
@@ -859,7 +851,7 @@ class VerifyIncomingWithGreenMailCommand extends Command
         $emailMessage->refresh();
 
         $this->newLine();
-        $this->line($label . ':');
+        $this->line($label.':');
 
         $this->table(
             [
@@ -904,10 +896,10 @@ class VerifyIncomingWithGreenMailCommand extends Command
         if ($expected !== $actual) {
             throw new RuntimeException(
                 $message
-                . ' Expected: '
-                . var_export($expected, true)
-                . '; actual: '
-                . var_export($actual, true)
+                .' Expected: '
+                .var_export($expected, true)
+                .'; actual: '
+                .var_export($actual, true)
             );
         }
     }

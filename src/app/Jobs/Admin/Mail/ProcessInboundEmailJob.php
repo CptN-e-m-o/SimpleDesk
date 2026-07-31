@@ -39,7 +39,7 @@ class ProcessInboundEmailJob implements ShouldQueue
             (
             new WithoutOverlapping(
                 'inbound-email-ticketing:'
-                . $this->emailMessageId
+                .$this->emailMessageId
             )
             )
                 ->releaseAfter(15)
@@ -78,9 +78,9 @@ class ProcessInboundEmailJob implements ShouldQueue
                 $this->emailMessageId
             );
         } catch (
-        InboundEmailTicketingException $exception
+            InboundEmailTicketingException $exception
         ) {
-            if (!$exception->retryable()) {
+            if (! $exception->retryable()) {
                 $this->fail($exception);
 
                 return;
@@ -94,7 +94,7 @@ class ProcessInboundEmailJob implements ShouldQueue
         ?Throwable $exception
     ): void {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-quarantine.enabled',
                 true
             )
@@ -106,14 +106,11 @@ class ProcessInboundEmailJob implements ShouldQueue
             app(
                 EmailMessageQuarantineService::class
             )->quarantine(
-                emailMessageId:
-                $this->emailMessageId,
+                emailMessageId: $this->emailMessageId,
 
-                stage:
-                EmailQuarantineStage::InboundTicketing,
+                stage: EmailQuarantineStage::InboundTicketing,
 
-                exception:
-                $exception,
+                exception: $exception,
             );
         } catch (Throwable $quarantineException) {
             report(

@@ -114,8 +114,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
         $mailbox = $this->createMailbox();
 
         $payload = $this->payload(
-            idempotencyKey:
-            'queue-test-not-scanned-disabled',
+            idempotencyKey: 'queue-test-not-scanned-disabled',
 
             attachments: [
                 $this->attachmentPayload(),
@@ -124,8 +123,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
 
         $message = $this
             ->service(
-                scanStatus:
-                EmailAttachmentScanStatus::NotScanned
+                scanStatus: EmailAttachmentScanStatus::NotScanned
             )
             ->queue(
                 mailbox: $mailbox,
@@ -155,8 +153,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
             SendOutgoingEmailJob::class,
             fn (
                 SendOutgoingEmailJob $job
-            ): bool =>
-                $job->emailMessageId
+            ): bool => $job->emailMessageId
                 === $message->id
         );
     }
@@ -171,8 +168,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
         $mailbox = $this->createMailbox();
 
         $payload = $this->payload(
-            idempotencyKey:
-            'queue-test-not-scanned-enabled',
+            idempotencyKey: 'queue-test-not-scanned-enabled',
 
             attachments: [
                 $this->attachmentPayload(),
@@ -181,8 +177,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
 
         $message = $this
             ->service(
-                scanStatus:
-                EmailAttachmentScanStatus::NotScanned
+                scanStatus: EmailAttachmentScanStatus::NotScanned
             )
             ->queue(
                 mailbox: $mailbox,
@@ -226,8 +221,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
         $mailbox = $this->createMailbox();
 
         $payload = $this->payload(
-            idempotencyKey:
-            'queue-test-pending',
+            idempotencyKey: 'queue-test-pending',
 
             attachments: [
                 $this->attachmentPayload(),
@@ -236,8 +230,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
 
         $message = $this
             ->service(
-                scanStatus:
-                EmailAttachmentScanStatus::Pending
+                scanStatus: EmailAttachmentScanStatus::Pending
             )
             ->queue(
                 mailbox: $mailbox,
@@ -277,8 +270,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
         $mailbox = $this->createMailbox();
 
         $payload = $this->payload(
-            idempotencyKey:
-            'queue-test-infected',
+            idempotencyKey: 'queue-test-infected',
 
             attachments: [
                 $this->attachmentPayload(),
@@ -287,8 +279,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
 
         $message = $this
             ->service(
-                scanStatus:
-                EmailAttachmentScanStatus::Infected
+                scanStatus: EmailAttachmentScanStatus::Infected
             )
             ->queue(
                 mailbox: $mailbox,
@@ -334,8 +325,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
         $mailbox = $this->createMailbox();
 
         $payload = $this->payload(
-            idempotencyKey:
-            'queue-test-scan-failed',
+            idempotencyKey: 'queue-test-scan-failed',
 
             attachments: [
                 $this->attachmentPayload(),
@@ -344,8 +334,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
 
         $message = $this
             ->service(
-                scanStatus:
-                EmailAttachmentScanStatus::Failed
+                scanStatus: EmailAttachmentScanStatus::Failed
             )
             ->queue(
                 mailbox: $mailbox,
@@ -387,8 +376,7 @@ class OutgoingEmailQueueServiceTest extends TestCase
         $mailbox = $this->createMailbox();
 
         $payload = $this->payload(
-            idempotencyKey:
-            'queue-test-dispatch-intent',
+            idempotencyKey: 'queue-test-dispatch-intent',
 
             attachments: [
                 $this->attachmentPayload(),
@@ -396,11 +384,9 @@ class OutgoingEmailQueueServiceTest extends TestCase
         );
 
         $service = $this->service(
-            scanStatus:
-            EmailAttachmentScanStatus::NotScanned,
+            scanStatus: EmailAttachmentScanStatus::NotScanned,
 
-            calls:
-            2
+            calls: 2
         );
 
         $firstMessage = $service->queue(
@@ -475,11 +461,9 @@ class OutgoingEmailQueueServiceTest extends TestCase
             );
 
         $payload = $this->payload(
-            idempotencyKey:
-            $idempotencyKey,
+            idempotencyKey: $idempotencyKey,
 
-            attachments:
-            [],
+            attachments: [],
         );
 
         $result = $this
@@ -562,17 +546,13 @@ class OutgoingEmailQueueServiceTest extends TestCase
                         $scanStatus
                     ): EmailAttachment {
                         return $this->storeAttachment(
-                            emailMessage:
-                            $emailMessage,
+                            emailMessage: $emailMessage,
 
-                            attachment:
-                            $attachment,
+                            attachment: $attachment,
 
-                            position:
-                            $position,
+                            position: $position,
 
-                            scanStatus:
-                            $scanStatus,
+                            scanStatus: $scanStatus,
                         );
                     }
                 );
@@ -600,25 +580,22 @@ class OutgoingEmailQueueServiceTest extends TestCase
                     string $idempotencyKey,
                 ): string {
                     return '<'
-                        . hash(
+                        .hash(
                             'sha256',
                             $mailbox->id
-                            . '|'
-                            . $idempotencyKey
+                            .'|'
+                            .$idempotencyKey
                         )
-                        . '@simpledesk.test>';
+                        .'@simpledesk.test>';
                 }
             );
 
         return new OutgoingEmailQueueService(
-            attachmentStorage:
-            $attachmentStorage,
+            attachmentStorage: $attachmentStorage,
 
-            attachmentValidator:
-            $attachmentValidator,
+            attachmentValidator: $attachmentValidator,
 
-            messageIds:
-            $messageIds,
+            messageIds: $messageIds,
         );
     }
 
@@ -631,87 +608,70 @@ class OutgoingEmailQueueServiceTest extends TestCase
         $deduplicationKey = hash(
             'sha256',
             $emailMessage->id
-            . '|'
-            . $position
-            . '|'
-            . $attachment->fileName
+            .'|'
+            .$position
+            .'|'
+            .$attachment->fileName
         );
 
         return EmailAttachment::query()
             ->firstOrCreate(
                 [
-                    'deduplication_key' =>
-                        $deduplicationKey,
+                    'deduplication_key' => $deduplicationKey,
                 ],
                 [
-                    'email_message_id' =>
-                        $emailMessage->id,
+                    'email_message_id' => $emailMessage->id,
 
-                    'position' =>
-                        $position,
+                    'position' => $position,
 
-                    'external_id' =>
-                        $attachment->externalId,
+                    'external_id' => $attachment->externalId,
 
-                    'file_name' =>
-                        $attachment->fileName,
+                    'file_name' => $attachment->fileName,
 
-                    'mime_type' =>
-                        $attachment->mimeType,
+                    'mime_type' => $attachment->mimeType,
 
-                    'size' =>
-                        $attachment->size,
+                    'size' => $attachment->size,
 
-                    'disk' =>
-                        'local',
+                    'disk' => 'local',
 
-                    'path' =>
-                        'testing/outgoing-queue/'
-                        . $emailMessage->id
-                        . '/'
-                        . $position
-                        . '-'
-                        . $attachment->fileName,
+                    'path' => 'testing/outgoing-queue/'
+                        .$emailMessage->id
+                        .'/'
+                        .$position
+                        .'-'
+                        .$attachment->fileName,
 
-                    'checksum_sha256' =>
-                        hash(
-                            'sha256',
-                            $attachment->content
-                        ),
+                    'checksum_sha256' => hash(
+                        'sha256',
+                        $attachment->content
+                    ),
 
-                    'content_id' =>
-                        $attachment->contentId,
+                    'content_id' => $attachment->contentId,
 
-                    'is_inline' =>
-                        $attachment->inline,
+                    'is_inline' => $attachment->inline,
 
-                    'scan_status' =>
+                    'scan_status' => $scanStatus,
+
+                    'scanned_at' => in_array(
                         $scanStatus,
-
-                    'scanned_at' =>
-                        in_array(
-                            $scanStatus,
-                            [
-                                EmailAttachmentScanStatus::Clean,
-                                EmailAttachmentScanStatus::Infected,
-                                EmailAttachmentScanStatus::Failed,
-                            ],
-                            true
-                        )
+                        [
+                            EmailAttachmentScanStatus::Clean,
+                            EmailAttachmentScanStatus::Infected,
+                            EmailAttachmentScanStatus::Failed,
+                        ],
+                        true
+                    )
                             ? now()
                             : null,
 
-                    'quarantined_at' =>
-                        $scanStatus
+                    'quarantined_at' => $scanStatus
                         === EmailAttachmentScanStatus::Infected
                             ? now()
                             : null,
 
-                    'scan_result' =>
-                        null,
+                    'scan_result' => null,
 
-                    'metadata' =>
-                        $attachment->metadata,
+                    'metadata' => $attachment->metadata,
                 ]
             );
     }
@@ -721,60 +681,44 @@ class OutgoingEmailQueueServiceTest extends TestCase
         array $attachments,
     ): OutgoingEmailMessageData {
         return new OutgoingEmailMessageData(
-            idempotencyKey:
-            $idempotencyKey,
+            idempotencyKey: $idempotencyKey,
 
-            from:
-            null,
+            from: null,
 
             to: [
                 new MailAddressData(
-                    address:
-                    'customer@example.test',
+                    address: 'customer@example.test',
 
-                    name:
-                    'Test Customer',
+                    name: 'Test Customer',
                 ),
             ],
 
-            cc:
-            [],
+            cc: [],
 
-            bcc:
-            [],
+            bcc: [],
 
-            replyTo:
-            [],
+            replyTo: [],
 
-            subject:
-            'Outgoing queue service test',
+            subject: 'Outgoing queue service test',
 
-            textBody:
-            'Outgoing queue service test body.',
+            textBody: 'Outgoing queue service test body.',
 
-            htmlBody:
-            '<p>Outgoing queue service test body.</p>',
+            htmlBody: '<p>Outgoing queue service test body.</p>',
 
             headers: [
-                'X-SimpleDesk-Test' =>
-                    'outgoing-queue',
+                'X-SimpleDesk-Test' => 'outgoing-queue',
             ],
 
-            attachments:
-            $attachments,
+            attachments: $attachments,
 
-            internetMessageId:
-            null,
+            internetMessageId: null,
 
-            inReplyToMessageId:
-            null,
+            inReplyToMessageId: null,
 
-            references:
-            [],
+            references: [],
 
             metadata: [
-                'test' =>
-                    true,
+                'test' => true,
             ],
         );
     }
@@ -785,30 +729,22 @@ class OutgoingEmailQueueServiceTest extends TestCase
             'Outgoing queue attachment contents.';
 
         return new MailAttachmentData(
-            fileName:
-            'diagnostic.txt',
+            fileName: 'diagnostic.txt',
 
-            mimeType:
-            'text/plain',
+            mimeType: 'text/plain',
 
-            size:
-            strlen($contents),
+            size: strlen($contents),
 
-            content:
-            $contents,
+            content: $contents,
 
-            externalId:
-            'test-external-attachment',
+            externalId: 'test-external-attachment',
 
-            contentId:
-            null,
+            contentId: null,
 
-            inline:
-            false,
+            inline: false,
 
             metadata: [
-                'source' =>
-                    'test',
+                'source' => 'test',
             ],
         );
     }
@@ -820,26 +756,19 @@ class OutgoingEmailQueueServiceTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Queue Mailbox {$token}",
+            'name' => "Queue Mailbox {$token}",
 
-            'email_address' =>
-                "queue-{$token}@example.test",
+            'email_address' => "queue-{$token}@example.test",
 
-            'display_name' =>
-                'Queue Mailbox',
+            'display_name' => 'Queue Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -848,104 +777,73 @@ class OutgoingEmailQueueServiceTest extends TestCase
         string $idempotencyKey,
     ): EmailMessage {
         return EmailMessage::query()->create([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'mailbox_channel_id' =>
-                null,
+            'mailbox_channel_id' => null,
 
-            'ticket_id' =>
-                null,
+            'ticket_id' => null,
 
-            'ticket_reply_id' =>
-                null,
+            'ticket_reply_id' => null,
 
-            'direction' =>
-                EmailMessageDirection::Outgoing,
+            'direction' => EmailMessageDirection::Outgoing,
 
-            'driver' =>
-                null,
+            'driver' => null,
 
-            'status' =>
-                EmailMessageStatus::Sent,
+            'status' => EmailMessageStatus::Sent,
 
-            'idempotency_key' =>
-                $idempotencyKey,
+            'idempotency_key' => $idempotencyKey,
 
-            'external_message_id' =>
-                'provider-existing-message',
+            'external_message_id' => 'provider-existing-message',
 
-            'internet_message_id' =>
-                '<existing-sent@example.test>',
+            'internet_message_id' => '<existing-sent@example.test>',
 
-            'in_reply_to_message_id' =>
-                null,
+            'in_reply_to_message_id' => null,
 
-            'reference_message_ids' =>
-                [],
+            'reference_message_ids' => [],
 
-            'sender_address' =>
-                $mailbox->email_address,
+            'sender_address' => $mailbox->email_address,
 
-            'sender_name' =>
-                $mailbox->display_name,
+            'sender_name' => $mailbox->display_name,
 
             'to_recipients' => [
                 [
-                    'address' =>
-                        'customer@example.test',
+                    'address' => 'customer@example.test',
 
-                    'name' =>
-                        'Test Customer',
+                    'name' => 'Test Customer',
                 ],
             ],
 
-            'cc_recipients' =>
-                [],
+            'cc_recipients' => [],
 
-            'bcc_recipients' =>
-                [],
+            'bcc_recipients' => [],
 
-            'reply_to_recipients' =>
-                [],
+            'reply_to_recipients' => [],
 
-            'subject' =>
-                'Existing sent message',
+            'subject' => 'Existing sent message',
 
-            'text_body' =>
-                'Existing sent body.',
+            'text_body' => 'Existing sent body.',
 
-            'html_body' =>
-                null,
+            'html_body' => null,
 
-            'headers' =>
-                [],
+            'headers' => [],
 
             'metadata' => [
-                'immutable' =>
-                    true,
+                'immutable' => true,
             ],
 
-            'queued_at' =>
-                now()->subMinutes(2),
+            'queued_at' => now()->subMinutes(2),
 
-            'processing_started_at' =>
-                now()->subMinute(),
+            'processing_started_at' => now()->subMinute(),
 
-            'sent_at' =>
-                now(),
+            'sent_at' => now(),
 
-            'processed_at' =>
-                now(),
+            'processed_at' => now(),
 
-            'failed_at' =>
-                null,
+            'failed_at' => null,
 
-            'failure_code' =>
-                null,
+            'failure_code' => null,
 
-            'failure_message' =>
-                null,
+            'failure_message' => null,
         ]);
     }
 }

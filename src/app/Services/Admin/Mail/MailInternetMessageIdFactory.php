@@ -15,7 +15,7 @@ class MailInternetMessageIdFactory
         );
 
         $localPart = 'simpledesk-'
-            . substr(
+            .substr(
                 hash('sha256', $idempotencyKey),
                 0,
                 40

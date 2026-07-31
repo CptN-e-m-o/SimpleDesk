@@ -16,8 +16,8 @@ use App\Models\Admin\Mail\MailboxChannel;
 use App\Services\Admin\Mail\InboundNormalizationFailurePersister;
 use App\Services\Admin\Mail\IncomingEmailMessagePersister;
 use App\Services\Admin\Mail\IncomingMailAcknowledger;
-use App\Services\Admin\Mail\IncomingMailFetchService;
 use App\Services\Admin\Mail\IncomingMailboxSyncService;
+use App\Services\Admin\Mail\IncomingMailFetchService;
 use App\Services\Admin\Mail\MailChannelHealthRecorder;
 use App\Services\Admin\Mail\MailChannelSelector;
 use App\Services\Admin\Mail\Quarantine\EmailMessageQuarantineService;
@@ -42,8 +42,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
             ->shouldReceive('incomingCandidates')
             ->once()
             ->withArgs(
-                fn (Mailbox $argument): bool =>
-                    $argument->id === $mailbox->id
+                fn (Mailbox $argument): bool => $argument->id === $mailbox->id
             )
             ->andReturn(
                 collect()
@@ -177,8 +176,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                 fn (
                     MailboxChannel $argumentChannel,
                     bool $hasActivity,
-                ): bool =>
-                    $argumentChannel->id
+                ): bool => $argumentChannel->id
                     === $channel->id
                     && $hasActivity === false
             );
@@ -384,10 +382,8 @@ class IncomingMailboxSyncServiceTest extends TestCase
             acknowledger: $this->unusedAcknowledger(),
             health: $health,
             batchSize: 25,
-            normalizationFailures:
-            $this->unusedNormalizationFailures(),
-            quarantine:
-            $this->unusedQuarantine(),
+            normalizationFailures: $this->unusedNormalizationFailures(),
+            quarantine: $this->unusedQuarantine(),
         );
 
         $result = $service->synchronize(
@@ -452,27 +448,21 @@ class IncomingMailboxSyncServiceTest extends TestCase
                     MailboxChannel $channel,
                     ?IncomingCursorData $cursor,
                     int $limit,
-                ): bool =>
-                    $channel->id === $primary->id
+                ): bool => $channel->id === $primary->id
                     && $cursor === null
                     && $limit === 100
             )
             ->andThrow(
                 new MailDriverException(
-                    message:
-                    'Primary IMAP connection failed.',
+                    message: 'Primary IMAP connection failed.',
 
-                    driverErrorCode:
-                    'imap_connection_failed',
+                    driverErrorCode: 'imap_connection_failed',
 
-                    retryable:
-                    true,
+                    retryable: true,
 
-                    failoverAllowed:
-                    true,
+                    failoverAllowed: true,
 
-                    affectsChannelHealth:
-                    true,
+                    affectsChannelHealth: true,
                 )
             );
 
@@ -485,8 +475,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                     MailboxChannel $channel,
                     ?IncomingCursorData $cursor,
                     int $limit,
-                ): bool =>
-                    $channel->id === $fallback->id
+                ): bool => $channel->id === $fallback->id
                     && $cursor === null
                     && $limit === 100
             )
@@ -514,8 +503,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                     MailboxChannel $channel,
                     ?string $errorCode,
                     string $errorMessage,
-                ): bool =>
-                    $channel->id === $primary->id
+                ): bool => $channel->id === $primary->id
                     && $errorCode
                     === 'imap_connection_failed'
                     && $errorMessage
@@ -529,8 +517,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                 fn (
                     MailboxChannel $channel,
                     bool $hasActivity,
-                ): bool =>
-                    $channel->id === $fallback->id
+                ): bool => $channel->id === $fallback->id
                     && $hasActivity === false
             );
 
@@ -540,10 +527,8 @@ class IncomingMailboxSyncServiceTest extends TestCase
             persister: $this->unusedPersister(),
             acknowledger: $this->unusedAcknowledger(),
             health: $health,
-            normalizationFailures:
-            $this->unusedNormalizationFailures(),
-            quarantine:
-            $this->unusedQuarantine(),
+            normalizationFailures: $this->unusedNormalizationFailures(),
+            quarantine: $this->unusedQuarantine(),
         );
 
         $result = $service->synchronize(
@@ -640,8 +625,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                     MailboxChannel $argumentChannel,
                     ?string $errorCode,
                     string $errorMessage,
-                ): bool =>
-                    $argumentChannel->id
+                ): bool => $argumentChannel->id
                     === $channel->id
                     && $errorCode
                     === 'missing_next_cursor'
@@ -661,10 +645,8 @@ class IncomingMailboxSyncServiceTest extends TestCase
             persister: $this->unusedPersister(),
             acknowledger: $this->unusedAcknowledger(),
             health: $health,
-            normalizationFailures:
-            $this->unusedNormalizationFailures(),
-            quarantine:
-            $this->unusedQuarantine(),
+            normalizationFailures: $this->unusedNormalizationFailures(),
+            quarantine: $this->unusedQuarantine(),
         );
 
         try {
@@ -676,7 +658,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                 'Expected AllMailChannelsFailedException was not thrown.'
             );
         } catch (
-        AllMailChannelsFailedException $exception
+            AllMailChannelsFailedException $exception
         ) {
             $this->assertNotSame(
                 '',
@@ -732,8 +714,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                     MailboxChannel $argumentChannel,
                     ?IncomingCursorData $cursor,
                     int $limit,
-                ): bool =>
-                    $argumentChannel->id
+                ): bool => $argumentChannel->id
                     === $channel->id
                     && $cursor === null
                     && $limit === 10
@@ -759,8 +740,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                     MailboxChannel $argumentChannel,
                     ?IncomingCursorData $cursor,
                     int $limit,
-                ): bool =>
-                    $argumentChannel->id
+                ): bool => $argumentChannel->id
                     === $channel->id
                     && $cursor
                     instanceof IncomingCursorData
@@ -792,10 +772,8 @@ class IncomingMailboxSyncServiceTest extends TestCase
             health: $health,
             batchSize: 10,
             maxPagesPerRun: 2,
-            normalizationFailures:
-            $this->unusedNormalizationFailures(),
-            quarantine:
-            $this->unusedQuarantine(),
+            normalizationFailures: $this->unusedNormalizationFailures(),
+            quarantine: $this->unusedQuarantine(),
         );
 
         $result = $service->synchronize(
@@ -889,8 +867,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
         return $selector;
     }
 
-    private function unusedPersister():
-    IncomingEmailMessagePersister
+    private function unusedPersister(): IncomingEmailMessagePersister
     {
         $persister = Mockery::mock(
             IncomingEmailMessagePersister::class
@@ -903,8 +880,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
         return $persister;
     }
 
-    private function unusedNormalizationFailures():
-    InboundNormalizationFailurePersister
+    private function unusedNormalizationFailures(): InboundNormalizationFailurePersister
     {
         $persister = Mockery::mock(
             InboundNormalizationFailurePersister::class
@@ -913,8 +889,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
         return $persister;
     }
 
-    private function unusedQuarantine():
-    EmailMessageQuarantineService
+    private function unusedQuarantine(): EmailMessageQuarantineService
     {
         $quarantine = Mockery::mock(
             EmailMessageQuarantineService::class
@@ -923,8 +898,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
         return $quarantine;
     }
 
-    private function unusedAcknowledger():
-    IncomingMailAcknowledger
+    private function unusedAcknowledger(): IncomingMailAcknowledger
     {
         $acknowledger = Mockery::mock(
             IncomingMailAcknowledger::class
@@ -952,8 +926,7 @@ class IncomingMailboxSyncServiceTest extends TestCase
                 fn (
                     MailboxChannel $argumentChannel,
                     bool $argumentHasActivity,
-                ): bool =>
-                    $argumentChannel->id
+                ): bool => $argumentChannel->id
                     === $channel->id
                     && $argumentHasActivity
                     === $hasActivity
@@ -973,26 +946,19 @@ class IncomingMailboxSyncServiceTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Incoming Sync Mailbox {$token}",
+            'name' => "Incoming Sync Mailbox {$token}",
 
-            'email_address' =>
-                "incoming-sync-{$token}@example.test",
+            'email_address' => "incoming-sync-{$token}@example.test",
 
-            'display_name' =>
-                'Incoming Sync Mailbox',
+            'display_name' => 'Incoming Sync Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -1006,40 +972,30 @@ class IncomingMailboxSyncServiceTest extends TestCase
             (string) Str::ulid()
         );
 
-        $channel = new MailboxChannel();
+        $channel = new MailboxChannel;
 
         $channel->forceFill([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'provider_connection_id' =>
-                null,
+            'provider_connection_id' => null,
 
-            'name' =>
-                "{$name} {$token}",
+            'name' => "{$name} {$token}",
 
-            'direction' =>
-                MailboxChannelDirection::Incoming,
+            'direction' => MailboxChannelDirection::Incoming,
 
-            'driver' =>
-                MailboxDriver::Imap,
+            'driver' => MailboxDriver::Imap,
 
-            'is_primary' =>
-                $primary,
+            'is_primary' => $primary,
 
-            'failover_order' =>
-                $failoverOrder,
+            'failover_order' => $failoverOrder,
 
-            'is_enabled' =>
-                true,
+            'is_enabled' => true,
 
             'configuration' => [
-                'post_fetch_action' =>
-                    IncomingAcknowledgeAction::Keep->value,
+                'post_fetch_action' => IncomingAcknowledgeAction::Keep->value,
             ],
 
-            'health_status' =>
-                MailboxHealthStatus::Unknown,
+            'health_status' => MailboxHealthStatus::Unknown,
         ])->save();
 
         return $channel->fresh();

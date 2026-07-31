@@ -9,8 +9,7 @@ class MailChannelHealthRecorder
 {
     public function __construct(
         private readonly MailSensitiveDataRedactor $redactor,
-    ) {
-    }
+    ) {}
 
     public function markSuccess(
         MailboxChannel $channel,

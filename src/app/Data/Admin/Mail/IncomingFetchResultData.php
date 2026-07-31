@@ -8,8 +8,8 @@ use InvalidArgumentException;
 final readonly class IncomingFetchResultData
 {
     /**
-     * @param array<int, NormalizedInboundMessageData> $messages
-     * @param array<int, FailedInboundMessageData> $failures
+     * @param  array<int, NormalizedInboundMessageData>  $messages
+     * @param  array<int, FailedInboundMessageData>  $failures
      */
     public function __construct(
         public array $messages,
@@ -22,7 +22,7 @@ final readonly class IncomingFetchResultData
     ) {
         foreach ($messages as $message) {
             if (
-                !$message
+                ! $message
                     instanceof NormalizedInboundMessageData
             ) {
                 throw new InvalidArgumentException(
@@ -33,12 +33,12 @@ final readonly class IncomingFetchResultData
 
         foreach ($failures as $failure) {
             if (
-                !$failure
+                ! $failure
                     instanceof FailedInboundMessageData
             ) {
                 throw new InvalidArgumentException(
                     'Fetch failure must be an instance '
-                    . 'of FailedInboundMessageData.'
+                    .'of FailedInboundMessageData.'
                 );
             }
         }

@@ -102,7 +102,7 @@ class MailboxChannelRequest extends FormRequest
 
                 if (
                     $direction === MailboxChannelDirection::Incoming
-                    && !$driver->supportsIncoming()
+                    && ! $driver->supportsIncoming()
                 ) {
                     $validator->errors()->add(
                         'driver',
@@ -112,7 +112,7 @@ class MailboxChannelRequest extends FormRequest
 
                 if (
                     $direction === MailboxChannelDirection::Outgoing
-                    && !$driver->supportsOutgoing()
+                    && ! $driver->supportsOutgoing()
                 ) {
                     $validator->errors()->add(
                         'driver',
@@ -122,7 +122,7 @@ class MailboxChannelRequest extends FormRequest
 
                 if (
                     $this->boolean('is_primary')
-                    && !$this->boolean('is_enabled')
+                    && ! $this->boolean('is_enabled')
                 ) {
                     $validator->errors()->add(
                         'is_primary',

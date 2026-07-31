@@ -2,6 +2,4 @@
 
 namespace App\Http\Requests\Admin\Mail\Mailboxes;
 
-class StoreMailboxRequest extends MailboxRequest
-{
-}
+class StoreMailboxRequest extends MailboxRequest {}

@@ -18,14 +18,11 @@ class TicketReplyEmailRendererTest extends TestCase
         parent::setUp();
 
         config()->set([
-            'simpledesk-mail-ticketing.outgoing_replies.subject_prefix' =>
-                'Re: ',
+            'simpledesk-mail-ticketing.outgoing_replies.subject_prefix' => 'Re: ',
 
-            'simpledesk-mail-ticketing.outgoing_replies.include_agent_signature' =>
-                true,
+            'simpledesk-mail-ticketing.outgoing_replies.include_agent_signature' => true,
 
-            'simpledesk-mail-ticketing.outgoing_replies.include_department_signature' =>
-                true,
+            'simpledesk-mail-ticketing.outgoing_replies.include_department_signature' => true,
         ]);
 
         $this->renderer = app(
@@ -36,17 +33,13 @@ class TicketReplyEmailRendererTest extends TestCase
     public function test_it_renders_reply_with_signatures(): void
     {
         $reply = $this->reply(
-            ticketSubject:
-            'Re: Re: Не работает авторизация',
+            ticketSubject: 'Re: Re: Не работает авторизация',
 
-            message:
-            'Здравствуйте! Попробуйте очистить кеш браузера.',
+            message: 'Здравствуйте! Попробуйте очистить кеш браузера.',
 
-            agentSignature:
-            '<p>Иван Иванов<br>Technical Support</p>',
+            agentSignature: '<p>Иван Иванов<br>Technical Support</p>',
 
-            departmentSignature:
-            '<p>SimpleDesk Support Team</p>',
+            departmentSignature: '<p>SimpleDesk Support Team</p>',
         );
 
         $result = $this->renderer->render(
@@ -92,13 +85,11 @@ class TicketReplyEmailRendererTest extends TestCase
     public function test_it_escapes_agent_message_in_html(): void
     {
         $reply = $this->reply(
-            ticketSubject:
-            'Ошибка отображения',
+            ticketSubject: 'Ошибка отображения',
 
-            message:
-            '<script>alert("test")</script>'
-            . "\n"
-            . '<b>Это должно быть текстом</b>',
+            message: '<script>alert("test")</script>'
+            ."\n"
+            .'<b>Это должно быть текстом</b>',
 
             agentSignature: null,
             departmentSignature: null,
@@ -135,17 +126,13 @@ class TicketReplyEmailRendererTest extends TestCase
             '<p>SimpleDesk Support Team</p>';
 
         $reply = $this->reply(
-            ticketSubject:
-            'Тест подписей',
+            ticketSubject: 'Тест подписей',
 
-            message:
-            'Ответ специалиста.',
+            message: 'Ответ специалиста.',
 
-            agentSignature:
-            $signature,
+            agentSignature: $signature,
 
-            departmentSignature:
-            $signature,
+            departmentSignature: $signature,
         );
 
         $result = $this->renderer->render(
@@ -167,18 +154,16 @@ class TicketReplyEmailRendererTest extends TestCase
         ?string $agentSignature,
         ?string $departmentSignature,
     ): TicketReply {
-        $department = new Department();
+        $department = new Department;
 
         $department->forceFill([
-            'signature' =>
-                $departmentSignature,
+            'signature' => $departmentSignature,
         ]);
 
-        $ticket = new Ticket();
+        $ticket = new Ticket;
 
         $ticket->forceFill([
-            'subject' =>
-                $ticketSubject,
+            'subject' => $ticketSubject,
         ]);
 
         $ticket->setRelation(
@@ -186,30 +171,24 @@ class TicketReplyEmailRendererTest extends TestCase
             $department
         );
 
-        $agent = new User();
+        $agent = new User;
 
         $agent->forceFill([
-            'email' =>
-                'agent@simpledesk.test',
+            'email' => 'agent@simpledesk.test',
 
-            'first_name' =>
-                'Иван',
+            'first_name' => 'Иван',
 
-            'last_name' =>
-                'Иванов',
+            'last_name' => 'Иванов',
 
-            'signature' =>
-                $agentSignature,
+            'signature' => $agentSignature,
         ]);
 
-        $reply = new TicketReply();
+        $reply = new TicketReply;
 
         $reply->forceFill([
-            'message' =>
-                $message,
+            'message' => $message,
 
-            'is_internal' =>
-                false,
+            'is_internal' => false,
         ]);
 
         $reply->setRelation(

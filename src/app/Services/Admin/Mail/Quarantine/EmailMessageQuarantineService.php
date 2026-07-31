@@ -40,28 +40,23 @@ class EmailMessageQuarantineService
 
                 $reasonCode ??=
                     $this->reasonCode(
-                        emailMessage:
-                        $emailMessage,
+                        emailMessage: $emailMessage,
 
-                        exception:
-                        $exception,
+                        exception: $exception,
                     );
 
                 $reasonMessage ??=
                     $this->reasonMessage(
-                        emailMessage:
-                        $emailMessage,
+                        emailMessage: $emailMessage,
 
-                        exception:
-                        $exception,
+                        exception: $exception,
                     );
 
                 $quarantine =
                     EmailMessageQuarantine::query()
                         ->lockForUpdate()
                         ->firstOrNew([
-                            'email_message_id' =>
-                                $emailMessage->id,
+                            'email_message_id' => $emailMessage->id,
                         ]);
 
                 $now = now();
@@ -75,66 +70,54 @@ class EmailMessageQuarantineService
                 $event = [
                     'action' => 'quarantined',
 
-                    'stage' =>
-                        $stage->value,
+                    'stage' => $stage->value,
 
-                    'reason_code' =>
-                        $reasonCode,
+                    'reason_code' => $reasonCode,
 
-                    'reason_message' =>
-                        $reasonMessage,
+                    'reason_message' => $reasonMessage,
 
-                    'exception_class' =>
-                        $exception !== null
+                    'exception_class' => $exception !== null
                             ? $exception::class
                             : null,
 
                     'attempt' => $attempts,
 
-                    'created_at' =>
-                        $now->toIso8601String(),
+                    'created_at' => $now->toIso8601String(),
                 ];
 
                 $quarantine->forceFill([
-                    'mailbox_id' =>
-                        $emailMessage->mailbox_id,
+                    'mailbox_id' => $emailMessage->mailbox_id,
 
-                    'mailbox_channel_id' =>
-                        $emailMessage
-                            ->mailbox_channel_id,
+                    'mailbox_channel_id' => $emailMessage
+                        ->mailbox_channel_id,
 
                     'stage' => $stage,
 
-                    'reason_code' =>
-                        $this->limitString(
-                            $reasonCode,
-                            255
-                        ),
+                    'reason_code' => $this->limitString(
+                        $reasonCode,
+                        255
+                    ),
 
-                    'reason_message' =>
-                        $this->limitString(
-                            $reasonMessage,
-                            10000
-                        ),
+                    'reason_message' => $this->limitString(
+                        $reasonMessage,
+                        10000
+                    ),
 
-                    'exception_class' =>
-                        $exception !== null
+                    'exception_class' => $exception !== null
                             ? $this->limitString(
-                            $exception::class,
-                            255
-                        )
+                                $exception::class,
+                                255
+                            )
                             : null,
 
                     'attempts' => $attempts,
 
-                    'first_quarantined_at' =>
-                        $quarantine->exists
+                    'first_quarantined_at' => $quarantine->exists
                             ? $quarantine
-                            ->first_quarantined_at
+                                ->first_quarantined_at
                             : $now,
 
-                    'last_quarantined_at' =>
-                        $now,
+                    'last_quarantined_at' => $now,
 
                     'released_at' => null,
                     'released_by_id' => null,
@@ -142,24 +125,20 @@ class EmailMessageQuarantineService
                     'resolved_at' => null,
                     'resolution' => null,
 
-                    'metadata' =>
-                        $this->appendMetadataEvent(
-                            current:
-                            $quarantine->metadata,
+                    'metadata' => $this->appendMetadataEvent(
+                        current: $quarantine->metadata,
 
-                            event: array_merge(
-                                $event,
-                                $metadata,
-                            ),
+                        event: array_merge(
+                            $event,
+                            $metadata,
                         ),
+                    ),
                 ])->save();
 
                 $this->markEmailMessageFailed(
-                    emailMessage:
-                    $emailMessage,
+                    emailMessage: $emailMessage,
 
-                    reasonMessage:
-                    $reasonMessage,
+                    reasonMessage: $reasonMessage,
                 );
 
                 return $quarantine->fresh([
@@ -192,13 +171,11 @@ class EmailMessageQuarantineService
 
                 if ($quarantine->isResolved()) {
                     throw new EmailQuarantineException(
-                        message:
-                        "Quarantine record "
-                        . "[{$quarantine->id}] "
-                        . 'has already been resolved.',
+                        message: 'Quarantine record '
+                        ."[{$quarantine->id}] "
+                        .'has already been resolved.',
 
-                        errorCode:
-                        'quarantine_already_resolved',
+                        errorCode: 'quarantine_already_resolved',
                     );
                 }
 
@@ -207,13 +184,11 @@ class EmailMessageQuarantineService
                     !== EmailQuarantineStage::InboundTicketing
                 ) {
                     throw new EmailQuarantineException(
-                        message:
-                        "Quarantine stage "
-                        . "[{$quarantine->stage->value}] "
-                        . 'does not support this retry method yet.',
+                        message: 'Quarantine stage '
+                        ."[{$quarantine->stage->value}] "
+                        .'does not support this retry method yet.',
 
-                        errorCode:
-                        'unsupported_quarantine_retry_stage',
+                        errorCode: 'unsupported_quarantine_retry_stage',
                     );
                 }
 
@@ -230,13 +205,11 @@ class EmailMessageQuarantineService
                     !== EmailMessageDirection::Incoming
                 ) {
                     throw new EmailQuarantineException(
-                        message:
-                        "Email message "
-                        . "[{$emailMessage->id}] "
-                        . 'is not incoming.',
+                        message: 'Email message '
+                        ."[{$emailMessage->id}] "
+                        .'is not incoming.',
 
-                        errorCode:
-                        'quarantine_email_not_incoming',
+                        errorCode: 'quarantine_email_not_incoming',
                     );
                 }
 
@@ -250,19 +223,15 @@ class EmailMessageQuarantineService
                         : [];
 
                 $emailMetadata['quarantine'] = [
-                    'action' =>
-                        'retry_requested',
+                    'action' => 'retry_requested',
 
-                    'quarantine_id' =>
-                        $quarantine->id,
+                    'quarantine_id' => $quarantine->id,
 
-                    'requested_at' =>
-                        $now->toIso8601String(),
+                    'requested_at' => $now->toIso8601String(),
                 ];
 
                 $emailMessage->forceFill([
-                    'status' =>
-                        EmailMessageStatus::Received,
+                    'status' => EmailMessageStatus::Received,
 
                     'processing_started_at' => null,
                     'processed_at' => null,
@@ -271,15 +240,13 @@ class EmailMessageQuarantineService
                     'failure_code' => null,
                     'failure_message' => null,
 
-                    'metadata' =>
-                        $emailMetadata,
+                    'metadata' => $emailMetadata,
                 ])->save();
 
                 $quarantine->forceFill([
                     'released_at' => $now,
 
-                    'released_by_id' =>
-                        $releasedById,
+                    'released_by_id' => $releasedById,
 
                     /*
                      * Пока повторная обработка не закончилась,
@@ -287,26 +254,20 @@ class EmailMessageQuarantineService
                      */
                     'resolved_at' => null,
 
-                    'resolution' =>
-                        EmailQuarantineResolution::Retried,
+                    'resolution' => EmailQuarantineResolution::Retried,
 
-                    'metadata' =>
-                        $this->appendMetadataEvent(
-                            current:
-                            $quarantine->metadata,
+                    'metadata' => $this->appendMetadataEvent(
+                        current: $quarantine->metadata,
 
-                            event: [
-                                'action' =>
-                                    'retry_requested',
+                        event: [
+                            'action' => 'retry_requested',
 
-                                'released_by_id' =>
-                                    $releasedById,
+                            'released_by_id' => $releasedById,
 
-                                'created_at' =>
-                                    $now
-                                        ->toIso8601String(),
-                            ],
-                        ),
+                            'created_at' => $now
+                                ->toIso8601String(),
+                        ],
+                    ),
                 ])->save();
 
                 return $quarantine->fresh([
@@ -345,13 +306,11 @@ class EmailMessageQuarantineService
 
                 if ($quarantine->isResolved()) {
                     throw new EmailQuarantineException(
-                        message:
-                        "Quarantine record "
-                        . "[{$quarantine->id}] "
-                        . 'has already been resolved.',
+                        message: 'Quarantine record '
+                        ."[{$quarantine->id}] "
+                        .'has already been resolved.',
 
-                        errorCode:
-                        'quarantine_already_resolved',
+                        errorCode: 'quarantine_already_resolved',
                     );
                 }
 
@@ -373,22 +332,17 @@ class EmailMessageQuarantineService
                         : [];
 
                 $emailMetadata['ticketing'] = [
-                    'action' =>
-                        'manually_ignored',
+                    'action' => 'manually_ignored',
 
-                    'quarantine_id' =>
-                        $quarantine->id,
+                    'quarantine_id' => $quarantine->id,
 
-                    'reason' =>
-                        $reason,
+                    'reason' => $reason,
 
-                    'ignored_at' =>
-                        $now->toIso8601String(),
+                    'ignored_at' => $now->toIso8601String(),
                 ];
 
                 $emailMessage->forceFill([
-                    'status' =>
-                        EmailMessageStatus::Processed,
+                    'status' => EmailMessageStatus::Processed,
 
                     'processing_started_at' => null,
                     'processed_at' => $now,
@@ -397,41 +351,32 @@ class EmailMessageQuarantineService
                     'failure_code' => null,
                     'failure_message' => null,
 
-                    'metadata' =>
-                        $emailMetadata,
+                    'metadata' => $emailMetadata,
                 ])->save();
 
                 $quarantine->forceFill([
                     'released_at' => $now,
 
-                    'released_by_id' =>
-                        $releasedById,
+                    'released_by_id' => $releasedById,
 
                     'resolved_at' => $now,
 
-                    'resolution' =>
-                        EmailQuarantineResolution::Ignored,
+                    'resolution' => EmailQuarantineResolution::Ignored,
 
-                    'metadata' =>
-                        $this->appendMetadataEvent(
-                            current:
-                            $quarantine->metadata,
+                    'metadata' => $this->appendMetadataEvent(
+                        current: $quarantine->metadata,
 
-                            event: [
-                                'action' =>
-                                    'manually_ignored',
+                        event: [
+                            'action' => 'manually_ignored',
 
-                                'reason' =>
-                                    $reason,
+                            'reason' => $reason,
 
-                                'released_by_id' =>
-                                    $releasedById,
+                            'released_by_id' => $releasedById,
 
-                                'created_at' =>
-                                    $now
-                                        ->toIso8601String(),
-                            ],
-                        ),
+                            'created_at' => $now
+                                ->toIso8601String(),
+                        ],
+                    ),
                 ])->save();
 
                 return $quarantine->fresh([
@@ -468,23 +413,18 @@ class EmailMessageQuarantineService
                 $quarantine->forceFill([
                     'resolved_at' => $now,
 
-                    'resolution' =>
-                        EmailQuarantineResolution::Resolved,
+                    'resolution' => EmailQuarantineResolution::Resolved,
 
-                    'metadata' =>
-                        $this->appendMetadataEvent(
-                            current:
-                            $quarantine->metadata,
+                    'metadata' => $this->appendMetadataEvent(
+                        current: $quarantine->metadata,
 
-                            event: [
-                                'action' =>
-                                    'processing_succeeded',
+                        event: [
+                            'action' => 'processing_succeeded',
 
-                                'created_at' =>
-                                    $now
-                                        ->toIso8601String(),
-                            ],
-                        ),
+                            'created_at' => $now
+                                ->toIso8601String(),
+                        ],
+                    ),
                 ])->save();
 
                 return $quarantine;
@@ -505,21 +445,18 @@ class EmailMessageQuarantineService
         }
 
         $emailMessage->forceFill([
-            'status' =>
-                EmailMessageStatus::Failed,
+            'status' => EmailMessageStatus::Failed,
 
             'processing_started_at' => null,
 
             'failed_at' => now(),
 
-            'failure_code' =>
-                'inbound_ticket_processing_quarantined',
+            'failure_code' => 'inbound_ticket_processing_quarantined',
 
-            'failure_message' =>
-                $this->limitString(
-                    $reasonMessage,
-                    10000
-                ),
+            'failure_message' => $this->limitString(
+                $reasonMessage,
+                10000
+            ),
         ])->save();
     }
 

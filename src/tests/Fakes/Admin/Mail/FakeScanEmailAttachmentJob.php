@@ -11,10 +11,7 @@ class FakeScanEmailAttachmentJob implements ShouldQueue
 
     public function __construct(
         public int $emailAttachmentId,
-    ) {
-    }
+    ) {}
 
-    public function handle(): void
-    {
-    }
+    public function handle(): void {}
 }

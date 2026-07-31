@@ -4,6 +4,4 @@ namespace App\Exceptions\Admin\Mail;
 
 use RuntimeException;
 
-class InvalidMailDriverException extends RuntimeException
-{
-}
+class InvalidMailDriverException extends RuntimeException {}

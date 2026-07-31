@@ -107,8 +107,7 @@ class SendOutgoingEmailJob implements ShouldQueue
             'status' => EmailMessageStatus::Failed,
             'failed_at' => now(),
             'failure_code' => 'queue_job_failed',
-            'failure_message' =>
-                $exception?->getMessage()
+            'failure_message' => $exception?->getMessage()
                 ?? 'Outgoing email queue job failed.',
         ])->save();
     }

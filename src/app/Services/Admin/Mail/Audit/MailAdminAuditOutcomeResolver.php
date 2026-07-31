@@ -11,8 +11,7 @@ class MailAdminAuditOutcomeResolver
 {
     public function __construct(
         private readonly MailAdminAuditResponseReader $responses,
-    ) {
-    }
+    ) {}
 
     public function fromResponse(
         Response $response

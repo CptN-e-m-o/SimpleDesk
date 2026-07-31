@@ -10,6 +10,5 @@ final readonly class MailAdminAuditTargetData
         public ?MailAdminAuditSubjectType $subjectType,
         public ?int $subjectId,
         public ?int $mailboxId,
-    ) {
-    }
+    ) {}
 }

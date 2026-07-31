@@ -34,16 +34,14 @@ class InboundEmailThreadMatcherTest extends TestCase
             ticket: $ticket,
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sent,
-            internetMessageId:
-            '<Agent-Reply-123@Example.Test>',
+            internetMessageId: '<Agent-Reply-123@Example.Test>',
         );
 
         $incomingMessage = $this->createEmailMessage(
             mailbox: $mailbox,
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Received,
-            inReplyToMessageId:
-            '  <AGENT-REPLY-123@example.test>  ',
+            inReplyToMessageId: '  <AGENT-REPLY-123@example.test>  ',
         );
 
         $matchedTicket = $this->matcher()->match(
@@ -81,8 +79,7 @@ class InboundEmailThreadMatcherTest extends TestCase
             ticket: $firstTicket,
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sent,
-            internetMessageId:
-            '<first-reference@example.test>',
+            internetMessageId: '<first-reference@example.test>',
         );
 
         $this->createEmailMessage(
@@ -90,8 +87,7 @@ class InboundEmailThreadMatcherTest extends TestCase
             ticket: $secondTicket,
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sent,
-            internetMessageId:
-            '<second-reference@example.test>',
+            internetMessageId: '<second-reference@example.test>',
         );
 
         $incomingMessage = $this->createEmailMessage(
@@ -136,16 +132,14 @@ class InboundEmailThreadMatcherTest extends TestCase
             ticket: $firstMailboxTicket,
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sent,
-            internetMessageId:
-            '<shared-message-id@example.test>',
+            internetMessageId: '<shared-message-id@example.test>',
         );
 
         $incomingMessage = $this->createEmailMessage(
             mailbox: $secondMailbox,
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Received,
-            inReplyToMessageId:
-            '<shared-message-id@example.test>',
+            inReplyToMessageId: '<shared-message-id@example.test>',
         );
 
         $matchedTicket = $this->matcher()->match(
@@ -160,8 +154,7 @@ class InboundEmailThreadMatcherTest extends TestCase
     public function test_closed_ticket_returns_null_when_action_is_new_ticket(): void
     {
         config([
-            'simpledesk-mail-ticketing.closed_ticket_action'
-            => 'new_ticket',
+            'simpledesk-mail-ticketing.closed_ticket_action' => 'new_ticket',
         ]);
 
         $requester = $this->createRequester();
@@ -179,16 +172,14 @@ class InboundEmailThreadMatcherTest extends TestCase
             ticket: $ticket,
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sent,
-            internetMessageId:
-            '<closed-ticket@example.test>',
+            internetMessageId: '<closed-ticket@example.test>',
         );
 
         $incomingMessage = $this->createEmailMessage(
             mailbox: $mailbox,
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Received,
-            inReplyToMessageId:
-            '<closed-ticket@example.test>',
+            inReplyToMessageId: '<closed-ticket@example.test>',
         );
 
         $matchedTicket = $this->matcher()->match(
@@ -203,8 +194,7 @@ class InboundEmailThreadMatcherTest extends TestCase
     public function test_closed_ticket_can_be_matched_when_action_allows_reply(): void
     {
         config([
-            'simpledesk-mail-ticketing.closed_ticket_action'
-            => 'reply',
+            'simpledesk-mail-ticketing.closed_ticket_action' => 'reply',
         ]);
 
         $requester = $this->createRequester();
@@ -222,16 +212,14 @@ class InboundEmailThreadMatcherTest extends TestCase
             ticket: $ticket,
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sent,
-            internetMessageId:
-            '<closed-ticket-reply@example.test>',
+            internetMessageId: '<closed-ticket-reply@example.test>',
         );
 
         $incomingMessage = $this->createEmailMessage(
             mailbox: $mailbox,
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Received,
-            inReplyToMessageId:
-            '<closed-ticket-reply@example.test>',
+            inReplyToMessageId: '<closed-ticket-reply@example.test>',
         );
 
         $matchedTicket = $this->matcher()->match(
@@ -262,26 +250,19 @@ class InboundEmailThreadMatcherTest extends TestCase
         );
 
         return User::query()->create([
-            'email' =>
-                "thread-requester-{$token}@example.test",
+            'email' => "thread-requester-{$token}@example.test",
 
-            'username' =>
-                "thread-requester-{$token}",
+            'username' => "thread-requester-{$token}",
 
-            'first_name' =>
-                'Thread',
+            'first_name' => 'Thread',
 
-            'last_name' =>
-                'Requester',
+            'last_name' => 'Requester',
 
-            'password' =>
-                'test-password',
+            'password' => 'test-password',
 
-            'email_verified_at' =>
-                now(),
+            'email_verified_at' => now(),
 
-            'is_active' =>
-                true,
+            'is_active' => true,
         ]);
     }
 
@@ -292,26 +273,19 @@ class InboundEmailThreadMatcherTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Thread Mailbox {$token}",
+            'name' => "Thread Mailbox {$token}",
 
-            'email_address' =>
-                "thread-support-{$token}@example.test",
+            'email_address' => "thread-support-{$token}@example.test",
 
-            'display_name' =>
-                'Thread Support',
+            'display_name' => 'Thread Support',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -328,52 +302,37 @@ class InboundEmailThreadMatcherTest extends TestCase
         );
 
         return Ticket::query()->create([
-            'ticket_number' =>
-                "THREAD-{$token}",
+            'ticket_number' => "THREAD-{$token}",
 
-            'requester_id' =>
-                $requester->id,
+            'requester_id' => $requester->id,
 
-            'category_id' =>
-                null,
+            'category_id' => null,
 
-            'assignee_id' =>
-                null,
+            'assignee_id' => null,
 
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'subject' =>
-                'Thread matcher test ticket',
+            'subject' => 'Thread matcher test ticket',
 
-            'priority' =>
-                Ticket::PRIORITY_MEDIUM,
+            'priority' => Ticket::PRIORITY_MEDIUM,
 
-            'status' =>
-                $status,
+            'status' => $status,
 
-            'source' =>
-                Ticket::SOURCE_EMAIL,
+            'source' => Ticket::SOURCE_EMAIL,
 
-            'service' =>
-                null,
+            'service' => null,
 
-            'description' =>
-                'Thread matcher test description.',
+            'description' => 'Thread matcher test description.',
 
-            'last_reply_at' =>
-                now(),
+            'last_reply_at' => now(),
 
-            'resolved_at' =>
-                $status === Ticket::STATUS_RESOLVED
+            'resolved_at' => $status === Ticket::STATUS_RESOLVED
                     ? now()
                     : null,
 
-            'closed_at' =>
-                $status === Ticket::STATUS_CLOSED
+            'closed_at' => $status === Ticket::STATUS_CLOSED
                     ? now()
                     : null,
         ]);
@@ -393,111 +352,84 @@ class InboundEmailThreadMatcherTest extends TestCase
         );
 
         return EmailMessage::query()->create([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'mailbox_channel_id' =>
-                null,
+            'mailbox_channel_id' => null,
 
-            'ticket_id' =>
-                $ticket?->id,
+            'ticket_id' => $ticket?->id,
 
-            'ticket_reply_id' =>
-                null,
+            'ticket_reply_id' => null,
 
-            'direction' =>
-                $direction,
+            'direction' => $direction,
 
-            'driver' =>
-                $direction
+            'driver' => $direction
                 === EmailMessageDirection::Outgoing
                     ? MailboxDriver::Smtp
                     : MailboxDriver::Imap,
 
-            'status' =>
-                $status,
+            'status' => $status,
 
-            'idempotency_key' =>
-                "thread-matcher-{$token}",
+            'idempotency_key' => "thread-matcher-{$token}",
 
-            'external_message_id' =>
-                "external-{$token}",
+            'external_message_id' => "external-{$token}",
 
-            'internet_message_id' =>
-                $internetMessageId,
+            'internet_message_id' => $internetMessageId,
 
-            'in_reply_to_message_id' =>
-                $inReplyToMessageId,
+            'in_reply_to_message_id' => $inReplyToMessageId,
 
-            'reference_message_ids' =>
-                $referenceMessageIds,
+            'reference_message_ids' => $referenceMessageIds,
 
-            'sender_address' =>
-                $direction
+            'sender_address' => $direction
                 === EmailMessageDirection::Outgoing
                     ? $mailbox->email_address
                     : "customer-{$token}@example.test",
 
-            'sender_name' =>
-                $direction
+            'sender_name' => $direction
                 === EmailMessageDirection::Outgoing
                     ? $mailbox->display_name
                     : 'Test Customer',
 
             'to_recipients' => [
                 [
-                    'address' =>
-                        $direction
+                    'address' => $direction
                         === EmailMessageDirection::Outgoing
                             ? "customer-{$token}@example.test"
                             : $mailbox->email_address,
 
-                    'name' =>
-                        $direction
+                    'name' => $direction
                         === EmailMessageDirection::Outgoing
                             ? 'Test Customer'
                             : $mailbox->display_name,
                 ],
             ],
 
-            'cc_recipients' =>
-                [],
+            'cc_recipients' => [],
 
-            'bcc_recipients' =>
-                [],
+            'bcc_recipients' => [],
 
-            'reply_to_recipients' =>
-                [],
+            'reply_to_recipients' => [],
 
-            'subject' =>
-                'Re: Thread matcher test',
+            'subject' => 'Re: Thread matcher test',
 
-            'text_body' =>
-                'Thread matcher test body.',
+            'text_body' => 'Thread matcher test body.',
 
-            'html_body' =>
-                null,
+            'html_body' => null,
 
-            'headers' =>
-                [],
+            'headers' => [],
 
-            'metadata' =>
-                [],
+            'metadata' => [],
 
-            'received_at' =>
-                $direction
+            'received_at' => $direction
                 === EmailMessageDirection::Incoming
                     ? now()
                     : null,
 
-            'sent_at' =>
-                $direction
+            'sent_at' => $direction
                 === EmailMessageDirection::Outgoing
                     ? now()
                     : null,
 
-            'processed_at' =>
-                $status
+            'processed_at' => $status
                 === EmailMessageStatus::Processed
                     ? now()
                     : null,

@@ -17,8 +17,7 @@ class MailboxController extends Controller
 {
     public function __construct(
         private readonly MailboxAdminService $mailboxes,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {

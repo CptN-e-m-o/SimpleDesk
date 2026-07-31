@@ -15,8 +15,7 @@ class AgentTicketEmailReplyController extends Controller
     public function __construct(
         private readonly AgentTicketEmailReplyService $replies,
         private readonly UploadedMailAttachmentFactory $attachments,
-    ) {
-    }
+    ) {}
 
     public function store(
         AgentTicketEmailReplyStoreRequest $request,

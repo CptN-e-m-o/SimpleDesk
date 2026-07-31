@@ -79,10 +79,9 @@ class TicketEmailThreadResolver
 
         foreach (
             $parentMessage->reference_message_ids
-            ?? []
-            as $reference
+            ?? [] as $reference
         ) {
-            if (!is_scalar($reference)) {
+            if (! is_scalar($reference)) {
                 continue;
             }
 
@@ -135,19 +134,16 @@ class TicketEmailThreadResolver
         }
 
         return new TicketEmailThreadData(
-            parentEmailMessageId:
-            $parentMessage->id,
+            parentEmailMessageId: $parentMessage->id,
 
-            inReplyToMessageId:
-            $parentMessageId,
+            inReplyToMessageId: $parentMessageId,
 
-            references:
-            $references,
+            references: $references,
         );
     }
 
     /**
-     * @param array<int, string> $messageIds
+     * @param  array<int, string>  $messageIds
      * @return array<int, string>
      */
     private function uniqueMessageIds(

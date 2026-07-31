@@ -30,10 +30,8 @@ class ImapClientFactory
         $account = [
             'host' => $configuration->host,
             'port' => $configuration->port,
-            'encryption' =>
-                $configuration->encryption->webklexValue(),
-            'validate_cert' =>
-                $configuration->validateCertificate,
+            'encryption' => $configuration->encryption->webklexValue(),
+            'validate_cert' => $configuration->validateCertificate,
             'protocol' => 'imap',
         ];
 

@@ -12,7 +12,7 @@ interface AttachmentScanDriver
     public function testConnection(): MailConnectionTestResultData;
 
     /**
-     * @param resource $stream
+     * @param  resource  $stream
      */
     public function scanStream(
         $stream,

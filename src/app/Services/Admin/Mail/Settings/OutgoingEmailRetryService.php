@@ -16,8 +16,7 @@ class OutgoingEmailRetryService
 {
     public function __construct(
         private readonly MailAdminActionLock $locks,
-    ) {
-    }
+    ) {}
 
     public function dispatch(
         EmailMessage $emailMessage,
@@ -43,7 +42,7 @@ class OutgoingEmailRetryService
             );
         }
 
-        if (!$this->locks->acquire(
+        if (! $this->locks->acquire(
             'retry-message',
             $emailMessage->id
         )) {
@@ -174,7 +173,7 @@ class OutgoingEmailRetryService
 
         if (
             $emailMessage->mailbox === null
-            || !$emailMessage->mailbox->is_active
+            || ! $emailMessage->mailbox->is_active
         ) {
             throw new MailAdminActionException(
                 message: "The mailbox for email message [{$emailMessage->id}] is unavailable or disabled.",
@@ -197,8 +196,7 @@ class OutgoingEmailRetryService
         $infectedAttachment = $emailMessage
             ->attachments
             ->first(
-                fn ($attachment): bool =>
-                    $attachment->scan_status
+                fn ($attachment): bool => $attachment->scan_status
                     === EmailAttachmentScanStatus::Infected
             );
 
@@ -210,7 +208,7 @@ class OutgoingEmailRetryService
             );
         }
 
-        if (!config(
+        if (! config(
             'simpledesk-mail-antivirus.enabled',
             false
         )) {
@@ -220,8 +218,7 @@ class OutgoingEmailRetryService
         $unscannedAttachment = $emailMessage
             ->attachments
             ->first(
-                fn ($attachment): bool =>
-                    $attachment->scan_status
+                fn ($attachment): bool => $attachment->scan_status
                     !== EmailAttachmentScanStatus::Clean
             );
 

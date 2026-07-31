@@ -17,8 +17,7 @@ class EmailAttachmentDownloadController extends Controller
     public function __construct(
         private readonly TicketAccessService $access,
         private readonly MailAttachmentDownloadService $downloads,
-    ) {
-    }
+    ) {}
 
     public function __invoke(
         Request $request,

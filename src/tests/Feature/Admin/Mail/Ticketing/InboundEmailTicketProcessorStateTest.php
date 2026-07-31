@@ -220,7 +220,7 @@ class InboundEmailTicketProcessorStateTest extends TestCase
                 'Expected InboundEmailAlreadyProcessingException was not thrown.'
             );
         } catch (
-        InboundEmailAlreadyProcessingException $exception
+            InboundEmailAlreadyProcessingException $exception
         ) {
             $this->assertInstanceOf(
                 InboundEmailAlreadyProcessingException::class,
@@ -422,8 +422,7 @@ class InboundEmailTicketProcessorStateTest extends TestCase
         $mailbox = Mailbox::query()->create([
             'name' => "Test Mailbox {$token}",
 
-            'email_address' =>
-                "support-{$token}@example.test",
+            'email_address' => "support-{$token}@example.test",
 
             'display_name' => 'Test Support',
 
@@ -453,31 +452,25 @@ class InboundEmailTicketProcessorStateTest extends TestCase
 
                     'status' => $status,
 
-                    'idempotency_key' =>
-                        "state-test-{$token}",
+                    'idempotency_key' => "state-test-{$token}",
 
-                    'external_message_id' =>
-                        "external-{$token}",
+                    'external_message_id' => "external-{$token}",
 
-                    'internet_message_id' =>
-                        "<{$token}@example.test>",
+                    'internet_message_id' => "<{$token}@example.test>",
 
                     'in_reply_to_message_id' => null,
 
                     'reference_message_ids' => [],
 
-                    'sender_address' =>
-                        "customer-{$token}@example.test",
+                    'sender_address' => "customer-{$token}@example.test",
 
                     'sender_name' => 'Test Customer',
 
                     'to_recipients' => [
                         [
-                            'address' =>
-                                $mailbox->email_address,
+                            'address' => $mailbox->email_address,
 
-                            'name' =>
-                                $mailbox->display_name,
+                            'name' => $mailbox->display_name,
                         ],
                     ],
 
@@ -487,11 +480,9 @@ class InboundEmailTicketProcessorStateTest extends TestCase
 
                     'reply_to_recipients' => [],
 
-                    'subject' =>
-                        'Test mail processor state',
+                    'subject' => 'Test mail processor state',
 
-                    'text_body' =>
-                        'Test message body.',
+                    'text_body' => 'Test message body.',
 
                     'html_body' => null,
 
@@ -522,7 +513,7 @@ class InboundEmailTicketProcessorStateTest extends TestCase
         try {
             $callback();
         } catch (
-        InboundEmailTicketingException $exception
+            InboundEmailTicketingException $exception
         ) {
             return $exception;
         }

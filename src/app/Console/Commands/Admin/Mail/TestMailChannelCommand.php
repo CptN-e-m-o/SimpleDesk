@@ -40,7 +40,7 @@ class TestMailChannelCommand extends Command
                 $channel
             );
 
-            if (!$result->successful) {
+            if (! $result->successful) {
                 $this->error(
                     $result->message
                 );
@@ -57,9 +57,9 @@ class TestMailChannelCommand extends Command
                 !== null
             ) {
                 $this->line(
-                    "Latency: "
-                    . $result->latencyMilliseconds
-                    . ' ms'
+                    'Latency: '
+                    .$result->latencyMilliseconds
+                    .' ms'
                 );
             }
 

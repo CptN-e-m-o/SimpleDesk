@@ -13,7 +13,7 @@ class NoAvailableMailChannelException extends RuntimeException
     ) {
         parent::__construct(
             "Mailbox [{$mailboxId}] has no available "
-            . "{$direction->value} channels."
+            ."{$direction->value} channels."
         );
     }
 }

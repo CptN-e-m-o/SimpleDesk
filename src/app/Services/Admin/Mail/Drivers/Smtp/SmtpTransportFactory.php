@@ -15,8 +15,7 @@ class SmtpTransportFactory
 {
     public function __construct(
         private readonly MailManager $mailManager,
-    ) {
-    }
+    ) {}
 
     public function make(
         SmtpChannelConfigurationData $configuration
@@ -25,7 +24,7 @@ class SmtpTransportFactory
             $this->laravelConfiguration($configuration)
         );
 
-        if (!$transport instanceof EsmtpTransport) {
+        if (! $transport instanceof EsmtpTransport) {
             throw new MailDriverException(
                 message: 'Laravel did not create an ESMTP transport.',
                 driverErrorCode: 'smtp_transport_creation_failed',
@@ -45,7 +44,7 @@ class SmtpTransportFactory
             === MailAuthenticationType::OAuth2
         ) {
             $transport->setAuthenticators([
-                new XOAuth2Authenticator(),
+                new XOAuth2Authenticator,
             ]);
         }
 
@@ -66,15 +65,15 @@ class SmtpTransportFactory
         EsmtpTransport $transport,
         SmtpChannelConfigurationData $configuration,
     ): void {
-        if (!$configuration->encryption->usesTls()) {
+        if (! $configuration->encryption->usesTls()) {
             return;
         }
 
         $stream = $transport->getStream();
 
         if (
-            !$stream instanceof SocketStream
-            || !$stream->isTls()
+            ! $stream instanceof SocketStream
+            || ! $stream->isTls()
         ) {
             throw new MailDriverException(
                 message: 'SMTP connection was established without TLS.',

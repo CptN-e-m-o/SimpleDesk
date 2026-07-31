@@ -80,7 +80,7 @@ class MailboxRequest extends FormRequest
             function (Validator $validator): void {
                 if (
                     $this->boolean('is_default_outgoing')
-                    && !$this->boolean('is_active')
+                    && ! $this->boolean('is_active')
                 ) {
                     $validator->errors()->add(
                         'is_default_outgoing',

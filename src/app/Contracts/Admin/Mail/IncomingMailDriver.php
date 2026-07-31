@@ -31,7 +31,7 @@ interface IncomingMailDriver
     ): void;
 
     /**
-     * @param array<int, NormalizedInboundMessageData> $messages
+     * @param  array<int, NormalizedInboundMessageData>  $messages
      */
     public function acknowledgeMany(
         MailboxChannel $channel,

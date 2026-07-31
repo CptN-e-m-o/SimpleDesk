@@ -17,20 +17,15 @@ class InboundEmailClassifierTest extends TestCase
         parent::setUp();
 
         config()->set([
-            'simpledesk-mail-reply-parsing.ignore.same_mailbox_sender' =>
-                true,
+            'simpledesk-mail-reply-parsing.ignore.same_mailbox_sender' => true,
 
-            'simpledesk-mail-reply-parsing.ignore.simpledesk_origin' =>
-                true,
+            'simpledesk-mail-reply-parsing.ignore.simpledesk_origin' => true,
 
-            'simpledesk-mail-reply-parsing.ignore.auto_replies' =>
-                true,
+            'simpledesk-mail-reply-parsing.ignore.auto_replies' => true,
 
-            'simpledesk-mail-reply-parsing.ignore.delivery_status' =>
-                true,
+            'simpledesk-mail-reply-parsing.ignore.delivery_status' => true,
 
-            'simpledesk-mail-reply-parsing.ignore.bulk' =>
-                true,
+            'simpledesk-mail-reply-parsing.ignore.bulk' => true,
         ]);
 
         $this->classifier = app(
@@ -41,11 +36,9 @@ class InboundEmailClassifierTest extends TestCase
     public function test_it_accepts_a_regular_human_message(): void
     {
         $message = $this->message(
-            senderAddress:
-            'customer@simpledesk.test',
+            senderAddress: 'customer@simpledesk.test',
 
-            subject:
-            'Не работает приложение',
+            subject: 'Не работает приложение',
         );
 
         $decision = $this->classifier->classify(
@@ -70,8 +63,7 @@ class InboundEmailClassifierTest extends TestCase
     public function test_it_blocks_a_message_from_the_same_mailbox(): void
     {
         $message = $this->message(
-            senderAddress:
-            'support@simpledesk.test',
+            senderAddress: 'support@simpledesk.test',
         );
 
         $decision = $this->classifier->classify(
@@ -125,8 +117,7 @@ class InboundEmailClassifierTest extends TestCase
     public function test_it_blocks_an_automatic_reply(): void
     {
         $message = $this->message(
-            subject:
-            'Automatic reply: Annual leave',
+            subject: 'Automatic reply: Annual leave',
 
             headers: [
                 'Auto-Submitted' => [
@@ -157,11 +148,9 @@ class InboundEmailClassifierTest extends TestCase
     public function test_it_blocks_a_delivery_status_notification(): void
     {
         $message = $this->message(
-            senderAddress:
-            'mailer-daemon@example.test',
+            senderAddress: 'mailer-daemon@example.test',
 
-            subject:
-            'Delivery Status Notification',
+            subject: 'Delivery Status Notification',
 
             headers: [
                 'Content-Type' => [
@@ -264,24 +253,20 @@ class InboundEmailClassifierTest extends TestCase
 
         array $headers = [],
     ): EmailMessage {
-        $mailbox = new Mailbox();
+        $mailbox = new Mailbox;
 
         $mailbox->forceFill([
-            'email_address' =>
-                'support@simpledesk.test',
+            'email_address' => 'support@simpledesk.test',
         ]);
 
-        $message = new EmailMessage();
+        $message = new EmailMessage;
 
         $message->forceFill([
-            'sender_address' =>
-                $senderAddress,
+            'sender_address' => $senderAddress,
 
-            'subject' =>
-                $subject,
+            'subject' => $subject,
 
-            'headers' =>
-                $headers,
+            'headers' => $headers,
         ]);
 
         $message->setRelation(

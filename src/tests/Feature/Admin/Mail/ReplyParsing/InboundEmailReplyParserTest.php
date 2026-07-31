@@ -17,26 +17,19 @@ class InboundEmailReplyParserTest extends TestCase
         config()->set([
             'simpledesk-mail-reply-parsing.enabled' => true,
 
-            'simpledesk-mail-reply-parsing.prefer_plain_text' =>
-                true,
+            'simpledesk-mail-reply-parsing.prefer_plain_text' => true,
 
-            'simpledesk-mail-reply-parsing.strip_quoted_text' =>
-                true,
+            'simpledesk-mail-reply-parsing.strip_quoted_text' => true,
 
-            'simpledesk-mail-reply-parsing.strip_signatures' =>
-                true,
+            'simpledesk-mail-reply-parsing.strip_signatures' => true,
 
-            'simpledesk-mail-reply-parsing.fallback_to_full_body' =>
-                false,
+            'simpledesk-mail-reply-parsing.fallback_to_full_body' => false,
 
-            'simpledesk-mail-reply-parsing.empty_body_fallback' =>
-                'Ответ не содержит нового текстового содержимого.',
+            'simpledesk-mail-reply-parsing.empty_body_fallback' => 'Ответ не содержит нового текстового содержимого.',
 
-            'simpledesk-mail-reply-parsing.max_body_characters' =>
-                200000,
+            'simpledesk-mail-reply-parsing.max_body_characters' => 200000,
 
-            'simpledesk-mail-reply-parsing.custom_separators' =>
-                [],
+            'simpledesk-mail-reply-parsing.custom_separators' => [],
         ]);
 
         $this->parser = app(
@@ -183,8 +176,8 @@ class InboundEmailReplyParserTest extends TestCase
     {
         $textBody =
             'Новый ответ.\n\n'
-            . 'On Mon, 27 Jul 2026 SimpleDesk Support wrote:\n'
-            . '> Предыдущее сообщение.';
+            .'On Mon, 27 Jul 2026 SimpleDesk Support wrote:\n'
+            .'> Предыдущее сообщение.';
 
         $message = $this->message(
             textBody: $textBody,
@@ -237,7 +230,7 @@ class InboundEmailReplyParserTest extends TestCase
         ?string $textBody = null,
         ?string $htmlBody = null,
     ): EmailMessage {
-        $message = new EmailMessage();
+        $message = new EmailMessage;
 
         $message->forceFill([
             'text_body' => $textBody,

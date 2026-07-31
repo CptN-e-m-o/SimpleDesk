@@ -29,11 +29,9 @@ class InboundEmailRequesterResolver
             ) === false
         ) {
             throw new InboundEmailTicketingException(
-                message:
-                'Inbound email does not contain '
-                . 'a valid sender address.',
-                errorCode:
-                'invalid_inbound_sender',
+                message: 'Inbound email does not contain '
+                .'a valid sender address.',
+                errorCode: 'invalid_inbound_sender',
                 retryable: false,
             );
         }
@@ -47,18 +45,16 @@ class InboundEmailRequesterResolver
         }
 
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-ticketing.auto_create_requesters',
                 true
             )
         ) {
             throw new InboundEmailTicketingException(
-                message:
-                "User with email [{$email}] "
-                . 'does not exist and automatic creation '
-                . 'is disabled.',
-                errorCode:
-                'inbound_requester_not_found',
+                message: "User with email [{$email}] "
+                .'does not exist and automatic creation '
+                .'is disabled.',
+                errorCode: 'inbound_requester_not_found',
                 retryable: false,
             );
         }
@@ -68,18 +64,16 @@ class InboundEmailRequesterResolver
             $lastName,
         ] = $this->splitName(
             email: $email,
-            senderName:
-            $emailMessage->sender_name,
+            senderName: $emailMessage->sender_name,
         );
 
         try {
             $user = User::query()->create([
                 'email' => $email,
 
-                'username' =>
-                    $this->uniqueUsername(
-                        $email
-                    ),
+                'username' => $this->uniqueUsername(
+                    $email
+                ),
 
                 'first_name' => $firstName,
                 'last_name' => $lastName,
@@ -183,10 +177,10 @@ class InboundEmailRequesterResolver
 
             $lastName !== ''
                 ? mb_substr(
-                $lastName,
-                0,
-                100
-            )
+                    $lastName,
+                    0,
+                    100
+                )
                 : null,
         ];
     }
@@ -233,15 +227,15 @@ class InboundEmailRequesterResolver
         $counter = 2;
 
         while (
-        User::query()
-            ->withTrashed()
-            ->where(
-                'username',
-                $candidate
-            )
-            ->exists()
+            User::query()
+                ->withTrashed()
+                ->where(
+                    'username',
+                    $candidate
+                )
+                ->exists()
         ) {
-            $suffix = '_' . $counter;
+            $suffix = '_'.$counter;
 
             $candidate =
                 mb_substr(
@@ -249,7 +243,7 @@ class InboundEmailRequesterResolver
                     0,
                     40 - mb_strlen($suffix)
                 )
-                . $suffix;
+                .$suffix;
 
             $counter++;
 
@@ -260,8 +254,8 @@ class InboundEmailRequesterResolver
                         0,
                         30
                     )
-                    . '_'
-                    . strtolower(
+                    .'_'
+                    .strtolower(
                         Str::random(8)
                     );
 

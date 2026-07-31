@@ -32,14 +32,11 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
         parent::setUp();
 
         config([
-            'simpledesk-mail-ticketing.customer_reply_status'
-            => Ticket::STATUS_OPEN,
+            'simpledesk-mail-ticketing.customer_reply_status' => Ticket::STATUS_OPEN,
 
-            'simpledesk-mail-ticketing.reopen_resolved_tickets'
-            => true,
+            'simpledesk-mail-ticketing.reopen_resolved_tickets' => true,
 
-            'simpledesk-mail-ticketing.closed_ticket_action'
-            => 'new_ticket',
+            'simpledesk-mail-ticketing.closed_ticket_action' => 'new_ticket',
         ]);
     }
 
@@ -63,8 +60,7 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
         $processor = $this->processorForReply(
             requester: $requester,
             ticket: $ticket,
-            parsedBody:
-            'Проблема всё ещё сохраняется. Прикладываю дополнительную информацию.',
+            parsedBody: 'Проблема всё ещё сохраняется. Прикладываю дополнительную информацию.',
         );
 
         $firstResult = $processor->process(
@@ -227,8 +223,7 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
         $processor = $this->processorForReply(
             requester: $requester,
             ticket: $ticket,
-            parsedBody:
-            'После закрытия обращения ошибка появилась снова.',
+            parsedBody: 'После закрытия обращения ошибка появилась снова.',
         );
 
         $result = $processor->process(
@@ -299,26 +294,19 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
         );
 
         return User::query()->create([
-            'email' =>
-                "requester-{$token}@example.test",
+            'email' => "requester-{$token}@example.test",
 
-            'username' =>
-                "requester-{$token}",
+            'username' => "requester-{$token}",
 
-            'first_name' =>
-                'Mail',
+            'first_name' => 'Mail',
 
-            'last_name' =>
-                'Requester',
+            'last_name' => 'Requester',
 
-            'password' =>
-                'test-password',
+            'password' => 'test-password',
 
-            'email_verified_at' =>
-                now(),
+            'email_verified_at' => now(),
 
-            'is_active' =>
-                true,
+            'is_active' => true,
         ]);
     }
 
@@ -329,26 +317,19 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                'Test Support',
+            'name' => 'Test Support',
 
-            'email_address' =>
-                "support-{$token}@example.test",
+            'email_address' => "support-{$token}@example.test",
 
-            'display_name' =>
-                'Test Support',
+            'display_name' => 'Test Support',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -367,50 +348,35 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
         );
 
         return Ticket::query()->create([
-            'ticket_number' =>
-                "TEST-{$token}",
+            'ticket_number' => "TEST-{$token}",
 
-            'requester_id' =>
-                $requester->id,
+            'requester_id' => $requester->id,
 
-            'category_id' =>
-                null,
+            'category_id' => null,
 
-            'assignee_id' =>
-                null,
+            'assignee_id' => null,
 
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'subject' =>
-                'Не работает авторизация',
+            'subject' => 'Не работает авторизация',
 
-            'priority' =>
-                Ticket::PRIORITY_MEDIUM,
+            'priority' => Ticket::PRIORITY_MEDIUM,
 
-            'status' =>
-                $status,
+            'status' => $status,
 
-            'source' =>
-                Ticket::SOURCE_EMAIL,
+            'source' => Ticket::SOURCE_EMAIL,
 
-            'service' =>
-                null,
+            'service' => null,
 
-            'description' =>
-                'Первоначальное обращение клиента.',
+            'description' => 'Первоначальное обращение клиента.',
 
-            'last_reply_at' =>
-                now()->subDays(2),
+            'last_reply_at' => now()->subDays(2),
 
-            'resolved_at' =>
-                $resolvedAt,
+            'resolved_at' => $resolvedAt,
 
-            'closed_at' =>
-                $closedAt,
+            'closed_at' => $closedAt,
         ]);
     }
 
@@ -423,94 +389,71 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
         );
 
         return EmailMessage::query()->create([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'mailbox_channel_id' =>
-                null,
+            'mailbox_channel_id' => null,
 
-            'ticket_id' =>
-                null,
+            'ticket_id' => null,
 
-            'ticket_reply_id' =>
-                null,
+            'ticket_reply_id' => null,
 
-            'direction' =>
-                EmailMessageDirection::Incoming,
+            'direction' => EmailMessageDirection::Incoming,
 
-            'driver' =>
-                MailboxDriver::Imap,
+            'driver' => MailboxDriver::Imap,
 
-            'status' =>
-                EmailMessageStatus::Received,
+            'status' => EmailMessageStatus::Received,
 
-            'idempotency_key' =>
-                "test-incoming-reply-{$token}",
+            'idempotency_key' => "test-incoming-reply-{$token}",
 
-            'external_message_id' =>
-                "external-reply-{$token}",
+            'external_message_id' => "external-reply-{$token}",
 
-            'internet_message_id' =>
-                "<reply-{$token}@example.test>",
+            'internet_message_id' => "<reply-{$token}@example.test>",
 
-            'in_reply_to_message_id' =>
-                '<original-agent-message@example.test>',
+            'in_reply_to_message_id' => '<original-agent-message@example.test>',
 
             'reference_message_ids' => [
                 '<original-agent-message@example.test>',
             ],
 
-            'sender_address' =>
-                $requester->email,
+            'sender_address' => $requester->email,
 
-            'sender_name' =>
-                trim(
-                    "{$requester->first_name} {$requester->last_name}"
-                ),
+            'sender_name' => trim(
+                "{$requester->first_name} {$requester->last_name}"
+            ),
 
             'to_recipients' => [
-                [
-                    'address' =>
-                        $mailbox->email_address,
+            [
+                'address' => $mailbox->email_address,
 
-                    'name' =>
-                        $mailbox->display_name,
-                ],
+                'name' => $mailbox->display_name,
+            ],
             ],
 
-            'cc_recipients' =>
-                [],
+            'cc_recipients' => [],
 
-            'bcc_recipients' =>
-                [],
+            'bcc_recipients' => [],
 
-            'reply_to_recipients' =>
-                [],
+            'reply_to_recipients' => [],
 
-            'subject' =>
-                'Re: Не работает авторизация',
+            'subject' => 'Re: Не работает авторизация',
 
-            'text_body' =>
-                'Проблема всё ещё сохраняется.',
+            'text_body' => 'Проблема всё ещё сохраняется.',
 
-            'html_body' =>
-                null,
+            'html_body' => null,
 
             'headers' => [
-                'in-reply-to' => [
-                    '<original-agent-message@example.test>',
-                ],
-
-                'references' => [
-                    '<original-agent-message@example.test>',
-                ],
+            'in-reply-to' => [
+                '<original-agent-message@example.test>',
             ],
 
-            'metadata' =>
-                [],
+            'references' => [
+                '<original-agent-message@example.test>',
+            ],
+            ],
 
-            'received_at' =>
-                now(),
+            'metadata' => [],
+
+            'received_at' => now(),
         ]);
     }
 
@@ -530,11 +473,9 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
                 new InboundEmailDecisionData(
                     shouldProcess: true,
 
-                    classification:
-                    InboundEmailClassification::Human,
+                    classification: InboundEmailClassification::Human,
 
-                    reason:
-                    'Human customer reply.',
+                    reason: 'Human customer reply.',
                 )
             );
 
@@ -547,23 +488,17 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
             ->once()
             ->andReturn(
                 new ParsedInboundEmailContentData(
-                    body:
-                    $parsedBody,
+                    body: $parsedBody,
 
-                    source:
-                    'text',
+                    source: 'text',
 
-                    quotedTextRemoved:
-                    true,
+                    quotedTextRemoved: true,
 
-                    signatureRemoved:
-                    false,
+                    signatureRemoved: false,
 
-                    originalLength:
-                    180,
+                    originalLength: 180,
 
-                    parsedLength:
-                    mb_strlen($parsedBody),
+                    parsedLength: mb_strlen($parsedBody),
                 )
             );
 

@@ -134,8 +134,7 @@ class EmailMessageDiagnosticsController extends Controller
             $query
                 ->latest('id')
                 ->paginate(
-                    perPage:
-                    $request->integer(
+                    perPage: $request->integer(
                         'per_page',
                         25
                     )

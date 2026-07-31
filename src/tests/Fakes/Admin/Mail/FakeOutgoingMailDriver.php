@@ -16,8 +16,7 @@ class FakeOutgoingMailDriver implements OutgoingMailDriver
     public function __construct(
         public MailConnectionTestResultData $testResult,
         public ?Throwable $testException = null,
-    ) {
-    }
+    ) {}
 
     public function driver(): MailboxDriver
     {

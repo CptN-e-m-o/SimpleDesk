@@ -20,8 +20,7 @@ class MailDriverRegistry
         private readonly Container $container,
         private readonly array $incomingDrivers,
         private readonly array $outgoingDrivers,
-    ) {
-    }
+    ) {}
 
     public function incoming(
         MailboxDriver $driver
@@ -32,7 +31,7 @@ class MailDriverRegistry
 
         $class = $this->incomingDrivers[$driver->value] ?? null;
 
-        if (!is_string($class) || $class === '') {
+        if (! is_string($class) || $class === '') {
             throw new MailDriverNotRegisteredException(
                 driver: $driver,
                 direction: MailboxChannelDirection::Incoming,
@@ -41,19 +40,19 @@ class MailDriverRegistry
 
         $instance = $this->container->make($class);
 
-        if (!$instance instanceof IncomingMailDriver) {
+        if (! $instance instanceof IncomingMailDriver) {
             throw new InvalidMailDriverException(
                 "Class [{$class}] must implement "
-                . IncomingMailDriver::class
-                . '.'
+                .IncomingMailDriver::class
+                .'.'
             );
         }
 
         if ($instance->driver() !== $driver) {
             throw new InvalidMailDriverException(
                 "Class [{$class}] returned driver "
-                . "[{$instance->driver()->value}] instead of "
-                . "[{$driver->value}]."
+                ."[{$instance->driver()->value}] instead of "
+                ."[{$driver->value}]."
             );
         }
 
@@ -71,7 +70,7 @@ class MailDriverRegistry
 
         $class = $this->outgoingDrivers[$driver->value] ?? null;
 
-        if (!is_string($class) || $class === '') {
+        if (! is_string($class) || $class === '') {
             throw new MailDriverNotRegisteredException(
                 driver: $driver,
                 direction: MailboxChannelDirection::Outgoing,
@@ -80,19 +79,19 @@ class MailDriverRegistry
 
         $instance = $this->container->make($class);
 
-        if (!$instance instanceof OutgoingMailDriver) {
+        if (! $instance instanceof OutgoingMailDriver) {
             throw new InvalidMailDriverException(
                 "Class [{$class}] must implement "
-                . OutgoingMailDriver::class
-                . '.'
+                .OutgoingMailDriver::class
+                .'.'
             );
         }
 
         if ($instance->driver() !== $driver) {
             throw new InvalidMailDriverException(
                 "Class [{$class}] returned driver "
-                . "[{$instance->driver()->value}] instead of "
-                . "[{$driver->value}]."
+                ."[{$instance->driver()->value}] instead of "
+                ."[{$driver->value}]."
             );
         }
 
@@ -104,8 +103,7 @@ class MailDriverRegistry
     public function availableIncomingDrivers(): array
     {
         return array_values(array_filter(array_map(
-            static fn (string $driver): ?MailboxDriver =>
-            MailboxDriver::tryFrom($driver),
+            static fn (string $driver): ?MailboxDriver => MailboxDriver::tryFrom($driver),
             array_keys($this->incomingDrivers),
         )));
     }
@@ -113,8 +111,7 @@ class MailDriverRegistry
     public function availableOutgoingDrivers(): array
     {
         return array_values(array_filter(array_map(
-            static fn (string $driver): ?MailboxDriver =>
-            MailboxDriver::tryFrom($driver),
+            static fn (string $driver): ?MailboxDriver => MailboxDriver::tryFrom($driver),
             array_keys($this->outgoingDrivers),
         )));
     }

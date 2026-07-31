@@ -23,8 +23,7 @@ class IncomingEmailMessagePersister
         private readonly MailAttachmentStorageService $attachmentStorage,
         private readonly RejectedEmailAttachmentPersister $rejectedAttachments,
         private readonly int $processingLockSeconds,
-    ) {
-    }
+    ) {}
 
     public function persist(
         MailboxChannel $channel,
@@ -65,8 +64,7 @@ class IncomingEmailMessagePersister
             }
 
             foreach (
-                array_values($message->attachments)
-                as $position => $attachment
+                array_values($message->attachments) as $position => $attachment
             ) {
                 $failureCode =
                     'attachment_storage_failed';
@@ -83,8 +81,7 @@ class IncomingEmailMessagePersister
 
             $this->rejectedAttachments->persist(
                 emailMessage: $emailMessage,
-                attachments:
-                $message->rejectedAttachments,
+                attachments: $message->rejectedAttachments,
             );
 
             $failureCode =
@@ -97,21 +94,17 @@ class IncomingEmailMessagePersister
                 : [];
 
             $metadata['attachment_processing'] = [
-                'stored_count' =>
-                    count($message->attachments),
+                'stored_count' => count($message->attachments),
 
-                'rejected_count' =>
-                    count(
-                        $message->rejectedAttachments
-                    ),
+                'rejected_count' => count(
+                    $message->rejectedAttachments
+                ),
 
-                'completed_at' =>
-                    now()->toIso8601String(),
+                'completed_at' => now()->toIso8601String(),
             ];
 
             $emailMessage->forceFill([
-                'status' =>
-                    EmailMessageStatus::Received,
+                'status' => EmailMessageStatus::Received,
 
                 'metadata' => $metadata,
 
@@ -130,8 +123,7 @@ class IncomingEmailMessagePersister
             );
 
             return new PersistedInboundMessageData(
-                emailMessage:
-                $emailMessage->fresh([
+                emailMessage: $emailMessage->fresh([
                     'attachments',
                     'attachmentRejections',
                 ]),
@@ -141,38 +133,31 @@ class IncomingEmailMessagePersister
             );
         } catch (Throwable $exception) {
             $emailMessage->forceFill([
-                'status' =>
-                    EmailMessageStatus::Failed,
+                'status' => EmailMessageStatus::Failed,
 
                 'processing_started_at' => null,
 
                 'failed_at' => now(),
 
-                'failure_code' =>
-                    $failureCode,
+                'failure_code' => $failureCode,
 
-                'failure_message' =>
-                    mb_substr(
-                        $exception->getMessage(),
-                        0,
-                        10000
-                    ),
+                'failure_message' => mb_substr(
+                    $exception->getMessage(),
+                    0,
+                    10000
+                ),
             ])->save();
 
             throw new InboundMessagePersistenceException(
-                emailMessageId:
-                $emailMessage->id,
+                emailMessageId: $emailMessage->id,
 
-                errorCode:
-                $failureCode,
+                errorCode: $failureCode,
 
-                message:
-                $exception->getMessage(),
+                message: $exception->getMessage(),
 
                 retryable: true,
 
-                previous:
-                $exception,
+                previous: $exception,
             );
         }
     }
@@ -239,8 +224,7 @@ class IncomingEmailMessagePersister
                         $this->messageAttributes(
                             channel: $channel,
                             message: $message,
-                            idempotencyKey:
-                            $idempotencyKey,
+                            idempotencyKey: $idempotencyKey,
                         )
                     )->save();
 
@@ -257,8 +241,7 @@ class IncomingEmailMessagePersister
                             $this->messageAttributes(
                                 channel: $channel,
                                 message: $message,
-                                idempotencyKey:
-                                $idempotencyKey,
+                                idempotencyKey: $idempotencyKey,
                             )
                         );
 
@@ -277,82 +260,59 @@ class IncomingEmailMessagePersister
         string $idempotencyKey,
     ): array {
         return [
-            'mailbox_id' =>
-                $channel->mailbox_id,
+            'mailbox_id' => $channel->mailbox_id,
 
-            'mailbox_channel_id' =>
-                $channel->id,
+            'mailbox_channel_id' => $channel->id,
 
-            'direction' =>
-                EmailMessageDirection::Incoming,
+            'direction' => EmailMessageDirection::Incoming,
 
-            'driver' =>
-                $channel->driver,
+            'driver' => $channel->driver,
 
-            'status' =>
-                EmailMessageStatus::Processing,
+            'status' => EmailMessageStatus::Processing,
 
-            'idempotency_key' =>
-                $idempotencyKey,
+            'idempotency_key' => $idempotencyKey,
 
-            'external_message_id' =>
-                $message->externalMessageId,
+            'external_message_id' => $message->externalMessageId,
 
-            'internet_message_id' =>
-                $message->internetMessageId,
+            'internet_message_id' => $message->internetMessageId,
 
-            'in_reply_to_message_id' =>
-                $message->inReplyToMessageId,
+            'in_reply_to_message_id' => $message->inReplyToMessageId,
 
-            'reference_message_ids' =>
-                $message->references,
+            'reference_message_ids' => $message->references,
 
-            'sender_address' =>
-                $message->from->address,
+            'sender_address' => $message->from->address,
 
-            'sender_name' =>
-                $message->from->name,
+            'sender_name' => $message->from->name,
 
-            'to_recipients' =>
-                $this->addressesToArray(
-                    $message->to
-                ),
+            'to_recipients' => $this->addressesToArray(
+                $message->to
+            ),
 
-            'cc_recipients' =>
-                $this->addressesToArray(
-                    $message->cc
-                ),
+            'cc_recipients' => $this->addressesToArray(
+                $message->cc
+            ),
 
-            'bcc_recipients' =>
-                $this->addressesToArray(
-                    $message->bcc
-                ),
+            'bcc_recipients' => $this->addressesToArray(
+                $message->bcc
+            ),
 
-            'reply_to_recipients' =>
-                $this->addressesToArray(
-                    $message->replyTo
-                ),
+            'reply_to_recipients' => $this->addressesToArray(
+                $message->replyTo
+            ),
 
-            'subject' =>
-                $message->subject,
+            'subject' => $message->subject,
 
-            'text_body' =>
-                $message->textBody,
+            'text_body' => $message->textBody,
 
-            'html_body' =>
-                $message->htmlBody,
+            'html_body' => $message->htmlBody,
 
-            'headers' =>
-                $message->headers,
+            'headers' => $message->headers,
 
-            'metadata' =>
-                $message->metadata,
+            'metadata' => $message->metadata,
 
-            'received_at' =>
-                $message->receivedAt,
+            'received_at' => $message->receivedAt,
 
-            'processing_started_at' =>
-                now(),
+            'processing_started_at' => now(),
 
             'processed_at' => null,
 
@@ -363,7 +323,7 @@ class IncomingEmailMessagePersister
     }
 
     /**
-     * @param array<int, MailAddressData> $addresses
+     * @param  array<int, MailAddressData>  $addresses
      */
     private function addressesToArray(
         array $addresses

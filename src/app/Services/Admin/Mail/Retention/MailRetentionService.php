@@ -21,17 +21,22 @@ use Throwable;
 class MailRetentionService
 {
     public const CATEGORY_RAW_MESSAGES = 'raw_messages';
+
     public const CATEGORY_CLEAN_ATTACHMENTS = 'clean_attachments';
+
     public const CATEGORY_QUARANTINED_ATTACHMENTS = 'quarantined_attachments';
+
     public const CATEGORY_ATTEMPTS = 'attempts';
+
     public const CATEGORY_QUARANTINES = 'quarantines';
+
     public const CATEGORY_MESSAGES = 'messages';
+
     public const CATEGORY_AUDIT = 'audit';
 
     public function __construct(
         private readonly FilesystemFactory $filesystem,
-    ) {
-    }
+    ) {}
 
     public static function categories(): array
     {
@@ -65,7 +70,7 @@ class MailRetentionService
         }
 
         foreach ($categories as $category) {
-            if (!$this->categoryEnabled($category)) {
+            if (! $this->categoryEnabled($category)) {
                 $stats[$category]['note'] = 'disabled by configuration';
 
                 continue;
@@ -521,7 +526,7 @@ class MailRetentionService
         );
 
         if (
-            !is_string($modelClass)
+            ! is_string($modelClass)
             || trim($modelClass) === ''
         ) {
             $stats['note'] = 'audit model is not configured';
@@ -532,8 +537,8 @@ class MailRetentionService
         $modelClass = trim($modelClass);
 
         if (
-            !class_exists($modelClass)
-            || !is_subclass_of($modelClass, Model::class)
+            ! class_exists($modelClass)
+            || ! is_subclass_of($modelClass, Model::class)
         ) {
             $stats['note'] = "audit model [{$modelClass}] was not found";
 
@@ -553,7 +558,7 @@ class MailRetentionService
             return;
         }
 
-        $model = new $modelClass();
+        $model = new $modelClass;
         $keyName = $model->getKeyName();
 
         $ids = $modelClass::query()
@@ -622,14 +627,14 @@ class MailRetentionService
     ): array {
         $storage = $this->filesystem->disk($disk);
 
-        if (!$storage->exists($path)) {
+        if (! $storage->exists($path)) {
             return [
                 'deleted' => 0,
                 'missing' => 1,
             ];
         }
 
-        if (!$storage->delete($path)) {
+        if (! $storage->delete($path)) {
             throw new \RuntimeException(
                 "Unable to delete retained mail file [{$disk}:{$path}]."
             );

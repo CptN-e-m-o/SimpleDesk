@@ -22,6 +22,5 @@ final readonly class ImapChannelConfigurationData
         public bool $storeRawMessage,
         public int $maxRawMessageBytes,
         public int $maxAttachmentBytes,
-    ) {
-    }
+    ) {}
 }

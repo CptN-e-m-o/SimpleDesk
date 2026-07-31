@@ -61,14 +61,11 @@ class AttachmentScanRecoveryServiceTest extends TestCase
             emailMessage: $message,
             scanStatus: EmailAttachmentScanStatus::Pending,
             attributes: [
-                'scan_started_at' =>
-                    now()->subMinutes(20),
+                'scan_started_at' => now()->subMinutes(20),
 
-                'created_at' =>
-                    now()->subMinutes(30),
+                'created_at' => now()->subMinutes(30),
 
-                'updated_at' =>
-                    now()->subMinutes(20),
+                'updated_at' => now()->subMinutes(20),
             ],
         );
 
@@ -125,20 +122,15 @@ class AttachmentScanRecoveryServiceTest extends TestCase
             emailMessage: $message,
             scanStatus: EmailAttachmentScanStatus::Pending,
             attributes: [
-                'scan_started_at' =>
-                    now()->subMinutes(10),
+                'scan_started_at' => now()->subMinutes(10),
 
-                'created_at' =>
-                    now()->subMinutes(20),
+                'created_at' => now()->subMinutes(20),
 
-                'updated_at' =>
-                    now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
 
-                'scan_failure_code' =>
-                    'previous_failure',
+                'scan_failure_code' => 'previous_failure',
 
-                'scan_failure_message' =>
-                    'Previous antivirus failure.',
+                'scan_failure_message' => 'Previous antivirus failure.',
             ],
         );
 
@@ -211,23 +203,17 @@ class AttachmentScanRecoveryServiceTest extends TestCase
             emailMessage: $message,
             scanStatus: EmailAttachmentScanStatus::NotScanned,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(10),
+                'created_at' => now()->subMinutes(10),
 
-                'updated_at' =>
-                    now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
 
-                'scan_started_at' =>
-                    null,
+                'scan_started_at' => null,
 
-                'scanned_at' =>
-                    now()->subMinutes(20),
+                'scanned_at' => now()->subMinutes(20),
 
-                'scan_failure_code' =>
-                    'legacy_failure',
+                'scan_failure_code' => 'legacy_failure',
 
-                'scan_failure_message' =>
-                    'Legacy failure information.',
+                'scan_failure_message' => 'Legacy failure information.',
             ],
         );
 
@@ -300,14 +286,11 @@ class AttachmentScanRecoveryServiceTest extends TestCase
             emailMessage: $message,
             scanStatus: EmailAttachmentScanStatus::Pending,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(10),
+                'created_at' => now()->subMinutes(10),
 
-                'updated_at' =>
-                    now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
 
-                'scan_started_at' =>
-                    null,
+                'scan_started_at' => null,
             ],
         );
 
@@ -369,11 +352,9 @@ class AttachmentScanRecoveryServiceTest extends TestCase
             scanStatus: EmailAttachmentScanStatus::NotScanned,
             position: 0,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(20),
+                'created_at' => now()->subMinutes(20),
 
-                'updated_at' =>
-                    now()->subMinutes(20),
+                'updated_at' => now()->subMinutes(20),
             ],
         );
 
@@ -382,11 +363,9 @@ class AttachmentScanRecoveryServiceTest extends TestCase
             scanStatus: EmailAttachmentScanStatus::NotScanned,
             position: 1,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(20),
+                'created_at' => now()->subMinutes(20),
 
-                'updated_at' =>
-                    now()->subMinutes(20),
+                'updated_at' => now()->subMinutes(20),
             ],
         );
 
@@ -456,26 +435,19 @@ class AttachmentScanRecoveryServiceTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Scan Recovery Mailbox {$token}",
+            'name' => "Scan Recovery Mailbox {$token}",
 
-            'email_address' =>
-                "scan-recovery-{$token}@example.test",
+            'email_address' => "scan-recovery-{$token}@example.test",
 
-            'display_name' =>
-                'Scan Recovery Mailbox',
+            'display_name' => 'Scan Recovery Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -487,85 +459,61 @@ class AttachmentScanRecoveryServiceTest extends TestCase
         );
 
         return EmailMessage::query()->create([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'mailbox_channel_id' =>
-                null,
+            'mailbox_channel_id' => null,
 
-            'ticket_id' =>
-                null,
+            'ticket_id' => null,
 
-            'ticket_reply_id' =>
-                null,
+            'ticket_reply_id' => null,
 
-            'direction' =>
-                EmailMessageDirection::Incoming,
+            'direction' => EmailMessageDirection::Incoming,
 
-            'driver' =>
-                null,
+            'driver' => null,
 
-            'status' =>
-                EmailMessageStatus::Received,
+            'status' => EmailMessageStatus::Received,
 
-            'idempotency_key' =>
-                "scan-recovery-message-{$token}",
+            'idempotency_key' => "scan-recovery-message-{$token}",
 
-            'external_message_id' =>
-                "external-{$token}",
+            'external_message_id' => "external-{$token}",
 
-            'internet_message_id' =>
-                "<scan-recovery-{$token}@example.test>",
+            'internet_message_id' => "<scan-recovery-{$token}@example.test>",
 
-            'in_reply_to_message_id' =>
-                null,
+            'in_reply_to_message_id' => null,
 
-            'reference_message_ids' =>
-                [],
+            'reference_message_ids' => [],
 
-            'sender_address' =>
-                'customer@example.test',
+            'sender_address' => 'customer@example.test',
 
-            'sender_name' =>
-                'Test Customer',
+            'sender_name' => 'Test Customer',
 
             'to_recipients' => [
                 [
-                    'address' =>
-                        $mailbox->email_address,
+                    'address' => $mailbox->email_address,
 
-                    'name' =>
-                        $mailbox->display_name,
+                    'name' => $mailbox->display_name,
                 ],
             ],
 
-            'cc_recipients' =>
-                [],
+            'cc_recipients' => [],
 
-            'bcc_recipients' =>
-                [],
+            'bcc_recipients' => [],
 
-            'reply_to_recipients' =>
-                [],
+            'reply_to_recipients' => [],
 
-            'subject' =>
-                'Attachment scan recovery test',
+            'subject' => 'Attachment scan recovery test',
 
-            'text_body' =>
-                'Attachment scan recovery test body.',
+            'text_body' => 'Attachment scan recovery test body.',
 
-            'html_body' =>
-                null,
+            'html_body' => null,
 
-            'headers' =>
-                [],
+            'headers' => [],
 
             'metadata' => [
                 'test' => true,
             ],
 
-            'received_at' =>
-                now(),
+            'received_at' => now(),
         ]);
     }
 
@@ -579,85 +527,65 @@ class AttachmentScanRecoveryServiceTest extends TestCase
             (string) Str::ulid()
         );
 
-        $attachment = new EmailAttachment();
+        $attachment = new EmailAttachment;
 
         $attachment->forceFill(
             array_merge(
                 [
-                    'email_message_id' =>
-                        $emailMessage->id,
+                    'email_message_id' => $emailMessage->id,
 
-                    'position' =>
-                        $position,
+                    'position' => $position,
 
-                    'external_id' =>
-                        "scan-recovery-external-{$token}",
+                    'external_id' => "scan-recovery-external-{$token}",
 
-                    'deduplication_key' =>
-                        hash(
-                            'sha256',
-                            $emailMessage->id
-                            . '|'
-                            . $position
-                            . '|'
-                            . $token
-                        ),
+                    'deduplication_key' => hash(
+                        'sha256',
+                        $emailMessage->id
+                        .'|'
+                        .$position
+                        .'|'
+                        .$token
+                    ),
 
-                    'file_name' =>
-                        "scan-recovery-{$position}.txt",
+                    'file_name' => "scan-recovery-{$position}.txt",
 
-                    'mime_type' =>
-                        'text/plain',
+                    'mime_type' => 'text/plain',
 
-                    'size' =>
-                        20,
+                    'size' => 20,
 
-                    'disk' =>
-                        'local',
+                    'disk' => 'local',
 
-                    'path' =>
-                        "testing/scan-recovery/"
-                        . $emailMessage->id
-                        . "/{$token}.txt",
+                    'path' => 'testing/scan-recovery/'
+                        .$emailMessage->id
+                        ."/{$token}.txt",
 
-                    'checksum_sha256' =>
-                        hash(
-                            'sha256',
-                            "scan-recovery-{$token}"
-                        ),
+                    'checksum_sha256' => hash(
+                        'sha256',
+                        "scan-recovery-{$token}"
+                    ),
 
-                    'content_id' =>
-                        null,
+                    'content_id' => null,
 
-                    'is_inline' =>
-                        false,
+                    'is_inline' => false,
 
-                    'scan_status' =>
-                        $scanStatus,
+                    'scan_status' => $scanStatus,
 
-                    'scan_started_at' =>
-                        null,
+                    'scan_started_at' => null,
 
-                    'scan_attempts' =>
-                        0,
+                    'scan_attempts' => 0,
 
-                    'scanned_at' =>
-                        null,
+                    'scanned_at' => null,
 
-                    'scan_failure_code' =>
-                        null,
+                    'scan_failure_code' => null,
 
-                    'scan_failure_message' =>
-                        null,
+                    'scan_failure_message' => null,
 
-                    'quarantined_at' =>
-                        null,
+                    'quarantined_at' => null,
 
-                    'scan_result' =>
-                        null,
+                    'scan_result' => null,
 
                     'metadata' => [
-                        'test' => true,
+                    'test' => true,
                     ],
                 ],
                 $attributes

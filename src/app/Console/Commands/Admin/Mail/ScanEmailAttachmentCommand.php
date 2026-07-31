@@ -22,7 +22,7 @@ class ScanEmailAttachmentCommand extends Command
         AttachmentScanDispatcher $dispatcher
     ): int {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-antivirus.enabled',
                 false
             )
@@ -55,7 +55,7 @@ class ScanEmailAttachmentCommand extends Command
         );
 
         if (
-            !$force
+            ! $force
             && in_array(
                 $attachment->scan_status,
                 [
@@ -68,8 +68,8 @@ class ScanEmailAttachmentCommand extends Command
         ) {
             $this->warn(
                 "Attachment [{$attachment->id}] has status "
-                . "[{$attachment->scan_status->value}]. "
-                . 'Use --force to rescan it.'
+                ."[{$attachment->scan_status->value}]. "
+                .'Use --force to rescan it.'
             );
 
             return self::FAILURE;
@@ -99,7 +99,7 @@ class ScanEmailAttachmentCommand extends Command
         );
 
         if (
-            !$dispatcher->dispatch(
+            ! $dispatcher->dispatch(
                 $attachmentId
             )
         ) {

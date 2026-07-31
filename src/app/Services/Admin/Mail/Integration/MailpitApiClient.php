@@ -23,7 +23,7 @@ class MailpitApiClient
         int $timeoutSeconds,
     ): array {
         $deadline = microtime(true) + max(1, $timeoutSeconds);
-        $query = 'subject:"' . $this->escapeSearchPhrase($subject) . '"';
+        $query = 'subject:"'.$this->escapeSearchPhrase($subject).'"';
 
         do {
             foreach ($this->search($query) as $message) {
@@ -43,7 +43,7 @@ class MailpitApiClient
 
         throw new RuntimeException(
             "Mailpit did not receive message with subject [{$subject}] "
-            . "within {$timeoutSeconds} seconds."
+            ."within {$timeoutSeconds} seconds."
         );
     }
 
@@ -68,7 +68,7 @@ class MailpitApiClient
     {
         return $this->json(
             $this->jsonRequest()
-                ->get('/api/v1/message/' . rawurlencode($id))
+                ->get('/api/v1/message/'.rawurlencode($id))
                 ->throw()
         );
     }
@@ -81,9 +81,9 @@ class MailpitApiClient
             ->accept('*/*')
             ->get(
                 '/api/v1/message/'
-                . rawurlencode($messageId)
-                . '/part/'
-                . rawurlencode($partId)
+                .rawurlencode($messageId)
+                .'/part/'
+                .rawurlencode($partId)
             )
             ->throw()
             ->body();
@@ -153,7 +153,7 @@ class MailpitApiClient
     {
         $payload = $response->json();
 
-        if (!is_array($payload)) {
+        if (! is_array($payload)) {
             throw new RuntimeException(
                 'Mailpit returned an invalid JSON response.'
             );

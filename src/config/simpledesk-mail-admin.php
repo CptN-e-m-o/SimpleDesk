@@ -1,5 +1,7 @@
 <?php
 
+use App\Jobs\Admin\Mail\ScanEmailAttachmentJob;
+
 return [
     'actions' => [
         'dispatch_lock_seconds' => env(
@@ -11,7 +13,7 @@ return [
     'attachment_rescan' => [
         'job' => env(
             'MAIL_ADMIN_ATTACHMENT_SCAN_JOB',
-            App\Jobs\Admin\Mail\ScanEmailAttachmentJob::class,
+            ScanEmailAttachmentJob::class,
         ),
     ],
 ];

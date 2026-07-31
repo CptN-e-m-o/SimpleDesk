@@ -193,20 +193,15 @@ class OutgoingMailFailoverServiceTest extends TestCase
 
         $primaryException =
             new MailDriverException(
-                message:
-                'Primary SMTP connection failed.',
+                message: 'Primary SMTP connection failed.',
 
-                driverErrorCode:
-                'smtp_connection_failed',
+                driverErrorCode: 'smtp_connection_failed',
 
-                retryable:
-                true,
+                retryable: true,
 
-                failoverAllowed:
-                true,
+                failoverAllowed: true,
 
-                affectsChannelHealth:
-                true,
+                affectsChannelHealth: true,
 
                 context: [
                     'operation' => 'send',
@@ -225,8 +220,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                 fn (
                     MailboxChannel $channel,
                     OutgoingEmailMessageData $sentPayload,
-                ): bool =>
-                    $channel->id === $primary->id
+                ): bool => $channel->id === $primary->id
                     && $sentPayload === $payload
             )
             ->andThrow(
@@ -241,8 +235,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                 fn (
                     MailboxChannel $channel,
                     OutgoingEmailMessageData $sentPayload,
-                ): bool =>
-                    $channel->id === $fallback->id
+                ): bool => $channel->id === $fallback->id
                     && $sentPayload === $payload
             )
             ->andReturn(
@@ -300,8 +293,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                     MailboxChannel $channel,
                     ?string $errorCode,
                     string $errorMessage,
-                ): bool =>
-                    $channel->id === $primary->id
+                ): bool => $channel->id === $primary->id
                     && $errorCode
                     === 'smtp_connection_failed'
                     && $errorMessage
@@ -315,8 +307,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                 fn (
                     MailboxChannel $channel,
                     bool $hasActivity,
-                ): bool =>
-                    $channel->id === $fallback->id
+                ): bool => $channel->id === $fallback->id
                     && $hasActivity
             );
 
@@ -410,20 +401,15 @@ class OutgoingMailFailoverServiceTest extends TestCase
 
         $driverException =
             new MailDriverException(
-                message:
-                'Message was rejected permanently.',
+                message: 'Message was rejected permanently.',
 
-                driverErrorCode:
-                'smtp_message_rejected',
+                driverErrorCode: 'smtp_message_rejected',
 
-                retryable:
-                false,
+                retryable: false,
 
-                failoverAllowed:
-                false,
+                failoverAllowed: false,
 
-                affectsChannelHealth:
-                false,
+                affectsChannelHealth: false,
             );
 
         $driver = Mockery::mock(
@@ -437,8 +423,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                 fn (
                     MailboxChannel $channel,
                     OutgoingEmailMessageData $sentPayload,
-                ): bool =>
-                    $channel->id === $primary->id
+                ): bool => $channel->id === $primary->id
                     && $sentPayload === $payload
             )
             ->andThrow(
@@ -463,7 +448,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                 'Expected AllMailChannelsFailedException was not thrown.'
             );
         } catch (
-        AllMailChannelsFailedException $exception
+            AllMailChannelsFailedException $exception
         ) {
             $this->assertNotSame(
                 '',
@@ -583,7 +568,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                 'Expected NoAvailableMailChannelException was not thrown.'
             );
         } catch (
-        NoAvailableMailChannelException $exception
+            NoAvailableMailChannelException $exception
         ) {
             $this->assertNotSame(
                 '',
@@ -621,8 +606,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
             mailbox: $mailbox,
             status: EmailMessageStatus::Sending,
             attributes: [
-                'processing_started_at' =>
-                    now()->subSeconds(30),
+                'processing_started_at' => now()->subSeconds(30),
             ],
         );
 
@@ -727,8 +711,7 @@ class OutgoingMailFailoverServiceTest extends TestCase
                     fn (
                         MailboxChannel $channel,
                         bool $hasActivity,
-                    ): bool =>
-                        $channel->id
+                    ): bool => $channel->id
                         === $successChannel->id
                         && $hasActivity
                 );
@@ -754,26 +737,19 @@ class OutgoingMailFailoverServiceTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Failover Mailbox {$token}",
+            'name' => "Failover Mailbox {$token}",
 
-            'email_address' =>
-                "failover-{$token}@example.test",
+            'email_address' => "failover-{$token}@example.test",
 
-            'display_name' =>
-                'Failover Mailbox',
+            'display_name' => 'Failover Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -783,38 +759,28 @@ class OutgoingMailFailoverServiceTest extends TestCase
         bool $primary,
         int $failoverOrder,
     ): MailboxChannel {
-        $channel = new MailboxChannel();
+        $channel = new MailboxChannel;
 
         $channel->forceFill([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'provider_connection_id' =>
-                null,
+            'provider_connection_id' => null,
 
-            'name' =>
-                $name,
+            'name' => $name,
 
-            'direction' =>
-                MailboxChannelDirection::Outgoing,
+            'direction' => MailboxChannelDirection::Outgoing,
 
-            'driver' =>
-                MailboxDriver::Smtp,
+            'driver' => MailboxDriver::Smtp,
 
-            'is_primary' =>
-                $primary,
+            'is_primary' => $primary,
 
-            'failover_order' =>
-                $failoverOrder,
+            'failover_order' => $failoverOrder,
 
-            'is_enabled' =>
-                true,
+            'is_enabled' => true,
 
-            'configuration' =>
-                [],
+            'configuration' => [],
 
-            'health_status' =>
-                MailboxHealthStatus::Unknown,
+            'health_status' => MailboxHealthStatus::Unknown,
         ])->save();
 
         return $channel->fresh();
@@ -833,105 +799,73 @@ class OutgoingMailFailoverServiceTest extends TestCase
         return EmailMessage::query()->create(
             array_merge(
                 [
-                    'mailbox_id' =>
-                        $mailbox->id,
+                    'mailbox_id' => $mailbox->id,
 
-                    'mailbox_channel_id' =>
-                        null,
+                    'mailbox_channel_id' => null,
 
-                    'ticket_id' =>
-                        null,
+                    'ticket_id' => null,
 
-                    'ticket_reply_id' =>
-                        null,
+                    'ticket_reply_id' => null,
 
-                    'direction' =>
-                        EmailMessageDirection::Outgoing,
+                    'direction' => EmailMessageDirection::Outgoing,
 
-                    'driver' =>
-                        null,
+                    'driver' => null,
 
-                    'status' =>
-                        $status,
+                    'status' => $status,
 
-                    'idempotency_key' =>
-                        "failover-test-{$token}",
+                    'idempotency_key' => "failover-test-{$token}",
 
-                    'external_message_id' =>
-                        null,
+                    'external_message_id' => null,
 
-                    'internet_message_id' =>
-                        "<queued-{$token}@example.test>",
+                    'internet_message_id' => "<queued-{$token}@example.test>",
 
-                    'in_reply_to_message_id' =>
-                        null,
+                    'in_reply_to_message_id' => null,
 
-                    'reference_message_ids' =>
-                        [],
+                    'reference_message_ids' => [],
 
-                    'sender_address' =>
-                        $mailbox->email_address,
+                    'sender_address' => $mailbox->email_address,
 
-                    'sender_name' =>
-                        $mailbox->display_name,
+                    'sender_name' => $mailbox->display_name,
 
                     'to_recipients' => [
                         [
-                            'address' =>
-                                "customer-{$token}@example.test",
+                            'address' => "customer-{$token}@example.test",
 
-                            'name' =>
-                                'Test Customer',
+                            'name' => 'Test Customer',
                         ],
                     ],
 
-                    'cc_recipients' =>
-                        [],
+                    'cc_recipients' => [],
 
-                    'bcc_recipients' =>
-                        [],
+                    'bcc_recipients' => [],
 
-                    'reply_to_recipients' =>
-                        [],
+                    'reply_to_recipients' => [],
 
-                    'subject' =>
-                        'Outgoing failover test',
+                    'subject' => 'Outgoing failover test',
 
-                    'text_body' =>
-                        'Outgoing failover test body.',
+                    'text_body' => 'Outgoing failover test body.',
 
-                    'html_body' =>
-                        null,
+                    'html_body' => null,
 
-                    'headers' =>
-                        [],
+                    'headers' => [],
 
-                    'metadata' =>
-                        [],
+                    'metadata' => [],
 
-                    'queued_at' =>
-                        now(),
+                    'queued_at' => now(),
 
-                    'processing_started_at' =>
-                        null,
+                    'processing_started_at' => null,
 
-                    'processed_at' =>
-                        null,
+                    'processed_at' => null,
 
-                    'sent_at' =>
-                        null,
+                    'sent_at' => null,
 
-                    'delivered_at' =>
-                        null,
+                    'delivered_at' => null,
 
-                    'failed_at' =>
-                        null,
+                    'failed_at' => null,
 
-                    'failure_code' =>
-                        null,
+                    'failure_code' => null,
 
-                    'failure_message' =>
-                        null,
+                    'failure_message' => null,
                 ],
                 $attributes
             )
@@ -942,90 +876,66 @@ class OutgoingMailFailoverServiceTest extends TestCase
         EmailMessage $message
     ): OutgoingEmailMessageData {
         return new OutgoingEmailMessageData(
-            idempotencyKey:
-            $message->idempotency_key,
+            idempotencyKey: $message->idempotency_key,
 
-            from:
-            new MailAddressData(
-                address:
-                $message->sender_address,
+            from: new MailAddressData(
+                address: $message->sender_address,
 
-                name:
-                $message->sender_name,
+                name: $message->sender_name,
             ),
 
             to: [
                 new MailAddressData(
-                    address:
-                    $message->to_recipients[0]['address'],
+                    address: $message->to_recipients[0]['address'],
 
-                    name:
-                    $message->to_recipients[0]['name'],
+                    name: $message->to_recipients[0]['name'],
                 ),
             ],
 
-            cc:
-            [],
+            cc: [],
 
-            bcc:
-            [],
+            bcc: [],
 
-            replyTo:
-            [],
+            replyTo: [],
 
-            subject:
-            $message->subject,
+            subject: $message->subject,
 
-            textBody:
-            $message->text_body,
+            textBody: $message->text_body,
 
-            htmlBody:
-            $message->html_body,
+            htmlBody: $message->html_body,
 
-            headers:
-            [],
+            headers: [],
 
-            attachments:
-            [],
+            attachments: [],
 
-            internetMessageId:
-            $message->internet_message_id,
+            internetMessageId: $message->internet_message_id,
 
-            inReplyToMessageId:
-            null,
+            inReplyToMessageId: null,
 
-            references:
-            [],
+            references: [],
 
-            metadata:
-            [],
+            metadata: [],
         );
     }
 
     private function sendResult(): OutgoingSendResultData
     {
         return new OutgoingSendResultData(
-            externalMessageId:
-            'provider-message-123',
+            externalMessageId: 'provider-message-123',
 
-            internetMessageId:
-            '<sent-message@example.test>',
+            internetMessageId: '<sent-message@example.test>',
 
             acceptedRecipients: [
                 new MailAddressData(
-                    address:
-                    'customer@example.test',
+                    address: 'customer@example.test',
 
-                    name:
-                    'Test Customer',
+                    name: 'Test Customer',
                 ),
             ],
 
-            rejectedRecipients:
-            [],
+            rejectedRecipients: [],
 
-            sentAt:
-            new DateTimeImmutable(),
+            sentAt: new DateTimeImmutable,
 
             providerResponse: [
                 'code' => 250,

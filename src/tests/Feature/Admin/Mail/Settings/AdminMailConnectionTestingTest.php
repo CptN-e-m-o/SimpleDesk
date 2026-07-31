@@ -411,13 +411,14 @@ class AdminMailConnectionTestingTest extends TestCase
             'admin.mail.test_connections',
         ]);
 
-        $driver = new class implements AttachmentScanDriver {
+        $driver = new class implements AttachmentScanDriver
+        {
             public function name(): string
             {
                 return 'fake-antivirus';
             }
 
-            public function testConnection(): MailConnectionTestResultData
+            public function test_connection(): MailConnectionTestResultData
             {
                 return MailConnectionTestResultData::success(
                     message: 'Antivirus connection succeeded.',
@@ -481,7 +482,7 @@ class AdminMailConnectionTestingTest extends TestCase
         $user = User::factory()->create();
 
         $role = Role::query()->create([
-            'name' => 'mail-connection-admin-' . $user->id,
+            'name' => 'mail-connection-admin-'.$user->id,
             'label' => 'Mail connection administrator',
             'description' => null,
             'type' => 'agent',
@@ -490,7 +491,7 @@ class AdminMailConnectionTestingTest extends TestCase
         ]);
 
         $group = PermissionGroup::query()->create([
-            'key' => 'mail-connection-test-' . $user->id,
+            'key' => 'mail-connection-test-'.$user->id,
             'label' => 'Mail connection test',
             'panel' => 'admin',
             'type' => 'agent',
@@ -529,7 +530,7 @@ class AdminMailConnectionTestingTest extends TestCase
     {
         return Mailbox::query()->create([
             'name' => 'Support',
-            'email_address' => 'support-' . uniqid() . '@example.test',
+            'email_address' => 'support-'.uniqid().'@example.test',
             'display_name' => 'SimpleDesk Support',
             'department_id' => null,
             'is_active' => true,
@@ -541,7 +542,7 @@ class AdminMailConnectionTestingTest extends TestCase
     private function createProviderConnection(): MailProviderConnection
     {
         return MailProviderConnection::query()->create([
-            'name' => 'Shared connection ' . uniqid(),
+            'name' => 'Shared connection '.uniqid(),
             'provider' => 'generic',
             'auth_type' => 'none',
             'account_identifier' => null,

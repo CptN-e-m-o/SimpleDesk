@@ -17,11 +17,10 @@ class AgentTicketEmailReplyService
     public function __construct(
         private readonly TicketAccessService $access,
         private readonly TicketReplyEmailService $mail,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array<int, MailAttachmentData> $attachments
+     * @param  array<int, MailAttachmentData>  $attachments
      */
     public function create(
         Ticket $ticket,
@@ -29,20 +28,20 @@ class AgentTicketEmailReplyService
         string $message,
         array $attachments = [],
     ): TicketReply {
-        if (!$agent->hasPermission('agent.tickets.reply')) {
+        if (! $agent->hasPermission('agent.tickets.reply')) {
             throw new AuthorizationException(
                 'You are not allowed to reply to tickets.'
             );
         }
 
-        if (!$this->access->canView($agent, $ticket)) {
+        if (! $this->access->canView($agent, $ticket)) {
             throw new AuthorizationException(
                 'You do not have access to this ticket.'
             );
         }
 
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-ticketing.outgoing_replies.enabled',
                 true
             )
@@ -65,7 +64,7 @@ class AgentTicketEmailReplyService
                     ->lockForUpdate()
                     ->findOrFail($ticket->id);
 
-                if (!$this->access->canView($agent, $lockedTicket)) {
+                if (! $this->access->canView($agent, $lockedTicket)) {
                     throw new AuthorizationException(
                         'You do not have access to this ticket.'
                     );

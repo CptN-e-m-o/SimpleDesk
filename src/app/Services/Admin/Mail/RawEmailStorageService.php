@@ -14,8 +14,7 @@ class RawEmailStorageService
         private readonly Factory $filesystem,
         private readonly string $disk,
         private readonly string $rootPath,
-    ) {
-    }
+    ) {}
 
     public function store(
         EmailMessage $emailMessage,
@@ -34,15 +33,15 @@ class RawEmailStorageService
             trim($this->rootPath, '/'),
             $createdAt->format('Y'),
             $createdAt->format('m'),
-            "{$emailMessage->id}-" . Str::uuid() . '.eml',
+            "{$emailMessage->id}-".Str::uuid().'.eml',
         ]);
 
         $storage = $this->filesystem->disk($this->disk);
 
-        if (!$storage->put($path, $rawMessage)) {
+        if (! $storage->put($path, $rawMessage)) {
             throw new MailStorageException(
-                "Unable to store raw email message "
-                . "[{$emailMessage->id}]."
+                'Unable to store raw email message '
+                ."[{$emailMessage->id}]."
             );
         }
 

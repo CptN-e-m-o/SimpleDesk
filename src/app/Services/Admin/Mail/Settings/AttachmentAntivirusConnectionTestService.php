@@ -11,8 +11,7 @@ class AttachmentAntivirusConnectionTestService
     public function __construct(
         private readonly AttachmentScanDriver $driver,
         private readonly MailConnectionTestResultSanitizer $sanitizer,
-    ) {
-    }
+    ) {}
 
     public function test(): MailConnectionTestResultData
     {

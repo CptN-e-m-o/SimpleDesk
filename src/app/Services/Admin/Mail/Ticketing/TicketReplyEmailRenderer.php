@@ -40,25 +40,24 @@ class TicketReplyEmailRenderer
 
         $htmlBody =
             '<div class="simpledesk-message">'
-            . $this->textToHtml($message)
-            . '</div>';
+            .$this->textToHtml($message)
+            .'</div>';
 
         if ($signatures !== []) {
             $htmlSignatures = array_map(
-                fn (string $signature): string =>
-                    '<div class="simpledesk-signature">'
-                    . $this->textToHtml($signature)
-                    . '</div>',
+                fn (string $signature): string => '<div class="simpledesk-signature">'
+                    .$this->textToHtml($signature)
+                    .'</div>',
                 $signatures,
             );
 
             $htmlBody .=
                 '<br><div class="simpledesk-signatures">'
-                . implode(
+                .implode(
                     '<br>',
                     $htmlSignatures
                 )
-                . '</div>';
+                .'</div>';
         }
 
         return new RenderedTicketReplyEmailData(
@@ -102,7 +101,7 @@ class TicketReplyEmailRenderer
         );
 
         return mb_substr(
-            $prefix . $subject,
+            $prefix.$subject,
             0,
             255
         );
@@ -148,7 +147,7 @@ class TicketReplyEmailRenderer
 
             if (
                 $departmentSignature !== null
-                && !in_array(
+                && ! in_array(
                     $departmentSignature,
                     $signatures,
                     true

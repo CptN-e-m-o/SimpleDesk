@@ -11,7 +11,7 @@ class InboundMessageAlreadyProcessingException extends RuntimeException
     ) {
         parent::__construct(
             "Inbound email message [{$emailMessageId}] "
-            . 'is already being persisted.'
+            .'is already being persisted.'
         );
     }
 }

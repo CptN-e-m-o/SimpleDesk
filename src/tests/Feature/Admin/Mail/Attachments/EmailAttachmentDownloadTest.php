@@ -147,11 +147,9 @@ class EmailAttachmentDownloadTest extends TestCase
 
         [$attachment] =
             $this->createStoredAttachment(
-                requester:
-                $requester,
+                requester: $requester,
 
-                scanStatus:
-                EmailAttachmentScanStatus::Infected,
+                scanStatus: EmailAttachmentScanStatus::Infected,
             );
 
         $this

@@ -11,7 +11,7 @@ class UserLoginSessionLogger
 {
     public function log(Request $request, User $user, string $guard): UserLoginSession
     {
-        $agent = new Agent();
+        $agent = new Agent;
 
         $userAgent = $request->userAgent();
 

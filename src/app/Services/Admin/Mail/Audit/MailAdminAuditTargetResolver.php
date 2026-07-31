@@ -8,9 +8,9 @@ use App\Enums\Admin\Mail\MailAdminAuditSubjectType;
 use App\Models\Admin\Mail\EmailAttachment;
 use App\Models\Admin\Mail\EmailMessage;
 use App\Models\Admin\Mail\EmailMessageQuarantine;
-use App\Models\Admin\Mail\MailProviderConnection;
 use App\Models\Admin\Mail\Mailbox;
 use App\Models\Admin\Mail\MailboxChannel;
+use App\Models\Admin\Mail\MailProviderConnection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,8 +19,7 @@ class MailAdminAuditTargetResolver
 {
     public function __construct(
         private readonly MailAdminAuditResponseReader $responses,
-    ) {
-    }
+    ) {}
 
     public function resolve(
         MailAdminAuditEvent $event,
@@ -55,33 +54,26 @@ class MailAdminAuditTargetResolver
             MailAdminAuditEvent::MailboxCreated,
             MailAdminAuditEvent::MailboxUpdated,
             MailAdminAuditEvent::MailboxDeleted,
-            MailAdminAuditEvent::MailboxSyncRequested
-            => MailAdminAuditSubjectType::Mailbox,
+            MailAdminAuditEvent::MailboxSyncRequested => MailAdminAuditSubjectType::Mailbox,
 
             MailAdminAuditEvent::ChannelCreated,
             MailAdminAuditEvent::ChannelUpdated,
             MailAdminAuditEvent::ChannelDeleted,
-            MailAdminAuditEvent::ChannelConnectionTested
-            => MailAdminAuditSubjectType::MailboxChannel,
+            MailAdminAuditEvent::ChannelConnectionTested => MailAdminAuditSubjectType::MailboxChannel,
 
             MailAdminAuditEvent::ProviderConnectionCreated,
             MailAdminAuditEvent::ProviderConnectionUpdated,
             MailAdminAuditEvent::ProviderConnectionDeleted,
-            MailAdminAuditEvent::ProviderConnectionTested
-            => MailAdminAuditSubjectType::ProviderConnection,
+            MailAdminAuditEvent::ProviderConnectionTested => MailAdminAuditSubjectType::ProviderConnection,
 
-            MailAdminAuditEvent::OutgoingMessageRetryRequested
-            => MailAdminAuditSubjectType::EmailMessage,
+            MailAdminAuditEvent::OutgoingMessageRetryRequested => MailAdminAuditSubjectType::EmailMessage,
 
-            MailAdminAuditEvent::AttachmentRescanRequested
-            => MailAdminAuditSubjectType::EmailAttachment,
+            MailAdminAuditEvent::AttachmentRescanRequested => MailAdminAuditSubjectType::EmailAttachment,
 
             MailAdminAuditEvent::QuarantineRetryRequested,
-            MailAdminAuditEvent::QuarantineIgnored
-            => MailAdminAuditSubjectType::EmailQuarantine,
+            MailAdminAuditEvent::QuarantineIgnored => MailAdminAuditSubjectType::EmailQuarantine,
 
-            MailAdminAuditEvent::AntivirusConnectionTested
-            => MailAdminAuditSubjectType::Antivirus,
+            MailAdminAuditEvent::AntivirusConnectionTested => MailAdminAuditSubjectType::Antivirus,
         };
     }
 
@@ -92,28 +84,22 @@ class MailAdminAuditTargetResolver
         $parameter = match ($event) {
             MailAdminAuditEvent::MailboxUpdated,
             MailAdminAuditEvent::MailboxDeleted,
-            MailAdminAuditEvent::MailboxSyncRequested
-            => 'mailbox',
+            MailAdminAuditEvent::MailboxSyncRequested => 'mailbox',
 
             MailAdminAuditEvent::ChannelUpdated,
             MailAdminAuditEvent::ChannelDeleted,
-            MailAdminAuditEvent::ChannelConnectionTested
-            => 'channel',
+            MailAdminAuditEvent::ChannelConnectionTested => 'channel',
 
             MailAdminAuditEvent::ProviderConnectionUpdated,
             MailAdminAuditEvent::ProviderConnectionDeleted,
-            MailAdminAuditEvent::ProviderConnectionTested
-            => 'providerConnection',
+            MailAdminAuditEvent::ProviderConnectionTested => 'providerConnection',
 
-            MailAdminAuditEvent::OutgoingMessageRetryRequested
-            => 'message',
+            MailAdminAuditEvent::OutgoingMessageRetryRequested => 'message',
 
-            MailAdminAuditEvent::AttachmentRescanRequested
-            => 'attachment',
+            MailAdminAuditEvent::AttachmentRescanRequested => 'attachment',
 
             MailAdminAuditEvent::QuarantineRetryRequested,
-            MailAdminAuditEvent::QuarantineIgnored
-            => 'quarantine',
+            MailAdminAuditEvent::QuarantineIgnored => 'quarantine',
 
             default => null,
         };

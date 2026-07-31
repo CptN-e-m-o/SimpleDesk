@@ -17,7 +17,7 @@ class MailProviderConnectionResource extends JsonResource
             array_filter(
                 $secretConfiguration,
                 static fn (mixed $value): bool => $value !== null
-                    && (!is_string($value) || trim($value) !== '')
+                    && (! is_string($value) || trim($value) !== '')
             )
         );
 

@@ -29,25 +29,19 @@ class EmailMessageQuarantine extends Model
     ];
 
     protected $casts = [
-        'stage' =>
-            EmailQuarantineStage::class,
+        'stage' => EmailQuarantineStage::class,
 
-        'resolution' =>
-            EmailQuarantineResolution::class,
+        'resolution' => EmailQuarantineResolution::class,
 
         'attempts' => 'integer',
 
-        'first_quarantined_at' =>
-            'immutable_datetime',
+        'first_quarantined_at' => 'immutable_datetime',
 
-        'last_quarantined_at' =>
-            'immutable_datetime',
+        'last_quarantined_at' => 'immutable_datetime',
 
-        'released_at' =>
-            'immutable_datetime',
+        'released_at' => 'immutable_datetime',
 
-        'resolved_at' =>
-            'immutable_datetime',
+        'resolved_at' => 'immutable_datetime',
 
         'metadata' => 'array',
     ];

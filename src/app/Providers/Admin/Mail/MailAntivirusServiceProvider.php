@@ -107,12 +107,12 @@ class MailAntivirusServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (
-            !$this->app->runningInConsole()
-            || !(bool) config(
+            ! $this->app->runningInConsole()
+            || ! (bool) config(
                 'simpledesk-mail-antivirus.enabled',
                 false
             )
-            || !(bool) config(
+            || ! (bool) config(
                 'simpledesk-mail-antivirus.recovery.enabled',
                 true
             )

@@ -143,8 +143,7 @@ class EmailQuarantineDiagnosticsController extends Controller
                 )
                 ->latest('id')
                 ->paginate(
-                    perPage:
-                    $request->integer(
+                    perPage: $request->integer(
                         'per_page',
                         25
                     )

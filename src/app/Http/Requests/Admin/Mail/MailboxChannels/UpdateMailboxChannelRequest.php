@@ -2,6 +2,4 @@
 
 namespace App\Http\Requests\Admin\Mail\MailboxChannels;
 
-class UpdateMailboxChannelRequest extends MailboxChannelRequest
-{
-}
+class UpdateMailboxChannelRequest extends MailboxChannelRequest {}

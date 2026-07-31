@@ -9,8 +9,7 @@ final readonly class MailAdminActionResultData
         public bool $dispatched,
         public string $message,
         public array $details = [],
-    ) {
-    }
+    ) {}
 
     public function toArray(): array
     {

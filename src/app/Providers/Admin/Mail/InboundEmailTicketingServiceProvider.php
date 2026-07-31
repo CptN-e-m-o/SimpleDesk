@@ -8,8 +8,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
 
-class InboundEmailTicketingServiceProvider extends
-    ServiceProvider
+class InboundEmailTicketingServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
@@ -30,7 +29,7 @@ class InboundEmailTicketingServiceProvider extends
                 InboundEmailStored $event
             ): void {
                 if (
-                    !(bool) config(
+                    ! (bool) config(
                         'simpledesk-mail-ticketing.enabled',
                         true
                     )

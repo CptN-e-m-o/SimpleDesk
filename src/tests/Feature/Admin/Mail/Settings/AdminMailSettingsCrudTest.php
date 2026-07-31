@@ -434,7 +434,7 @@ class AdminMailSettingsCrudTest extends TestCase
         $user = User::factory()->create();
 
         $role = Role::query()->create([
-            'name' => 'mail-admin-' . $user->id,
+            'name' => 'mail-admin-'.$user->id,
             'label' => 'Mail administrator',
             'description' => null,
             'type' => 'agent',
@@ -443,7 +443,7 @@ class AdminMailSettingsCrudTest extends TestCase
         ]);
 
         $group = PermissionGroup::query()->create([
-            'key' => 'mail-test-' . $user->id,
+            'key' => 'mail-test-'.$user->id,
             'label' => 'Mail test',
             'panel' => 'admin',
             'type' => 'agent',

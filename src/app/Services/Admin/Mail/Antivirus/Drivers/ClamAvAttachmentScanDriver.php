@@ -17,8 +17,7 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
         private readonly int $readTimeoutSeconds,
         private readonly int $chunkBytes,
         private readonly int $maxStreamBytes,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {
@@ -93,7 +92,7 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
         string $fileName,
         int $expectedSize,
     ): AttachmentScanResultData {
-        if (!is_resource($stream)) {
+        if (! is_resource($stream)) {
             throw new AttachmentScanException(
                 message: 'Attachment scan stream is not a valid resource.',
                 errorCode: 'invalid_scan_stream',
@@ -138,7 +137,7 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
                 data: "zINSTREAM\0",
             );
 
-            while (!feof($stream)) {
+            while (! feof($stream)) {
                 $chunk = fread(
                     $stream,
                     $this->chunkBytes
@@ -177,7 +176,7 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
 
                 $this->writeAll(
                     socket: $socket,
-                    data: pack('N', $chunkLength) . $chunk,
+                    data: pack('N', $chunkLength).$chunk,
                 );
             }
 
@@ -231,7 +230,7 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
         } catch (Throwable $exception) {
             throw new AttachmentScanException(
                 message: 'Unable to connect to the ClamAV daemon: '
-                . $exception->getMessage(),
+                .$exception->getMessage(),
                 errorCode: 'clamav_connection_failed',
                 retryable: true,
                 context: [
@@ -245,10 +244,10 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
         if ($socket === false) {
             throw new AttachmentScanException(
                 message: 'Unable to connect to the ClamAV daemon: '
-                . (
-                $errorMessage !== ''
-                    ? $errorMessage
-                    : "socket error {$errorNumber}"
+                .(
+                    $errorMessage !== ''
+                        ? $errorMessage
+                        : "socket error {$errorNumber}"
                 ),
                 errorCode: 'clamav_connection_failed',
                 retryable: true,
@@ -269,7 +268,7 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
     }
 
     /**
-     * @param resource $socket
+     * @param  resource  $socket
      */
     private function writeAll(
         $socket,
@@ -301,13 +300,13 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
     }
 
     /**
-     * @param resource $socket
+     * @param  resource  $socket
      */
     private function readResponse($socket): string
     {
         $response = '';
 
-        while (!feof($socket)) {
+        while (! feof($socket)) {
             $chunk = fread(
                 $socket,
                 4096
@@ -408,7 +407,7 @@ class ClamAvAttachmentScanDriver implements AttachmentScanDriver
             );
         }
 
-        $retryable = !str_contains(
+        $retryable = ! str_contains(
             strtolower($response),
             'size limit exceeded'
         );

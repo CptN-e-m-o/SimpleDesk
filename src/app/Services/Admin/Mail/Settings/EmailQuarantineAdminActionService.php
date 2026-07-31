@@ -15,8 +15,7 @@ class EmailQuarantineAdminActionService
     public function __construct(
         private readonly EmailMessageQuarantineService $quarantines,
         private readonly MailAdminActionLock $locks,
-    ) {
-    }
+    ) {}
 
     public function retry(
         EmailMessageQuarantine $quarantine,
@@ -31,8 +30,7 @@ class EmailQuarantineAdminActionService
                 message: 'Quarantine retry is already queued.',
                 details: [
                     'quarantine_id' => $quarantine->id,
-                    'email_message_id' =>
-                        $quarantine->email_message_id,
+                    'email_message_id' => $quarantine->email_message_id,
                 ],
             );
         }
@@ -45,7 +43,7 @@ class EmailQuarantineAdminActionService
             );
         }
 
-        if (!$this->locks->acquire(
+        if (! $this->locks->acquire(
             'retry-quarantine',
             $quarantine->id
         )) {
@@ -55,8 +53,7 @@ class EmailQuarantineAdminActionService
                 message: 'Quarantine retry is already queued.',
                 details: [
                     'quarantine_id' => $quarantine->id,
-                    'email_message_id' =>
-                        $quarantine->email_message_id,
+                    'email_message_id' => $quarantine->email_message_id,
                 ],
             );
         }
@@ -94,10 +91,8 @@ class EmailQuarantineAdminActionService
             message: 'Quarantined email processing was queued for retry.',
             details: [
                 'quarantine_id' => $quarantine->id,
-                'email_message_id' =>
-                    $quarantine->email_message_id,
-                'resolution' =>
-                    $quarantine->resolution?->value,
+                'email_message_id' => $quarantine->email_message_id,
+                'resolution' => $quarantine->resolution?->value,
             ],
         );
     }
@@ -120,10 +115,8 @@ class EmailQuarantineAdminActionService
                 message: 'Quarantine record has already been ignored.',
                 details: [
                     'quarantine_id' => $quarantine->id,
-                    'email_message_id' =>
-                        $quarantine->email_message_id,
-                    'resolution' =>
-                        EmailQuarantineResolution::Ignored->value,
+                    'email_message_id' => $quarantine->email_message_id,
+                    'resolution' => EmailQuarantineResolution::Ignored->value,
                 ],
             );
         }
@@ -144,7 +137,7 @@ class EmailQuarantineAdminActionService
             );
         }
 
-        if (!$this->locks->acquire(
+        if (! $this->locks->acquire(
             'ignore-quarantine',
             $quarantine->id
         )) {
@@ -154,8 +147,7 @@ class EmailQuarantineAdminActionService
                 message: 'Quarantine ignore action has already been accepted.',
                 details: [
                     'quarantine_id' => $quarantine->id,
-                    'email_message_id' =>
-                        $quarantine->email_message_id,
+                    'email_message_id' => $quarantine->email_message_id,
                 ],
             );
         }
@@ -193,10 +185,8 @@ class EmailQuarantineAdminActionService
             message: 'Quarantine record was ignored.',
             details: [
                 'quarantine_id' => $quarantine->id,
-                'email_message_id' =>
-                    $quarantine->email_message_id,
-                'resolution' =>
-                    $quarantine->resolution?->value,
+                'email_message_id' => $quarantine->email_message_id,
+                'resolution' => $quarantine->resolution?->value,
             ],
         );
     }

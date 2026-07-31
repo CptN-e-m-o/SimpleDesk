@@ -20,11 +20,10 @@ class TicketReplyEmailService
         private readonly TicketEmailThreadResolver $threads,
         private readonly TicketReplyEmailRenderer $renderer,
         private readonly OutgoingEmailQueueService $outgoingQueue,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array<int, MailAttachmentData> $attachments
+     * @param  array<int, MailAttachmentData>  $attachments
      */
     public function queue(
         int $ticketReplyId,
@@ -43,11 +42,9 @@ class TicketReplyEmailService
 
                 if ($reply === null) {
                     throw new TicketReplyEmailException(
-                        message:
-                        "Ticket reply [{$ticketReplyId}] "
-                        . 'was not found.',
-                        errorCode:
-                        'ticket_reply_not_found',
+                        message: "Ticket reply [{$ticketReplyId}] "
+                        .'was not found.',
+                        errorCode: 'ticket_reply_not_found',
                         retryable: false,
                     );
                 }
@@ -68,11 +65,9 @@ class TicketReplyEmailService
 
                 if ($ticket === null) {
                     throw new TicketReplyEmailException(
-                        message:
-                        "Ticket reply [{$reply->id}] "
-                        . 'has no ticket.',
-                        errorCode:
-                        'ticket_reply_has_no_ticket',
+                        message: "Ticket reply [{$reply->id}] "
+                        .'has no ticket.',
+                        errorCode: 'ticket_reply_has_no_ticket',
                         retryable: false,
                     );
                 }
@@ -81,22 +76,18 @@ class TicketReplyEmailService
 
                 if ($mailbox === null) {
                     throw new TicketReplyEmailException(
-                        message:
-                        "Ticket [{$ticket->id}] "
-                        . 'has no mailbox.',
-                        errorCode:
-                        'ticket_has_no_mailbox',
+                        message: "Ticket [{$ticket->id}] "
+                        .'has no mailbox.',
+                        errorCode: 'ticket_has_no_mailbox',
                         retryable: false,
                     );
                 }
 
-                if (!$mailbox->is_active) {
+                if (! $mailbox->is_active) {
                     throw new TicketReplyEmailException(
-                        message:
-                        "Mailbox [{$mailbox->id}] "
-                        . 'is disabled.',
-                        errorCode:
-                        'ticket_mailbox_disabled',
+                        message: "Mailbox [{$mailbox->id}] "
+                        .'is disabled.',
+                        errorCode: 'ticket_mailbox_disabled',
                         retryable: false,
                     );
                 }
@@ -129,19 +120,16 @@ class TicketReplyEmailService
                             true,
                         )) {
                             throw new TicketReplyEmailException(
-                                message:
-                                "Ticket reply [{$reply->id}] "
-                                . 'email can no longer be changed.',
-                                errorCode:
-                                'ticket_reply_email_immutable',
+                                message: "Ticket reply [{$reply->id}] "
+                                .'email can no longer be changed.',
+                                errorCode: 'ticket_reply_email_immutable',
                                 retryable: false,
                             );
                         }
 
                         return $this->outgoingQueue->queue(
                             mailbox: $mailbox,
-                            message:
-                            OutgoingEmailMessageData::fromEmailMessage(
+                            message: OutgoingEmailMessageData::fromEmailMessage(
                                 message: $existingMessage,
                                 attachments: $attachments,
                             ),
@@ -166,11 +154,9 @@ class TicketReplyEmailService
 
                 if ($requester === null) {
                     throw new TicketReplyEmailException(
-                        message:
-                        "Ticket [{$ticket->id}] "
-                        . 'has no requester.',
-                        errorCode:
-                        'ticket_requester_missing',
+                        message: "Ticket [{$ticket->id}] "
+                        .'has no requester.',
+                        errorCode: 'ticket_requester_missing',
                         retryable: false,
                     );
                 }
@@ -188,11 +174,9 @@ class TicketReplyEmailService
                     ) === false
                 ) {
                     throw new TicketReplyEmailException(
-                        message:
-                        "Ticket requester [{$requester->id}] "
-                        . 'has an invalid email address.',
-                        errorCode:
-                        'invalid_ticket_requester_email',
+                        message: "Ticket requester [{$requester->id}] "
+                        .'has an invalid email address.',
+                        errorCode: 'invalid_ticket_requester_email',
                         retryable: false,
                     );
                 }
@@ -209,12 +193,10 @@ class TicketReplyEmailService
                     === $mailboxAddress
                 ) {
                     throw new TicketReplyEmailException(
-                        message:
-                        'Ticket requester address matches '
-                        . 'the mailbox address. Sending was '
-                        . 'blocked to prevent an email loop.',
-                        errorCode:
-                        'ticket_reply_email_loop',
+                        message: 'Ticket requester address matches '
+                        .'the mailbox address. Sending was '
+                        .'blocked to prevent an email loop.',
+                        errorCode: 'ticket_reply_email_loop',
                         retryable: false,
                     );
                 }
@@ -229,20 +211,17 @@ class TicketReplyEmailService
 
                 $payload =
                     new OutgoingEmailMessageData(
-                        idempotencyKey:
-                        'ticket-reply:'
-                        . $reply->id
-                        . ':outgoing:v1',
+                        idempotencyKey: 'ticket-reply:'
+                        .$reply->id
+                        .':outgoing:v1',
 
                         from: null,
 
                         to: [
                             new MailAddressData(
-                                address:
-                                $recipientEmail,
+                                address: $recipientEmail,
 
-                                name:
-                                $requester->name,
+                                name: $requester->name,
                             ),
                         ],
 
@@ -250,60 +229,45 @@ class TicketReplyEmailService
                         bcc: [],
                         replyTo: [],
 
-                        subject:
-                        $rendered->subject,
+                        subject: $rendered->subject,
 
-                        textBody:
-                        $rendered->textBody,
+                        textBody: $rendered->textBody,
 
-                        htmlBody:
-                        $rendered->htmlBody,
+                        htmlBody: $rendered->htmlBody,
 
                         headers: [
-                            'X-SimpleDesk-Ticket-ID' =>
-                                (string) $ticket->id,
+                            'X-SimpleDesk-Ticket-ID' => (string) $ticket->id,
 
-                            'X-SimpleDesk-Ticket-Number' =>
-                                $ticket->ticket_number,
+                            'X-SimpleDesk-Ticket-Number' => $ticket->ticket_number,
 
-                            'X-SimpleDesk-Ticket-Reply-ID' =>
-                                (string) $reply->id,
+                            'X-SimpleDesk-Ticket-Reply-ID' => (string) $reply->id,
                         ],
 
                         attachments: $attachments,
 
                         internetMessageId: null,
 
-                        inReplyToMessageId:
-                        $thread
+                        inReplyToMessageId: $thread
                             ->inReplyToMessageId,
 
-                        references:
-                        $thread->references,
+                        references: $thread->references,
 
                         metadata: [
-                            'source' =>
-                                'ticket_reply',
+                            'source' => 'ticket_reply',
 
-                            'ticket_id' =>
-                                $ticket->id,
+                            'ticket_id' => $ticket->id,
 
-                            'ticket_number' =>
-                                $ticket
-                                    ->ticket_number,
+                            'ticket_number' => $ticket
+                                ->ticket_number,
 
-                            'ticket_reply_id' =>
-                                $reply->id,
+                            'ticket_reply_id' => $reply->id,
 
-                            'agent_user_id' =>
-                                $reply->user_id,
+                            'agent_user_id' => $reply->user_id,
 
-                            'requester_user_id' =>
-                                $requester->id,
+                            'requester_user_id' => $requester->id,
 
-                            'parent_email_message_id' =>
-                                $thread
-                                    ->parentEmailMessageId,
+                            'parent_email_message_id' => $thread
+                                ->parentEmailMessageId,
                         ],
                     );
 
@@ -326,23 +290,19 @@ class TicketReplyEmailService
     ): void {
         if ($reply->is_internal) {
             throw new TicketReplyEmailException(
-                message:
-                "Ticket reply [{$reply->id}] "
-                . 'is an internal note and cannot be sent.',
-                errorCode:
-                'internal_ticket_reply',
+                message: "Ticket reply [{$reply->id}] "
+                .'is an internal note and cannot be sent.',
+                errorCode: 'internal_ticket_reply',
                 retryable: false,
             );
         }
 
         if ($reply->cameFromIncomingEmail()) {
             throw new TicketReplyEmailException(
-                message:
-                "Ticket reply [{$reply->id}] "
-                . 'originated from an incoming email '
-                . 'and must not be sent back.',
-                errorCode:
-                'incoming_ticket_reply',
+                message: "Ticket reply [{$reply->id}] "
+                .'originated from an incoming email '
+                .'and must not be sent back.',
+                errorCode: 'incoming_ticket_reply',
                 retryable: false,
             );
         }
@@ -352,11 +312,9 @@ class TicketReplyEmailService
 
         if ($author === null) {
             throw new TicketReplyEmailException(
-                message:
-                "Ticket reply [{$reply->id}] "
-                . 'has no author.',
-                errorCode:
-                'ticket_reply_author_missing',
+                message: "Ticket reply [{$reply->id}] "
+                .'has no author.',
+                errorCode: 'ticket_reply_author_missing',
                 retryable: false,
             );
         }
@@ -366,23 +324,19 @@ class TicketReplyEmailService
             && $ticket->requester_id === $author->id
         ) {
             throw new TicketReplyEmailException(
-                message:
-                "Ticket reply [{$reply->id}] "
-                . 'was created by the requester and must not '
-                . 'be sent back to the requester.',
-                errorCode:
-                'requester_ticket_reply',
+                message: "Ticket reply [{$reply->id}] "
+                .'was created by the requester and must not '
+                .'be sent back to the requester.',
+                errorCode: 'requester_ticket_reply',
                 retryable: false,
             );
         }
 
-        if (!$author->hasPermission('agent.tickets.reply')) {
+        if (! $author->hasPermission('agent.tickets.reply')) {
             throw new TicketReplyEmailException(
-                message:
-                "Ticket reply author [{$author->id}] "
-                . 'is not allowed to send ticket email replies.',
-                errorCode:
-                'ticket_reply_author_not_agent',
+                message: "Ticket reply author [{$author->id}] "
+                .'is not allowed to send ticket email replies.',
+                errorCode: 'ticket_reply_author_not_agent',
                 retryable: false,
             );
         }
@@ -391,7 +345,7 @@ class TicketReplyEmailService
     private function dispatchExistingMessage(
         EmailMessage $emailMessage
     ): void {
-        if (!in_array(
+        if (! in_array(
             $emailMessage->status,
             [
                 EmailMessageStatus::Preparing,

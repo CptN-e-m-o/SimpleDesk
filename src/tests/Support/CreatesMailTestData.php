@@ -42,17 +42,14 @@ trait CreatesMailTestData
             array_merge(
                 [
                     'name' => 'Support',
-                    'email_address' =>
-                        'support@simpledesk.test',
+                    'email_address' => 'support@simpledesk.test',
 
-                    'display_name' =>
-                        'SimpleDesk Support',
+                    'display_name' => 'SimpleDesk Support',
 
                     'department_id' => null,
                     'is_active' => true,
 
-                    'is_default_outgoing' =>
-                        true,
+                    'is_default_outgoing' => true,
 
                     'internal_notes' => null,
                 ],
@@ -72,24 +69,19 @@ trait CreatesMailTestData
         return Ticket::factory()->create(
             array_merge(
                 [
-                    'requester_id' =>
-                        $requester->id,
+                    'requester_id' => $requester->id,
 
                     'category_id' => null,
 
-                    'assignee_id' =>
-                        $agent?->id,
+                    'assignee_id' => $agent?->id,
 
-                    'mailbox_id' =>
-                        $mailbox->id,
+                    'mailbox_id' => $mailbox->id,
 
                     'department_id' => null,
 
-                    'status' =>
-                        Ticket::STATUS_OPEN,
+                    'status' => Ticket::STATUS_OPEN,
 
-                    'source' =>
-                        Ticket::SOURCE_PORTAL,
+                    'source' => Ticket::SOURCE_PORTAL,
                 ],
                 $attributes
             )
@@ -120,44 +112,32 @@ trait CreatesMailTestData
 
         $emailMessage =
             EmailMessage::query()->create([
-                'mailbox_id' =>
-                    $mailbox->id,
+                'mailbox_id' => $mailbox->id,
 
-                'mailbox_channel_id' =>
-                    null,
+                'mailbox_channel_id' => null,
 
-                'ticket_id' =>
-                    $ticket->id,
+                'ticket_id' => $ticket->id,
 
-                'ticket_reply_id' =>
-                    null,
+                'ticket_reply_id' => null,
 
-                'direction' =>
-                    EmailMessageDirection::Incoming,
+                'direction' => EmailMessageDirection::Incoming,
 
                 'driver' => null,
 
-                'status' =>
-                    EmailMessageStatus::Processed,
+                'status' => EmailMessageStatus::Processed,
 
-                'idempotency_key' =>
-                    'download-test:'
-                    . $ticket->id,
+                'idempotency_key' => 'download-test:'
+                    .$ticket->id,
 
-                'external_message_id' =>
-                    null,
+                'external_message_id' => null,
 
-                'internet_message_id' =>
-                    null,
+                'internet_message_id' => null,
 
-                'subject' =>
-                    'Attachment download test',
+                'subject' => 'Attachment download test',
 
-                'text_body' =>
-                    'Incoming email body.',
+                'text_body' => 'Incoming email body.',
 
-                'html_body' =>
-                    '<p>Incoming email body.</p>',
+                'html_body' => '<p>Incoming email body.</p>',
 
                 'headers' => [],
                 'metadata' => [],
@@ -191,17 +171,14 @@ trait CreatesMailTestData
                 'deduplication_key' => hash(
                     'sha256',
                     'download-test:'
-                    . $emailMessage->id
+                    .$emailMessage->id
                 ),
 
-                'file_name' =>
-                    'customer-notes.txt',
+                'file_name' => 'customer-notes.txt',
 
-                'mime_type' =>
-                    'text/plain',
+                'mime_type' => 'text/plain',
 
-                'size' =>
-                    strlen($contents),
+                'size' => strlen($contents),
 
                 'disk' => 'local',
                 'path' => $path,
@@ -214,13 +191,11 @@ trait CreatesMailTestData
                 'content_id' => null,
                 'is_inline' => false,
 
-                'scan_status' =>
-                    $scanStatus,
+                'scan_status' => $scanStatus,
 
                 'scanned_at' => now(),
 
-                'quarantined_at' =>
-                    null,
+                'quarantined_at' => null,
 
                 'scan_result' => null,
                 'metadata' => [],

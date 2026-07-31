@@ -15,7 +15,7 @@ class AgentResource extends JsonResource
             'username' => $this->username,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
-            'name' => trim($this->first_name . ' ' . $this->last_name),
+            'name' => trim($this->first_name.' '.$this->last_name),
             'location' => $this->location,
 
             'phone_country_iso2' => $this->phone_country_iso2,

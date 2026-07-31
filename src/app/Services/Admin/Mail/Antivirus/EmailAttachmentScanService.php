@@ -19,8 +19,7 @@ class EmailAttachmentScanService
         private readonly OutgoingAttachmentScanCompletionService $completion,
         private readonly int $processingLockSeconds,
         private readonly bool $verifyChecksums,
-    ) {
-    }
+    ) {}
 
     public function scan(
         int $emailAttachmentId
@@ -46,7 +45,7 @@ class EmailAttachmentScanService
             $attachment->path
         );
 
-        if (!is_resource($stream)) {
+        if (! is_resource($stream)) {
             throw new AttachmentScanException(
                 message: "Attachment [{$attachment->file_name}] cannot be opened for antivirus scanning.",
                 errorCode: 'attachment_scan_stream_open_failed',
@@ -268,7 +267,7 @@ class EmailAttachmentScanService
         Filesystem $storage,
         EmailAttachment $attachment,
     ): void {
-        if (!$storage->exists($attachment->path)) {
+        if (! $storage->exists($attachment->path)) {
             throw new AttachmentScanException(
                 message: "Attachment file [{$attachment->path}] does not exist on disk [{$attachment->disk}].",
                 errorCode: 'attachment_file_missing',
@@ -298,7 +297,7 @@ class EmailAttachmentScanService
             );
         }
 
-        if (!$this->verifyChecksums) {
+        if (! $this->verifyChecksums) {
             return;
         }
 
@@ -306,7 +305,7 @@ class EmailAttachmentScanService
             $attachment->path
         );
 
-        if (!is_resource($stream)) {
+        if (! is_resource($stream)) {
             throw new AttachmentScanException(
                 message: "Attachment [{$attachment->file_name}] cannot be read for checksum verification.",
                 errorCode: 'attachment_checksum_stream_failed',
@@ -335,7 +334,7 @@ class EmailAttachmentScanService
         }
 
         if (
-            !hash_equals(
+            ! hash_equals(
                 $attachment->checksum_sha256,
                 $checksum
             )

@@ -19,8 +19,7 @@ class SmtpMailDriver implements OutgoingMailDriver
         private readonly SmtpTransportFactory $transportFactory,
         private readonly SymfonyEmailFactory $emailFactory,
         private readonly SmtpExceptionMapper $exceptions,
-    ) {
-    }
+    ) {}
 
     public function driver(): MailboxDriver
     {
@@ -55,18 +54,14 @@ class SmtpMailDriver implements OutgoingMailDriver
             );
 
             return MailConnectionTestResultData::success(
-                message:
-                'SMTP connection and authentication succeeded.',
+                message: 'SMTP connection and authentication succeeded.',
                 latencyMilliseconds: $latencyMilliseconds,
                 details: [
                     'host' => $configuration->host,
                     'port' => $configuration->port,
-                    'encryption' =>
-                        $configuration->encryption->value,
-                    'authenticated' =>
-                        $configuration->username !== null,
-                    'verify_peer' =>
-                        $configuration->verifyPeer,
+                    'encryption' => $configuration->encryption->value,
+                    'authenticated' => $configuration->username !== null,
+                    'verify_peer' => $configuration->verifyPeer,
                 ],
             );
         } catch (Throwable $exception) {
@@ -113,8 +108,7 @@ class SmtpMailDriver implements OutgoingMailDriver
 
             if ($sentMessage === null) {
                 throw new MailDriverException(
-                    message:
-                    'SMTP transport did not return a sent message.',
+                    message: 'SMTP transport did not return a sent message.',
                     driverErrorCode: 'smtp_empty_send_result',
                     retryable: true,
                     failoverAllowed: true,
@@ -123,12 +117,9 @@ class SmtpMailDriver implements OutgoingMailDriver
             }
 
             return new OutgoingSendResultData(
-                externalMessageId:
-                $sentMessage->getMessageId(),
-                internetMessageId:
-                $message->internetMessageId,
-                acceptedRecipients:
-                array_values(
+                externalMessageId: $sentMessage->getMessageId(),
+                internetMessageId: $message->internetMessageId,
+                acceptedRecipients: array_values(
                     array_merge(
                         $message->to,
                         $message->cc,
@@ -136,16 +127,14 @@ class SmtpMailDriver implements OutgoingMailDriver
                     )
                 ),
                 rejectedRecipients: [],
-                sentAt: new DateTimeImmutable(),
+                sentAt: new DateTimeImmutable,
                 providerResponse: [
-                    'transport_message_id' =>
-                        $sentMessage->getMessageId(),
+                    'transport_message_id' => $sentMessage->getMessageId(),
                 ],
                 metadata: [
                     'host' => $configuration->host,
                     'port' => $configuration->port,
-                    'encryption' =>
-                        $configuration->encryption->value,
+                    'encryption' => $configuration->encryption->value,
                 ],
             );
         } catch (Throwable $exception) {

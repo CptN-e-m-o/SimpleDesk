@@ -224,8 +224,7 @@ class MailChannelSelectorTest extends TestCase
 
         $this->assertFalse(
             $channels->contains(
-                fn (MailboxChannel $channel): bool =>
-                    $channel->id === $failedPrimary->id
+                fn (MailboxChannel $channel): bool => $channel->id === $failedPrimary->id
             )
         );
     }
@@ -372,8 +371,7 @@ class MailChannelSelectorTest extends TestCase
         int $failedChannelCooldownSeconds = 300
     ): MailChannelSelector {
         return new MailChannelSelector(
-            failedChannelCooldownSeconds:
-            $failedChannelCooldownSeconds
+            failedChannelCooldownSeconds: $failedChannelCooldownSeconds
         );
     }
 
@@ -385,26 +383,19 @@ class MailChannelSelectorTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Selector Mailbox {$token}",
+            'name' => "Selector Mailbox {$token}",
 
-            'email_address' =>
-                "selector-{$token}@example.test",
+            'email_address' => "selector-{$token}@example.test",
 
-            'display_name' =>
-                'Selector Mailbox',
+            'display_name' => 'Selector Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                $active,
+            'is_active' => $active,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -425,55 +416,40 @@ class MailChannelSelectorTest extends TestCase
             (string) Str::ulid()
         );
 
-        $channel = new MailboxChannel();
+        $channel = new MailboxChannel;
 
         $channel->forceFill([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'provider_connection_id' =>
-                null,
+            'provider_connection_id' => null,
 
-            'name' =>
-                "{$name} {$token}",
+            'name' => "{$name} {$token}",
 
-            'direction' =>
-                $direction,
+            'direction' => $direction,
 
-            'driver' =>
-                $driver,
+            'driver' => $driver,
 
-            'is_primary' =>
-                $primary,
+            'is_primary' => $primary,
 
-            'failover_order' =>
-                $failoverOrder,
+            'failover_order' => $failoverOrder,
 
-            'is_enabled' =>
-                $enabled,
+            'is_enabled' => $enabled,
 
-            'configuration' =>
-                [],
+            'configuration' => [],
 
-            'health_status' =>
-                $healthStatus,
+            'health_status' => $healthStatus,
 
-            'last_checked_at' =>
-                $lastErrorAt,
+            'last_checked_at' => $lastErrorAt,
 
-            'last_success_at' =>
-                null,
+            'last_success_at' => null,
 
-            'last_error_at' =>
-                $lastErrorAt,
+            'last_error_at' => $lastErrorAt,
 
-            'last_error_code' =>
-                $lastErrorAt !== null
+            'last_error_code' => $lastErrorAt !== null
                     ? 'test_channel_failure'
                     : null,
 
-            'last_error_message' =>
-                $lastErrorAt !== null
+            'last_error_message' => $lastErrorAt !== null
                     ? 'Test channel failure.'
                     : null,
         ])->save();

@@ -48,17 +48,13 @@ class MailPipelineRecoveryService
             );
 
         return new MailRecoveryResultData(
-            incomingStuckReset:
-            $incomingStuckReset,
+            incomingStuckReset: $incomingStuckReset,
 
-            incomingReceivedDispatched:
-            $incomingReceivedDispatched,
+            incomingReceivedDispatched: $incomingReceivedDispatched,
 
-            outgoingStuckReset:
-            $outgoingStuckReset,
+            outgoingStuckReset: $outgoingStuckReset,
 
-            outgoingQueuedDispatched:
-            $outgoingQueuedDispatched,
+            outgoingQueuedDispatched: $outgoingQueuedDispatched,
         );
     }
 
@@ -134,18 +130,16 @@ class MailPipelineRecoveryService
                     $emailMessage->forceFill([
                         'status' => 'received',
 
-                        'processing_started_at' =>
-                            null,
+                        'processing_started_at' => null,
 
                         'failed_at' => null,
                         'failure_code' => null,
                         'failure_message' => null,
 
-                        'metadata' =>
-                            $this->appendRecoveryMetadata(
-                                $emailMessage,
-                                'incoming_processing_reset'
-                            ),
+                        'metadata' => $this->appendRecoveryMetadata(
+                            $emailMessage,
+                            'incoming_processing_reset'
+                        ),
                     ])->save();
 
                     return true;
@@ -153,7 +147,7 @@ class MailPipelineRecoveryService
                 3,
             );
 
-            if (!$wasReset) {
+            if (! $wasReset) {
                 continue;
             }
 
@@ -281,18 +275,16 @@ class MailPipelineRecoveryService
                     $emailMessage->forceFill([
                         'status' => 'queued',
 
-                        'processing_started_at' =>
-                            null,
+                        'processing_started_at' => null,
 
                         'failed_at' => null,
                         'failure_code' => null,
                         'failure_message' => null,
 
-                        'metadata' =>
-                            $this->appendRecoveryMetadata(
-                                $emailMessage,
-                                'outgoing_sending_reset'
-                            ),
+                        'metadata' => $this->appendRecoveryMetadata(
+                            $emailMessage,
+                            'outgoing_sending_reset'
+                        ),
                     ])->save();
 
                     return true;
@@ -300,7 +292,7 @@ class MailPipelineRecoveryService
                 3,
             );
 
-            if (!$wasReset) {
+            if (! $wasReset) {
                 continue;
             }
 
@@ -386,7 +378,7 @@ class MailPipelineRecoveryService
             $emailMessageId
         );
 
-        if (!$this->claim($lockKey)) {
+        if (! $this->claim($lockKey)) {
             return false;
         }
 
@@ -397,8 +389,7 @@ class MailPipelineRecoveryService
                 );
 
             $this->configureDispatch(
-                pendingDispatch:
-                $pendingDispatch,
+                pendingDispatch: $pendingDispatch,
 
                 queue: (string) config(
                     'simpledesk-mail-automation.recovery.incoming_queue',
@@ -422,7 +413,7 @@ class MailPipelineRecoveryService
             $emailMessageId
         );
 
-        if (!$this->claim($lockKey)) {
+        if (! $this->claim($lockKey)) {
             return false;
         }
 
@@ -433,8 +424,7 @@ class MailPipelineRecoveryService
                 );
 
             $this->configureDispatch(
-                pendingDispatch:
-                $pendingDispatch,
+                pendingDispatch: $pendingDispatch,
 
                 queue: (string) config(
                     'simpledesk-mail-automation.recovery.outgoing_queue',
@@ -536,8 +526,7 @@ class MailPipelineRecoveryService
 
         $events[] = [
             'action' => $action,
-            'recovered_at' =>
-                now()->toIso8601String(),
+            'recovered_at' => now()->toIso8601String(),
         ];
 
         $recovery['events'] = array_slice(

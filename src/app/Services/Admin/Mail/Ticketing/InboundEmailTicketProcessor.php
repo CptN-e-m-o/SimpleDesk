@@ -26,26 +26,24 @@ class InboundEmailTicketProcessor
         private readonly InboundEmailThreadMatcher $threads,
         private readonly InboundEmailClassifier $classifier,
         private readonly InboundEmailReplyParser $replyParser,
-    ) {
-    }
+    ) {}
 
     public function process(
         int $emailMessageId
     ): EmailMessage {
         try {
             return DB::transaction(
-                fn (): EmailMessage =>
-                $this->processInTransaction(
+                fn (): EmailMessage => $this->processInTransaction(
                     $emailMessageId
                 ),
                 3,
             );
         } catch (
-        InboundEmailAlreadyProcessingException $exception
+            InboundEmailAlreadyProcessingException $exception
         ) {
             throw $exception;
         } catch (
-        InboundEmailTicketingException $exception
+            InboundEmailTicketingException $exception
         ) {
             if (
                 $exception->errorCode()
@@ -55,16 +53,14 @@ class InboundEmailTicketProcessor
             }
 
             $this->markFailed(
-                emailMessageId:
-                $emailMessageId,
+                emailMessageId: $emailMessageId,
                 exception: $exception,
             );
 
             throw $exception;
         } catch (Throwable $exception) {
             $this->markFailed(
-                emailMessageId:
-                $emailMessageId,
+                emailMessageId: $emailMessageId,
                 exception: $exception,
             );
 
@@ -87,11 +83,9 @@ class InboundEmailTicketProcessor
 
         if ($emailMessage === null) {
             throw new InboundEmailTicketingException(
-                message:
-                "Email message [{$emailMessageId}] "
-                . 'was not found.',
-                errorCode:
-                'email_message_not_found',
+                message: "Email message [{$emailMessageId}] "
+                .'was not found.',
+                errorCode: 'email_message_not_found',
                 retryable: false,
             );
         }
@@ -101,11 +95,9 @@ class InboundEmailTicketProcessor
             !== EmailMessageDirection::Incoming
         ) {
             throw new InboundEmailTicketingException(
-                message:
-                "Email message [{$emailMessageId}] "
-                . 'is not incoming.',
-                errorCode:
-                'email_message_not_incoming',
+                message: "Email message [{$emailMessageId}] "
+                .'is not incoming.',
+                errorCode: 'email_message_not_incoming',
                 retryable: false,
             );
         }
@@ -126,8 +118,7 @@ class InboundEmailTicketProcessor
         );
 
         $emailMessage->forceFill([
-            'status' =>
-                EmailMessageStatus::Processing,
+            'status' => EmailMessageStatus::Processing,
 
             'processing_started_at' => now(),
 
@@ -140,10 +131,9 @@ class InboundEmailTicketProcessor
             ->classifier
             ->classify($emailMessage);
 
-        if (!$decision->shouldProcess) {
+        if (! $decision->shouldProcess) {
             return $this->markIgnored(
-                emailMessage:
-                $emailMessage,
+                emailMessage: $emailMessage,
                 decision: $decision,
             );
         }
@@ -162,11 +152,9 @@ class InboundEmailTicketProcessor
 
         if ($ticket === null) {
             $ticket = $this->createTicket(
-                emailMessage:
-                $emailMessage,
+                emailMessage: $emailMessage,
                 requester: $requester,
-                body:
-                $parsedContent->body,
+                body: $parsedContent->body,
             );
 
             $ticketReply = null;
@@ -175,10 +163,8 @@ class InboundEmailTicketProcessor
             $ticketReply = $this->createReply(
                 ticket: $ticket,
                 requester: $requester,
-                emailMessage:
-                $emailMessage,
-                body:
-                $parsedContent->body,
+                emailMessage: $emailMessage,
+                body: $parsedContent->body,
             );
 
             $action = 'reply_created';
@@ -191,41 +177,31 @@ class InboundEmailTicketProcessor
         $metadata['ticketing'] = [
             'action' => $action,
 
-            'classification' =>
-                $decision
-                    ->classification
-                    ->value,
+            'classification' => $decision
+                ->classification
+                ->value,
 
-            'classification_reason' =>
-                $decision->reason,
+            'classification_reason' => $decision->reason,
 
-            'ticket_id' =>
-                $ticket->id,
+            'ticket_id' => $ticket->id,
 
-            'ticket_reply_id' =>
-                $ticketReply?->id,
+            'ticket_reply_id' => $ticketReply?->id,
 
-            'requester_id' =>
-                $requester->id,
+            'requester_id' => $requester->id,
 
-            'reply_parsing' =>
-                $this->parsingMetadata(
-                    $parsedContent
-                ),
+            'reply_parsing' => $this->parsingMetadata(
+                $parsedContent
+            ),
 
-            'processed_at' =>
-                now()->toIso8601String(),
+            'processed_at' => now()->toIso8601String(),
         ];
 
         $emailMessage->forceFill([
-            'ticket_id' =>
-                $ticket->id,
+            'ticket_id' => $ticket->id,
 
-            'ticket_reply_id' =>
-                $ticketReply?->id,
+            'ticket_reply_id' => $ticketReply?->id,
 
-            'status' =>
-                EmailMessageStatus::Processed,
+            'status' => EmailMessageStatus::Processed,
 
             'metadata' => $metadata,
 
@@ -256,28 +232,24 @@ class InboundEmailTicketProcessor
         $metadata['ticketing'] = [
             'action' => 'ignored',
 
-            'classification' =>
-                $decision
-                    ->classification
-                    ->value,
+            'classification' => $decision
+                ->classification
+                ->value,
 
-            'classification_reason' =>
-                $decision->reason,
+            'classification_reason' => $decision->reason,
 
             'ticket_id' => null,
             'ticket_reply_id' => null,
             'requester_id' => null,
 
-            'processed_at' =>
-                now()->toIso8601String(),
+            'processed_at' => now()->toIso8601String(),
         ];
 
         $emailMessage->forceFill([
             'ticket_id' => null,
             'ticket_reply_id' => null,
 
-            'status' =>
-                EmailMessageStatus::Processed,
+            'status' => EmailMessageStatus::Processed,
 
             'metadata' => $metadata,
 
@@ -299,24 +271,19 @@ class InboundEmailTicketProcessor
         ParsedInboundEmailContentData $content
     ): array {
         return [
-            'source' =>
-                $content->source,
+            'source' => $content->source,
 
-            'quoted_text_removed' =>
-                $content
-                    ->quotedTextRemoved,
+            'quoted_text_removed' => $content
+                ->quotedTextRemoved,
 
-            'signature_removed' =>
-                $content
-                    ->signatureRemoved,
+            'signature_removed' => $content
+                ->signatureRemoved,
 
-            'original_length' =>
-                $content
-                    ->originalLength,
+            'original_length' => $content
+                ->originalLength,
 
-            'parsed_length' =>
-                $content
-                    ->parsedLength,
+            'parsed_length' => $content
+                ->parsedLength,
         ];
     }
 
@@ -369,13 +336,11 @@ class InboundEmailTicketProcessor
         }
 
         throw new InboundEmailTicketingException(
-            message:
-            "Email message [{$emailMessage->id}] "
-            . "with status "
-            . "[{$emailMessage->status->value}] "
-            . 'cannot be processed as a ticket.',
-            errorCode:
-            'invalid_email_message_status',
+            message: "Email message [{$emailMessage->id}] "
+            .'with status '
+            ."[{$emailMessage->status->value}] "
+            .'cannot be processed as a ticket.',
+            errorCode: 'invalid_email_message_status',
             retryable: false,
         );
     }
@@ -384,7 +349,7 @@ class InboundEmailTicketProcessor
         EmailMessage $emailMessage
     ): void {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-antivirus.enabled',
                 false
             )
@@ -396,8 +361,7 @@ class InboundEmailTicketProcessor
         $infectedAttachmentIds = $emailMessage
             ->attachments
             ->filter(
-                fn ($attachment): bool =>
-                    $attachment->scan_status
+                fn ($attachment): bool => $attachment->scan_status
                     === EmailAttachmentScanStatus::Infected
             )
             ->pluck('id')
@@ -406,16 +370,14 @@ class InboundEmailTicketProcessor
 
         if ($infectedAttachmentIds !== []) {
             throw new InboundEmailTicketingException(
-                message:
-                "Email message [{$emailMessage->id}] "
-                . 'contains infected attachments: '
-                . implode(
+                message: "Email message [{$emailMessage->id}] "
+                .'contains infected attachments: '
+                .implode(
                     ', ',
                     $infectedAttachmentIds
                 )
-                . '.',
-                errorCode:
-                'inbound_attachment_infected',
+                .'.',
+                errorCode: 'inbound_attachment_infected',
                 retryable: false,
             );
         }
@@ -423,8 +385,7 @@ class InboundEmailTicketProcessor
         $failedAttachmentIds = $emailMessage
             ->attachments
             ->filter(
-                fn ($attachment): bool =>
-                    $attachment->scan_status
+                fn ($attachment): bool => $attachment->scan_status
                     === EmailAttachmentScanStatus::Failed
             )
             ->pluck('id')
@@ -433,17 +394,15 @@ class InboundEmailTicketProcessor
 
         if ($failedAttachmentIds !== []) {
             throw new InboundEmailTicketingException(
-                message:
-                "Email message [{$emailMessage->id}] "
-                . 'contains attachments that failed '
-                . 'antivirus scanning: '
-                . implode(
+                message: "Email message [{$emailMessage->id}] "
+                .'contains attachments that failed '
+                .'antivirus scanning: '
+                .implode(
                     ', ',
                     $failedAttachmentIds
                 )
-                . '.',
-                errorCode:
-                'inbound_attachment_scan_failed',
+                .'.',
+                errorCode: 'inbound_attachment_scan_failed',
                 retryable: false,
             );
         }
@@ -451,8 +410,7 @@ class InboundEmailTicketProcessor
         $pendingAttachmentIds = $emailMessage
             ->attachments
             ->filter(
-                fn ($attachment): bool =>
-                in_array(
+                fn ($attachment): bool => in_array(
                     $attachment->scan_status,
                     [
                         EmailAttachmentScanStatus::NotScanned,
@@ -467,17 +425,15 @@ class InboundEmailTicketProcessor
 
         if ($pendingAttachmentIds !== []) {
             throw new InboundEmailTicketingException(
-                message:
-                "Email message [{$emailMessage->id}] "
-                . 'is waiting for antivirus scanning '
-                . 'of attachments: '
-                . implode(
+                message: "Email message [{$emailMessage->id}] "
+                .'is waiting for antivirus scanning '
+                .'of attachments: '
+                .implode(
                     ', ',
                     $pendingAttachmentIds
                 )
-                . '.',
-                errorCode:
-                'inbound_attachments_pending',
+                .'.',
+                errorCode: 'inbound_attachments_pending',
                 retryable: true,
             );
         }
@@ -485,8 +441,7 @@ class InboundEmailTicketProcessor
         $unexpectedAttachmentIds = $emailMessage
             ->attachments
             ->filter(
-                fn ($attachment): bool =>
-                    $attachment->scan_status
+                fn ($attachment): bool => $attachment->scan_status
                     !== EmailAttachmentScanStatus::Clean
             )
             ->pluck('id')
@@ -495,17 +450,15 @@ class InboundEmailTicketProcessor
 
         if ($unexpectedAttachmentIds !== []) {
             throw new InboundEmailTicketingException(
-                message:
-                "Email message [{$emailMessage->id}] "
-                . 'contains attachments with unsupported '
-                . 'antivirus statuses: '
-                . implode(
+                message: "Email message [{$emailMessage->id}] "
+                .'contains attachments with unsupported '
+                .'antivirus statuses: '
+                .implode(
                     ', ',
                     $unexpectedAttachmentIds
                 )
-                . '.',
-                errorCode:
-                'inbound_attachment_scan_status_invalid',
+                .'.',
+                errorCode: 'inbound_attachment_scan_status_invalid',
                 retryable: false,
             );
         }
@@ -522,7 +475,7 @@ class InboundEmailTicketProcessor
         );
 
         if (
-            !in_array(
+            ! in_array(
                 $status,
                 Ticket::statuses(),
                 true
@@ -537,7 +490,7 @@ class InboundEmailTicketProcessor
         );
 
         if (
-            !in_array(
+            ! in_array(
                 $priority,
                 Ticket::priorities(),
                 true
@@ -548,38 +501,31 @@ class InboundEmailTicketProcessor
         }
 
         return Ticket::query()->create([
-            'ticket_number' =>
-                $this->ticketNumber(),
+            'ticket_number' => $this->ticketNumber(),
 
-            'requester_id' =>
-                $requester->id,
+            'requester_id' => $requester->id,
 
             'category_id' => null,
             'assignee_id' => null,
 
-            'mailbox_id' =>
-                $emailMessage->mailbox_id,
+            'mailbox_id' => $emailMessage->mailbox_id,
 
-            'department_id' =>
+            'department_id' => $emailMessage
+                ->mailbox
+                ?->department_id,
+
+            'subject' => $this->ticketSubject(
                 $emailMessage
-                    ->mailbox
-                    ?->department_id,
-
-            'subject' =>
-                $this->ticketSubject(
-                    $emailMessage
-                ),
+            ),
 
             'priority' => $priority,
             'status' => $status,
-            'source' =>
-                Ticket::SOURCE_EMAIL,
+            'source' => Ticket::SOURCE_EMAIL,
 
             'service' => null,
             'description' => $body,
 
-            'last_reply_at' =>
-                $emailMessage->received_at
+            'last_reply_at' => $emailMessage->received_at
                 ?? now(),
 
             'resolved_at' => null,
@@ -600,8 +546,7 @@ class InboundEmailTicketProcessor
         $reply = $ticket
             ->replies()
             ->create([
-                'user_id' =>
-                    $requester->id,
+                'user_id' => $requester->id,
 
                 'message' => $body,
 
@@ -609,8 +554,7 @@ class InboundEmailTicketProcessor
             ]);
 
         $updates = [
-            'last_reply_at' =>
-                $emailMessage->received_at
+            'last_reply_at' => $emailMessage->received_at
                 ?? now(),
         ];
 
@@ -620,7 +564,7 @@ class InboundEmailTicketProcessor
         );
 
         if (
-            !in_array(
+            ! in_array(
                 $replyStatus,
                 Ticket::statuses(),
                 true
@@ -780,16 +724,13 @@ class InboundEmailTicketProcessor
         $metadata['ticketing_failure'] = [
             'error_code' => $errorCode,
 
-            'exception' =>
-                $exception::class,
+            'exception' => $exception::class,
 
-            'failed_at' =>
-                now()->toIso8601String(),
+            'failed_at' => now()->toIso8601String(),
         ];
 
         $emailMessage->forceFill([
-            'status' =>
-                EmailMessageStatus::Failed,
+            'status' => EmailMessageStatus::Failed,
 
             'metadata' => $metadata,
 
@@ -797,11 +738,9 @@ class InboundEmailTicketProcessor
 
             'failed_at' => now(),
 
-            'failure_code' =>
-                'inbound_ticket_processing_failed',
+            'failure_code' => 'inbound_ticket_processing_failed',
 
-            'failure_message' =>
-                $exception->getMessage(),
+            'failure_message' => $exception->getMessage(),
         ])->save();
     }
 }

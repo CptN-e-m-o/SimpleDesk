@@ -9,7 +9,7 @@ use App\Models\Admin\Mail\EmailMessage;
 class RejectedEmailAttachmentPersister
 {
     /**
-     * @param array<int, RejectedMailAttachmentData> $attachments
+     * @param  array<int, RejectedMailAttachmentData>  $attachments
      */
     public function persist(
         EmailMessage $emailMessage,
@@ -18,11 +18,10 @@ class RejectedEmailAttachmentPersister
         $stored = 0;
 
         foreach (
-            array_values($attachments)
-            as $position => $attachment
+            array_values($attachments) as $position => $attachment
         ) {
             if (
-                !$attachment
+                ! $attachment
                     instanceof RejectedMailAttachmentData
             ) {
                 continue;
@@ -37,53 +36,42 @@ class RejectedEmailAttachmentPersister
             EmailAttachmentRejection::query()
                 ->updateOrCreate(
                     [
-                        'email_message_id' =>
-                            $emailMessage->id,
+                        'email_message_id' => $emailMessage->id,
 
-                        'deduplication_key' =>
-                            $deduplicationKey,
+                        'deduplication_key' => $deduplicationKey,
                     ],
                     [
                         'position' => $position,
 
-                        'external_id' =>
-                            $attachment->externalId,
+                        'external_id' => $attachment->externalId,
 
-                        'file_name' =>
-                            mb_substr(
-                                $attachment->fileName,
-                                0,
-                                255
-                            ),
+                        'file_name' => mb_substr(
+                            $attachment->fileName,
+                            0,
+                            255
+                        ),
 
-                        'mime_type' =>
-                            mb_substr(
-                                $attachment->mimeType,
-                                0,
-                                255
-                            ),
+                        'mime_type' => mb_substr(
+                            $attachment->mimeType,
+                            0,
+                            255
+                        ),
 
-                        'reported_size' =>
-                            $attachment->reportedSize,
+                        'reported_size' => $attachment->reportedSize,
 
-                        'content_id' =>
-                            $attachment->contentId,
+                        'content_id' => $attachment->contentId,
 
-                        'is_inline' =>
-                            $attachment->inline,
+                        'is_inline' => $attachment->inline,
 
-                        'reason_code' =>
-                            mb_substr(
-                                $attachment->reasonCode,
-                                0,
-                                100
-                            ),
+                        'reason_code' => mb_substr(
+                            $attachment->reasonCode,
+                            0,
+                            100
+                        ),
 
-                        'reason_message' =>
-                            $attachment->reasonMessage,
+                        'reason_message' => $attachment->reasonMessage,
 
-                        'metadata' =>
-                            $attachment->metadata,
+                        'metadata' => $attachment->metadata,
                     ]
                 );
 

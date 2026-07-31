@@ -69,9 +69,9 @@ class MailRetentionServiceTest extends TestCase
 
         $rawContents =
             "Message-ID: <retention-dry-run@example.test>\r\n"
-            . "Subject: Retention dry-run\r\n"
-            . "\r\n"
-            . "Dry-run raw message body.";
+            ."Subject: Retention dry-run\r\n"
+            ."\r\n"
+            .'Dry-run raw message body.';
 
         $rawPath = $this->attachRawMessage(
             message: $message,
@@ -176,9 +176,9 @@ class MailRetentionServiceTest extends TestCase
 
         $rawContents =
             "Message-ID: <retention-delete@example.test>\r\n"
-            . "Subject: Retention delete\r\n"
-            . "\r\n"
-            . "Raw message that should be deleted.";
+            ."Subject: Retention delete\r\n"
+            ."\r\n"
+            .'Raw message that should be deleted.';
 
         $rawPath = $this->attachRawMessage(
             message: $message,
@@ -362,9 +362,9 @@ class MailRetentionServiceTest extends TestCase
 
         $rawContents =
             "Message-ID: <full-retention@example.test>\r\n"
-            . "Subject: Full retention\r\n"
-            . "\r\n"
-            . "This complete message should be deleted.";
+            ."Subject: Full retention\r\n"
+            ."\r\n"
+            .'This complete message should be deleted.';
 
         $rawPath = $this->attachRawMessage(
             message: $message,
@@ -615,26 +615,19 @@ class MailRetentionServiceTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Retention Mailbox {$token}",
+            'name' => "Retention Mailbox {$token}",
 
-            'email_address' =>
-                "retention-{$token}@example.test",
+            'email_address' => "retention-{$token}@example.test",
 
-            'display_name' =>
-                'Retention Mailbox',
+            'display_name' => 'Retention Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -648,100 +641,75 @@ class MailRetentionServiceTest extends TestCase
         );
 
         $message = EmailMessage::query()->create([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'mailbox_channel_id' =>
-                null,
+            'mailbox_channel_id' => null,
 
-            'ticket_id' =>
-                null,
+            'ticket_id' => null,
 
-            'ticket_reply_id' =>
-                null,
+            'ticket_reply_id' => null,
 
-            'direction' =>
-                EmailMessageDirection::Incoming,
+            'direction' => EmailMessageDirection::Incoming,
 
-            'driver' =>
-                null,
+            'driver' => null,
 
-            'status' =>
-                $status,
+            'status' => $status,
 
-            'idempotency_key' =>
-                "retention-test-{$token}",
+            'idempotency_key' => "retention-test-{$token}",
 
-            'external_message_id' =>
-                "retention-external-{$token}",
+            'external_message_id' => "retention-external-{$token}",
 
-            'internet_message_id' =>
-                "<retention-{$token}@example.test>",
+            'internet_message_id' => "<retention-{$token}@example.test>",
 
-            'in_reply_to_message_id' =>
-                null,
+            'in_reply_to_message_id' => null,
 
-            'reference_message_ids' =>
-                [],
+            'reference_message_ids' => [],
 
-            'sender_address' =>
-                'customer@example.test',
+            'sender_address' => 'customer@example.test',
 
-            'sender_name' =>
-                'Retention Customer',
+            'sender_name' => 'Retention Customer',
 
             'to_recipients' => [
                 [
-                    'address' =>
-                        $mailbox->email_address,
+                    'address' => $mailbox->email_address,
 
-                    'name' =>
-                        $mailbox->display_name,
+                    'name' => $mailbox->display_name,
                 ],
             ],
 
-            'cc_recipients' =>
-                [],
+            'cc_recipients' => [],
 
-            'bcc_recipients' =>
-                [],
+            'bcc_recipients' => [],
 
-            'reply_to_recipients' =>
-                [],
+            'reply_to_recipients' => [],
 
-            'subject' =>
-                'Mail retention test',
+            'subject' => 'Mail retention test',
 
-            'text_body' =>
-                'Mail retention test body.',
+            'text_body' => 'Mail retention test body.',
 
-            'html_body' =>
-                null,
+            'html_body' => null,
 
-            'headers' =>
-                [],
+            'headers' => [],
 
             'metadata' => [
                 'test' => true,
             ],
 
-            'received_at' =>
-                $createdAt,
+            'received_at' => $createdAt,
 
-            'processed_at' =>
-                in_array(
-                    $status,
-                    [
-                        EmailMessageStatus::Processed,
-                        EmailMessageStatus::Sent,
-                        EmailMessageStatus::Delivered,
-                        EmailMessageStatus::Failed,
-                        EmailMessageStatus::Rejected,
-                        EmailMessageStatus::Bounced,
-                        EmailMessageStatus::Complained,
-                    ],
-                    true
-                )
+            'processed_at' => in_array(
+                $status,
+                [
+                    EmailMessageStatus::Processed,
+                    EmailMessageStatus::Sent,
+                    EmailMessageStatus::Delivered,
+                    EmailMessageStatus::Failed,
+                    EmailMessageStatus::Rejected,
+                    EmailMessageStatus::Bounced,
+                    EmailMessageStatus::Complained,
+                ],
+                true
+            )
                     ? $createdAt
                     : null,
         ]);
@@ -749,11 +717,9 @@ class MailRetentionServiceTest extends TestCase
         $message->timestamps = false;
 
         $message->forceFill([
-            'created_at' =>
-                $createdAt,
+            'created_at' => $createdAt,
 
-            'updated_at' =>
-                $createdAt,
+            'updated_at' => $createdAt,
         ])->save();
 
         $message->timestamps = true;
@@ -777,17 +743,13 @@ class MailRetentionServiceTest extends TestCase
         );
 
         $message->forceFill([
-            'raw_message_disk' =>
-                'local',
+            'raw_message_disk' => 'local',
 
-            'raw_message_path' =>
-                $path,
+            'raw_message_path' => $path,
 
-            'raw_message_size' =>
-                strlen($contents),
+            'raw_message_size' => strlen($contents),
 
-            'raw_message_checksum' =>
-                hash('sha256', $contents),
+            'raw_message_checksum' => hash('sha256', $contents),
         ])->save();
 
         return $path;
@@ -815,87 +777,65 @@ class MailRetentionServiceTest extends TestCase
         );
 
         $attachment = EmailAttachment::query()->create([
-            'email_message_id' =>
-                $message->id,
+            'email_message_id' => $message->id,
 
-            'position' =>
-                0,
+            'position' => 0,
 
-            'external_id' =>
-                "retention-attachment-{$token}",
+            'external_id' => "retention-attachment-{$token}",
 
-            'deduplication_key' =>
-                hash(
-                    'sha256',
-                    $message->id
-                    . '|'
-                    . $token
-                ),
+            'deduplication_key' => hash(
+                'sha256',
+                $message->id
+                .'|'
+                .$token
+            ),
 
-            'file_name' =>
-                'retention-attachment.txt',
+            'file_name' => 'retention-attachment.txt',
 
-            'mime_type' =>
-                'text/plain',
+            'mime_type' => 'text/plain',
 
-            'size' =>
-                strlen($contents),
+            'size' => strlen($contents),
 
-            'disk' =>
-                'local',
+            'disk' => 'local',
 
-            'path' =>
-                $path,
+            'path' => $path,
 
-            'checksum_sha256' =>
-                hash('sha256', $contents),
+            'checksum_sha256' => hash('sha256', $contents),
 
-            'content_id' =>
-                null,
+            'content_id' => null,
 
-            'is_inline' =>
-                false,
+            'is_inline' => false,
 
-            'scan_status' =>
-                $scanStatus,
+            'scan_status' => $scanStatus,
 
-            'scan_started_at' =>
-                null,
+            'scan_started_at' => null,
 
-            'scan_attempts' =>
-                0,
+            'scan_attempts' => 0,
 
-            'scanned_at' =>
-                $scanStatus
+            'scanned_at' => $scanStatus
                 === EmailAttachmentScanStatus::Clean
                     ? $createdAt
                     : null,
 
-            'scan_failure_code' =>
-                null,
+            'scan_failure_code' => null,
 
-            'scan_failure_message' =>
-                null,
+            'scan_failure_message' => null,
 
-            'quarantined_at' =>
-                null,
+            'quarantined_at' => null,
 
-            'scan_result' =>
-                null,
+            'scan_result' => null,
 
             'metadata' => [
-                'test' => true,
+            'test' => true,
             ],
         ]);
 
         $attachment->timestamps = false;
 
         $attachment->forceFill([
-            'created_at' =>
-                $createdAt,
+            'created_at' => $createdAt,
 
-            'updated_at' =>
-                $createdAt,
+            'updated_at' => $createdAt,
         ])->save();
 
         $attachment->timestamps = true;

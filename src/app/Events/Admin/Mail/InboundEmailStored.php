@@ -12,6 +12,5 @@ class InboundEmailStored
 
     public function __construct(
         public int $emailMessageId,
-    ) {
-    }
+    ) {}
 }

@@ -20,14 +20,14 @@ class AgentTicketEmailReplyStoreRequest extends FormRequest
         $attachmentRules = [
             'bail',
             'file',
-            'max:' . $this->maxAttachmentKilobytes(),
+            'max:'.$this->maxAttachmentKilobytes(),
         ];
 
         $allowedMimeTypes = $this->allowedMimeTypes();
 
         if ($allowedMimeTypes !== []) {
             $attachmentRules[] =
-                'mimetypes:' . implode(',', $allowedMimeTypes);
+                'mimetypes:'.implode(',', $allowedMimeTypes);
         }
 
         return [
@@ -40,7 +40,7 @@ class AgentTicketEmailReplyStoreRequest extends FormRequest
             'attachments' => [
                 'nullable',
                 'array',
-                'max:' . $this->maxAttachmentCount(),
+                'max:'.$this->maxAttachmentCount(),
             ],
             'attachments.*' => $attachmentRules,
         ];
@@ -56,14 +56,14 @@ class AgentTicketEmailReplyStoreRequest extends FormRequest
                     []
                 );
 
-                if (!is_array($attachments)) {
+                if (! is_array($attachments)) {
                     return;
                 }
 
                 $totalSize = 0;
 
                 foreach ($attachments as $attachment) {
-                    if (!$attachment instanceof UploadedFile) {
+                    if (! $attachment instanceof UploadedFile) {
                         continue;
                     }
 
@@ -111,15 +111,14 @@ class AgentTicketEmailReplyStoreRequest extends FormRequest
             []
         );
 
-        if (!is_array($mimeTypes)) {
+        if (! is_array($mimeTypes)) {
             return [];
         }
 
         return array_values(
             array_filter(
                 $mimeTypes,
-                static fn (mixed $mimeType): bool =>
-                    is_string($mimeType)
+                static fn (mixed $mimeType): bool => is_string($mimeType)
                     && trim($mimeType) !== ''
             )
         );

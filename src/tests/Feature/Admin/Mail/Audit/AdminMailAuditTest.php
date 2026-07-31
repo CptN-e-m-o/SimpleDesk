@@ -412,8 +412,7 @@ class AdminMailAuditTest extends TestCase
     {
         return Mailbox::query()->create([
             'name' => 'Support',
-            'email_address' =>
-                'support-' . uniqid() . '@example.test',
+            'email_address' => 'support-'.uniqid().'@example.test',
             'display_name' => 'SimpleDesk Support',
             'department_id' => null,
             'is_active' => true,
@@ -447,7 +446,7 @@ class AdminMailAuditTest extends TestCase
         $user = User::factory()->create();
 
         $role = Role::query()->create([
-            'name' => 'mail-audit-admin-' . $user->id,
+            'name' => 'mail-audit-admin-'.$user->id,
             'label' => 'Mail audit administrator',
             'description' => null,
             'type' => 'agent',
@@ -456,7 +455,7 @@ class AdminMailAuditTest extends TestCase
         ]);
 
         $group = PermissionGroup::query()->create([
-            'key' => 'mail-audit-test-' . $user->id,
+            'key' => 'mail-audit-test-'.$user->id,
             'label' => 'Mail audit test',
             'panel' => 'admin',
             'type' => 'agent',
@@ -465,8 +464,7 @@ class AdminMailAuditTest extends TestCase
 
         $permissionIds = collect($permissionKeys)
             ->map(
-                fn (string $key): int =>
-                Permission::query()->create([
+                fn (string $key): int => Permission::query()->create([
                     'permission_group_id' => $group->id,
                     'parent_id' => null,
                     'key' => $key,

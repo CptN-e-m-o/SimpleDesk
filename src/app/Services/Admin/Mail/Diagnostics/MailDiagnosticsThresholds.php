@@ -83,8 +83,7 @@ class MailDiagnosticsThresholds
             $message->direction
             === EmailMessageDirection::Outgoing
             && $message->status
-            === EmailMessageStatus::Preparing
-            => $message->created_at
+            === EmailMessageStatus::Preparing => $message->created_at
                 ?->lessThanOrEqualTo(
                     $this->preparingCutoff()
                 ) ?? false,
@@ -92,8 +91,7 @@ class MailDiagnosticsThresholds
             $message->direction
             === EmailMessageDirection::Outgoing
             && $message->status
-            === EmailMessageStatus::Queued
-            => (
+            === EmailMessageStatus::Queued => (
                 $message->queued_at
                 ?? $message->created_at
             )
@@ -104,8 +102,7 @@ class MailDiagnosticsThresholds
             $message->direction
             === EmailMessageDirection::Incoming
             && $message->status
-            === EmailMessageStatus::Processing
-            => $message->processing_started_at
+            === EmailMessageStatus::Processing => $message->processing_started_at
                 ?->lessThanOrEqualTo(
                     $this->processingCutoff()
                 ) ?? false,
@@ -113,8 +110,7 @@ class MailDiagnosticsThresholds
             $message->direction
             === EmailMessageDirection::Outgoing
             && $message->status
-            === EmailMessageStatus::Sending
-            => $message->processing_started_at
+            === EmailMessageStatus::Sending => $message->processing_started_at
                 ?->lessThanOrEqualTo(
                     $this->sendingCutoff()
                 ) ?? false,

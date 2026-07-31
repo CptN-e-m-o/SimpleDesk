@@ -27,11 +27,10 @@ class SendTicketReplyEmailCommand extends Command
                 ->option('now');
 
             $emailMessage = $service->queue(
-                ticketReplyId:
-                (int) $this
+                ticketReplyId: (int) $this
                     ->argument('reply'),
 
-                dispatch: !$sendNow,
+                dispatch: ! $sendNow,
             );
 
             $this->table(
@@ -77,7 +76,7 @@ class SendTicketReplyEmailCommand extends Command
                 ]
             );
 
-            if (!$sendNow) {
+            if (! $sendNow) {
                 $this->info(
                     'Ticket reply email was queued.'
                 );
@@ -110,7 +109,7 @@ class SendTicketReplyEmailCommand extends Command
 
             $this->line(
                 'Internet Message-ID: '
-                . (
+                .(
                     $result->internetMessageId
                     ?? 'not available'
                 )

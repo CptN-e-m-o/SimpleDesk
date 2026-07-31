@@ -22,8 +22,7 @@ class MailAttachmentStorageService
         private readonly string $rootPath,
         private readonly ?AttachmentScanDispatcher $scanDispatcher = null,
         private readonly ?bool $antivirusEnabled = null,
-    ) {
-    }
+    ) {}
 
     public function store(
         EmailMessage $emailMessage,
@@ -179,12 +178,12 @@ class MailAttachmentStorageService
 
         if (
             $attachment->temporaryPath === null
-            || !is_file($attachment->temporaryPath)
-            || !is_readable($attachment->temporaryPath)
+            || ! is_file($attachment->temporaryPath)
+            || ! is_readable($attachment->temporaryPath)
         ) {
             throw new MailStorageException(
                 "Attachment [{$attachment->fileName}] "
-                . 'has no readable local content.'
+                .'has no readable local content.'
             );
         }
 
@@ -203,7 +202,7 @@ class MailAttachmentStorageService
         ) {
             throw new MailStorageException(
                 'Unable to inspect attachment '
-                . "[{$attachment->fileName}]."
+                ."[{$attachment->fileName}]."
             );
         }
 
@@ -220,14 +219,14 @@ class MailAttachmentStorageService
     ): void {
         if ($attachment->content !== null) {
             if (
-                !$storage->put(
+                ! $storage->put(
                     $path,
                     $attachment->content
                 )
             ) {
                 throw new MailStorageException(
                     'Unable to store attachment '
-                    . "[{$attachment->fileName}]."
+                    ."[{$attachment->fileName}]."
                 );
             }
 
@@ -242,20 +241,20 @@ class MailAttachmentStorageService
         if ($stream === false) {
             throw new MailStorageException(
                 'Unable to open attachment '
-                . "[{$attachment->fileName}]."
+                ."[{$attachment->fileName}]."
             );
         }
 
         try {
             if (
-                !$storage->writeStream(
+                ! $storage->writeStream(
                     $path,
                     $stream
                 )
             ) {
                 throw new MailStorageException(
                     'Unable to store attachment '
-                    . "[{$attachment->fileName}]."
+                    ."[{$attachment->fileName}]."
                 );
             }
         } finally {

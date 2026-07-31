@@ -191,10 +191,10 @@ class VerifyOutgoingFailoverCommand extends Command
                 ])
             );
 
-            if (!$connectionTest->successful) {
+            if (! $connectionTest->successful) {
                 throw new RuntimeException(
                     'Primary channel recovery connection test failed: '
-                    . $connectionTest->message
+                    .$connectionTest->message
                 );
             }
 
@@ -324,7 +324,7 @@ class VerifyOutgoingFailoverCommand extends Command
             );
         }
 
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             throw new RuntimeException(
                 "Mailbox [{$mailbox->id}] is disabled."
             );
@@ -386,7 +386,7 @@ class VerifyOutgoingFailoverCommand extends Command
             $channel->provider_connection_id !== null
             && (
                 $channel->providerConnection === null
-                || !$channel->providerConnection->is_active
+                || ! $channel->providerConnection->is_active
             )
         ) {
             throw new RuntimeException(
@@ -410,11 +410,9 @@ class VerifyOutgoingFailoverCommand extends Command
                 $channel->id === $fallback->id;
 
             $values = [
-                'is_enabled' =>
-                    $isPrimary || $isFallback,
+                'is_enabled' => $isPrimary || $isFallback,
 
-                'is_primary' =>
-                    $isPrimary,
+                'is_primary' => $isPrimary,
             ];
 
             if ($isPrimary) {
@@ -449,8 +447,7 @@ class VerifyOutgoingFailoverCommand extends Command
         Collection $snapshots
     ): void {
         foreach (
-            $snapshots
-            as $channelId => $snapshot
+            $snapshots as $channelId => $snapshot
         ) {
             MailboxChannel::query()
                 ->whereKey(
@@ -475,8 +472,7 @@ class VerifyOutgoingFailoverCommand extends Command
             mailbox: $mailbox,
 
             message: new OutgoingEmailMessageData(
-                idempotencyKey:
-                "smtp-failover-verification:{$phase}:{$token}",
+                idempotencyKey: "smtp-failover-verification:{$phase}:{$token}",
 
                 from: null,
 
@@ -490,32 +486,26 @@ class VerifyOutgoingFailoverCommand extends Command
                 bcc: [],
                 replyTo: [],
 
-                subject:
-                "[SimpleDesk SMTP failover {$phase}] {$token}",
+                subject: "[SimpleDesk SMTP failover {$phase}] {$token}",
 
-                textBody:
-                "SimpleDesk SMTP failover verification.\n"
-                . "Phase: {$phase}\n"
-                . "Token: {$token}",
+                textBody: "SimpleDesk SMTP failover verification.\n"
+                ."Phase: {$phase}\n"
+                ."Token: {$token}",
 
                 htmlBody: null,
 
                 headers: [
-                    'X-SimpleDesk-Integration-Test' =>
-                        $token,
+                    'X-SimpleDesk-Integration-Test' => $token,
 
-                    'X-SimpleDesk-Failover-Phase' =>
-                        $phase,
+                    'X-SimpleDesk-Failover-Phase' => $phase,
                 ],
 
                 metadata: [
-                    'source' =>
-                        'outgoing_failover_verification',
+                    'source' => 'outgoing_failover_verification',
 
                     'phase' => $phase,
 
-                    'verification_token' =>
-                        $token,
+                    'verification_token' => $token,
                 ],
             ),
 
@@ -603,7 +593,7 @@ class VerifyOutgoingFailoverCommand extends Command
         ) {
             throw new RuntimeException(
                 ucfirst($context)
-                . " message [{$message->id}] was not sent."
+                ." message [{$message->id}] was not sent."
             );
         }
 
@@ -613,7 +603,7 @@ class VerifyOutgoingFailoverCommand extends Command
         ) {
             throw new RuntimeException(
                 ucfirst($context)
-                . " message [{$message->id}] used channel [{$message->mailbox_channel_id}] instead of [{$expectedChannelId}]."
+                ." message [{$message->id}] used channel [{$message->mailbox_channel_id}] instead of [{$expectedChannelId}]."
             );
         }
 
@@ -631,7 +621,7 @@ class VerifyOutgoingFailoverCommand extends Command
         ) {
             throw new RuntimeException(
                 ucfirst($context)
-                . " message [{$message->id}] expected one successful attempt through channel [{$expectedChannelId}]."
+                ." message [{$message->id}] expected one successful attempt through channel [{$expectedChannelId}]."
             );
         }
     }
@@ -643,7 +633,7 @@ class VerifyOutgoingFailoverCommand extends Command
         $this->newLine();
 
         $this->line(
-            $title . ':'
+            $title.':'
         );
 
         $this->table(
@@ -674,10 +664,10 @@ class VerifyOutgoingFailoverCommand extends Command
                         $attempt->failover_allowed === null
                             ? '-'
                             : (
-                        $attempt->failover_allowed
-                            ? 'yes'
-                            : 'no'
-                        ),
+                                $attempt->failover_allowed
+                                    ? 'yes'
+                                    : 'no'
+                            ),
                     ]
                 )
                 ->all()
@@ -685,8 +675,8 @@ class VerifyOutgoingFailoverCommand extends Command
 
         $this->line(
             "Message [{$message->id}] "
-            . "status={$message->status->value}, "
-            . "selected_channel={$message->mailbox_channel_id}."
+            ."status={$message->status->value}, "
+            ."selected_channel={$message->mailbox_channel_id}."
         );
     }
 }

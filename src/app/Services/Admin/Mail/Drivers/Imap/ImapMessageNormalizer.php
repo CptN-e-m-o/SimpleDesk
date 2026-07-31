@@ -13,8 +13,8 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use Throwable;
 use Webklex\PHPIMAP\Address;
-use Webklex\PHPIMAP\Attribute;
 use Webklex\PHPIMAP\Attachment;
+use Webklex\PHPIMAP\Attribute;
 use Webklex\PHPIMAP\Message;
 
 class ImapMessageNormalizer
@@ -91,20 +91,15 @@ class ImapMessageNormalizer
         );
 
         return new NormalizedInboundMessageData(
-            externalMessageId:
-            $this->externalMessageId(
-                folder:
-                $configuration->folder,
+            externalMessageId: $this->externalMessageId(
+                folder: $configuration->folder,
 
-                uidValidity:
-                $uidValidity,
+                uidValidity: $uidValidity,
 
-                uid:
-                $uid,
+                uid: $uid,
             ),
 
-            internetMessageId:
-            $internetMessageId,
+            internetMessageId: $internetMessageId,
 
             from: $from,
 
@@ -124,76 +119,57 @@ class ImapMessageNormalizer
                 $message->getReplyTo()
             ),
 
-            subject:
-            $this->nullableString(
+            subject: $this->nullableString(
                 $this->attributeFirst(
                     $message->getSubject()
                 )
             ),
 
-            textBody:
-            $textBody,
+            textBody: $textBody,
 
-            htmlBody:
-            $htmlBody,
+            htmlBody: $htmlBody,
 
-            headers:
-            $this->parseHeaders(
+            headers: $this->parseHeaders(
                 $rawHeader
             ),
 
-            attachments:
-            $attachments,
+            attachments: $attachments,
 
-            receivedAt:
-            $this->receivedAt(
+            receivedAt: $this->receivedAt(
                 $message
             ),
 
-            inReplyToMessageId:
-            $inReplyTo,
+            inReplyToMessageId: $inReplyTo,
 
-            references:
-            $references,
+            references: $references,
 
             metadata: [
                 'imap_uid' => $uid,
 
-                'imap_uidvalidity' =>
-                    $uidValidity,
+                'imap_uidvalidity' => $uidValidity,
 
-                'imap_folder' =>
-                    $configuration->folder,
+                'imap_folder' => $configuration->folder,
 
-                'imap_message_number' =>
-                    (int) $message->getMsgn(),
+                'imap_message_number' => (int) $message->getMsgn(),
 
-                'imap_size' =>
-                    (int) $message->getSize(),
+                'imap_size' => (int) $message->getSize(),
 
-                'imap_flags' =>
-                    $this->flags($message),
+                'imap_flags' => $this->flags($message),
 
-                'raw_message_omitted' =>
-                    $rawMessageOmitted,
+                'raw_message_omitted' => $rawMessageOmitted,
 
-                'raw_message_omission_reason' =>
-                    $rawMessageOmissionReason,
+                'raw_message_omission_reason' => $rawMessageOmissionReason,
 
-                'attachment_count' =>
-                    count($attachments),
+                'attachment_count' => count($attachments),
 
-                'rejected_attachment_count' =>
-                    count(
-                        $rejectedAttachments
-                    ),
+                'rejected_attachment_count' => count(
+                    $rejectedAttachments
+                ),
             ],
 
-            rawMessage:
-            $rawMessage,
+            rawMessage: $rawMessage,
 
-            rejectedAttachments:
-            $rejectedAttachments,
+            rejectedAttachments: $rejectedAttachments,
         );
     }
 
@@ -204,14 +180,13 @@ class ImapMessageNormalizer
         Throwable $exception,
     ): FailedInboundMessageData {
         $uid = $this->safeInteger(
-            static fn (): mixed =>
-            $message->getUid()
+            static fn (): mixed => $message->getUid()
         );
 
         if ($uid < 1) {
             throw $this->invalidMessage(
                 'Unable to quarantine IMAP message '
-                . 'because its UID is unavailable.'
+                .'because its UID is unavailable.'
             );
         }
 
@@ -234,7 +209,7 @@ class ImapMessageNormalizer
             $exception
             instanceof MailDriverException
                 ? $exception
-                ->driverErrorCode()
+                    ->driverErrorCode()
                 : 'imap_message_normalization_failed';
 
         $retryable =
@@ -251,26 +226,20 @@ class ImapMessageNormalizer
 
         $acknowledgementMessage =
             new NormalizedInboundMessageData(
-                externalMessageId:
-                $this->externalMessageId(
-                    folder:
-                    $configuration->folder,
+                externalMessageId: $this->externalMessageId(
+                    folder: $configuration->folder,
 
-                    uidValidity:
-                    $uidValidity,
+                    uidValidity: $uidValidity,
 
-                    uid:
-                    $uid,
+                    uid: $uid,
                 ),
 
                 internetMessageId: null,
 
                 from: new MailAddressData(
-                    address:
-                    'unknown@invalid.local',
+                    address: 'unknown@invalid.local',
 
-                    name:
-                    'Unparsed IMAP sender',
+                    name: 'Unparsed IMAP sender',
                 ),
 
                 to: [],
@@ -278,21 +247,18 @@ class ImapMessageNormalizer
                 bcc: [],
                 replyTo: [],
 
-                subject:
-                '[IMAP message could not be parsed]',
+                subject: '[IMAP message could not be parsed]',
 
                 textBody: null,
                 htmlBody: null,
 
-                headers:
-                $this->parseHeaders(
+                headers: $this->parseHeaders(
                     $rawHeader
                 ),
 
                 attachments: [],
 
-                receivedAt:
-                $this->safeReceivedAt(
+                receivedAt: $this->safeReceivedAt(
                     $message
                 ),
 
@@ -302,69 +268,51 @@ class ImapMessageNormalizer
                 metadata: [
                     'imap_uid' => $uid,
 
-                    'imap_uidvalidity' =>
-                        $uidValidity,
+                    'imap_uidvalidity' => $uidValidity,
 
-                    'imap_folder' =>
-                        $configuration->folder,
+                    'imap_folder' => $configuration->folder,
 
-                    'imap_message_number' =>
-                        $this->safeInteger(
-                            static fn (): mixed =>
-                            $message->getMsgn()
-                        ),
+                    'imap_message_number' => $this->safeInteger(
+                        static fn (): mixed => $message->getMsgn()
+                    ),
 
-                    'imap_size' =>
-                        $this->safeInteger(
-                            static fn (): mixed =>
-                            $message->getSize()
-                        ),
+                    'imap_size' => $this->safeInteger(
+                        static fn (): mixed => $message->getSize()
+                    ),
 
-                    'raw_message_omitted' =>
-                        $rawMessageOmitted,
+                    'raw_message_omitted' => $rawMessageOmitted,
 
-                    'raw_message_omission_reason' =>
-                        $rawMessageOmissionReason,
+                    'raw_message_omission_reason' => $rawMessageOmissionReason,
 
-                    'normalization_failed' =>
-                        true,
+                    'normalization_failed' => true,
                 ],
 
-                rawMessage:
-                $rawMessage,
+                rawMessage: $rawMessage,
 
                 rejectedAttachments: [],
             );
 
         return new FailedInboundMessageData(
-            acknowledgementMessage:
-            $acknowledgementMessage,
+            acknowledgementMessage: $acknowledgementMessage,
 
-            errorCode:
-            $errorCode,
+            errorCode: $errorCode,
 
-            errorMessage:
-            trim(
+            errorMessage: trim(
                 $exception->getMessage()
             ) !== ''
                 ? $exception->getMessage()
                 : 'IMAP message normalization failed.',
 
-            exceptionClass:
-            $exception::class,
+            exceptionClass: $exception::class,
 
-            retryable:
-            $retryable,
+            retryable: $retryable,
 
             metadata: [
-                'driver_context' =>
-                    $context,
+                'driver_context' => $context,
 
-                'file' =>
-                    $exception->getFile(),
+                'file' => $exception->getFile(),
 
-                'line' =>
-                    $exception->getLine(),
+                'line' => $exception->getLine(),
             ],
         );
     }
@@ -378,8 +326,7 @@ class ImapMessageNormalizer
         $addresses = [];
 
         foreach (
-            $attribute->toArray()
-            as $value
+            $attribute->toArray() as $value
         ) {
             if ($value instanceof Address) {
                 $email = trim(
@@ -400,20 +347,19 @@ class ImapMessageNormalizer
                     new MailAddressData(
                         address: $email,
 
-                        name:
-                        trim(
+                        name: trim(
                             $value->personal
                         ) !== ''
                             ? trim(
-                            $value->personal
-                        )
+                                $value->personal
+                            )
                             : null,
                     );
 
                 continue;
             }
 
-            if (!is_scalar($value)) {
+            if (! is_scalar($value)) {
                 continue;
             }
 
@@ -455,11 +401,10 @@ class ImapMessageNormalizer
         $rejected = [];
 
         foreach (
-            $message->getAttachments()
-            as $attachment
+            $message->getAttachments() as $attachment
         ) {
             if (
-                !$attachment
+                ! $attachment
                     instanceof Attachment
             ) {
                 continue;
@@ -467,67 +412,54 @@ class ImapMessageNormalizer
 
             $descriptor =
                 $this->attachmentDescriptor(
-                    attachment:
-                    $attachment,
+                    attachment: $attachment,
 
-                    htmlBody:
-                    $htmlBody,
+                    htmlBody: $htmlBody,
                 );
 
             try {
                 $content =
                     $attachment->getContent();
 
-                if (!is_string($content)) {
+                if (! is_string($content)) {
                     $content =
                         (string) $content;
                 }
             } catch (Throwable $exception) {
                 $rejected[] =
                     new RejectedMailAttachmentData(
-                        fileName:
-                        $descriptor['file_name'],
+                        fileName: $descriptor['file_name'],
 
-                        mimeType:
-                        $descriptor['mime_type'],
+                        mimeType: $descriptor['mime_type'],
 
-                        reportedSize:
-                        $descriptor[
+                        reportedSize: $descriptor[
                         'reported_size'
                         ],
 
-                        reasonCode:
-                        'imap_attachment_read_failed',
+                        reasonCode: 'imap_attachment_read_failed',
 
-                        reasonMessage:
-                        $exception->getMessage(),
+                        reasonMessage: $exception->getMessage(),
 
-                        externalId:
-                        $descriptor[
+                        externalId: $descriptor[
                         'external_id'
                         ],
 
-                        contentId:
-                        $descriptor[
+                        contentId: $descriptor[
                         'content_id'
                         ],
 
-                        inline:
-                        $descriptor['inline'],
+                        inline: $descriptor['inline'],
 
                         metadata: [
-                            'imap_part_number' =>
-                                $descriptor[
+                            'imap_part_number' => $descriptor[
                                 'part_number'
                                 ],
 
-                            'imap_disposition' =>
-                                $descriptor[
+                            'imap_disposition' => $descriptor[
                                 'disposition'
                                 ],
 
-                            'exception_class' =>
-                                $exception::class,
+                            'exception_class' => $exception::class,
                         ],
                     );
 
@@ -543,60 +475,47 @@ class ImapMessageNormalizer
             ) {
                 $rejected[] =
                     new RejectedMailAttachmentData(
-                        fileName:
-                        $descriptor['file_name'],
+                        fileName: $descriptor['file_name'],
 
-                        mimeType:
-                        $descriptor['mime_type'],
+                        mimeType: $descriptor['mime_type'],
 
-                        reportedSize:
-                        $size,
+                        reportedSize: $size,
 
-                        reasonCode:
-                        'imap_attachment_too_large',
+                        reasonCode: 'imap_attachment_too_large',
 
-                        reasonMessage:
-                        sprintf(
+                        reasonMessage: sprintf(
                             'Attachment size %d bytes exceeds '
-                            . 'the configured limit of %d bytes.',
+                            .'the configured limit of %d bytes.',
                             $size,
                             $configuration
                                 ->maxAttachmentBytes,
                         ),
 
-                        externalId:
-                        $descriptor[
+                        externalId: $descriptor[
                         'external_id'
                         ],
 
-                        contentId:
-                        $descriptor[
+                        contentId: $descriptor[
                         'content_id'
                         ],
 
-                        inline:
-                        $descriptor['inline'],
+                        inline: $descriptor['inline'],
 
                         metadata: [
-                            'imap_part_number' =>
-                                $descriptor[
+                            'imap_part_number' => $descriptor[
                                 'part_number'
                                 ],
 
-                            'imap_disposition' =>
-                                $descriptor[
+                            'imap_disposition' => $descriptor[
                                 'disposition'
                                 ],
 
-                            'attachment_size' =>
-                                $size,
+                            'attachment_size' => $size,
 
-                            'attachment_limit' =>
-                                $configuration
-                                    ->maxAttachmentBytes,
+                            'attachment_limit' => $configuration
+                                ->maxAttachmentBytes,
 
-                            'imap_reported_size' =>
-                                $descriptor[
+                            'imap_reported_size' => $descriptor[
                                 'reported_size'
                                 ],
                         ],
@@ -609,46 +528,36 @@ class ImapMessageNormalizer
 
             $accepted[] =
                 new MailAttachmentData(
-                    fileName:
-                    $descriptor['file_name'],
+                    fileName: $descriptor['file_name'],
 
-                    mimeType:
-                    $descriptor['mime_type'],
+                    mimeType: $descriptor['mime_type'],
 
-                    size:
-                    $size,
+                    size: $size,
 
-                    content:
-                    $content,
+                    content: $content,
 
-                    externalId:
-                    $descriptor[
+                    externalId: $descriptor[
                     'external_id'
                     ],
 
-                    contentId:
-                    $descriptor['inline']
+                    contentId: $descriptor['inline']
                         ? $descriptor[
                     'content_id'
                     ]
                         : null,
 
-                    inline:
-                    $descriptor['inline'],
+                    inline: $descriptor['inline'],
 
                     metadata: [
-                        'imap_part_number' =>
-                            $descriptor[
+                        'imap_part_number' => $descriptor[
                             'part_number'
                             ],
 
-                        'imap_disposition' =>
-                            $descriptor[
+                        'imap_disposition' => $descriptor[
                             'disposition'
                             ],
 
-                        'imap_reported_size' =>
-                            $descriptor[
+                        'imap_reported_size' => $descriptor[
                             'reported_size'
                             ],
                     ],
@@ -682,8 +591,7 @@ class ImapMessageNormalizer
 
         $disposition =
             $this->safeString(
-                static fn (): mixed =>
-                $attachment
+                static fn (): mixed => $attachment
                     ->getDisposition()
             );
 
@@ -696,12 +604,12 @@ class ImapMessageNormalizer
             $disposition === 'inline';
 
         if (
-            !$inline
+            ! $inline
             && $contentId !== null
             && $htmlBody !== null
             && stripos(
                 $htmlBody,
-                'cid:' . $contentId
+                'cid:'.$contentId
             ) !== false
         ) {
             $inline = true;
@@ -709,21 +617,19 @@ class ImapMessageNormalizer
 
         $externalId =
             $this->safeString(
-                static fn (): mixed =>
-                $attachment->getHash()
+                static fn (): mixed => $attachment->getHash()
             );
 
         $partNumber =
             $this->safeString(
-                static fn (): mixed =>
-                $attachment
+                static fn (): mixed => $attachment
                     ->getPartNumber()
             );
 
         if ($externalId === null) {
             $externalId =
                 'part:'
-                . (
+                .(
                     $partNumber
                     ?? 'unknown'
                 );
@@ -738,11 +644,9 @@ class ImapMessageNormalizer
             'external_id' => $externalId,
             'part_number' => $partNumber,
 
-            'reported_size' =>
-                $this->safeInteger(
-                    static fn (): mixed =>
-                    $attachment->getSize()
-                ),
+            'reported_size' => $this->safeInteger(
+                static fn (): mixed => $attachment->getSize()
+            ),
         ];
     }
 
@@ -751,21 +655,19 @@ class ImapMessageNormalizer
     ): string {
         $name =
             $this->safeString(
-                static fn (): mixed =>
-                $attachment->getName()
+                static fn (): mixed => $attachment->getName()
             );
 
         if ($name === null) {
             $partNumber =
                 $this->safeString(
-                    static fn (): mixed =>
-                    $attachment
+                    static fn (): mixed => $attachment
                         ->getPartNumber()
                 );
 
             $name =
                 'attachment-'
-                . (
+                .(
                     $partNumber
                     ?? 'unknown'
                 );
@@ -803,16 +705,14 @@ class ImapMessageNormalizer
     ): string {
         $mimeType =
             $this->safeString(
-                static fn (): mixed =>
-                $attachment
+                static fn (): mixed => $attachment
                     ->getContentType()
             );
 
         if ($mimeType === null) {
             $mimeType =
                 $this->safeString(
-                    static fn (): mixed =>
-                    $attachment
+                    static fn (): mixed => $attachment
                         ->getMimeType()
                 );
         }
@@ -826,8 +726,7 @@ class ImapMessageNormalizer
     ): ?string {
         $contentId =
             $this->safeString(
-                static fn (): mixed =>
-                $attachment->getId()
+                static fn (): mixed => $attachment->getId()
             );
 
         if ($contentId === null) {
@@ -852,7 +751,7 @@ class ImapMessageNormalizer
         string $rawHeader,
         ImapChannelConfigurationData $configuration,
     ): array {
-        if (!$configuration->storeRawMessage) {
+        if (! $configuration->storeRawMessage) {
             return [
                 null,
                 true,
@@ -868,7 +767,7 @@ class ImapMessageNormalizer
                 null,
                 true,
                 'read_failed: '
-                . $exception->getMessage(),
+                .$exception->getMessage(),
             ];
         }
 
@@ -877,8 +776,8 @@ class ImapMessageNormalizer
                 $rawHeader,
                 "\r\n"
             )
-            . "\r\n\r\n"
-            . $rawBody;
+            ."\r\n\r\n"
+            .$rawBody;
 
         if (
             strlen($rawMessage)
@@ -921,7 +820,7 @@ class ImapMessageNormalizer
             }
         }
 
-        return new DateTimeImmutable();
+        return new DateTimeImmutable;
     }
 
     private function safeReceivedAt(
@@ -932,7 +831,7 @@ class ImapMessageNormalizer
                 $message
             );
         } catch (Throwable) {
-            return new DateTimeImmutable();
+            return new DateTimeImmutable;
         }
     }
 
@@ -945,10 +844,9 @@ class ImapMessageNormalizer
         $references = [];
 
         foreach (
-            $attribute->toArray()
-            as $value
+            $attribute->toArray() as $value
         ) {
-            if (!is_scalar($value)) {
+            if (! is_scalar($value)) {
                 continue;
             }
 
@@ -971,8 +869,7 @@ class ImapMessageNormalizer
                 !== []
             ) {
                 foreach (
-                    $matches[1]
-                    as $messageId
+                    $matches[1] as $messageId
                 ) {
                     $messageId = trim(
                         $messageId
@@ -991,8 +888,7 @@ class ImapMessageNormalizer
                 preg_split(
                     '/\s+/',
                     $value
-                ) ?: []
-                as $messageId
+                ) ?: [] as $messageId
             ) {
                 $messageId = trim(
                     $messageId,
@@ -1028,10 +924,9 @@ class ImapMessageNormalizer
             preg_split(
                 "/\r?\n/",
                 (string) $unfolded
-            ) ?: []
-            as $line
+            ) ?: [] as $line
         ) {
-            if (!str_contains($line, ':')) {
+            if (! str_contains($line, ':')) {
                 continue;
             }
 
@@ -1066,8 +961,7 @@ class ImapMessageNormalizer
         foreach (
             $message
                 ->getFlags()
-                ->toArray()
-            as $flag
+                ->toArray() as $flag
         ) {
             if (is_scalar($flag)) {
                 $flags[] =
@@ -1110,7 +1004,7 @@ class ImapMessageNormalizer
     private function nullableString(
         mixed $value
     ): ?string {
-        if (!is_scalar($value)) {
+        if (! is_scalar($value)) {
             return null;
         }
 
@@ -1126,7 +1020,7 @@ class ImapMessageNormalizer
     private function normalizeMessageId(
         mixed $messageId
     ): ?string {
-        if (!is_scalar($messageId)) {
+        if (! is_scalar($messageId)) {
             return null;
         }
 
@@ -1164,7 +1058,7 @@ class ImapMessageNormalizer
             return null;
         }
 
-        if (!is_scalar($value)) {
+        if (! is_scalar($value)) {
             return null;
         }
 
@@ -1208,8 +1102,7 @@ class ImapMessageNormalizer
     ): MailDriverException {
         return new MailDriverException(
             message: $message,
-            driverErrorCode:
-            'imap_invalid_message',
+            driverErrorCode: 'imap_invalid_message',
             retryable: false,
             failoverAllowed: false,
             affectsChannelHealth: false,

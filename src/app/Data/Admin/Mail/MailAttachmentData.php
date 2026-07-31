@@ -16,8 +16,7 @@ final readonly class MailAttachmentData
         public ?string $contentId = null,
         public bool $inline = false,
         public array $metadata = [],
-    ) {
-    }
+    ) {}
 
     public function hasContent(): bool
     {

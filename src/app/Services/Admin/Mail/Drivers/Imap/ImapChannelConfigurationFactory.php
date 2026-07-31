@@ -97,24 +97,24 @@ class ImapChannelConfigurationFactory
             storeRawMessage: $this->boolean(
                 $configuration['store_raw_message']
                 ?? config(
-                'simpledesk-mail.imap.store_raw_message',
-                true
-            )
+                    'simpledesk-mail.imap.store_raw_message',
+                    true
+                )
             ),
             maxRawMessageBytes: $this->positiveInteger(
                 $configuration['max_raw_message_bytes']
                 ?? config(
-                'simpledesk-mail.imap.max_raw_message_bytes',
-                50 * 1024 * 1024
-            ),
+                    'simpledesk-mail.imap.max_raw_message_bytes',
+                    50 * 1024 * 1024
+                ),
                 'IMAP raw message size limit must be positive.'
             ),
             maxAttachmentBytes: $this->positiveInteger(
                 $configuration['max_attachment_bytes']
                 ?? config(
-                'simpledesk-mail.imap.max_attachment_bytes',
-                25 * 1024 * 1024
-            ),
+                    'simpledesk-mail.imap.max_attachment_bytes',
+                    25 * 1024 * 1024
+                ),
                 'IMAP attachment size limit must be positive.'
             ),
         );
@@ -182,7 +182,7 @@ class ImapChannelConfigurationFactory
 
             default => throw $this->configurationException(
                 "Authentication type [{$channel->auth_type->value}] "
-                . 'is not supported by the IMAP driver.'
+                .'is not supported by the IMAP driver.'
             ),
         };
     }
@@ -224,7 +224,7 @@ class ImapChannelConfigurationFactory
             return null;
         }
 
-        if (!is_scalar($value)) {
+        if (! is_scalar($value)) {
             return null;
         }
 

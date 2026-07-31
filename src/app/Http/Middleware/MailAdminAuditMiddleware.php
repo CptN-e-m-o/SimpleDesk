@@ -16,8 +16,7 @@ class MailAdminAuditMiddleware
     public function __construct(
         private readonly MailAdminAuditLogger $logger,
         private readonly MailAdminAuditOutcomeResolver $outcomes,
-    ) {
-    }
+    ) {}
 
     public function handle(
         Request $request,

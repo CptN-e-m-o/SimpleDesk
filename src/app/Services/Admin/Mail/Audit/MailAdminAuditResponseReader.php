@@ -21,7 +21,7 @@ class MailAdminAuditResponseReader
 
         $content = $response->getContent();
 
-        if (!is_string($content) || trim($content) === '') {
+        if (! is_string($content) || trim($content) === '') {
             return [];
         }
 

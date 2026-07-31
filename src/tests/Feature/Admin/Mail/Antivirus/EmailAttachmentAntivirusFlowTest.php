@@ -112,7 +112,7 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
 
     public function test_outgoing_email_waits_for_clean_scan_before_sending(): void
     {
-        $driver = new FakeAttachmentScanDriver();
+        $driver = new FakeAttachmentScanDriver;
 
         $driver->pushResult(
             AttachmentScanResultData::clean(
@@ -164,8 +164,7 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
             ScanEmailAttachmentJob::class,
             fn (
                 ScanEmailAttachmentJob $job
-            ): bool =>
-                $job->emailAttachmentId
+            ): bool => $job->emailAttachmentId
                 === $attachment->id
                 && $job->queue
                 === 'mail-antivirus'
@@ -215,8 +214,7 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
             SendOutgoingEmailJob::class,
             fn (
                 SendOutgoingEmailJob $queuedJob
-            ): bool =>
-                $queuedJob->emailMessageId
+            ): bool => $queuedJob->emailMessageId
                 === $message->id
                 && $queuedJob->queue
                 === 'mail-outgoing'
@@ -230,14 +228,13 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
 
     public function test_infected_attachment_is_quarantined_and_email_is_blocked(): void
     {
-        $driver = new FakeAttachmentScanDriver();
+        $driver = new FakeAttachmentScanDriver;
 
         $driver->pushResult(
             AttachmentScanResultData::infected(
                 signature: 'Eicar-Signature',
                 driver: $driver->name(),
-                rawResponse:
-                'fake: Eicar-Signature FOUND',
+                rawResponse: 'fake: Eicar-Signature FOUND',
                 scannedBytes: strlen(
                     'infected contents'
                 ),
@@ -317,14 +314,12 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
 
     public function test_retryable_scan_error_keeps_attachment_pending(): void
     {
-        $driver = new FakeAttachmentScanDriver();
+        $driver = new FakeAttachmentScanDriver;
 
         $driver->pushException(
             new AttachmentScanException(
-                message:
-                'ClamAV is temporarily unavailable.',
-                errorCode:
-                'clamav_connection_failed',
+                message: 'ClamAV is temporarily unavailable.',
+                errorCode: 'clamav_connection_failed',
                 retryable: true,
             )
         );
@@ -416,8 +411,7 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
         );
 
         $attachment->forceFill([
-            'scan_started_at' =>
-                now()->subMinutes(10),
+            'scan_started_at' => now()->subMinutes(10),
             'scan_attempts' => 1,
             'scanned_at' => null,
         ])->save();
@@ -448,8 +442,7 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
             ScanEmailAttachmentJob::class,
             fn (
                 ScanEmailAttachmentJob $job
-            ): bool =>
-                $job->emailAttachmentId
+            ): bool => $job->emailAttachmentId
                 === $attachment->id
         );
     }
@@ -469,8 +462,7 @@ class EmailAttachmentAntivirusFlowTest extends TestCase
             ->replies()
             ->create([
                 'user_id' => $agent->id,
-                'message' =>
-                    'Please review the attached file.',
+                'message' => 'Please review the attached file.',
                 'is_internal' => false,
             ]);
 

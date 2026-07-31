@@ -17,7 +17,7 @@ class TestAttachmentAntivirusCommand extends Command
         AttachmentScanDriver $driver
     ): int {
         if (
-            !(bool) config(
+            ! (bool) config(
                 'simpledesk-mail-antivirus.enabled',
                 false
             )
@@ -54,7 +54,7 @@ class TestAttachmentAntivirusCommand extends Command
                 [
                     'Latency',
                     $result->latencyMilliseconds !== null
-                        ? $result->latencyMilliseconds . ' ms'
+                        ? $result->latencyMilliseconds.' ms'
                         : 'n/a',
                 ],
             ]

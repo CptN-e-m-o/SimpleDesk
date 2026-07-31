@@ -6,12 +6,15 @@ use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
 use App\Services\Admin\Mail\Drivers\Smtp\SmtpTransportFactory;
 use App\Services\Admin\Mail\InboundNormalizationFailurePersister;
 use App\Services\Admin\Mail\IncomingEmailMessagePersister;
+use App\Services\Admin\Mail\IncomingMailAcknowledger;
 use App\Services\Admin\Mail\IncomingMailboxSyncService;
+use App\Services\Admin\Mail\IncomingMailFetchService;
 use App\Services\Admin\Mail\MailAttachmentDownloadService;
 use App\Services\Admin\Mail\MailAttachmentStorageService;
 use App\Services\Admin\Mail\MailChannelHealthRecorder;
 use App\Services\Admin\Mail\MailChannelSelector;
 use App\Services\Admin\Mail\MailDriverRegistry;
+use App\Services\Admin\Mail\MailMessageIdempotencyKeyFactory;
 use App\Services\Admin\Mail\OutgoingEmailMessageFactory;
 use App\Services\Admin\Mail\OutgoingMailAttachmentValidator;
 use App\Services\Admin\Mail\OutgoingMailFailoverService;
@@ -68,8 +71,7 @@ class MailServiceProvider extends ServiceProvider
             MailChannelSelector::class,
             function (): MailChannelSelector {
                 return new MailChannelSelector(
-                    failedChannelCooldownSeconds:
-                    (int) config(
+                    failedChannelCooldownSeconds: (int) config(
                         'simpledesk-mail.failover.failed_channel_cooldown_seconds',
                         300,
                     ),
@@ -176,18 +178,15 @@ class MailServiceProvider extends ServiceProvider
                     filesystem: $app->make(
                         FilesystemFactory::class
                     ),
-                    maxAttachmentBytes:
-                    (int) config(
+                    maxAttachmentBytes: (int) config(
                         'simpledesk-mail.outgoing.max_attachment_bytes',
                         25 * 1024 * 1024,
                     ),
-                    maxTotalAttachmentBytes:
-                    (int) config(
+                    maxTotalAttachmentBytes: (int) config(
                         'simpledesk-mail.outgoing.max_total_attachment_bytes',
                         40 * 1024 * 1024,
                     ),
-                    verifyChecksums:
-                    (bool) config(
+                    verifyChecksums: (bool) config(
                         'simpledesk-mail.outgoing.verify_attachment_checksums',
                         true,
                     ),
@@ -202,7 +201,7 @@ class MailServiceProvider extends ServiceProvider
             ): IncomingEmailMessagePersister {
                 return new IncomingEmailMessagePersister(
                     keys: $app->make(
-                        \App\Services\Admin\Mail\MailMessageIdempotencyKeyFactory::class
+                        MailMessageIdempotencyKeyFactory::class
                     ),
                     rawStorage: $app->make(
                         RawEmailStorageService::class
@@ -210,12 +209,10 @@ class MailServiceProvider extends ServiceProvider
                     attachmentStorage: $app->make(
                         MailAttachmentStorageService::class
                     ),
-                    rejectedAttachments:
-                    $app->make(
+                    rejectedAttachments: $app->make(
                         RejectedEmailAttachmentPersister::class
                     ),
-                    processingLockSeconds:
-                    (int) config(
+                    processingLockSeconds: (int) config(
                         'simpledesk-mail.sync.message_processing_lock_seconds',
                         600,
                     ),
@@ -242,20 +239,18 @@ class MailServiceProvider extends ServiceProvider
                         MailChannelSelector::class
                     ),
                     fetcher: $app->make(
-                        \App\Services\Admin\Mail\IncomingMailFetchService::class
+                        IncomingMailFetchService::class
                     ),
                     persister: $app->make(
                         IncomingEmailMessagePersister::class
                     ),
-                    normalizationFailures:
-                    $app->make(
+                    normalizationFailures: $app->make(
                         InboundNormalizationFailurePersister::class
                     ),
                     acknowledger: $app->make(
-                        \App\Services\Admin\Mail\IncomingMailAcknowledger::class
+                        IncomingMailAcknowledger::class
                     ),
-                    quarantine:
-                    $app->make(
+                    quarantine: $app->make(
                         EmailMessageQuarantineService::class
                     ),
                     health: $app->make(
@@ -292,8 +287,7 @@ class MailServiceProvider extends ServiceProvider
                     messageFactory: $app->make(
                         OutgoingEmailMessageFactory::class
                     ),
-                    sendingLockSeconds:
-                    (int) config(
+                    sendingLockSeconds: (int) config(
                         'simpledesk-mail.failover.sending_lock_seconds',
                         600,
                     ),

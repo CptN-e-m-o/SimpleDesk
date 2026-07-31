@@ -14,7 +14,7 @@ class SecretConfigurationMerger
             : [];
 
         foreach ($clearKeys as $key) {
-            if (!is_string($key)) {
+            if (! is_string($key)) {
                 continue;
             }
 
@@ -26,13 +26,13 @@ class SecretConfigurationMerger
         }
 
         foreach ($incoming ?? [] as $key => $value) {
-            if (!is_string($key)) {
+            if (! is_string($key)) {
                 continue;
             }
 
             $key = trim($key);
 
-            if ($key === '' || !$this->hasValue($value)) {
+            if ($key === '' || ! $this->hasValue($value)) {
                 continue;
             }
 

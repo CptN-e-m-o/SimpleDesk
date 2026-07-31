@@ -22,6 +22,5 @@ final readonly class SmtpChannelConfigurationData
         public ?int $restartThreshold = null,
         public int $restartThresholdSleep = 0,
         public ?int $pingThreshold = null,
-    ) {
-    }
+    ) {}
 }

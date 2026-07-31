@@ -12,8 +12,7 @@ class MailDiagnosticsController extends Controller
         MailDiagnosticsService $diagnostics
     ): JsonResponse {
         return response()->json([
-            'data' =>
-                $diagnostics->overview(),
+            'data' => $diagnostics->overview(),
         ]);
     }
 }

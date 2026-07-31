@@ -8,6 +8,5 @@ final readonly class IncomingCursorData
         public int $mailboxChannelId,
         public string $value,
         public array $metadata = [],
-    ) {
-    }
+    ) {}
 }

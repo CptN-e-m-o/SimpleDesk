@@ -57,47 +57,37 @@ class IncomingEmailMessagePersisterTest extends TestCase
 
         $rawMessage =
             "Message-ID: <incoming-100@example.test>\r\n"
-            . "From: customer@example.test\r\n"
-            . "To: support@example.test\r\n"
-            . "Subject: Test incoming message\r\n"
-            . "\r\n"
-            . "Incoming raw message body.";
+            ."From: customer@example.test\r\n"
+            ."To: support@example.test\r\n"
+            ."Subject: Test incoming message\r\n"
+            ."\r\n"
+            .'Incoming raw message body.';
 
         $attachmentContents =
             'Incoming attachment contents.';
 
         $message = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:100',
+            externalMessageId: 'imap:INBOX:1001:100',
 
-            internetMessageId:
-            '<incoming-100@example.test>',
+            internetMessageId: '<incoming-100@example.test>',
 
-            rawMessage:
-            $rawMessage,
+            rawMessage: $rawMessage,
 
             attachments: [
                 new MailAttachmentData(
-                    fileName:
-                    'diagnostic.txt',
+                    fileName: 'diagnostic.txt',
 
-                    mimeType:
-                    'text/plain',
+                    mimeType: 'text/plain',
 
-                    size:
-                    strlen($attachmentContents),
+                    size: strlen($attachmentContents),
 
-                    content:
-                    $attachmentContents,
+                    content: $attachmentContents,
 
-                    externalId:
-                    'imap-part-1',
+                    externalId: 'imap-part-1',
 
-                    contentId:
-                    null,
+                    contentId: null,
 
-                    inline:
-                    false,
+                    inline: false,
 
                     metadata: [
                         'imap_part_number' => 1,
@@ -332,19 +322,15 @@ class IncomingEmailMessagePersisterTest extends TestCase
         );
 
         $firstMessage = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:101',
+            externalMessageId: 'imap:INBOX:1001:101',
 
-            internetMessageId:
-            '<shared-message@example.test>',
+            internetMessageId: '<shared-message@example.test>',
         );
 
         $secondMessage = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:2002:500',
+            externalMessageId: 'imap:INBOX:2002:500',
 
-            internetMessageId:
-            '<shared-message@example.test>',
+            internetMessageId: '<shared-message@example.test>',
         );
 
         $service = $this->service();
@@ -423,19 +409,15 @@ class IncomingEmailMessagePersisterTest extends TestCase
         );
 
         $firstMessage = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:102',
+            externalMessageId: 'imap:INBOX:1001:102',
 
-            internetMessageId:
-            null,
+            internetMessageId: null,
         );
 
         $secondMessage = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:102',
+            externalMessageId: 'imap:INBOX:1001:102',
 
-            internetMessageId:
-            null,
+            internetMessageId: null,
         );
 
         $service = $this->service();
@@ -496,11 +478,9 @@ class IncomingEmailMessagePersisterTest extends TestCase
         );
 
         $message = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:103',
+            externalMessageId: 'imap:INBOX:1001:103',
 
-            internetMessageId:
-            '<processing-lock@example.test>',
+            internetMessageId: '<processing-lock@example.test>',
         );
 
         $service = $this->service(
@@ -515,14 +495,11 @@ class IncomingEmailMessagePersisterTest extends TestCase
         $emailMessage = $firstResult->emailMessage;
 
         $emailMessage->forceFill([
-            'status' =>
-                EmailMessageStatus::Processing,
+            'status' => EmailMessageStatus::Processing,
 
-            'processing_started_at' =>
-                now()->subSeconds(30),
+            'processing_started_at' => now()->subSeconds(30),
 
-            'processed_at' =>
-                null,
+            'processed_at' => null,
         ])->save();
 
         try {
@@ -535,7 +512,7 @@ class IncomingEmailMessagePersisterTest extends TestCase
                 'Expected InboundMessageAlreadyProcessingException was not thrown.'
             );
         } catch (
-        InboundMessageAlreadyProcessingException $exception
+            InboundMessageAlreadyProcessingException $exception
         ) {
             $this->assertNotSame(
                 '',
@@ -574,14 +551,11 @@ class IncomingEmailMessagePersisterTest extends TestCase
         );
 
         $originalMessage = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:104',
+            externalMessageId: 'imap:INBOX:1001:104',
 
-            internetMessageId:
-            '<stale-processing@example.test>',
+            internetMessageId: '<stale-processing@example.test>',
 
-            subject:
-            'Original subject',
+            subject: 'Original subject',
         );
 
         $service = $this->service(
@@ -596,37 +570,27 @@ class IncomingEmailMessagePersisterTest extends TestCase
         $emailMessage = $firstResult->emailMessage;
 
         $emailMessage->forceFill([
-            'status' =>
-                EmailMessageStatus::Processing,
+            'status' => EmailMessageStatus::Processing,
 
-            'processing_started_at' =>
-                now()->subSeconds(600),
+            'processing_started_at' => now()->subSeconds(600),
 
-            'processed_at' =>
-                null,
+            'processed_at' => null,
 
-            'failed_at' =>
-                now()->subMinutes(10),
+            'failed_at' => now()->subMinutes(10),
 
-            'failure_code' =>
-                'previous_failure',
+            'failure_code' => 'previous_failure',
 
-            'failure_message' =>
-                'Previous processing failed.',
+            'failure_message' => 'Previous processing failed.',
         ])->save();
 
         $updatedMessage = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:104',
+            externalMessageId: 'imap:INBOX:1001:104',
 
-            internetMessageId:
-            '<stale-processing@example.test>',
+            internetMessageId: '<stale-processing@example.test>',
 
-            subject:
-            'Updated subject after retry',
+            subject: 'Updated subject after retry',
 
-            textBody:
-            'Updated text after retry.',
+            textBody: 'Updated text after retry.',
         );
 
         $secondResult = $service->persist(
@@ -700,14 +664,11 @@ class IncomingEmailMessagePersisterTest extends TestCase
         );
 
         $message = $this->normalizedMessage(
-            externalMessageId:
-            'imap:INBOX:1001:105',
+            externalMessageId: 'imap:INBOX:1001:105',
 
-            internetMessageId:
-            '<raw-storage-failure@example.test>',
+            internetMessageId: '<raw-storage-failure@example.test>',
 
-            rawMessage:
-            'Raw message that cannot be stored.',
+            rawMessage: 'Raw message that cannot be stored.',
         );
 
         $rawStorage = Mockery::mock(
@@ -755,7 +716,7 @@ class IncomingEmailMessagePersisterTest extends TestCase
                 'Expected InboundMessagePersistenceException was not thrown.'
             );
         } catch (
-        InboundMessagePersistenceException $exception
+            InboundMessagePersistenceException $exception
         ) {
             $this->assertStringContainsString(
                 'Test raw storage failure.',
@@ -810,52 +771,39 @@ class IncomingEmailMessagePersisterTest extends TestCase
         );
 
         $rawStorage ??= new RawEmailStorageService(
-            filesystem:
-            $filesystem,
+            filesystem: $filesystem,
 
-            disk:
-            'local',
+            disk: 'local',
 
-            rootPath:
-            'testing/mail/raw',
+            rootPath: 'testing/mail/raw',
         );
 
         $attachmentStorage ??=
             new MailAttachmentStorageService(
-                filesystem:
-                $filesystem,
+                filesystem: $filesystem,
 
-                disk:
-                'local',
+                disk: 'local',
 
-                rootPath:
-                'testing/mail/attachments',
+                rootPath: 'testing/mail/attachments',
 
-                scanDispatcher:
-                null,
+                scanDispatcher: null,
 
-                antivirusEnabled:
-                false,
+                antivirusEnabled: false,
             );
 
         $rejectedAttachments ??=
-            new RejectedEmailAttachmentPersister();
+            new RejectedEmailAttachmentPersister;
 
         return new IncomingEmailMessagePersister(
-            keys:
-            new MailMessageIdempotencyKeyFactory(),
+            keys: new MailMessageIdempotencyKeyFactory,
 
-            rawStorage:
-            $rawStorage,
+            rawStorage: $rawStorage,
 
-            attachmentStorage:
-            $attachmentStorage,
+            attachmentStorage: $attachmentStorage,
 
-            rejectedAttachments:
-            $rejectedAttachments,
+            rejectedAttachments: $rejectedAttachments,
 
-            processingLockSeconds:
-            $processingLockSeconds,
+            processingLockSeconds: $processingLockSeconds,
         );
     }
 
@@ -868,55 +816,42 @@ class IncomingEmailMessagePersisterTest extends TestCase
         array $attachments = [],
     ): NormalizedInboundMessageData {
         return new NormalizedInboundMessageData(
-            externalMessageId:
-            $externalMessageId,
+            externalMessageId: $externalMessageId,
 
-            internetMessageId:
-            $internetMessageId,
+            internetMessageId: $internetMessageId,
 
-            from:
-            new MailAddressData(
-                address:
-                'customer@example.test',
+            from: new MailAddressData(
+                address: 'customer@example.test',
 
-                name:
-                'Test Customer',
+                name: 'Test Customer',
             ),
 
             to: [
                 new MailAddressData(
-                    address:
-                    'support@example.test',
+                    address: 'support@example.test',
 
-                    name:
-                    'SimpleDesk Support',
+                    name: 'SimpleDesk Support',
                 ),
             ],
 
-            cc:
-            [],
+            cc: [],
 
-            bcc:
-            [],
+            bcc: [],
 
-            replyTo:
-            [],
+            replyTo: [],
 
-            subject:
-            $subject,
+            subject: $subject,
 
-            textBody:
-            $textBody,
+            textBody: $textBody,
 
-            htmlBody:
-            '<p>'
-            . htmlspecialchars(
+            htmlBody: '<p>'
+            .htmlspecialchars(
                 $textBody,
                 ENT_QUOTES
                 | ENT_SUBSTITUTE,
                 'UTF-8'
             )
-            . '</p>',
+            .'</p>',
 
             headers: [
                 'message-id' => [
@@ -928,36 +863,27 @@ class IncomingEmailMessagePersisterTest extends TestCase
                 ],
             ],
 
-            attachments:
-            $attachments,
+            attachments: $attachments,
 
-            rejectedAttachments:
-            [],
+            rejectedAttachments: [],
 
-            receivedAt:
-            new DateTimeImmutable(
+            receivedAt: new DateTimeImmutable(
                 '2026-07-31 12:00:00'
             ),
 
-            inReplyToMessageId:
-            null,
+            inReplyToMessageId: null,
 
-            references:
-            [],
+            references: [],
 
             metadata: [
-                'imap_uid' =>
-                    100,
+                'imap_uid' => 100,
 
-                'imap_uidvalidity' =>
-                    1001,
+                'imap_uidvalidity' => 1001,
 
-                'imap_folder' =>
-                    'INBOX',
+                'imap_folder' => 'INBOX',
             ],
 
-            rawMessage:
-            $rawMessage,
+            rawMessage: $rawMessage,
         );
     }
 
@@ -968,26 +894,19 @@ class IncomingEmailMessagePersisterTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Persister Mailbox {$token}",
+            'name' => "Persister Mailbox {$token}",
 
-            'email_address' =>
-                "persister-{$token}@example.test",
+            'email_address' => "persister-{$token}@example.test",
 
-            'display_name' =>
-                'Persister Mailbox',
+            'display_name' => 'Persister Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -1001,40 +920,30 @@ class IncomingEmailMessagePersisterTest extends TestCase
             (string) Str::ulid()
         );
 
-        $channel = new MailboxChannel();
+        $channel = new MailboxChannel;
 
         $channel->forceFill([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'provider_connection_id' =>
-                null,
+            'provider_connection_id' => null,
 
-            'name' =>
-                "{$name} {$token}",
+            'name' => "{$name} {$token}",
 
-            'direction' =>
-                MailboxChannelDirection::Incoming,
+            'direction' => MailboxChannelDirection::Incoming,
 
-            'driver' =>
-                MailboxDriver::Imap,
+            'driver' => MailboxDriver::Imap,
 
-            'is_primary' =>
-                $primary,
+            'is_primary' => $primary,
 
-            'failover_order' =>
-                $failoverOrder,
+            'failover_order' => $failoverOrder,
 
-            'is_enabled' =>
-                true,
+            'is_enabled' => true,
 
             'configuration' => [
-                'folder' =>
-                    'INBOX',
+                'folder' => 'INBOX',
             ],
 
-            'health_status' =>
-                MailboxHealthStatus::Unknown,
+            'health_status' => MailboxHealthStatus::Unknown,
         ])->save();
 
         return $channel->fresh();

@@ -14,7 +14,7 @@ class MailDriverNotRegisteredException extends RuntimeException
     ) {
         parent::__construct(
             "Mail driver [{$driver->value}] is not registered "
-            . "for direction [{$direction->value}]."
+            ."for direction [{$direction->value}]."
         );
     }
 }

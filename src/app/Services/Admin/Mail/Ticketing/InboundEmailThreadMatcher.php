@@ -54,8 +54,8 @@ class InboundEmailThreadMatcher
                                     'LOWER(internet_message_id) = ?',
                                     [
                                         '<'
-                                        . $candidateMessageId
-                                        . '>',
+                                        .$candidateMessageId
+                                        .'>',
                                     ]
                                 );
                         }

@@ -12,13 +12,12 @@ class ManualMailboxSyncService
 {
     public function __construct(
         private readonly MailAdminActionLock $locks,
-    ) {
-    }
+    ) {}
 
     public function dispatch(
         Mailbox $mailbox
     ): MailAdminActionResultData {
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             throw new MailAdminActionException(
                 message: "Mailbox [{$mailbox->id}] is disabled.",
                 errorCode: 'mailbox_disabled',
@@ -39,7 +38,7 @@ class ManualMailboxSyncService
             );
         }
 
-        if (!$this->locks->acquire('sync-mailbox', $mailbox->id)) {
+        if (! $this->locks->acquire('sync-mailbox', $mailbox->id)) {
             return new MailAdminActionResultData(
                 action: 'mailbox_sync',
                 dispatched: false,

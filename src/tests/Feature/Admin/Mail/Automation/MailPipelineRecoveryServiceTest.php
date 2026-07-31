@@ -82,17 +82,13 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Processing,
             attributes: [
-                'processing_started_at' =>
-                    now()->subMinutes(10),
+                'processing_started_at' => now()->subMinutes(10),
 
-                'failure_code' =>
-                    'previous_processing_failure',
+                'failure_code' => 'previous_processing_failure',
 
-                'failure_message' =>
-                    'Previous inbound processing failure.',
+                'failure_message' => 'Previous inbound processing failure.',
 
-                'failed_at' =>
-                    now()->subMinutes(9),
+                'failed_at' => now()->subMinutes(9),
 
                 'metadata' => [
                     'source' => 'test',
@@ -206,20 +202,15 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sending,
             attributes: [
-                'processing_started_at' =>
-                    now()->subMinutes(10),
+                'processing_started_at' => now()->subMinutes(10),
 
-                'queued_at' =>
-                    now()->subMinutes(15),
+                'queued_at' => now()->subMinutes(15),
 
-                'failure_code' =>
-                    'previous_sending_failure',
+                'failure_code' => 'previous_sending_failure',
 
-                'failure_message' =>
-                    'Previous outgoing sending failure.',
+                'failure_message' => 'Previous outgoing sending failure.',
 
-                'failed_at' =>
-                    now()->subMinutes(9),
+                'failed_at' => now()->subMinutes(9),
 
                 'metadata' => [
                     'source' => 'test',
@@ -325,14 +316,11 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Received,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(10),
+                'created_at' => now()->subMinutes(10),
 
-                'updated_at' =>
-                    now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
 
-                'received_at' =>
-                    now()->subMinutes(10),
+                'received_at' => now()->subMinutes(10),
             ],
         );
 
@@ -341,14 +329,11 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Queued,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(10),
+                'created_at' => now()->subMinutes(10),
 
-                'updated_at' =>
-                    now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
 
-                'queued_at' =>
-                    now()->subMinutes(10),
+                'queued_at' => now()->subMinutes(10),
             ],
         );
 
@@ -412,8 +397,7 @@ class MailPipelineRecoveryServiceTest extends TestCase
             ProcessInboundEmailJob::class,
             fn (
                 ProcessInboundEmailJob $job
-            ): bool =>
-                $job->emailMessageId
+            ): bool => $job->emailMessageId
                 === $incoming->id
                 && $job->queue
                 === 'mail-incoming'
@@ -423,8 +407,7 @@ class MailPipelineRecoveryServiceTest extends TestCase
             SendOutgoingEmailJob::class,
             fn (
                 SendOutgoingEmailJob $job
-            ): bool =>
-                $job->emailMessageId
+            ): bool => $job->emailMessageId
                 === $outgoing->id
                 && $job->queue
                 === 'mail-outgoing'
@@ -440,8 +423,7 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Processing,
             attributes: [
-                'processing_started_at' =>
-                    now()->subSeconds(30),
+                'processing_started_at' => now()->subSeconds(30),
             ],
         );
 
@@ -450,14 +432,11 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Received,
             attributes: [
-                'created_at' =>
-                    now()->subSeconds(30),
+                'created_at' => now()->subSeconds(30),
 
-                'updated_at' =>
-                    now()->subSeconds(30),
+                'updated_at' => now()->subSeconds(30),
 
-                'received_at' =>
-                    now()->subSeconds(30),
+                'received_at' => now()->subSeconds(30),
             ],
         );
 
@@ -466,11 +445,9 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Sending,
             attributes: [
-                'processing_started_at' =>
-                    now()->subSeconds(30),
+                'processing_started_at' => now()->subSeconds(30),
 
-                'queued_at' =>
-                    now()->subMinute(),
+                'queued_at' => now()->subMinute(),
             ],
         );
 
@@ -479,14 +456,11 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Queued,
             attributes: [
-                'created_at' =>
-                    now()->subSeconds(30),
+                'created_at' => now()->subSeconds(30),
 
-                'updated_at' =>
-                    now()->subSeconds(30),
+                'updated_at' => now()->subSeconds(30),
 
-                'queued_at' =>
-                    now()->subSeconds(30),
+                'queued_at' => now()->subSeconds(30),
             ],
         );
 
@@ -531,14 +505,11 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Incoming,
             status: EmailMessageStatus::Received,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(10),
+                'created_at' => now()->subMinutes(10),
 
-                'updated_at' =>
-                    now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
 
-                'received_at' =>
-                    now()->subMinutes(10),
+                'received_at' => now()->subMinutes(10),
             ],
         );
 
@@ -547,14 +518,11 @@ class MailPipelineRecoveryServiceTest extends TestCase
             direction: EmailMessageDirection::Outgoing,
             status: EmailMessageStatus::Queued,
             attributes: [
-                'created_at' =>
-                    now()->subMinutes(10),
+                'created_at' => now()->subMinutes(10),
 
-                'updated_at' =>
-                    now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
 
-                'queued_at' =>
-                    now()->subMinutes(10),
+                'queued_at' => now()->subMinutes(10),
             ],
         );
 
@@ -607,8 +575,7 @@ class MailPipelineRecoveryServiceTest extends TestCase
             ProcessInboundEmailJob::class,
             fn (
                 ProcessInboundEmailJob $job
-            ): bool =>
-                $job->emailMessageId
+            ): bool => $job->emailMessageId
                 === $incoming->id
         );
 
@@ -616,8 +583,7 @@ class MailPipelineRecoveryServiceTest extends TestCase
             SendOutgoingEmailJob::class,
             fn (
                 SendOutgoingEmailJob $job
-            ): bool =>
-                $job->emailMessageId
+            ): bool => $job->emailMessageId
                 === $outgoing->id
         );
 
@@ -632,10 +598,9 @@ class MailPipelineRecoveryServiceTest extends TestCase
         );
     }
 
-    private function service():
-    MailPipelineRecoveryService
+    private function service(): MailPipelineRecoveryService
     {
-        return new MailPipelineRecoveryService();
+        return new MailPipelineRecoveryService;
     }
 
     private function createMailbox(): Mailbox
@@ -645,26 +610,19 @@ class MailPipelineRecoveryServiceTest extends TestCase
         );
 
         return Mailbox::query()->create([
-            'name' =>
-                "Recovery Mailbox {$token}",
+            'name' => "Recovery Mailbox {$token}",
 
-            'email_address' =>
-                "recovery-{$token}@example.test",
+            'email_address' => "recovery-{$token}@example.test",
 
-            'display_name' =>
-                'Recovery Mailbox',
+            'display_name' => 'Recovery Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
     }
 
@@ -678,139 +636,107 @@ class MailPipelineRecoveryServiceTest extends TestCase
             (string) Str::ulid()
         );
 
-        $message = new EmailMessage();
+        $message = new EmailMessage;
 
         $message->forceFill(
             array_merge(
                 [
-                    'mailbox_id' =>
-                        $mailbox->id,
+                    'mailbox_id' => $mailbox->id,
 
-                    'mailbox_channel_id' =>
-                        null,
+                    'mailbox_channel_id' => null,
 
-                    'ticket_id' =>
-                        null,
+                    'ticket_id' => null,
 
-                    'ticket_reply_id' =>
-                        null,
+                    'ticket_reply_id' => null,
 
-                    'direction' =>
-                        $direction,
+                    'direction' => $direction,
 
-                    'driver' =>
-                        null,
+                    'driver' => null,
 
-                    'status' =>
-                        $status,
+                    'status' => $status,
 
-                    'idempotency_key' =>
-                        "recovery-test-{$token}",
+                    'idempotency_key' => "recovery-test-{$token}",
 
-                    'external_message_id' =>
-                        null,
+                    'external_message_id' => null,
 
-                    'internet_message_id' =>
-                        "<recovery-{$token}@example.test>",
+                    'internet_message_id' => "<recovery-{$token}@example.test>",
 
-                    'in_reply_to_message_id' =>
-                        null,
+                    'in_reply_to_message_id' => null,
 
-                    'reference_message_ids' =>
-                        [],
+                    'reference_message_ids' => [],
 
-                    'sender_address' =>
-                        $direction
+                    'sender_address' => $direction
                         === EmailMessageDirection::Incoming
                             ? 'customer@example.test'
                             : $mailbox->email_address,
 
-                    'sender_name' =>
-                        $direction
+                    'sender_name' => $direction
                         === EmailMessageDirection::Incoming
                             ? 'Test Customer'
                             : $mailbox->display_name,
 
                     'to_recipients' => [
                         [
-                            'address' =>
-                                $direction
+                            'address' => $direction
                                 === EmailMessageDirection::Incoming
                                     ? $mailbox->email_address
                                     : 'customer@example.test',
 
-                            'name' =>
-                                $direction
+                            'name' => $direction
                                 === EmailMessageDirection::Incoming
                                     ? $mailbox->display_name
                                     : 'Test Customer',
                         ],
                     ],
 
-                    'cc_recipients' =>
-                        [],
+                    'cc_recipients' => [],
 
-                    'bcc_recipients' =>
-                        [],
+                    'bcc_recipients' => [],
 
-                    'reply_to_recipients' =>
-                        [],
+                    'reply_to_recipients' => [],
 
-                    'subject' =>
-                        'Mail recovery test',
+                    'subject' => 'Mail recovery test',
 
-                    'text_body' =>
-                        'Mail recovery test body.',
+                    'text_body' => 'Mail recovery test body.',
 
-                    'html_body' =>
-                        null,
+                    'html_body' => null,
 
-                    'headers' =>
-                        [],
+                    'headers' => [],
 
                     'metadata' => [
-                        'test' =>
-                            true,
+                        'test' => true,
                     ],
 
-                    'received_at' =>
-                        $direction
+                    'received_at' => $direction
                         === EmailMessageDirection::Incoming
                             ? now()
                             : null,
 
-                    'queued_at' =>
-                        $direction
+                    'queued_at' => $direction
                         === EmailMessageDirection::Outgoing
                             ? now()
                             : null,
 
-                    'processing_started_at' =>
-                        in_array(
-                            $status,
-                            [
-                                EmailMessageStatus::Processing,
-                                EmailMessageStatus::Sending,
-                            ],
-                            true
-                        )
+                    'processing_started_at' => in_array(
+                        $status,
+                        [
+                            EmailMessageStatus::Processing,
+                            EmailMessageStatus::Sending,
+                        ],
+                        true
+                    )
                             ? now()
                             : null,
 
-                    'processed_at' =>
-                        null,
+                    'processed_at' => null,
 
-                    'sent_at' =>
-                        null,
+                    'sent_at' => null,
 
-                    'failed_at' =>
-                        null,
+                    'failed_at' => null,
 
-                    'failure_code' =>
-                        null,
+                    'failure_code' => null,
 
-                    'failure_message' =>
-                        null,
+                    'failure_message' => null,
                 ],
                 $attributes
             )

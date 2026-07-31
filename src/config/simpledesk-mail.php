@@ -1,5 +1,8 @@
 <?php
 
+use App\Services\Admin\Mail\Drivers\Imap\ImapMailDriver;
+use App\Services\Admin\Mail\Drivers\Smtp\SmtpMailDriver;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -9,13 +12,11 @@ return [
 
     'drivers' => [
         'incoming' => [
-            'imap' =>
-                App\Services\Admin\Mail\Drivers\Imap\ImapMailDriver::class,
+            'imap' => ImapMailDriver::class,
         ],
 
         'outgoing' => [
-            'smtp' =>
-                App\Services\Admin\Mail\Drivers\Smtp\SmtpMailDriver::class,
+            'smtp' => SmtpMailDriver::class,
         ],
     ],
 
@@ -94,11 +95,9 @@ return [
 
         'max_pages_per_run' => 10,
 
-        'default_post_fetch_action' =>
-            'mark_read',
+        'default_post_fetch_action' => 'mark_read',
 
-        'message_processing_lock_seconds' =>
-            600,
+        'message_processing_lock_seconds' => 600,
     ],
 
     /*
@@ -163,8 +162,7 @@ return [
     */
 
     'failover' => [
-        'failed_channel_cooldown_seconds' =>
-            300,
+        'failed_channel_cooldown_seconds' => 300,
 
         'sending_lock_seconds' => 600,
     ],

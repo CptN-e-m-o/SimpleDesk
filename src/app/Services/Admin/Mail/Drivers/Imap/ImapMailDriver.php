@@ -25,8 +25,7 @@ class ImapMailDriver implements IncomingMailDriver
         private readonly ImapClientFactory $clientFactory,
         private readonly ImapMessageNormalizer $normalizer,
         private readonly ImapExceptionMapper $exceptions,
-    ) {
-    }
+    ) {}
 
     public function driver(): MailboxDriver
     {
@@ -60,50 +59,40 @@ class ImapMailDriver implements IncomingMailDriver
             );
 
             return MailConnectionTestResultData::success(
-                message:
-                'IMAP connection and authentication succeeded.',
+                message: 'IMAP connection and authentication succeeded.',
 
-                latencyMilliseconds:
-                $latencyMilliseconds,
+                latencyMilliseconds: $latencyMilliseconds,
 
                 details: [
-                    'host' =>
-                        $configuration->host,
+                    'host' => $configuration->host,
 
-                    'port' =>
-                        $configuration->port,
+                    'port' => $configuration->port,
 
-                    'encryption' =>
-                        $configuration
-                            ->encryption
-                            ->value,
+                    'encryption' => $configuration
+                        ->encryption
+                        ->value,
 
-                    'folder' =>
-                        $configuration->folder,
+                    'folder' => $configuration->folder,
 
-                    'exists' =>
-                        (int) (
-                            $folderInfo['exists']
-                            ?? 0
-                        ),
+                    'exists' => (int) (
+                        $folderInfo['exists']
+                        ?? 0
+                    ),
 
-                    'recent' =>
-                        (int) (
-                            $folderInfo['recent']
-                            ?? 0
-                        ),
+                    'recent' => (int) (
+                        $folderInfo['recent']
+                        ?? 0
+                    ),
 
-                    'uidvalidity' =>
-                        (int) (
-                            $folderInfo['uidvalidity']
-                            ?? 0
-                        ),
+                    'uidvalidity' => (int) (
+                        $folderInfo['uidvalidity']
+                        ?? 0
+                    ),
 
-                    'uidnext' =>
-                        (int) (
-                            $folderInfo['uidnext']
-                            ?? 0
-                        ),
+                    'uidnext' => (int) (
+                        $folderInfo['uidnext']
+                        ?? 0
+                    ),
                 ],
             );
         } catch (Throwable $exception) {
@@ -151,12 +140,10 @@ class ImapMailDriver implements IncomingMailDriver
 
             if ($uidValidity < 1) {
                 throw new MailDriverException(
-                    message:
-                    'IMAP server did not return '
-                    . 'a valid UIDVALIDITY.',
+                    message: 'IMAP server did not return '
+                    .'a valid UIDVALIDITY.',
 
-                    driverErrorCode:
-                    'imap_invalid_uidvalidity',
+                    driverErrorCode: 'imap_invalid_uidvalidity',
 
                     retryable: true,
                     failoverAllowed: true,
@@ -178,15 +165,13 @@ class ImapMailDriver implements IncomingMailDriver
                 $configuration->folder
             );
 
-            if (!$folder instanceof Folder) {
+            if (! $folder instanceof Folder) {
                 throw new MailDriverException(
-                    message:
-                    "IMAP folder "
-                    . "[{$configuration->folder}] "
-                    . 'was not found.',
+                    message: 'IMAP folder '
+                    ."[{$configuration->folder}] "
+                    .'was not found.',
 
-                    driverErrorCode:
-                    'imap_folder_not_found',
+                    driverErrorCode: 'imap_folder_not_found',
 
                     retryable: false,
                     failoverAllowed: true,
@@ -210,7 +195,7 @@ class ImapMailDriver implements IncomingMailDriver
             $hasMore = false;
 
             if (
-                !(
+                ! (
                     $initialSync['active']
                     && $initialSync['policy']
                     === ImapInitialSyncPolicy::FromNow
@@ -226,19 +211,16 @@ class ImapMailDriver implements IncomingMailDriver
 
                 if ($initialSync['active']) {
                     match (
-                    $initialSync['policy']
+                        $initialSync['policy']
                     ) {
-                        ImapInitialSyncPolicy::Unseen =>
-                        $query->unseen(),
+                        ImapInitialSyncPolicy::Unseen => $query->unseen(),
 
-                        ImapInitialSyncPolicy::RecentDays =>
-                        $query->since(
+                        ImapInitialSyncPolicy::RecentDays => $query->since(
                             $initialSync['since']
                         ),
 
                         ImapInitialSyncPolicy::All,
-                        ImapInitialSyncPolicy::FromNow =>
-                        null,
+                        ImapInitialSyncPolicy::FromNow => null,
                     };
                 }
 
@@ -273,11 +255,9 @@ class ImapMailDriver implements IncomingMailDriver
 
                 if ($messageUid < 1) {
                     throw new MailDriverException(
-                        message:
-                        'IMAP message has no valid UID.',
+                        message: 'IMAP message has no valid UID.',
 
-                        driverErrorCode:
-                        'imap_missing_message_uid',
+                        driverErrorCode: 'imap_missing_message_uid',
 
                         retryable: true,
                         failoverAllowed: false,
@@ -297,11 +277,9 @@ class ImapMailDriver implements IncomingMailDriver
                             ->normalize(
                                 message: $message,
 
-                                configuration:
-                                $configuration,
+                                configuration: $configuration,
 
-                                uidValidity:
-                                $uidValidity,
+                                uidValidity: $uidValidity,
                             );
                 } catch (Throwable $exception) {
                     $normalizationFailures[] =
@@ -310,21 +288,18 @@ class ImapMailDriver implements IncomingMailDriver
                             ->failed(
                                 message: $message,
 
-                                configuration:
-                                $configuration,
+                                configuration: $configuration,
 
-                                uidValidity:
-                                $uidValidity,
+                                uidValidity: $uidValidity,
 
-                                exception:
-                                $exception,
+                                exception: $exception,
                             );
                 }
             }
 
             $initialSyncCompleted =
-                !$initialSync['active']
-                || !$hasMore;
+                ! $initialSync['active']
+                || ! $hasMore;
 
             $nextCursor = $this->nextCursor(
                 currentUid: $lastUid,
@@ -332,53 +307,39 @@ class ImapMailDriver implements IncomingMailDriver
                 uidNext: $uidNext,
                 hasFetchedItems: $items !== [],
                 hasMore: $hasMore,
-                initialSyncActive:
-                $initialSync['active'],
-                initialSyncPolicy:
-                $initialSync['policy'],
+                initialSyncActive: $initialSync['active'],
+                initialSyncPolicy: $initialSync['policy'],
             );
 
             $metadata = [
-                'folder' =>
-                    $configuration->folder,
+                'folder' => $configuration->folder,
 
-                'uidvalidity' =>
-                    $uidValidity,
+                'uidvalidity' => $uidValidity,
 
-                'uidnext' =>
-                    $uidNext,
+                'uidnext' => $uidNext,
 
-                'cursor_reset' =>
-                    $cursorReset,
+                'cursor_reset' => $cursorReset,
 
-                'normalized_count' =>
-                    count(
-                        $normalizedMessages
-                    ),
+                'normalized_count' => count(
+                    $normalizedMessages
+                ),
 
-                'normalization_failure_count' =>
-                    count(
-                        $normalizationFailures
-                    ),
+                'normalization_failure_count' => count(
+                    $normalizationFailures
+                ),
 
-                'initial_sync_policy' =>
-                    $initialSync['policy']->value,
+                'initial_sync_policy' => $initialSync['policy']->value,
 
-                'initial_sync_completed' =>
-                    $initialSyncCompleted,
+                'initial_sync_completed' => $initialSyncCompleted,
 
-                'initial_sync_started_at' =>
-                    $initialSync['started_at'],
+                'initial_sync_started_at' => $initialSync['started_at'],
 
-                'initial_sync_recent_days' =>
-                    $initialSync['recent_days'],
+                'initial_sync_recent_days' => $initialSync['recent_days'],
 
-                'initial_sync_since' =>
-                    $initialSync['since']
-                        ?->toIso8601String(),
+                'initial_sync_since' => $initialSync['since']
+                    ?->toIso8601String(),
 
-                'initial_sync_skipped_existing' =>
-                    $initialSync['active']
+                'initial_sync_skipped_existing' => $initialSync['active']
                     && $initialSync['policy']
                     === ImapInitialSyncPolicy::FromNow,
             ];
@@ -402,20 +363,15 @@ class ImapMailDriver implements IncomingMailDriver
             }
 
             return new IncomingFetchResultData(
-                messages:
-                $normalizedMessages,
+                messages: $normalizedMessages,
 
-                nextCursor:
-                (string) $nextCursor,
+                nextCursor: (string) $nextCursor,
 
-                hasMore:
-                $hasMore,
+                hasMore: $hasMore,
 
-                metadata:
-                $metadata,
+                metadata: $metadata,
 
-                failures:
-                $normalizationFailures,
+                failures: $normalizationFailures,
             );
         } catch (Throwable $exception) {
             throw $this->exceptions->map(
@@ -450,16 +406,14 @@ class ImapMailDriver implements IncomingMailDriver
 
         foreach ($messages as $message) {
             if (
-                !$message
+                ! $message
                     instanceof NormalizedInboundMessageData
             ) {
                 throw new MailDriverException(
-                    message:
-                    'IMAP acknowledgement received '
-                    . 'an invalid message object.',
+                    message: 'IMAP acknowledgement received '
+                    .'an invalid message object.',
 
-                    driverErrorCode:
-                    'imap_invalid_acknowledgement',
+                    driverErrorCode: 'imap_invalid_acknowledgement',
 
                     retryable: false,
                     failoverAllowed: false,
@@ -497,23 +451,20 @@ class ImapMailDriver implements IncomingMailDriver
 
             $this->assertUidValidity(
                 messages: $messages,
-                currentUidValidity:
-                $currentUidValidity,
+                currentUidValidity: $currentUidValidity,
             );
 
             $folder = $client->getFolder(
                 $configuration->folder
             );
 
-            if (!$folder instanceof Folder) {
+            if (! $folder instanceof Folder) {
                 throw new MailDriverException(
-                    message:
-                    "IMAP folder "
-                    . "[{$configuration->folder}] "
-                    . 'was not found.',
+                    message: 'IMAP folder '
+                    ."[{$configuration->folder}] "
+                    .'was not found.',
 
-                    driverErrorCode:
-                    'imap_folder_not_found',
+                    driverErrorCode: 'imap_folder_not_found',
 
                     retryable: false,
                     failoverAllowed: true,
@@ -541,12 +492,10 @@ class ImapMailDriver implements IncomingMailDriver
 
                 if ($uid < 1) {
                     throw new MailDriverException(
-                        message:
-                        'Normalized IMAP message '
-                        . 'does not contain a valid UID.',
+                        message: 'Normalized IMAP message '
+                        .'does not contain a valid UID.',
 
-                        driverErrorCode:
-                        'imap_missing_message_uid',
+                        driverErrorCode: 'imap_missing_message_uid',
 
                         retryable: false,
                         failoverAllowed: false,
@@ -575,22 +524,18 @@ class ImapMailDriver implements IncomingMailDriver
                 }
 
                 match ($action) {
-                    IncomingAcknowledgeAction::Keep =>
-                    null,
+                    IncomingAcknowledgeAction::Keep => null,
 
-                    IncomingAcknowledgeAction::MarkRead =>
-                    $imapMessage->setFlag(
+                    IncomingAcknowledgeAction::MarkRead => $imapMessage->setFlag(
                         'Seen'
                     ),
 
-                    IncomingAcknowledgeAction::Move =>
-                    $imapMessage->move(
+                    IncomingAcknowledgeAction::Move => $imapMessage->move(
                         $configuration
                             ->processedFolder
                     ),
 
-                    IncomingAcknowledgeAction::Delete =>
-                    $imapMessage->delete(
+                    IncomingAcknowledgeAction::Delete => $imapMessage->delete(
                         $configuration
                             ->expungeOnDelete
                     ),
@@ -639,9 +584,8 @@ class ImapMailDriver implements IncomingMailDriver
                 $cursorMetadata
             )
         ) {
-            $active = !$this->booleanValue(
-                value:
-                $cursorMetadata[
+            $active = ! $this->booleanValue(
+                value: $cursorMetadata[
                 'initial_sync_completed'
                 ],
 
@@ -694,11 +638,9 @@ class ImapMailDriver implements IncomingMailDriver
             === ImapInitialSyncPolicy::RecentDays
         ) {
             $since = $this->initialSyncSince(
-                cursorMetadata:
-                $cursorMetadata,
+                cursorMetadata: $cursorMetadata,
 
-                recentDays:
-                $recentDays,
+                recentDays: $recentDays,
             );
         }
 
@@ -849,9 +791,9 @@ class ImapMailDriver implements IncomingMailDriver
 
         if (is_string($value)) {
             return match (
-            strtolower(
-                trim($value)
-            )
+                strtolower(
+                    trim($value)
+                )
             ) {
                 '1',
                 'true',
@@ -888,11 +830,9 @@ class ImapMailDriver implements IncomingMailDriver
             !== $channel->id
         ) {
             throw new MailDriverException(
-                message:
-                'IMAP cursor belongs to another channel.',
+                message: 'IMAP cursor belongs to another channel.',
 
-                driverErrorCode:
-                'imap_invalid_cursor_channel',
+                driverErrorCode: 'imap_invalid_cursor_channel',
 
                 retryable: false,
                 failoverAllowed: false,
@@ -930,14 +870,12 @@ class ImapMailDriver implements IncomingMailDriver
             ];
         }
 
-        if (!ctype_digit($cursor->value)) {
+        if (! ctype_digit($cursor->value)) {
             throw new MailDriverException(
-                message:
-                'IMAP cursor must contain '
-                . 'a numeric UID.',
+                message: 'IMAP cursor must contain '
+                .'a numeric UID.',
 
-                driverErrorCode:
-                'imap_invalid_cursor',
+                driverErrorCode: 'imap_invalid_cursor',
 
                 retryable: false,
                 failoverAllowed: false,
@@ -969,12 +907,10 @@ class ImapMailDriver implements IncomingMailDriver
                 !== $currentUidValidity
             ) {
                 throw new MailDriverException(
-                    message:
-                    'IMAP UIDVALIDITY changed before '
-                    . 'the message was acknowledged.',
+                    message: 'IMAP UIDVALIDITY changed before '
+                    .'the message was acknowledged.',
 
-                    driverErrorCode:
-                    'imap_uidvalidity_changed',
+                    driverErrorCode: 'imap_uidvalidity_changed',
 
                     retryable: true,
                     failoverAllowed: false,
@@ -993,12 +929,10 @@ class ImapMailDriver implements IncomingMailDriver
             === null
         ) {
             throw new MailDriverException(
-                message:
-                'Processed folder is required '
-                . 'when post_fetch_action is move.',
+                message: 'Processed folder is required '
+                .'when post_fetch_action is move.',
 
-                driverErrorCode:
-                'imap_processed_folder_missing',
+                driverErrorCode: 'imap_processed_folder_missing',
 
                 retryable: false,
                 failoverAllowed: false,
@@ -1016,7 +950,7 @@ class ImapMailDriver implements IncomingMailDriver
             }
         } catch (Throwable $exception) {
             if (
-                !$this
+                ! $this
                     ->exceptions
                     ->isFolderNotFound(
                         $exception
@@ -1027,17 +961,15 @@ class ImapMailDriver implements IncomingMailDriver
         }
 
         if (
-            !$configuration
+            ! $configuration
                 ->createProcessedFolder
         ) {
             throw new MailDriverException(
-                message:
-                "IMAP folder "
-                . "[{$configuration->processedFolder}] "
-                . 'does not exist.',
+                message: 'IMAP folder '
+                ."[{$configuration->processedFolder}] "
+                .'does not exist.',
 
-                driverErrorCode:
-                'imap_processed_folder_not_found',
+                driverErrorCode: 'imap_processed_folder_not_found',
 
                 retryable: false,
                 failoverAllowed: false,

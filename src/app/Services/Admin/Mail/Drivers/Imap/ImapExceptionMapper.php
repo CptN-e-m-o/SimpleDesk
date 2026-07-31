@@ -133,9 +133,8 @@ class ImapExceptionMapper
         bool $affectsHealth,
     ): MailDriverException {
         return new MailDriverException(
-            message:
-            "IMAP {$operation} failed: "
-            . $exception->getMessage(),
+            message: "IMAP {$operation} failed: "
+            .$exception->getMessage(),
             driverErrorCode: $code,
             retryable: $retryable,
             failoverAllowed: $failoverAllowed,

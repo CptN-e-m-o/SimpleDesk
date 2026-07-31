@@ -11,14 +11,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class MailAttachmentDownloadService
 {
     /**
-     * @param array<int, string> $allowedScanStatuses
+     * @param  array<int, string>  $allowedScanStatuses
      */
     public function __construct(
         private readonly FilesystemFactory $filesystem,
         private readonly array $allowedScanStatuses,
         private readonly bool $verifyChecksums,
-    ) {
-    }
+    ) {}
 
     public function download(
         EmailAttachment $attachment
@@ -31,7 +30,7 @@ class MailAttachmentDownloadService
             $attachment->disk
         );
 
-        if (!$storage->exists($attachment->path)) {
+        if (! $storage->exists($attachment->path)) {
             throw new MailStorageException(
                 'Attachment file does not exist.'
             );
@@ -122,7 +121,7 @@ class MailAttachmentDownloadService
             : $this->allowedScanStatuses;
 
         if (
-            !in_array(
+            ! in_array(
                 $status,
                 $allowedScanStatuses,
                 true
@@ -166,7 +165,7 @@ class MailAttachmentDownloadService
         }
 
         if (
-            !hash_equals(
+            ! hash_equals(
                 $attachment->checksum_sha256,
                 $checksum
             )

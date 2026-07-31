@@ -43,7 +43,7 @@ class InboundEmailReplyParser
             $originalBody
         );
 
-        if (!$parsingEnabled) {
+        if (! $parsingEnabled) {
             $body = $this->limitBody(
                 $originalBody
             );
@@ -164,8 +164,7 @@ class InboundEmailReplyParser
                 $quotedTextRemoved,
             ] = $this->htmlToText(
                 html: $htmlBody,
-                stripQuotedText:
-                $stripHtmlQuotedText,
+                stripQuotedText: $stripHtmlQuotedText,
             );
 
             return [
@@ -264,7 +263,7 @@ class InboundEmailReplyParser
     }
 
     /**
-     * @param array<int, string> $lines
+     * @param  array<int, string>  $lines
      */
     private function isQuoteSeparator(
         string $line,
@@ -281,8 +280,7 @@ class InboundEmailReplyParser
             config(
                 'simpledesk-mail-reply-parsing.custom_separators',
                 []
-            )
-            as $separator
+            ) as $separator
         ) {
             if (
                 is_string($separator)
@@ -296,11 +294,11 @@ class InboundEmailReplyParser
         if (
             preg_match(
                 '/^-{2,}\s*(?:'
-                . 'original message'
-                . '|forwarded message'
-                . '|исходное сообщение'
-                . '|пересылаемое сообщение'
-                . ')\s*-{2,}$/iu',
+                .'original message'
+                .'|forwarded message'
+                .'|исходное сообщение'
+                .'|пересылаемое сообщение'
+                .')\s*-{2,}$/iu',
                 $trimmed
             ) === 1
         ) {
@@ -310,9 +308,9 @@ class InboundEmailReplyParser
         if (
             preg_match(
                 '/^(?:'
-                . 'begin forwarded message'
-                . '|начало переадресованного сообщения'
-                . ')\s*:?$/iu',
+                .'begin forwarded message'
+                .'|начало переадресованного сообщения'
+                .')\s*:?$/iu',
                 $trimmed
             ) === 1
         ) {
@@ -358,9 +356,9 @@ class InboundEmailReplyParser
         if (
             preg_match(
                 '/^.{1,800}(?:'
-                . 'пользователь\s+.{1,300}\s+написал(?:а)?'
-                . '|написал(?:а)?'
-                . ')\s*:\s*$/iu',
+                .'пользователь\s+.{1,300}\s+написал(?:а)?'
+                .'|написал(?:а)?'
+                .')\s*:\s*$/iu',
                 $trimmed
             ) === 1
         ) {
@@ -393,7 +391,7 @@ class InboundEmailReplyParser
     }
 
     /**
-     * @param array<int, string> $lines
+     * @param  array<int, string>  $lines
      */
     private function isOutlookHeaderBlock(
         array $lines,
@@ -419,7 +417,7 @@ class InboundEmailReplyParser
     }
 
     /**
-     * @param array<int, string> $lines
+     * @param  array<int, string>  $lines
      */
     private function containsHeaderBlockAhead(
         array $lines,
@@ -483,12 +481,12 @@ class InboundEmailReplyParser
         }
 
         return isset(
-                $matchedHeaders['from']
-            ) && count($matchedHeaders) >= 3;
+            $matchedHeaders['from']
+        ) && count($matchedHeaders) >= 3;
     }
 
     /**
-     * @param array<int, string> $lines
+     * @param  array<int, string>  $lines
      */
     private function trailingQuotedBlockIndex(
         array $lines
@@ -505,7 +503,7 @@ class InboundEmailReplyParser
             );
 
             if (
-                !str_starts_with(
+                ! str_starts_with(
                     $line,
                     '>'
                 )
@@ -514,7 +512,7 @@ class InboundEmailReplyParser
             }
 
             if (
-                !$this->hasContentBefore(
+                ! $this->hasContentBefore(
                     $lines,
                     $index
                 )
@@ -564,7 +562,7 @@ class InboundEmailReplyParser
     }
 
     /**
-     * @param array<int, string> $lines
+     * @param  array<int, string>  $lines
      */
     private function hasContentBefore(
         array $lines,
@@ -641,14 +639,14 @@ class InboundEmailReplyParser
             if (
                 preg_match(
                     '/^(?:'
-                    . 'sent from my (?:iphone|ipad|android)'
-                    . '|sent from samsung mobile'
-                    . '|get outlook for (?:ios|android)'
-                    . '|отправлено с моего (?:iphone|ipad)'
-                    . '|отправлено с iphone'
-                    . '|отправлено из мобильной почты'
-                    . '|отправлено из мобильной почты mail\.ru'
-                    . ')\.?$/iu',
+                    .'sent from my (?:iphone|ipad|android)'
+                    .'|sent from samsung mobile'
+                    .'|get outlook for (?:ios|android)'
+                    .'|отправлено с моего (?:iphone|ipad)'
+                    .'|отправлено с iphone'
+                    .'|отправлено из мобильной почты'
+                    .'|отправлено из мобильной почты mail\.ru'
+                    .')\.?$/iu',
                     $line
                 ) === 1
             ) {
@@ -703,17 +701,17 @@ class InboundEmailReplyParser
 
             $wrappedHtml =
                 '<?xml encoding="UTF-8">'
-                . '<!DOCTYPE html>'
-                . '<html>'
-                . '<head>'
-                . '<meta charset="UTF-8">'
-                . '</head>'
-                . '<body>'
-                . '<div id="simpledesk-reply-parser-root">'
-                . $html
-                . '</div>'
-                . '</body>'
-                . '</html>';
+                .'<!DOCTYPE html>'
+                .'<html>'
+                .'<head>'
+                .'<meta charset="UTF-8">'
+                .'</head>'
+                .'<body>'
+                .'<div id="simpledesk-reply-parser-root">'
+                .$html
+                .'</div>'
+                .'</body>'
+                .'</html>';
 
             $loaded = $document->loadHTML(
                 $wrappedHtml,
@@ -722,7 +720,7 @@ class InboundEmailReplyParser
                 | LIBXML_NOWARNING,
             );
 
-            if (!$loaded) {
+            if (! $loaded) {
                 return [
                     $this->fallbackHtmlToText(
                         $html
@@ -738,10 +736,10 @@ class InboundEmailReplyParser
             $this->removeNodes(
                 $xpath,
                 '//script'
-                . '|//style'
-                . '|//head'
-                . '|//template'
-                . '|//noscript'
+                .'|//style'
+                .'|//head'
+                .'|//template'
+                .'|//noscript'
             );
 
             $quotedTextRemoved = false;
@@ -759,43 +757,43 @@ class InboundEmailReplyParser
                     $this->removeNodes(
                         $xpath,
                         '//*[contains('
-                        . 'concat(" ", normalize-space(@class), " "),'
-                        . '" gmail_quote "'
-                        . ')]'
+                        .'concat(" ", normalize-space(@class), " "),'
+                        .'" gmail_quote "'
+                        .')]'
                     );
 
                 $removedNodes +=
                     $this->removeNodes(
                         $xpath,
                         '//*[contains('
-                        . 'concat(" ", normalize-space(@class), " "),'
-                        . '" gmail_extra "'
-                        . ')]'
+                        .'concat(" ", normalize-space(@class), " "),'
+                        .'" gmail_extra "'
+                        .')]'
                     );
 
                 $removedNodes +=
                     $this->removeNodes(
                         $xpath,
                         '//*[contains('
-                        . 'concat(" ", normalize-space(@class), " "),'
-                        . '" yahoo_quoted "'
-                        . ')]'
+                        .'concat(" ", normalize-space(@class), " "),'
+                        .'" yahoo_quoted "'
+                        .')]'
                     );
 
                 $removedNodes +=
                     $this->removeNodes(
                         $xpath,
                         '//*[contains('
-                        . 'concat(" ", normalize-space(@class), " "),'
-                        . '" moz-cite-prefix "'
-                        . ')]'
+                        .'concat(" ", normalize-space(@class), " "),'
+                        .'" moz-cite-prefix "'
+                        .')]'
                     );
 
                 $removedNodes +=
                     $this->removeNodes(
                         $xpath,
                         '//*[@id="divRplyFwdMsg"]'
-                        . '|//*[@id="appendonsend"]'
+                        .'|//*[@id="appendonsend"]'
                     );
 
                 $quotedTextRemoved =
@@ -822,7 +820,7 @@ class InboundEmailReplyParser
                 0
             );
 
-            if (!$rootNode instanceof DOMElement) {
+            if (! $rootNode instanceof DOMElement) {
                 return [
                     $this->fallbackHtmlToText(
                         $html
@@ -878,11 +876,10 @@ class InboundEmailReplyParser
         $removed = 0;
 
         foreach (
-            array_reverse($items)
-            as $node
+            array_reverse($items) as $node
         ) {
             if (
-                !$node instanceof DOMNode
+                ! $node instanceof DOMNode
                 || $node->parentNode === null
             ) {
                 continue;
@@ -904,7 +901,7 @@ class InboundEmailReplyParser
         $document =
             $node->ownerDocument;
 
-        if (!$document instanceof DOMDocument) {
+        if (! $document instanceof DOMDocument) {
             return '';
         }
 
@@ -935,9 +932,9 @@ class InboundEmailReplyParser
 
         $html = preg_replace(
             '/<\/(?:'
-            . 'p|div|section|article|li|tr|td'
-            . '|h1|h2|h3|h4|h5|h6'
-            . ')>/iu',
+            .'p|div|section|article|li|tr|td'
+            .'|h1|h2|h3|h4|h5|h6'
+            .')>/iu',
             "\n",
             (string) $html
         );
@@ -1024,11 +1021,11 @@ class InboundEmailReplyParser
         }
 
         return rtrim(
-                mb_substr(
-                    $body,
-                    0,
-                    $limit
-                )
-            ) . "\n\n[Содержимое сокращено системой]";
+            mb_substr(
+                $body,
+                0,
+                $limit
+            )
+        )."\n\n[Содержимое сокращено системой]";
     }
 }

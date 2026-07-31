@@ -71,14 +71,8 @@ class ClamAvAttachmentScanDriverTest extends TestCase
 
     private function driver(): object
     {
-        return new class(
-            host: 'clamav',
-            port: 3310,
-            connectionTimeoutSeconds: 1,
-            readTimeoutSeconds: 1,
-            chunkBytes: 8192,
-            maxStreamBytes: 1024,
-        ) extends ClamAvAttachmentScanDriver {
+        return new class(host: 'clamav', port: 3310, connectionTimeoutSeconds: 1, readTimeoutSeconds: 1, chunkBytes: 8192, maxStreamBytes: 1024) extends ClamAvAttachmentScanDriver
+        {
             public function parseForTest(
                 string $response,
                 int $scannedBytes,

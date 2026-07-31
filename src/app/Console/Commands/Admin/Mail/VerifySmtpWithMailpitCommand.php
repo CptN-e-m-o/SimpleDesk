@@ -47,17 +47,16 @@ class VerifySmtpWithMailpitCommand extends Command
 
             $this->line(
                 'Mailpit API is available'
-                . (
-                isset($info['Version'])
-                    ? ": {$info['Version']}"
-                    : '.'
+                .(
+                    isset($info['Version'])
+                        ? ": {$info['Version']}"
+                        : '.'
                 )
             );
 
             $verification = $this->verificationData(
                 recipient: $recipient,
-                includeAttachment:
-                !$this->option('without-attachment'),
+                includeAttachment: ! $this->option('without-attachment'),
             );
 
             $emailMessage = $queue->queue(
@@ -68,7 +67,7 @@ class VerifySmtpWithMailpitCommand extends Command
 
             $this->info(
                 "Email message [{$emailMessage->id}] was prepared "
-                . "with status [{$emailMessage->status->value}]."
+                ."with status [{$emailMessage->status->value}]."
             );
 
             if ($mode === 'direct') {
@@ -107,10 +106,8 @@ class VerifySmtpWithMailpitCommand extends Command
                 emailMessage: $emailMessage,
                 subject: $verification['subject'],
                 token: $verification['token'],
-                attachmentName:
-                $verification['attachment_name'],
-                attachmentContent:
-                $verification['attachment_content'],
+                attachmentName: $verification['attachment_name'],
+                attachmentContent: $verification['attachment_content'],
             );
 
             $this->printResult(
@@ -156,7 +153,7 @@ class VerifySmtpWithMailpitCommand extends Command
             );
         }
 
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             throw new RuntimeException(
                 "Mailbox [{$mailbox->id}] is disabled."
             );
@@ -179,7 +176,7 @@ class VerifySmtpWithMailpitCommand extends Command
         ) {
             throw new RuntimeException(
                 "Recipient [{$recipient}] "
-                . 'is not a valid email address.'
+                .'is not a valid email address.'
             );
         }
 
@@ -193,7 +190,7 @@ class VerifySmtpWithMailpitCommand extends Command
         );
 
         if (
-            !in_array(
+            ! in_array(
                 $mode,
                 [
                     'direct',
@@ -241,7 +238,7 @@ class VerifySmtpWithMailpitCommand extends Command
 
         $html =
             '<p><strong>SimpleDesk SMTP verification</strong></p>'
-            . "<p>Token: {$token}</p>";
+            ."<p>Token: {$token}</p>";
 
         $attachmentName = null;
         $attachmentContent = null;
@@ -269,8 +266,7 @@ class VerifySmtpWithMailpitCommand extends Command
             'attachment_content' => $attachmentContent,
 
             'message' => new OutgoingEmailMessageData(
-                idempotencyKey:
-                "smtp-verification:{$token}",
+                idempotencyKey: "smtp-verification:{$token}",
 
                 from: null,
 
@@ -289,18 +285,15 @@ class VerifySmtpWithMailpitCommand extends Command
                 htmlBody: $html,
 
                 headers: [
-                    'X-SimpleDesk-Verification' =>
-                        $token,
+                    'X-SimpleDesk-Verification' => $token,
                 ],
 
                 attachments: $attachments,
 
                 metadata: [
-                    'source' =>
-                        'smtp_mailpit_verification',
+                    'source' => 'smtp_mailpit_verification',
 
-                    'verification_token' =>
-                        $token,
+                    'verification_token' => $token,
                 ],
             ),
         ];
@@ -341,10 +334,10 @@ class VerifySmtpWithMailpitCommand extends Command
 
         throw new RuntimeException(
             "Email message [{$emailMessage->id}] "
-            . 'did not become ready for direct sending '
-            . "within {$timeoutSeconds} seconds. "
-            . 'Current status: '
-            . "{$emailMessage->status->value}."
+            .'did not become ready for direct sending '
+            ."within {$timeoutSeconds} seconds. "
+            .'Current status: '
+            ."{$emailMessage->status->value}."
         );
     }
 
@@ -382,9 +375,9 @@ class VerifySmtpWithMailpitCommand extends Command
 
         throw new RuntimeException(
             "Email message [{$emailMessage->id}] "
-            . "was not sent within {$timeoutSeconds} seconds. "
-            . 'Current status: '
-            . "{$emailMessage->status->value}."
+            ."was not sent within {$timeoutSeconds} seconds. "
+            .'Current status: '
+            ."{$emailMessage->status->value}."
         );
     }
 
@@ -392,7 +385,7 @@ class VerifySmtpWithMailpitCommand extends Command
         EmailMessage $emailMessage
     ): void {
         if (
-            !in_array(
+            ! in_array(
                 $emailMessage->status,
                 [
                     EmailMessageStatus::Failed,
@@ -408,9 +401,9 @@ class VerifySmtpWithMailpitCommand extends Command
 
         throw new RuntimeException(
             "Email message [{$emailMessage->id}] "
-            . 'ended with status '
-            . "[{$emailMessage->status->value}]: "
-            . (
+            .'ended with status '
+            ."[{$emailMessage->status->value}]: "
+            .(
                 $emailMessage->failure_message
                 ?? 'no failure message'
             )
@@ -427,7 +420,7 @@ class VerifySmtpWithMailpitCommand extends Command
         ]);
 
         if (
-            !in_array(
+            ! in_array(
                 $emailMessage->status,
                 [
                     EmailMessageStatus::Sent,
@@ -458,8 +451,7 @@ class VerifySmtpWithMailpitCommand extends Command
 
         $successfulAttempt =
             $emailMessage->attempts->first(
-                fn ($attempt): bool =>
-                    $attempt->status
+                fn ($attempt): bool => $attempt->status
                     === EmailMessageAttemptStatus::Succeeded
             );
 
@@ -502,8 +494,7 @@ class VerifySmtpWithMailpitCommand extends Command
             $mailpitMessage['To'] ?? []
         )
             ->map(
-                fn (array $address): string =>
-                strtolower(
+                fn (array $address): string => strtolower(
                     (string) (
                         $address['Address']
                         ?? ''
@@ -513,7 +504,7 @@ class VerifySmtpWithMailpitCommand extends Command
             ->all();
 
         if (
-            !in_array(
+            ! in_array(
                 strtolower($recipient),
                 $toAddresses,
                 true
@@ -521,12 +512,12 @@ class VerifySmtpWithMailpitCommand extends Command
         ) {
             throw new RuntimeException(
                 'Mailpit recipient list does not contain '
-                . 'the expected recipient.'
+                .'the expected recipient.'
             );
         }
 
         if (
-            !str_contains(
+            ! str_contains(
                 (string) (
                     $mailpitMessage['Text']
                     ?? ''
@@ -536,12 +527,12 @@ class VerifySmtpWithMailpitCommand extends Command
         ) {
             throw new RuntimeException(
                 'Mailpit plain-text body does not '
-                . 'contain the verification token.'
+                .'contain the verification token.'
             );
         }
 
         if (
-            !str_contains(
+            ! str_contains(
                 (string) (
                     $mailpitMessage['HTML']
                     ?? ''
@@ -551,7 +542,7 @@ class VerifySmtpWithMailpitCommand extends Command
         ) {
             throw new RuntimeException(
                 'Mailpit HTML body does not contain '
-                . 'the verification token.'
+                .'the verification token.'
             );
         }
 
@@ -568,7 +559,7 @@ class VerifySmtpWithMailpitCommand extends Command
                     : null
             ),
             'Mailpit Message-ID does not match '
-            . 'the database value.'
+            .'the database value.'
         );
 
         if (
@@ -581,15 +572,14 @@ class VerifySmtpWithMailpitCommand extends Command
         $attachment = collect(
             $mailpitMessage['Attachments'] ?? []
         )->first(
-            fn (array $attachment): bool =>
-                ($attachment['FileName'] ?? null)
+            fn (array $attachment): bool => ($attachment['FileName'] ?? null)
                 === $attachmentName
         );
 
-        if (!is_array($attachment)) {
+        if (! is_array($attachment)) {
             throw new RuntimeException(
                 "Mailpit attachment [{$attachmentName}] "
-                . 'was not found.'
+                .'was not found.'
             );
         }
 
@@ -597,8 +587,8 @@ class VerifySmtpWithMailpitCommand extends Command
         $messageId = $mailpitMessage['ID'] ?? null;
 
         if (
-            !is_string($partId)
-            || !is_string($messageId)
+            ! is_string($partId)
+            || ! is_string($messageId)
         ) {
             throw new RuntimeException(
                 'Mailpit attachment identifiers are missing.'
@@ -739,18 +729,17 @@ class VerifySmtpWithMailpitCommand extends Command
         );
 
         foreach (
-            $emailMessage->attempts
-            as $attempt
+            $emailMessage->attempts as $attempt
         ) {
             $this->line(
                 "Attempt #{$attempt->attempt_number}: "
-                . "{$attempt->status->value}; "
-                . (
+                ."{$attempt->status->value}; "
+                .(
                     $attempt->error_code
                     ?? 'no error code'
                 )
-                . '; '
-                . (
+                .'; '
+                .(
                     $attempt->error_message
                     ?? 'no error message'
                 )
@@ -766,10 +755,10 @@ class VerifySmtpWithMailpitCommand extends Command
         if ($expected !== $actual) {
             throw new RuntimeException(
                 $message
-                . ' Expected: '
-                . var_export($expected, true)
-                . '; actual: '
-                . var_export($actual, true)
+                .' Expected: '
+                .var_export($expected, true)
+                .'; actual: '
+                .var_export($actual, true)
             );
         }
     }

@@ -15,8 +15,7 @@ class MailAdminAuditLogger
     public function __construct(
         private readonly MailAdminAuditTargetResolver $targets,
         private readonly MailAdminAuditContextFactory $contexts,
-    ) {
-    }
+    ) {}
 
     public function record(
         MailAdminAuditEvent $event,
@@ -36,7 +35,7 @@ class MailAdminAuditLogger
             (string) $request->header('X-Request-ID')
         );
 
-        if (!Str::isUuid($requestId)) {
+        if (! Str::isUuid($requestId)) {
             $requestId = (string) Str::uuid();
         }
 

@@ -19,8 +19,7 @@ class OutgoingEmailQueueService
         private readonly MailAttachmentStorageService $attachmentStorage,
         private readonly OutgoingMailAttachmentValidator $attachmentValidator,
         private readonly MailInternetMessageIdFactory $messageIds,
-    ) {
-    }
+    ) {}
 
     public function queue(
         Mailbox $mailbox,
@@ -29,7 +28,7 @@ class OutgoingEmailQueueService
         ?int $ticketReplyId = null,
         bool $dispatch = true,
     ): EmailMessage {
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             throw new InvalidArgumentException(
                 "Mailbox [{$mailbox->id}] is disabled."
             );
@@ -49,9 +48,9 @@ class OutgoingEmailQueueService
         $internetMessageId =
             $message->internetMessageId
             ?? $this->messageIds->make(
-            mailbox: $mailbox,
-            idempotencyKey: $message->idempotencyKey,
-        );
+                mailbox: $mailbox,
+                idempotencyKey: $message->idempotencyKey,
+            );
 
         $emailMessage = EmailMessage::query()
             ->firstOrCreate(
@@ -66,10 +65,8 @@ class OutgoingEmailQueueService
                     'driver' => null,
                     'status' => EmailMessageStatus::Preparing,
                     'internet_message_id' => $internetMessageId,
-                    'in_reply_to_message_id' =>
-                        $message->inReplyToMessageId,
-                    'reference_message_ids' =>
-                        $message->references,
+                    'in_reply_to_message_id' => $message->inReplyToMessageId,
+                    'reference_message_ids' => $message->references,
                     'sender_address' => $from->address,
                     'sender_name' => $from->name,
                     'to_recipients' => $this->addressesToArray(
@@ -110,8 +107,7 @@ class OutgoingEmailQueueService
 
         try {
             foreach (
-                array_values($message->attachments)
-                as $position => $attachment
+                array_values($message->attachments) as $position => $attachment
             ) {
                 $storedAttachment = $this
                     ->attachmentStorage
@@ -142,8 +138,7 @@ class OutgoingEmailQueueService
                     'processing_started_at' => null,
                     'failed_at' => now(),
                     'failure_code' => 'attachment_infected',
-                    'failure_message' =>
-                        'Outgoing email contains an infected attachment.',
+                    'failure_message' => 'Outgoing email contains an infected attachment.',
                 ])->save();
             } elseif ($scanState === 'failed') {
                 $emailMessage->forceFill([
@@ -152,8 +147,7 @@ class OutgoingEmailQueueService
                     'processing_started_at' => null,
                     'failed_at' => now(),
                     'failure_code' => 'attachment_scan_failed',
-                    'failure_message' =>
-                        'Antivirus scanning failed for an outgoing attachment.',
+                    'failure_message' => 'Antivirus scanning failed for an outgoing attachment.',
                 ])->save();
             } elseif ($scanState === 'waiting') {
                 $emailMessage->forceFill([
@@ -208,8 +202,7 @@ class OutgoingEmailQueueService
             );
         } catch (Throwable $exception) {
             foreach (
-                array_reverse($storedInThisCall)
-                as $storedAttachment
+                array_reverse($storedInThisCall) as $storedAttachment
             ) {
                 try {
                     $this->attachmentStorage->delete(
@@ -220,7 +213,7 @@ class OutgoingEmailQueueService
                 }
             }
 
-            if (!$this->isImmutable($emailMessage)) {
+            if (! $this->isImmutable($emailMessage)) {
                 $emailMessage->forceFill([
                     'status' => EmailMessageStatus::Failed,
                     'failed_at' => now(),
@@ -242,8 +235,7 @@ class OutgoingEmailQueueService
 
         if (
             $emailMessage->attachments->contains(
-                static fn ($attachment): bool =>
-                    $attachment->quarantined_at !== null
+                static fn ($attachment): bool => $attachment->quarantined_at !== null
                     || $attachment->scan_status
                     === EmailAttachmentScanStatus::Infected
             )
@@ -253,8 +245,7 @@ class OutgoingEmailQueueService
 
         if (
             $emailMessage->attachments->contains(
-                static fn ($attachment): bool =>
-                    $attachment->scan_status
+                static fn ($attachment): bool => $attachment->scan_status
                     === EmailAttachmentScanStatus::Failed
             )
         ) {
@@ -346,7 +337,7 @@ class OutgoingEmailQueueService
     }
 
     /**
-     * @param array<int, MailAddressData> $addresses
+     * @param  array<int, MailAddressData>  $addresses
      */
     private function addressesToArray(
         array $addresses

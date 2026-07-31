@@ -3,9 +3,9 @@
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\MailAdminAuditMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\SyncUserLoginSession;
-use App\Http\Middleware\MailAdminAuditMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -48,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if (
-                !in_array(
+                ! in_array(
                     $response->getStatusCode(),
                     [
                         403,

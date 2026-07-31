@@ -82,16 +82,14 @@ class InjectGreenMailAttachmentCommand extends Command
 
                 from: new MailAddressData(
                     address: $senderMailbox->email_address,
-                    name:
-                    $senderMailbox->display_name
+                    name: $senderMailbox->display_name
                     ?? $senderMailbox->name,
                 ),
 
                 to: [
                     new MailAddressData(
                         address: $targetMailbox->email_address,
-                        name:
-                        $targetMailbox->display_name
+                        name: $targetMailbox->display_name
                         ?? $targetMailbox->name,
                     ),
                 ],
@@ -102,10 +100,9 @@ class InjectGreenMailAttachmentCommand extends Command
 
                 subject: $subject,
                 textBody: $body,
-                htmlBody:
-                '<p><strong>SimpleDesk inbound attachment verification</strong></p>'
-                . "<p>Type: {$type}</p>"
-                . "<p>Token: {$token}</p>",
+                htmlBody: '<p><strong>SimpleDesk inbound attachment verification</strong></p>'
+                ."<p>Type: {$type}</p>"
+                ."<p>Token: {$token}</p>",
 
                 headers: [
                     'X-SimpleDesk-Integration-Test' => $token,
@@ -121,8 +118,7 @@ class InjectGreenMailAttachmentCommand extends Command
                 references: [],
 
                 metadata: [
-                    'source' =>
-                        'greenmail_attachment_injection',
+                    'source' => 'greenmail_attachment_injection',
 
                     'attachment_type' => $type,
                     'verification_token' => $token,
@@ -245,7 +241,7 @@ class InjectGreenMailAttachmentCommand extends Command
             );
         }
 
-        if (!$mailbox->is_active) {
+        if (! $mailbox->is_active) {
             throw new RuntimeException(
                 "{$role} mailbox [{$mailbox->id}] is disabled."
             );
@@ -302,7 +298,7 @@ class InjectGreenMailAttachmentCommand extends Command
             );
         }
 
-        if (!$channel->is_enabled) {
+        if (! $channel->is_enabled) {
             throw new RuntimeException(
                 "Channel [{$channel->id}] is disabled."
             );
@@ -336,7 +332,7 @@ class InjectGreenMailAttachmentCommand extends Command
         );
 
         if (
-            !in_array(
+            ! in_array(
                 $type,
                 [
                     'clean',
@@ -406,8 +402,7 @@ class InjectGreenMailAttachmentCommand extends Command
                 size: strlen(
                     self::EICAR_CONTENT
                 ),
-                content:
-                self::EICAR_CONTENT,
+                content: self::EICAR_CONTENT,
                 metadata: [
                     'integration_test' => true,
                     'attachment_type' => 'eicar',
@@ -422,8 +417,7 @@ class InjectGreenMailAttachmentCommand extends Command
         ]);
 
         return new MailAttachmentData(
-            fileName:
-            "simpledesk-clean-{$token}.txt",
+            fileName: "simpledesk-clean-{$token}.txt",
 
             mimeType: 'text/plain',
 

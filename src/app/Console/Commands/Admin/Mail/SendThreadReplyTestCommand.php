@@ -43,7 +43,7 @@ class SendThreadReplyTestCommand extends Command
             return self::FAILURE;
         }
 
-        if (!$senderMailbox->is_active) {
+        if (! $senderMailbox->is_active) {
             $this->error(
                 'Sender mailbox is disabled.'
             );
@@ -118,22 +118,20 @@ class SendThreadReplyTestCommand extends Command
 
         try {
             $payload = new OutgoingEmailMessageData(
-                idempotencyKey:
-                'thread-reply-test:'
-                . Str::uuid(),
+                idempotencyKey: 'thread-reply-test:'
+                .Str::uuid(),
 
                 from: null,
 
                 to: [
                     new MailAddressData(
                         address: $recipientAddress,
-                        name:
-                        $replyToMessage
+                        name: $replyToMessage
                             ->mailbox
                             ->display_name
                         ?? $replyToMessage
-                        ->mailbox
-                        ->name,
+                            ->mailbox
+                            ->name,
                     ),
                 ],
 
@@ -147,8 +145,7 @@ class SendThreadReplyTestCommand extends Command
 
                 textBody: $this->textBody(),
 
-                htmlBody:
-                $this->nullableOption(
+                htmlBody: $this->nullableOption(
                     'html'
                 ),
 
@@ -158,27 +155,21 @@ class SendThreadReplyTestCommand extends Command
 
                 internetMessageId: null,
 
-                inReplyToMessageId:
-                $replyToMessage
+                inReplyToMessageId: $replyToMessage
                     ->internet_message_id,
 
-                references:
-                $this->references(
+                references: $this->references(
                     $replyToMessage
                 ),
 
                 metadata: [
-                    'source' =>
-                        'artisan_thread_reply_test',
+                    'source' => 'artisan_thread_reply_test',
 
-                    'reply_to_email_message_id' =>
-                        $replyToMessage->id,
+                    'reply_to_email_message_id' => $replyToMessage->id,
 
-                    'expected_ticket_id' =>
-                        $replyToMessage->ticket_id,
+                    'expected_ticket_id' => $replyToMessage->ticket_id,
 
-                    'simulated_customer_mailbox_id' =>
-                        $senderMailbox->id,
+                    'simulated_customer_mailbox_id' => $senderMailbox->id,
                 ],
             );
 
@@ -190,12 +181,12 @@ class SendThreadReplyTestCommand extends Command
                 message: $payload,
                 ticketId: null,
                 ticketReplyId: null,
-                dispatch: !$sendNow,
+                dispatch: ! $sendNow,
             );
 
             $this->info(
                 "Test reply email [{$emailMessage->id}] "
-                . 'was prepared.'
+                .'was prepared.'
             );
 
             $this->table(
@@ -235,7 +226,7 @@ class SendThreadReplyTestCommand extends Command
                 ]
             );
 
-            if (!$sendNow) {
+            if (! $sendNow) {
                 $this->info(
                     'Test reply was queued.'
                 );
@@ -253,7 +244,7 @@ class SendThreadReplyTestCommand extends Command
 
             $this->line(
                 'Internet Message-ID: '
-                . (
+                .(
                     $result->internetMessageId
                     ?? 'not available'
                 )
@@ -304,7 +295,7 @@ class SendThreadReplyTestCommand extends Command
         }
 
         return mb_substr(
-            'Re: ' . $subject,
+            'Re: '.$subject,
             0,
             255
         );
@@ -314,7 +305,7 @@ class SendThreadReplyTestCommand extends Command
     {
         $value = $this->option('text');
 
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             return 'Спасибо, вопрос всё ещё актуален.';
         }
 
@@ -336,10 +327,9 @@ class SendThreadReplyTestCommand extends Command
         foreach (
             $replyToMessage
                 ->reference_message_ids
-            ?? []
-            as $reference
+            ?? [] as $reference
         ) {
-            if (!is_scalar($reference)) {
+            if (! is_scalar($reference)) {
                 continue;
             }
 
@@ -393,7 +383,7 @@ class SendThreadReplyTestCommand extends Command
     ): ?string {
         $value = $this->option($name);
 
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             return null;
         }
 

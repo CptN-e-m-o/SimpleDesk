@@ -8,6 +8,5 @@ final readonly class RenderedTicketReplyEmailData
         public string $subject,
         public string $textBody,
         public string $htmlBody,
-    ) {
-    }
+    ) {}
 }

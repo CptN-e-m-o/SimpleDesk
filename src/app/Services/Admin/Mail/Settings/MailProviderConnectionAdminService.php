@@ -11,8 +11,7 @@ class MailProviderConnectionAdminService
 {
     public function __construct(
         private readonly SecretConfigurationMerger $secrets,
-    ) {
-    }
+    ) {}
 
     public function create(array $data): MailProviderConnection
     {

@@ -36,25 +36,20 @@ class ManageEmailQuarantineCommand extends Command
         );
 
         return match ($action) {
-            'list' =>
-            $this->listRecords(),
+            'list' => $this->listRecords(),
 
-            'show' =>
-            $this->showRecord(),
+            'show' => $this->showRecord(),
 
-            'retry' =>
-            $this->retryRecord(
+            'retry' => $this->retryRecord(
                 service: $service,
                 processor: $processor,
             ),
 
-            'ignore' =>
-            $this->ignoreRecord(
+            'ignore' => $this->ignoreRecord(
                 $service
             ),
 
-            default =>
-            $this->invalidAction(
+            default => $this->invalidAction(
                 $action
             ),
         };
@@ -87,7 +82,7 @@ class ManageEmailQuarantineCommand extends Command
                 ]);
 
         if (
-            !(bool) $this->option('all')
+            ! (bool) $this->option('all')
         ) {
             $query->whereNull(
                 'resolved_at'
@@ -310,14 +305,14 @@ class ManageEmailQuarantineCommand extends Command
             $record = $service->retry(
                 quarantineId: $id,
                 releasedById: null,
-                dispatch: !$processNow,
+                dispatch: ! $processNow,
             );
 
-            if (!$processNow) {
+            if (! $processNow) {
                 $this->info(
-                    "Email message "
-                    . "[{$record->email_message_id}] "
-                    . 'was queued for retry.'
+                    'Email message '
+                    ."[{$record->email_message_id}] "
+                    .'was queued for retry.'
                 );
 
                 return self::SUCCESS;
@@ -335,24 +330,21 @@ class ManageEmailQuarantineCommand extends Command
                 );
             } catch (Throwable $exception) {
                 $service->quarantine(
-                    emailMessageId:
-                    $record
+                    emailMessageId: $record
                         ->email_message_id,
 
-                    stage:
-                    EmailQuarantineStage::InboundTicketing,
+                    stage: EmailQuarantineStage::InboundTicketing,
 
-                    exception:
-                    $exception,
+                    exception: $exception,
                 );
 
                 throw $exception;
             }
 
             $this->info(
-                "Email message "
-                . "[{$record->email_message_id}] "
-                . 'was processed successfully.'
+                'Email message '
+                ."[{$record->email_message_id}] "
+                .'was processed successfully.'
             );
 
             return self::SUCCESS;
@@ -398,9 +390,9 @@ class ManageEmailQuarantineCommand extends Command
         }
 
         $this->info(
-            "Quarantine record "
-            . "[{$record->id}] "
-            . 'was marked as ignored.'
+            'Quarantine record '
+            ."[{$record->id}] "
+            .'was marked as ignored.'
         );
 
         return self::SUCCESS;

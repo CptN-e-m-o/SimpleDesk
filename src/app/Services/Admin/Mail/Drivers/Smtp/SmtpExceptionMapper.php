@@ -24,9 +24,8 @@ class SmtpExceptionMapper
         }
 
         return new MailDriverException(
-            message:
-            "SMTP {$operation} failed: "
-            . $exception->getMessage(),
+            message: "SMTP {$operation} failed: "
+            .$exception->getMessage(),
             driverErrorCode: 'smtp_unexpected_error',
             retryable: false,
             failoverAllowed: true,
@@ -115,16 +114,14 @@ class SmtpExceptionMapper
         };
 
         return new MailDriverException(
-            message:
-            "SMTP {$operation} failed: "
-            . $exception->getMessage(),
+            message: "SMTP {$operation} failed: "
+            .$exception->getMessage(),
             driverErrorCode: $driverCode,
             retryable: $retryable,
             failoverAllowed: $failoverAllowed,
             affectsChannelHealth: $affectsHealth,
             context: [
-                'smtp_response_code' =>
-                    $code > 0 ? $code : null,
+                'smtp_response_code' => $code > 0 ? $code : null,
                 'operation' => $operation,
             ],
             previous: $exception,

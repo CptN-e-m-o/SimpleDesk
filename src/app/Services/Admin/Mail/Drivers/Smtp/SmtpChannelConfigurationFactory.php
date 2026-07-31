@@ -169,7 +169,7 @@ class SmtpChannelConfigurationFactory
 
             default => throw $this->configurationException(
                 "Authentication type [{$channel->auth_type->value}] "
-                . 'is not supported by the SMTP driver.'
+                .'is not supported by the SMTP driver.'
             ),
         };
     }
@@ -210,7 +210,7 @@ class SmtpChannelConfigurationFactory
             return null;
         }
 
-        if (!is_scalar($value)) {
+        if (! is_scalar($value)) {
             return null;
         }
 
@@ -273,7 +273,7 @@ class SmtpChannelConfigurationFactory
             return null;
         }
 
-        if (!is_numeric($value)) {
+        if (! is_numeric($value)) {
             throw $this->configurationException(
                 'SMTP max_per_second must be numeric.'
             );

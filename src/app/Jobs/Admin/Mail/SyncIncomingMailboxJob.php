@@ -61,7 +61,7 @@ class SyncIncomingMailboxJob implements ShouldQueue
             $this->mailboxId
         );
 
-        if ($mailbox === null || !$mailbox->is_active) {
+        if ($mailbox === null || ! $mailbox->is_active) {
             return;
         }
 

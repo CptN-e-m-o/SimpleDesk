@@ -454,17 +454,13 @@ class OutgoingEmailMessageFactoryTest extends TestCase
                 FilesystemFactory::class
             ),
 
-            maxAttachmentBytes:
-            $maxAttachmentBytes,
+            maxAttachmentBytes: $maxAttachmentBytes,
 
-            maxTotalAttachmentBytes:
-            $maxTotalAttachmentBytes,
+            maxTotalAttachmentBytes: $maxTotalAttachmentBytes,
 
-            verifyChecksums:
-            $verifyChecksums,
+            verifyChecksums: $verifyChecksums,
 
-            antivirusEnabled:
-            $antivirusEnabled,
+            antivirusEnabled: $antivirusEnabled,
         );
     }
 
@@ -475,100 +471,72 @@ class OutgoingEmailMessageFactoryTest extends TestCase
         );
 
         $mailbox = Mailbox::query()->create([
-            'name' =>
-                "Factory Mailbox {$token}",
+            'name' => "Factory Mailbox {$token}",
 
-            'email_address' =>
-                "factory-{$token}@example.test",
+            'email_address' => "factory-{$token}@example.test",
 
-            'display_name' =>
-                'Factory Mailbox',
+            'display_name' => 'Factory Mailbox',
 
-            'department_id' =>
-                null,
+            'department_id' => null,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
 
-            'is_default_outgoing' =>
-                false,
+            'is_default_outgoing' => false,
 
-            'internal_notes' =>
-                null,
+            'internal_notes' => null,
         ]);
 
         return EmailMessage::query()->create([
-            'mailbox_id' =>
-                $mailbox->id,
+            'mailbox_id' => $mailbox->id,
 
-            'mailbox_channel_id' =>
-                null,
+            'mailbox_channel_id' => null,
 
-            'ticket_id' =>
-                null,
+            'ticket_id' => null,
 
-            'ticket_reply_id' =>
-                null,
+            'ticket_reply_id' => null,
 
-            'direction' =>
-                EmailMessageDirection::Outgoing,
+            'direction' => EmailMessageDirection::Outgoing,
 
-            'driver' =>
-                null,
+            'driver' => null,
 
-            'status' =>
-                EmailMessageStatus::Queued,
+            'status' => EmailMessageStatus::Queued,
 
-            'idempotency_key' =>
-                "factory-test-{$token}",
+            'idempotency_key' => "factory-test-{$token}",
 
-            'external_message_id' =>
-                null,
+            'external_message_id' => null,
 
-            'internet_message_id' =>
-                "<factory-{$token}@example.test>",
+            'internet_message_id' => "<factory-{$token}@example.test>",
 
-            'in_reply_to_message_id' =>
-                '<previous-message@example.test>',
+            'in_reply_to_message_id' => '<previous-message@example.test>',
 
             'reference_message_ids' => [
                 '<first-reference@example.test>',
                 '<previous-message@example.test>',
             ],
 
-            'sender_address' =>
-                $mailbox->email_address,
+            'sender_address' => $mailbox->email_address,
 
-            'sender_name' =>
-                $mailbox->display_name,
+            'sender_name' => $mailbox->display_name,
 
             'to_recipients' => [
                 [
-                    'address' =>
-                        "customer-{$token}@example.test",
+                    'address' => "customer-{$token}@example.test",
 
-                    'name' =>
-                        'Test Customer',
+                    'name' => 'Test Customer',
                 ],
             ],
 
-            'cc_recipients' =>
-                [],
+            'cc_recipients' => [],
 
-            'bcc_recipients' =>
-                [],
+            'bcc_recipients' => [],
 
-            'reply_to_recipients' =>
-                [],
+            'reply_to_recipients' => [],
 
-            'subject' =>
-                'Outgoing message factory test',
+            'subject' => 'Outgoing message factory test',
 
-            'text_body' =>
-                'Factory test text body.',
+            'text_body' => 'Factory test text body.',
 
-            'html_body' =>
-                '<p>Factory test HTML body.</p>',
+            'html_body' => '<p>Factory test HTML body.</p>',
 
             'headers' => [
                 'X-SimpleDesk-Test' => 'factory',
@@ -578,8 +546,7 @@ class OutgoingEmailMessageFactoryTest extends TestCase
                 'test' => true,
             ],
 
-            'queued_at' =>
-                now(),
+            'queued_at' => now(),
         ]);
     }
 
@@ -595,8 +562,8 @@ class OutgoingEmailMessageFactoryTest extends TestCase
         );
 
         $path =
-            "testing/outgoing-factory/"
-            . "{$message->id}/{$token}.txt";
+            'testing/outgoing-factory/'
+            ."{$message->id}/{$token}.txt";
 
         Storage::disk('local')->put(
             $path,
@@ -606,72 +573,56 @@ class OutgoingEmailMessageFactoryTest extends TestCase
         return EmailAttachment::query()->create(
             array_merge(
                 [
-                    'email_message_id' =>
-                        $message->id,
+                    'email_message_id' => $message->id,
 
-                    'position' =>
-                        $position,
+                    'position' => $position,
 
-                    'external_id' =>
-                        "external-attachment-{$token}",
+                    'external_id' => "external-attachment-{$token}",
 
-                    'deduplication_key' =>
-                        hash(
-                            'sha256',
-                            "{$message->id}|{$position}|{$token}"
-                        ),
+                    'deduplication_key' => hash(
+                        'sha256',
+                        "{$message->id}|{$position}|{$token}"
+                    ),
 
-                    'file_name' =>
-                        "attachment-{$position}.txt",
+                    'file_name' => "attachment-{$position}.txt",
 
-                    'mime_type' =>
-                        'text/plain',
+                    'mime_type' => 'text/plain',
 
-                    'size' =>
-                        strlen($contents),
+                    'size' => strlen($contents),
 
-                    'disk' =>
-                        'local',
+                    'disk' => 'local',
 
-                    'path' =>
-                        $path,
+                    'path' => $path,
 
-                    'checksum_sha256' =>
-                        hash(
-                            'sha256',
-                            $contents
-                        ),
+                    'checksum_sha256' => hash(
+                        'sha256',
+                        $contents
+                    ),
 
-                    'content_id' =>
-                        "content-{$token}",
+                    'content_id' => "content-{$token}",
 
-                    'is_inline' =>
-                        false,
+                    'is_inline' => false,
 
-                    'scan_status' =>
+                    'scan_status' => $scanStatus,
+
+                    'scanned_at' => in_array(
                         $scanStatus,
-
-                    'scanned_at' =>
-                        in_array(
-                            $scanStatus,
-                            [
-                                EmailAttachmentScanStatus::Clean,
-                                EmailAttachmentScanStatus::Infected,
-                                EmailAttachmentScanStatus::Failed,
-                            ],
-                            true
-                        )
+                        [
+                            EmailAttachmentScanStatus::Clean,
+                            EmailAttachmentScanStatus::Infected,
+                            EmailAttachmentScanStatus::Failed,
+                        ],
+                        true
+                    )
                             ? now()
                             : null,
 
-                    'quarantined_at' =>
-                        null,
+                    'quarantined_at' => null,
 
-                    'scan_result' =>
-                        null,
+                    'scan_result' => null,
 
                     'metadata' => [
-                        'source' => 'test',
+                    'source' => 'test',
                     ],
                 ],
                 $attributes

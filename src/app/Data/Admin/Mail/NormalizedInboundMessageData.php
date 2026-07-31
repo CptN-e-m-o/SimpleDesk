@@ -8,13 +8,13 @@ use InvalidArgumentException;
 final readonly class NormalizedInboundMessageData
 {
     /**
-     * @param array<int, MailAddressData> $to
-     * @param array<int, MailAddressData> $cc
-     * @param array<int, MailAddressData> $bcc
-     * @param array<int, MailAddressData> $replyTo
-     * @param array<int, string> $references
-     * @param array<int, MailAttachmentData> $attachments
-     * @param array<int, RejectedMailAttachmentData> $rejectedAttachments
+     * @param  array<int, MailAddressData>  $to
+     * @param  array<int, MailAddressData>  $cc
+     * @param  array<int, MailAddressData>  $bcc
+     * @param  array<int, MailAddressData>  $replyTo
+     * @param  array<int, string>  $references
+     * @param  array<int, MailAttachmentData>  $attachments
+     * @param  array<int, RejectedMailAttachmentData>  $rejectedAttachments
      */
     public function __construct(
         public string $externalMessageId,
@@ -58,7 +58,7 @@ final readonly class NormalizedInboundMessageData
         array $addresses
     ): void {
         foreach ($addresses as $address) {
-            if (!$address instanceof MailAddressData) {
+            if (! $address instanceof MailAddressData) {
                 throw new InvalidArgumentException(
                     'Recipient must be an instance of MailAddressData.'
                 );
@@ -70,7 +70,7 @@ final readonly class NormalizedInboundMessageData
         array $attachments
     ): void {
         foreach ($attachments as $attachment) {
-            if (!$attachment instanceof MailAttachmentData) {
+            if (! $attachment instanceof MailAttachmentData) {
                 throw new InvalidArgumentException(
                     'Attachment must be an instance of MailAttachmentData.'
                 );
@@ -83,12 +83,12 @@ final readonly class NormalizedInboundMessageData
     ): void {
         foreach ($attachments as $attachment) {
             if (
-                !$attachment
+                ! $attachment
                     instanceof RejectedMailAttachmentData
             ) {
                 throw new InvalidArgumentException(
                     'Rejected attachment must be an instance '
-                    . 'of RejectedMailAttachmentData.'
+                    .'of RejectedMailAttachmentData.'
                 );
             }
         }

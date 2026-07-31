@@ -43,7 +43,7 @@ class ProcessInboundEmailCommand extends Command
 
                 $this->info(
                     "Email message [{$id}] "
-                    . 'was queued for ticket processing.'
+                    .'was queued for ticket processing.'
                 );
 
                 continue;
@@ -97,7 +97,7 @@ class ProcessInboundEmailCommand extends Command
 
                 $this->error(
                     "Email message [{$id}]: "
-                    . $exception->getMessage()
+                    .$exception->getMessage()
                 );
             }
         }
@@ -131,7 +131,7 @@ class ProcessInboundEmailCommand extends Command
         }
 
         if (
-            !(bool) $this
+            ! (bool) $this
                 ->option('all-received')
         ) {
             return [];

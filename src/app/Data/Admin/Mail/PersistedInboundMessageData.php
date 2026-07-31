@@ -10,6 +10,5 @@ final readonly class PersistedInboundMessageData
         public EmailMessage $emailMessage,
         public bool $created,
         public bool $duplicate,
-    ) {
-    }
+    ) {}
 }

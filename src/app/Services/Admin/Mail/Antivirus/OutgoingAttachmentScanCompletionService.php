@@ -57,8 +57,7 @@ class OutgoingAttachmentScanCompletionService
 
                 if (
                     $attachments->contains(
-                        static fn ($attachment): bool =>
-                            $attachment->quarantined_at !== null
+                        static fn ($attachment): bool => $attachment->quarantined_at !== null
                             || $attachment->scan_status
                             === EmailAttachmentScanStatus::Infected
                     )
@@ -69,8 +68,7 @@ class OutgoingAttachmentScanCompletionService
                         'processing_started_at' => null,
                         'failed_at' => now(),
                         'failure_code' => 'attachment_infected',
-                        'failure_message' =>
-                            'Outgoing email contains an infected attachment.',
+                        'failure_message' => 'Outgoing email contains an infected attachment.',
                     ])->save();
 
                     return false;
@@ -78,8 +76,7 @@ class OutgoingAttachmentScanCompletionService
 
                 if (
                     $attachments->contains(
-                        static fn ($attachment): bool =>
-                            $attachment->scan_status
+                        static fn ($attachment): bool => $attachment->scan_status
                             === EmailAttachmentScanStatus::Failed
                     )
                 ) {
@@ -89,8 +86,7 @@ class OutgoingAttachmentScanCompletionService
                         'processing_started_at' => null,
                         'failed_at' => now(),
                         'failure_code' => 'attachment_scan_failed',
-                        'failure_message' =>
-                            'Antivirus scanning failed for an outgoing attachment.',
+                        'failure_message' => 'Antivirus scanning failed for an outgoing attachment.',
                     ])->save();
 
                     return false;
@@ -166,7 +162,7 @@ class OutgoingAttachmentScanCompletionService
             3,
         );
 
-        if (!$shouldDispatch) {
+        if (! $shouldDispatch) {
             return;
         }
 

@@ -18,8 +18,7 @@ class OutgoingEmailMessageFactory
         private readonly int $maxTotalAttachmentBytes,
         private readonly bool $verifyChecksums,
         private readonly ?bool $antivirusEnabled = null,
-    ) {
-    }
+    ) {}
 
     public function make(
         EmailMessage $emailMessage
@@ -32,8 +31,7 @@ class OutgoingEmailMessageFactory
         $totalSize = 0;
 
         foreach (
-            $emailMessage->attachments
-            as $attachment
+            $emailMessage->attachments as $attachment
         ) {
             $this->assertAttachmentCanBeSent(
                 $attachment
@@ -47,7 +45,7 @@ class OutgoingEmailMessageFactory
             ) {
                 throw new MailStorageException(
                     'Outgoing email attachments exceed '
-                    . 'the configured total size limit.'
+                    .'the configured total size limit.'
                 );
             }
 
@@ -82,7 +80,7 @@ class OutgoingEmailMessageFactory
         ) {
             throw new MailStorageException(
                 "Attachment [{$attachment->file_name}] "
-                . 'exceeds the configured size limit.'
+                .'exceeds the configured size limit.'
             );
         }
 
@@ -96,7 +94,7 @@ class OutgoingEmailMessageFactory
             ];
 
         if (
-            !in_array(
+            ! in_array(
                 $attachment->scan_status,
                 $allowedScanStatuses,
                 true,
@@ -104,14 +102,14 @@ class OutgoingEmailMessageFactory
         ) {
             throw new MailStorageException(
                 "Attachment [{$attachment->file_name}] "
-                . 'cannot be sent because of its scan status.'
+                .'cannot be sent because of its scan status.'
             );
         }
 
         if ($attachment->quarantined_at !== null) {
             throw new MailStorageException(
                 "Attachment [{$attachment->file_name}] "
-                . 'is quarantined.'
+                .'is quarantined.'
             );
         }
     }
@@ -132,10 +130,10 @@ class OutgoingEmailMessageFactory
             $attachment->disk
         );
 
-        if (!$storage->exists($attachment->path)) {
+        if (! $storage->exists($attachment->path)) {
             throw new MailStorageException(
                 "Attachment file [{$attachment->path}] "
-                . "does not exist on disk [{$attachment->disk}]."
+                ."does not exist on disk [{$attachment->disk}]."
             );
         }
 
@@ -149,13 +147,13 @@ class OutgoingEmailMessageFactory
         ) {
             throw new MailStorageException(
                 "Attachment [{$attachment->file_name}] "
-                . 'size does not match the stored metadata.'
+                .'size does not match the stored metadata.'
             );
         }
 
         if (
             $this->verifyChecksums
-            && !hash_equals(
+            && ! hash_equals(
                 $attachment->checksum_sha256,
                 hash(
                     'sha256',
@@ -165,7 +163,7 @@ class OutgoingEmailMessageFactory
         ) {
             throw new MailStorageException(
                 "Attachment [{$attachment->file_name}] "
-                . 'checksum verification failed.'
+                .'checksum verification failed.'
             );
         }
 

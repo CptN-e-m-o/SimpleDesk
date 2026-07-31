@@ -19,7 +19,7 @@ enum ImapInitialSyncPolicy: string
             return $value;
         }
 
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             return self::FromNow;
         }
 

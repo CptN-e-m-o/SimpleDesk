@@ -39,7 +39,7 @@ class SymfonyEmailFactory
             );
         }
 
-        $email = new Email();
+        $email = new Email;
 
         $email->from(
             $this->address($message->from)
@@ -83,8 +83,7 @@ class SymfonyEmailFactory
 
         if ($htmlBody !== null) {
             foreach (
-                $inlineContentIds
-                as $originalContentId => $normalizedContentId
+                $inlineContentIds as $originalContentId => $normalizedContentId
             ) {
                 if (
                     $originalContentId
@@ -94,8 +93,8 @@ class SymfonyEmailFactory
                 }
 
                 $htmlBody = str_replace(
-                    'cid:' . $originalContentId,
-                    'cid:' . $normalizedContentId,
+                    'cid:'.$originalContentId,
+                    'cid:'.$normalizedContentId,
                     $htmlBody,
                 );
             }
@@ -135,8 +134,7 @@ class SymfonyEmailFactory
             $references = array_values(
                 array_filter(
                     array_map(
-                        fn (mixed $reference): ?string =>
-                        $this->normalizeNullableMessageId(
+                        fn (mixed $reference): ?string => $this->normalizeNullableMessageId(
                             $reference
                         ),
                         $message->references,
@@ -161,13 +159,12 @@ class SymfonyEmailFactory
             $this->attach(
                 email: $email,
                 attachment: $attachment,
-                normalizedContentId:
-                $attachment->contentId !== null
+                normalizedContentId: $attachment->contentId !== null
                     ? (
-                    $inlineContentIds[
-                    $attachment->contentId
-                    ] ?? null
-                )
+                        $inlineContentIds[
+                        $attachment->contentId
+                        ] ?? null
+                    )
                     : null,
             );
         }
@@ -200,7 +197,7 @@ class SymfonyEmailFactory
     }
 
     /**
-     * @param array<int, MailAttachmentData> $attachments
+     * @param  array<int, MailAttachmentData>  $attachments
      */
     private function inlineContentIds(
         array $attachments
@@ -209,8 +206,8 @@ class SymfonyEmailFactory
 
         foreach ($attachments as $attachment) {
             if (
-                !$attachment instanceof MailAttachmentData
-                || !$attachment->inline
+                ! $attachment instanceof MailAttachmentData
+                || ! $attachment->inline
                 || $attachment->contentId === null
             ) {
                 continue;
@@ -230,7 +227,7 @@ class SymfonyEmailFactory
         array $customHeaders,
     ): void {
         foreach ($customHeaders as $name => $values) {
-            if (!is_string($name)) {
+            if (! is_string($name)) {
                 throw $this->invalidMessage(
                     'Email header name must be a string.'
                 );
@@ -265,7 +262,7 @@ class SymfonyEmailFactory
                 : [$values];
 
             foreach ($values as $value) {
-                if (!is_scalar($value)) {
+                if (! is_scalar($value)) {
                     throw $this->invalidMessage(
                         "Email header [{$name}] must be scalar."
                     );
@@ -302,15 +299,14 @@ class SymfonyEmailFactory
     }
 
     /**
-     * @param array<int, MailAddressData> $addresses
+     * @param  array<int, MailAddressData>  $addresses
      * @return array<int, Address>
      */
     private function addresses(
         array $addresses
     ): array {
         return array_map(
-            fn (MailAddressData $address): Address =>
-            $this->address($address),
+            fn (MailAddressData $address): Address => $this->address($address),
             $addresses,
         );
     }
@@ -335,7 +331,7 @@ class SymfonyEmailFactory
     private function normalizeNullableMessageId(
         mixed $messageId
     ): ?string {
-        if (!is_scalar($messageId)) {
+        if (! is_scalar($messageId)) {
             return null;
         }
 
@@ -363,7 +359,7 @@ class SymfonyEmailFactory
             );
         }
 
-        if (!str_contains($contentId, '@')) {
+        if (! str_contains($contentId, '@')) {
             $contentId .= '@simpledesk.local';
         }
 

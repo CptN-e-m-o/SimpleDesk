@@ -7,8 +7,7 @@ final readonly class AttachmentScanRecoveryResultData
     public function __construct(
         public int $stuckScansReset,
         public int $pendingScansDispatched,
-    ) {
-    }
+    ) {}
 
     public function totalActions(): int
     {

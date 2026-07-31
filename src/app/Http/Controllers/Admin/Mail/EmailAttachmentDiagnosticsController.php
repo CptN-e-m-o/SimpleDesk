@@ -85,11 +85,11 @@ class EmailAttachmentDiagnosticsController extends Controller
         if ($request->has('quarantined')) {
             $request->boolean('quarantined')
                 ? $query->whereNotNull(
-                'quarantined_at'
-            )
+                    'quarantined_at'
+                )
                 : $query->whereNull(
-                'quarantined_at'
-            );
+                    'quarantined_at'
+                );
         }
 
         if (
@@ -143,8 +143,7 @@ class EmailAttachmentDiagnosticsController extends Controller
             $query
                 ->latest('id')
                 ->paginate(
-                    perPage:
-                    $request->integer(
+                    perPage: $request->integer(
                         'per_page',
                         25
                     )

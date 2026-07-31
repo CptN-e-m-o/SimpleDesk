@@ -11,8 +11,7 @@ class MailRetentionResultData
         public readonly CarbonImmutable $startedAt,
         public readonly CarbonImmutable $completedAt,
         public readonly array $categories,
-    ) {
-    }
+    ) {}
 
     public function totalCandidates(): int
     {

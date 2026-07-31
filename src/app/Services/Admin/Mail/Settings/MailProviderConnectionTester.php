@@ -11,8 +11,7 @@ class MailProviderConnectionTester
     public function __construct(
         private readonly MailChannelConnectionTestService $channels,
         private readonly MailConnectionTestResultSanitizer $sanitizer,
-    ) {
-    }
+    ) {}
 
     public function test(
         MailProviderConnection $connection

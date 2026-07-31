@@ -8,12 +8,12 @@ use InvalidArgumentException;
 final readonly class OutgoingEmailMessageData
 {
     /**
-     * @param array<int, MailAddressData> $to
-     * @param array<int, MailAddressData> $cc
-     * @param array<int, MailAddressData> $bcc
-     * @param array<int, MailAddressData> $replyTo
-     * @param array<int, string> $references
-     * @param array<int, MailAttachmentData> $attachments
+     * @param  array<int, MailAddressData>  $to
+     * @param  array<int, MailAddressData>  $cc
+     * @param  array<int, MailAddressData>  $bcc
+     * @param  array<int, MailAddressData>  $replyTo
+     * @param  array<int, string>  $references
+     * @param  array<int, MailAttachmentData>  $attachments
      */
     public function __construct(
         public string $idempotencyKey,
@@ -46,7 +46,7 @@ final readonly class OutgoingEmailMessageData
     }
 
     /**
-     * @param array<int, MailAttachmentData> $attachments
+     * @param  array<int, MailAttachmentData>  $attachments
      */
     public static function fromEmailMessage(
         EmailMessage $message,

@@ -10,8 +10,7 @@ class IncomingMailAcknowledger
 {
     public function __construct(
         private readonly MailDriverRegistry $drivers,
-    ) {
-    }
+    ) {}
 
     public function acknowledge(
         MailboxChannel $channel,
@@ -30,7 +29,7 @@ class IncomingMailAcknowledger
     }
 
     /**
-     * @param array<int, NormalizedInboundMessageData> $messages
+     * @param  array<int, NormalizedInboundMessageData>  $messages
      */
     public function acknowledgeMany(
         MailboxChannel $channel,

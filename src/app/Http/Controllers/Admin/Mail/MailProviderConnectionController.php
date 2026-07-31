@@ -17,8 +17,7 @@ class MailProviderConnectionController extends Controller
 {
     public function __construct(
         private readonly MailProviderConnectionAdminService $connections,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {

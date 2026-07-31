@@ -185,8 +185,7 @@ class AdminMailOperationsTest extends TestCase
             SyncIncomingMailboxJob::class,
             fn (
                 SyncIncomingMailboxJob $job
-            ): bool =>
-                $job->mailboxId === $mailbox->id
+            ): bool => $job->mailboxId === $mailbox->id
                 && $job->queue === 'mail-incoming'
                 && $job->afterCommit === true
         );
@@ -260,8 +259,7 @@ class AdminMailOperationsTest extends TestCase
             SendOutgoingEmailJob::class,
             fn (
                 SendOutgoingEmailJob $job
-            ): bool =>
-                $job->emailMessageId === $message->id
+            ): bool => $job->emailMessageId === $message->id
                 && $job->queue === 'mail-outgoing'
                 && $job->afterCommit === true
         );
@@ -408,8 +406,7 @@ class AdminMailOperationsTest extends TestCase
             FakeScanEmailAttachmentJob::class,
             fn (
                 FakeScanEmailAttachmentJob $job
-            ): bool =>
-                $job->emailAttachmentId === $attachment->id
+            ): bool => $job->emailAttachmentId === $attachment->id
                 && $job->queue === 'mail-antivirus'
                 && $job->afterCommit === true
         );
@@ -524,8 +521,7 @@ class AdminMailOperationsTest extends TestCase
             ProcessInboundEmailJob::class,
             fn (
                 ProcessInboundEmailJob $job
-            ): bool =>
-                $job->emailMessageId
+            ): bool => $job->emailMessageId
                 === $quarantine->email_message_id
                 && $job->queue === 'mail-incoming'
                 && $job->afterCommit === true
@@ -599,7 +595,7 @@ class AdminMailOperationsTest extends TestCase
         $user = User::factory()->create();
 
         $role = Role::query()->create([
-            'name' => 'mail-operations-admin-' . $user->id,
+            'name' => 'mail-operations-admin-'.$user->id,
             'label' => 'Mail operations administrator',
             'description' => null,
             'type' => 'agent',
@@ -608,7 +604,7 @@ class AdminMailOperationsTest extends TestCase
         ]);
 
         $group = PermissionGroup::query()->create([
-            'key' => 'mail-operations-test-' . $user->id,
+            'key' => 'mail-operations-test-'.$user->id,
             'label' => 'Mail operations test',
             'panel' => 'admin',
             'type' => 'agent',
@@ -617,8 +613,7 @@ class AdminMailOperationsTest extends TestCase
 
         $permissionIds = collect($permissionKeys)
             ->map(
-                fn (string $key): int =>
-                Permission::query()->create([
+                fn (string $key): int => Permission::query()->create([
                     'permission_group_id' => $group->id,
                     'parent_id' => null,
                     'key' => $key,
@@ -649,10 +644,9 @@ class AdminMailOperationsTest extends TestCase
             array_merge(
                 [
                     'name' => 'Support',
-                    'email_address' =>
-                        'support-'
-                        . uniqid()
-                        . '@example.test',
+                    'email_address' => 'support-'
+                        .uniqid()
+                        .'@example.test',
                     'display_name' => 'SimpleDesk Support',
                     'department_id' => null,
                     'is_active' => true,
@@ -697,15 +691,12 @@ class AdminMailOperationsTest extends TestCase
                     'direction' => 'outgoing',
                     'driver' => null,
                     'status' => 'failed',
-                    'idempotency_key' =>
-                        'admin-operation-outgoing-'
-                        . uniqid(),
-                    'sender_address' =>
-                        $mailbox->email_address,
+                    'idempotency_key' => 'admin-operation-outgoing-'
+                        .uniqid(),
+                    'sender_address' => $mailbox->email_address,
                     'to_recipients' => [
                         [
-                            'address' =>
-                                'customer@example.test',
+                            'address' => 'customer@example.test',
                             'name' => 'Customer',
                         ],
                     ],
@@ -713,10 +704,8 @@ class AdminMailOperationsTest extends TestCase
                     'text_body' => 'Test body',
                     'metadata' => [],
                     'failed_at' => now(),
-                    'failure_code' =>
-                        'all_channels_failed',
-                    'failure_message' =>
-                        'All channels failed.',
+                    'failure_code' => 'all_channels_failed',
+                    'failure_message' => 'All channels failed.',
                 ],
                 $overrides
             )
@@ -746,10 +735,9 @@ class AdminMailOperationsTest extends TestCase
                     'mime_type' => 'text/plain',
                     'size' => strlen($content),
                     'disk' => 'local',
-                    'path' =>
-                        'mail/attachments/'
-                        . uniqid()
-                        . '/document.txt',
+                    'path' => 'mail/attachments/'
+                        .uniqid()
+                        .'/document.txt',
                     'checksum_sha256' => hash(
                         'sha256',
                         $content
@@ -785,15 +773,12 @@ class AdminMailOperationsTest extends TestCase
             'direction' => 'incoming',
             'driver' => 'imap',
             'status' => 'failed',
-            'idempotency_key' =>
-                'admin-operation-incoming-'
-                . uniqid(),
-            'sender_address' =>
-                'customer@example.test',
+            'idempotency_key' => 'admin-operation-incoming-'
+                .uniqid(),
+            'sender_address' => 'customer@example.test',
             'to_recipients' => [
                 [
-                    'address' =>
-                        $mailbox->email_address,
+                    'address' => $mailbox->email_address,
                     'name' => null,
                 ],
             ],
@@ -802,10 +787,8 @@ class AdminMailOperationsTest extends TestCase
             'metadata' => [],
             'received_at' => now(),
             'failed_at' => now(),
-            'failure_code' =>
-                'inbound_ticket_processing_quarantined',
-            'failure_message' =>
-                'Ticketing failed.',
+            'failure_code' => 'inbound_ticket_processing_quarantined',
+            'failure_message' => 'Ticketing failed.',
         ]);
 
         return EmailMessageQuarantine::query()->create([

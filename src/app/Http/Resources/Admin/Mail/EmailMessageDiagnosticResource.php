@@ -25,177 +25,143 @@ class EmailMessageDiagnosticResource extends JsonResource
 
             'mailbox' => $this->whenLoaded(
                 'mailbox',
-                fn (): ?array =>
-                $this->mailbox === null
+                fn (): ?array => $this->mailbox === null
                     ? null
                     : [
-                    'id' =>
-                        $this->mailbox->id,
+                        'id' => $this->mailbox->id,
 
-                    'name' =>
-                        $this->mailbox->name,
+                        'name' => $this->mailbox->name,
 
-                    'email_address' =>
-                        $this
+                        'email_address' => $this
                             ->mailbox
                             ->email_address,
-                ]
+                    ]
             ),
 
             'channel' => $this->whenLoaded(
                 'mailboxChannel',
-                fn (): ?array =>
-                $this->mailboxChannel === null
+                fn (): ?array => $this->mailboxChannel === null
                     ? null
                     : [
-                    'id' =>
-                        $this
+                        'id' => $this
                             ->mailboxChannel
                             ->id,
 
-                    'name' =>
-                        $this
+                        'name' => $this
                             ->mailboxChannel
                             ->name,
 
-                    'direction' =>
-                        $this
+                        'direction' => $this
                             ->mailboxChannel
                             ->direction
                             ->value,
 
-                    'driver' =>
-                        $this
+                        'driver' => $this
                             ->mailboxChannel
                             ->driver
                             ->value,
-                ]
+                    ]
             ),
 
-            'ticket_id' =>
-                $this->ticket_id,
+            'ticket_id' => $this->ticket_id,
 
-            'ticket_reply_id' =>
-                $this->ticket_reply_id,
+            'ticket_reply_id' => $this->ticket_reply_id,
 
-            'direction' =>
-                $this->direction->value,
+            'direction' => $this->direction->value,
 
-            'driver' =>
-                $this->driver?->value,
+            'driver' => $this->driver?->value,
 
-            'status' =>
-                $this->status->value,
+            'status' => $this->status->value,
 
-            'is_stuck' =>
-                $thresholds->isMessageStuck(
-                    $this->resource
-                ),
+            'is_stuck' => $thresholds->isMessageStuck(
+                $this->resource
+            ),
 
-            'idempotency_key' =>
-                $this->idempotency_key,
+            'idempotency_key' => $this->idempotency_key,
 
-            'external_message_id' =>
-                $this->external_message_id,
+            'external_message_id' => $this->external_message_id,
 
-            'internet_message_id' =>
-                $this->internet_message_id,
+            'internet_message_id' => $this->internet_message_id,
 
-            'sender_address' =>
-                $this->sender_address,
+            'sender_address' => $this->sender_address,
 
-            'sender_name' =>
-                $this->sender_name,
+            'sender_name' => $this->sender_name,
 
             'recipient_counts' => [
-                'to' => count(
-                    $this->to_recipients ?? []
-                ),
+            'to' => count(
+                $this->to_recipients ?? []
+            ),
 
-                'cc' => count(
-                    $this->cc_recipients ?? []
-                ),
+            'cc' => count(
+                $this->cc_recipients ?? []
+            ),
 
-                'bcc' => count(
-                    $this->bcc_recipients ?? []
-                ),
+            'bcc' => count(
+                $this->bcc_recipients ?? []
+            ),
 
-                'reply_to' => count(
-                    $this->reply_to_recipients ?? []
-                ),
+            'reply_to' => count(
+                $this->reply_to_recipients ?? []
+            ),
             ],
 
             'subject' => $this->subject,
 
-            'attachments_count' =>
-                $this->whenCounted(
-                    'attachments'
-                ),
+            'attachments_count' => $this->whenCounted(
+                'attachments'
+            ),
 
-            'attachment_rejections_count' =>
-                $this->whenCounted(
-                    'attachmentRejections'
-                ),
+            'attachment_rejections_count' => $this->whenCounted(
+                'attachmentRejections'
+            ),
 
-            'attempts_count' =>
-                $this->whenCounted(
-                    'attempts'
-                ),
+            'attempts_count' => $this->whenCounted(
+                'attempts'
+            ),
 
-            'received_at' =>
-                $this
-                    ->received_at
-                    ?->toIso8601String(),
+            'received_at' => $this
+                ->received_at
+                ?->toIso8601String(),
 
-            'queued_at' =>
-                $this
-                    ->queued_at
-                    ?->toIso8601String(),
+            'queued_at' => $this
+                ->queued_at
+                ?->toIso8601String(),
 
-            'processing_started_at' =>
-                $this
-                    ->processing_started_at
-                    ?->toIso8601String(),
+            'processing_started_at' => $this
+                ->processing_started_at
+                ?->toIso8601String(),
 
-            'processed_at' =>
-                $this
-                    ->processed_at
-                    ?->toIso8601String(),
+            'processed_at' => $this
+                ->processed_at
+                ?->toIso8601String(),
 
-            'sent_at' =>
-                $this
-                    ->sent_at
-                    ?->toIso8601String(),
+            'sent_at' => $this
+                ->sent_at
+                ?->toIso8601String(),
 
-            'delivered_at' =>
-                $this
-                    ->delivered_at
-                    ?->toIso8601String(),
+            'delivered_at' => $this
+                ->delivered_at
+                ?->toIso8601String(),
 
-            'failed_at' =>
-                $this
-                    ->failed_at
-                    ?->toIso8601String(),
+            'failed_at' => $this
+                ->failed_at
+                ?->toIso8601String(),
 
-            'failure_code' =>
-                $this->failure_code,
+            'failure_code' => $this->failure_code,
 
-            'failure_message' =>
-                $this->failure_message === null
+            'failure_message' => $this->failure_message === null
                     ? null
                     : $redactor->redactString(
-                    $this->failure_message
-                ),
+                        $this->failure_message
+                    ),
 
-            'created_at' =>
-                $this
-                    ->created_at
-                    ?->toIso8601String(),
+            'created_at' => $this
+                ->created_at
+                ?->toIso8601String(),
 
-            'updated_at' =>
-                $this
-                    ->updated_at
-                    ?->toIso8601String(),
+            'updated_at' => $this
+                ->updated_at
+                ?->toIso8601String(),
         ];
     }
 }

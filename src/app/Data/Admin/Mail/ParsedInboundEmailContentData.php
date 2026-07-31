@@ -11,6 +11,5 @@ final readonly class ParsedInboundEmailContentData
         public bool $signatureRemoved,
         public int $originalLength,
         public int $parsedLength,
-    ) {
-    }
+    ) {}
 }

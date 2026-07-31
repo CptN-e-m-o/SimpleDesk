@@ -11,8 +11,7 @@ final readonly class AttachmentScanResultData
         public string $rawResponse,
         public int $scannedBytes,
         public array $metadata = [],
-    ) {
-    }
+    ) {}
 
     public static function clean(
         string $driver,

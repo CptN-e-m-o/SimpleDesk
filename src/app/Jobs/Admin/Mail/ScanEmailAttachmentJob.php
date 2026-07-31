@@ -83,7 +83,7 @@ class ScanEmailAttachmentJob implements ShouldQueue
                 $this->emailAttachmentId
             );
         } catch (AttachmentScanException $exception) {
-            if (!$exception->retryable()) {
+            if (! $exception->retryable()) {
                 $scanner->markFailed(
                     emailAttachmentId: $this->emailAttachmentId,
                     exception: $exception,

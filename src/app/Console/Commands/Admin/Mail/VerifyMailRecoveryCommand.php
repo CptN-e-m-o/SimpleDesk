@@ -223,11 +223,10 @@ class VerifyMailRecoveryCommand extends Command
                     'incomingReceivedDispatched' => 1,
                     'outgoingStuckReset' => 1,
                     'outgoingQueuedDispatched' => 1,
-                ]
-                as $property => $minimum
+                ] as $property => $minimum
             ) {
                 if (
-                    !property_exists(
+                    ! property_exists(
                         $result,
                         $property
                     )
@@ -298,7 +297,7 @@ class VerifyMailRecoveryCommand extends Command
 
             if (
                 $scanResult === null
-                || !$scanResult->clean
+                || ! $scanResult->clean
             ) {
                 throw new RuntimeException(
                     "Attachment [{$attachment->id}] was not recovered as clean."
@@ -312,8 +311,7 @@ class VerifyMailRecoveryCommand extends Command
                     $outgoingSending,
                     $outgoingQueued,
                     $outgoingAttachment,
-                ]
-                as $message
+                ] as $message
             ) {
                 $message->refresh();
 
@@ -333,7 +331,7 @@ class VerifyMailRecoveryCommand extends Command
                 $message->refresh();
 
                 if (
-                    !in_array(
+                    ! in_array(
                         $message->status,
                         [
                             EmailMessageStatus::Sent,
@@ -352,8 +350,7 @@ class VerifyMailRecoveryCommand extends Command
                 [
                     $incomingProcessing,
                     $incomingReceived,
-                ]
-                as $message
+                ] as $message
             ) {
                 $processed = $processor->process(
                     $message->id
@@ -449,8 +446,7 @@ class VerifyMailRecoveryCommand extends Command
         return $queue->queue(
             mailbox: $mailbox,
             message: new OutgoingEmailMessageData(
-                idempotencyKey:
-                "mail-recovery:{$phase}:{$token}",
+                idempotencyKey: "mail-recovery:{$phase}:{$token}",
 
                 from: null,
 
@@ -464,33 +460,26 @@ class VerifyMailRecoveryCommand extends Command
                 bcc: [],
                 replyTo: [],
 
-                subject:
-                "[SimpleDesk recovery {$phase}] {$token}",
+                subject: "[SimpleDesk recovery {$phase}] {$token}",
 
-                textBody:
-                "SimpleDesk recovery verification.\n"
-                . "Phase: {$phase}\n"
-                . "Token: {$token}",
+                textBody: "SimpleDesk recovery verification.\n"
+                ."Phase: {$phase}\n"
+                ."Token: {$token}",
 
                 htmlBody: null,
 
                 headers: [
-                    'X-SimpleDesk-Integration-Test' =>
-                        $token,
+                    'X-SimpleDesk-Integration-Test' => $token,
 
-                    'X-SimpleDesk-Recovery-Phase' =>
-                        $phase,
+                    'X-SimpleDesk-Recovery-Phase' => $phase,
                 ],
 
                 metadata: [
-                    'source' =>
-                        'mail_recovery_verification',
+                    'source' => 'mail_recovery_verification',
 
-                    'phase' =>
-                        $phase,
+                    'phase' => $phase,
 
-                    'verification_token' =>
-                        $token,
+                    'verification_token' => $token,
                 ],
             ),
 
@@ -506,13 +495,12 @@ class VerifyMailRecoveryCommand extends Command
     ): EmailMessage {
         $content =
             "SimpleDesk attachment recovery verification.\n"
-            . "Token: {$token}\n";
+            ."Token: {$token}\n";
 
         return $queue->queue(
             mailbox: $mailbox,
             message: new OutgoingEmailMessageData(
-                idempotencyKey:
-                "mail-recovery:attachment:{$token}",
+                idempotencyKey: "mail-recovery:attachment:{$token}",
 
                 from: null,
 
@@ -526,35 +514,27 @@ class VerifyMailRecoveryCommand extends Command
                 bcc: [],
                 replyTo: [],
 
-                subject:
-                "[SimpleDesk recovery attachment] {$token}",
+                subject: "[SimpleDesk recovery attachment] {$token}",
 
-                textBody:
-                $content,
+                textBody: $content,
 
                 htmlBody: null,
 
                 headers: [
-                    'X-SimpleDesk-Integration-Test' =>
-                        $token,
+                    'X-SimpleDesk-Integration-Test' => $token,
 
-                    'X-SimpleDesk-Recovery-Phase' =>
-                        'attachment-scan',
+                    'X-SimpleDesk-Recovery-Phase' => 'attachment-scan',
                 ],
 
                 attachments: [
                     new MailAttachmentData(
-                        fileName:
-                        "simpledesk-recovery-{$token}.txt",
+                        fileName: "simpledesk-recovery-{$token}.txt",
 
-                        mimeType:
-                        'text/plain',
+                        mimeType: 'text/plain',
 
-                        size:
-                        strlen($content),
+                        size: strlen($content),
 
-                        content:
-                        $content,
+                        content: $content,
 
                         metadata: [
                             'integration_test' => true,
@@ -564,14 +544,11 @@ class VerifyMailRecoveryCommand extends Command
                 ],
 
                 metadata: [
-                    'source' =>
-                        'mail_recovery_verification',
+                    'source' => 'mail_recovery_verification',
 
-                    'phase' =>
-                        'attachment-scan',
+                    'phase' => 'attachment-scan',
 
-                    'verification_token' =>
-                        $token,
+                    'verification_token' => $token,
                 ],
             ),
 
@@ -591,33 +568,28 @@ class VerifyMailRecoveryCommand extends Command
         $messageToken = (string) Str::uuid();
 
         $idempotencyKey =
-            "mail-recovery-incoming:"
-            . "{$phase}:{$messageToken}";
+            'mail-recovery-incoming:'
+            ."{$phase}:{$messageToken}";
 
         $subject =
             "[SimpleDesk recovery {$phase}] "
-            . $messageToken;
+            .$messageToken;
 
         $message = new OutgoingEmailMessageData(
-            idempotencyKey:
-            $idempotencyKey,
+            idempotencyKey: $idempotencyKey,
 
             from: new MailAddressData(
-                address:
-                $senderMailbox->email_address,
+                address: $senderMailbox->email_address,
 
-                name:
-                $senderMailbox->display_name
+                name: $senderMailbox->display_name
                 ?? $senderMailbox->name,
             ),
 
             to: [
                 new MailAddressData(
-                    address:
-                    $targetMailbox->email_address,
+                    address: $targetMailbox->email_address,
 
-                    name:
-                    $targetMailbox->display_name
+                    name: $targetMailbox->display_name
                     ?? $targetMailbox->name,
                 ),
             ],
@@ -626,28 +598,23 @@ class VerifyMailRecoveryCommand extends Command
             bcc: [],
             replyTo: [],
 
-            subject:
-            $subject,
+            subject: $subject,
 
-            textBody:
-            "SimpleDesk incoming recovery verification.\n"
-            . "Phase: {$phase}\n"
-            . "Token: {$token}",
+            textBody: "SimpleDesk incoming recovery verification.\n"
+            ."Phase: {$phase}\n"
+            ."Token: {$token}",
 
             htmlBody: null,
 
             headers: [
-                'X-SimpleDesk-Integration-Test' =>
-                    $token,
+                'X-SimpleDesk-Integration-Test' => $token,
 
-                'X-SimpleDesk-Recovery-Phase' =>
-                    $phase,
+                'X-SimpleDesk-Recovery-Phase' => $phase,
             ],
 
             attachments: [],
 
-            internetMessageId:
-            $messageIds->make(
+            internetMessageId: $messageIds->make(
                 mailbox: $senderMailbox,
                 idempotencyKey: $idempotencyKey,
             ),
@@ -657,14 +624,11 @@ class VerifyMailRecoveryCommand extends Command
             references: [],
 
             metadata: [
-                'source' =>
-                    'mail_recovery_verification',
+                'source' => 'mail_recovery_verification',
 
-                'phase' =>
-                    $phase,
+                'phase' => $phase,
 
-                'verification_token' =>
-                    $token,
+                'verification_token' => $token,
             ],
         );
 
@@ -747,11 +711,9 @@ class VerifyMailRecoveryCommand extends Command
                 $sending->id
             )
             ->update([
-                'status' =>
-                    EmailMessageStatus::Sending->value,
+                'status' => EmailMessageStatus::Sending->value,
 
-                'processing_started_at' =>
-                    $old,
+                'processing_started_at' => $old,
 
                 'failed_at' => null,
                 'failure_code' => null,
@@ -763,17 +725,13 @@ class VerifyMailRecoveryCommand extends Command
                 $queued->id
             )
             ->update([
-                'status' =>
-                    EmailMessageStatus::Queued->value,
+                'status' => EmailMessageStatus::Queued->value,
 
-                'queued_at' =>
-                    $old,
+                'queued_at' => $old,
 
-                'created_at' =>
-                    $old,
+                'created_at' => $old,
 
-                'processing_started_at' =>
-                    null,
+                'processing_started_at' => null,
 
                 'failed_at' => null,
                 'failure_code' => null,
@@ -791,11 +749,9 @@ class VerifyMailRecoveryCommand extends Command
                 $processing->id
             )
             ->update([
-                'status' =>
-                    EmailMessageStatus::Processing->value,
+                'status' => EmailMessageStatus::Processing->value,
 
-                'processing_started_at' =>
-                    $old,
+                'processing_started_at' => $old,
 
                 'failed_at' => null,
                 'failure_code' => null,
@@ -807,14 +763,11 @@ class VerifyMailRecoveryCommand extends Command
                 $received->id
             )
             ->update([
-                'status' =>
-                    EmailMessageStatus::Received->value,
+                'status' => EmailMessageStatus::Received->value,
 
-                'created_at' =>
-                    $old,
+                'created_at' => $old,
 
-                'processing_started_at' =>
-                    null,
+                'processing_started_at' => null,
 
                 'failed_at' => null,
                 'failure_code' => null,
@@ -831,29 +784,21 @@ class VerifyMailRecoveryCommand extends Command
                 $attachment->id
             )
             ->update([
-                'scan_status' =>
-                    EmailAttachmentScanStatus::Pending->value,
+                'scan_status' => EmailAttachmentScanStatus::Pending->value,
 
-                'scan_started_at' =>
-                    $old,
+                'scan_started_at' => $old,
 
-                'scan_attempts' =>
-                    1,
+                'scan_attempts' => 1,
 
-                'scanned_at' =>
-                    null,
+                'scanned_at' => null,
 
-                'scan_failure_code' =>
-                    null,
+                'scan_failure_code' => null,
 
-                'scan_failure_message' =>
-                    null,
+                'scan_failure_message' => null,
 
-                'quarantined_at' =>
-                    null,
+                'quarantined_at' => null,
 
-                'scan_result' =>
-                    null,
+                'scan_result' => null,
             ]);
     }
 
@@ -875,11 +820,11 @@ class VerifyMailRecoveryCommand extends Command
         ) {
             throw new RuntimeException(
                 "Message [{$message->id}] recovery state "
-                . 'is invalid: status='
-                . $message->status->value
-                . ', action='
-                . ($actualAction ?? 'null')
-                . '.'
+                .'is invalid: status='
+                .$message->status->value
+                .', action='
+                .($actualAction ?? 'null')
+                .'.'
             );
         }
     }
@@ -891,14 +836,14 @@ class VerifyMailRecoveryCommand extends Command
 
         if (
             $application === null
-            || !$application->has(
+            || ! $application->has(
                 self::ATTACHMENT_RECOVERY_COMMAND
             )
         ) {
             throw new RuntimeException(
                 'Command ['
-                . self::ATTACHMENT_RECOVERY_COMMAND
-                . '] is not registered.'
+                .self::ATTACHMENT_RECOVERY_COMMAND
+                .'] is not registered.'
             );
         }
 
@@ -909,7 +854,7 @@ class VerifyMailRecoveryCommand extends Command
         if ($exitCode !== self::SUCCESS) {
             throw new RuntimeException(
                 'Attachment recovery command failed '
-                . "with exit code {$exitCode}."
+                ."with exit code {$exitCode}."
             );
         }
     }
@@ -928,10 +873,9 @@ class VerifyMailRecoveryCommand extends Command
         )
             ? $queue->pushed(
                 $jobClass,
-                fn (object $job): bool =>
-                    isset(
-                        $job->{$property}
-                    )
+                fn (object $job): bool => isset(
+                    $job->{$property}
+                )
                     && (int) $job->{$property}
                     === $id,
             )
@@ -939,8 +883,8 @@ class VerifyMailRecoveryCommand extends Command
 
         if ($jobs->isEmpty()) {
             throw new RuntimeException(
-                "Recovery did not dispatch "
-                . "[{$jobClass}] for ID [{$id}]."
+                'Recovery did not dispatch '
+                ."[{$jobClass}] for ID [{$id}]."
             );
         }
     }
@@ -959,10 +903,9 @@ class VerifyMailRecoveryCommand extends Command
         )
             ? $queue->pushed(
                 $jobClass,
-                fn (object $job): bool =>
-                    isset(
-                        $job->{$property}
-                    )
+                fn (object $job): bool => isset(
+                    $job->{$property}
+                )
                     && in_array(
                         (int) $job->{$property},
                         $ids,
@@ -974,7 +917,7 @@ class VerifyMailRecoveryCommand extends Command
         if ($jobs->isNotEmpty()) {
             throw new RuntimeException(
                 'Repeated recovery redispatched '
-                . "completed [{$jobClass}] fixtures."
+                ."completed [{$jobClass}] fixtures."
             );
         }
     }
@@ -1075,11 +1018,11 @@ class VerifyMailRecoveryCommand extends Command
 
         if (
             $mailbox === null
-            || !$mailbox->is_active
+            || ! $mailbox->is_active
         ) {
             throw new RuntimeException(
                 "{$role} mailbox [{$id}] "
-                . 'was not found or is disabled.'
+                .'was not found or is disabled.'
             );
         }
 
@@ -1091,7 +1034,7 @@ class VerifyMailRecoveryCommand extends Command
         ) {
             throw new RuntimeException(
                 "{$role} mailbox [{$id}] "
-                . 'has an invalid email address.'
+                .'has an invalid email address.'
             );
         }
 
@@ -1120,7 +1063,7 @@ class VerifyMailRecoveryCommand extends Command
         ) {
             throw new RuntimeException(
                 "Sender channel [{$id}] "
-                . "was not found for mailbox [{$mailbox->id}]."
+                ."was not found for mailbox [{$mailbox->id}]."
             );
         }
 
@@ -1129,11 +1072,11 @@ class VerifyMailRecoveryCommand extends Command
             !== MailboxChannelDirection::Outgoing
             || $channel->driver
             !== MailboxDriver::Smtp
-            || !$channel->is_enabled
+            || ! $channel->is_enabled
         ) {
             throw new RuntimeException(
                 "Sender channel [{$id}] "
-                . 'must be enabled outgoing/smtp.'
+                .'must be enabled outgoing/smtp.'
             );
         }
 
@@ -1141,14 +1084,14 @@ class VerifyMailRecoveryCommand extends Command
             $channel->provider_connection_id !== null
             && (
                 $channel->providerConnection === null
-                || !$channel
+                || ! $channel
                     ->providerConnection
                     ->is_active
             )
         ) {
             throw new RuntimeException(
                 "Sender channel [{$id}] "
-                . 'has an inactive provider connection.'
+                .'has an inactive provider connection.'
             );
         }
 
@@ -1191,7 +1134,7 @@ class VerifyMailRecoveryCommand extends Command
         ) {
             throw new RuntimeException(
                 "Argument [{$argument}] "
-                . 'must be a positive integer.'
+                .'must be a positive integer.'
             );
         }
 

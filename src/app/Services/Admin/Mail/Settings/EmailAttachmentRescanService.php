@@ -18,14 +18,13 @@ class EmailAttachmentRescanService
     public function __construct(
         private readonly MailAdminActionLock $locks,
         private readonly ConfiguredAttachmentScanJobDispatcher $dispatcher,
-    ) {
-    }
+    ) {}
 
     public function dispatch(
         EmailAttachment $attachment,
         ?int $requestedById = null,
     ): MailAdminActionResultData {
-        if (!config(
+        if (! config(
             'simpledesk-mail-antivirus.enabled',
             false
         )) {
@@ -39,7 +38,7 @@ class EmailAttachmentRescanService
         if (
             trim((string) $attachment->disk) === ''
             || trim((string) $attachment->path) === ''
-            || !Storage::disk($attachment->disk)
+            || ! Storage::disk($attachment->disk)
                 ->exists($attachment->path)
         ) {
             throw new MailAdminActionException(
@@ -49,7 +48,7 @@ class EmailAttachmentRescanService
             );
         }
 
-        if (!$this->locks->acquire(
+        if (! $this->locks->acquire(
             'rescan-attachment',
             $attachment->id
         )) {
@@ -87,8 +86,7 @@ class EmailAttachmentRescanService
 
                     $events[] = [
                         'action' => 'attachment_rescan_requested',
-                        'previous_scan_status' =>
-                            $lockedAttachment->scan_status->value,
+                        'previous_scan_status' => $lockedAttachment->scan_status->value,
                         'requested_by_id' => $requestedById,
                         'created_at' => now()->toIso8601String(),
                     ];
@@ -99,8 +97,7 @@ class EmailAttachmentRescanService
                     );
 
                     $lockedAttachment->forceFill([
-                        'scan_status' =>
-                            EmailAttachmentScanStatus::Pending,
+                        'scan_status' => EmailAttachmentScanStatus::Pending,
                         'scanned_at' => null,
                         'scan_result' => null,
                         'metadata' => $metadata,
@@ -134,8 +131,7 @@ class EmailAttachmentRescanService
             details: [
                 'attachment_id' => $attachment->id,
                 'email_message_id' => $attachment->email_message_id,
-                'scan_status' =>
-                    EmailAttachmentScanStatus::Pending->value,
+                'scan_status' => EmailAttachmentScanStatus::Pending->value,
             ],
         );
     }
@@ -147,7 +143,7 @@ class EmailAttachmentRescanService
             $emailMessage === null
             || $emailMessage->direction
             !== EmailMessageDirection::Outgoing
-            || !in_array(
+            || ! in_array(
                 $emailMessage->status,
                 [
                     EmailMessageStatus::Failed,
@@ -155,7 +151,7 @@ class EmailAttachmentRescanService
                 ],
                 true,
             )
-            || !$this->isAttachmentSecurityFailure(
+            || ! $this->isAttachmentSecurityFailure(
                 $emailMessage->failure_code
             )
         ) {
