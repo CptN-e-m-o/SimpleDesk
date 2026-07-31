@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Mail\EmailAttachmentRescanController;
 use App\Http\Controllers\Admin\Mail\EmailMessageDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineIgnoreController;
+use App\Http\Controllers\Admin\Mail\MailboxSettingsController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineRetryController;
 use App\Http\Controllers\Admin\Mail\MailAdminAuditLogController;
 use App\Http\Controllers\Admin\Mail\MailboxChannelConnectionTestController;
@@ -150,6 +151,22 @@ Route::middleware('auth')->group(function () {
             ->name('agents.force-delete');
 
         Route::prefix('email')->name('email.')->group(function () {
+            /*
+             * Frontend routes
+             */
+
+            Route::get(
+                '/settings',
+                MailboxSettingsController::class
+            )
+                ->middleware(
+                    'permission:admin.mail.view|admin.mail.manage_mailboxes'
+                )
+                ->name('settings.index');
+
+            /*
+             * Backend routes
+             */
             Route::get('/audit-logs', MailAdminAuditLogController::class)
                 ->middleware('permission:admin.mail.view_audit')
                 ->name('audit-logs.index');
