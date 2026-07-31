@@ -89,7 +89,11 @@ class OutgoingMailFailoverService
 
         $failures = [];
 
+        $lastAttemptedChannel = null;
+
         foreach ($channels as $channel) {
+            $lastAttemptedChannel = $channel;
+
             $attempt = $this->startAttempt(
                 message: $message,
                 channel: $channel,
@@ -194,7 +198,7 @@ class OutgoingMailFailoverService
             message: $message,
             errorCode: 'all_channels_failed',
             errorMessage: $failureMessage,
-            channel: $channels->last(),
+            channel: $lastAttemptedChannel,
         );
 
         throw new AllMailChannelsFailedException(
@@ -227,14 +231,16 @@ class OutgoingMailFailoverService
                     );
                 }
 
-                if (in_array(
-                    $lockedMessage->status,
-                    [
-                        EmailMessageStatus::Sent,
-                        EmailMessageStatus::Delivered,
-                    ],
-                    true,
-                )) {
+                if (
+                    in_array(
+                        $lockedMessage->status,
+                        [
+                            EmailMessageStatus::Sent,
+                            EmailMessageStatus::Delivered,
+                        ],
+                        true,
+                    )
+                ) {
                     throw new OutgoingMessageStateException(
                         "Email message [{$lockedMessage->id}] "
                         . 'has already been sent.'
@@ -267,11 +273,21 @@ class OutgoingMailFailoverService
                 $lockedMessage->forceFill([
                     'status' =>
                         EmailMessageStatus::Sending,
-                    'processing_started_at' => now(),
-                    'processed_at' => null,
-                    'failed_at' => null,
-                    'failure_code' => null,
-                    'failure_message' => null,
+
+                    'processing_started_at' =>
+                        now(),
+
+                    'processed_at' =>
+                        null,
+
+                    'failed_at' =>
+                        null,
+
+                    'failure_code' =>
+                        null,
+
+                    'failure_message' =>
+                        null,
                 ])->save();
 
                 return $lockedMessage;
@@ -285,12 +301,20 @@ class OutgoingMailFailoverService
         int $attemptNumber,
     ): EmailMessageAttempt {
         return $message->attempts()->create([
-            'mailbox_channel_id' => $channel->id,
-            'attempt_number' => $attemptNumber,
-            'driver' => $channel->driver,
+            'mailbox_channel_id' =>
+                $channel->id,
+
+            'attempt_number' =>
+                $attemptNumber,
+
+            'driver' =>
+                $channel->driver,
+
             'status' =>
                 EmailMessageAttemptStatus::Processing,
-            'started_at' => now(),
+
+            'started_at' =>
+                now(),
         ]);
     }
 
@@ -310,42 +334,63 @@ class OutgoingMailFailoverService
                 $attempt->forceFill([
                     'status' =>
                         EmailMessageAttemptStatus::Succeeded,
+
                     'external_message_id' =>
                         $result->externalMessageId,
+
                     'internet_message_id' =>
                         $result->internetMessageId,
+
                     'accepted_recipients' =>
                         $this->addressesToArray(
                             $result->acceptedRecipients
                         ),
+
                     'rejected_recipients' =>
                         $this->addressesToArray(
                             $result->rejectedRecipients
                         ),
+
                     'provider_response' =>
                         $result->providerResponse,
+
                     'metadata' =>
                         $result->metadata,
-                    'completed_at' => now(),
+
+                    'completed_at' =>
+                        now(),
                 ])->save();
 
                 $message->forceFill([
                     'mailbox_channel_id' =>
                         $channel->id,
+
                     'driver' =>
                         $channel->driver,
+
                     'status' =>
                         EmailMessageStatus::Sent,
+
                     'external_message_id' =>
                         $result->externalMessageId,
+
                     'internet_message_id' =>
                         $result->internetMessageId,
+
                     'sent_at' =>
                         $result->sentAt,
-                    'processed_at' => now(),
-                    'failed_at' => null,
-                    'failure_code' => null,
-                    'failure_message' => null,
+
+                    'processed_at' =>
+                        now(),
+
+                    'failed_at' =>
+                        null,
+
+                    'failure_code' =>
+                        null,
+
+                    'failure_message' =>
+                        null,
                 ])->save();
             }
         );
@@ -358,20 +403,30 @@ class OutgoingMailFailoverService
         $attempt->forceFill([
             'status' =>
                 EmailMessageAttemptStatus::Failed,
+
             'retryable' =>
                 $exception->retryable(),
+
             'failover_allowed' =>
                 $exception->failoverAllowed(),
+
             'error_class' =>
                 $exception::class,
+
             'error_code' =>
                 $exception->driverErrorCode(),
+
             'error_message' =>
                 $exception->getMessage(),
+
             'metadata' =>
                 $exception->context(),
-            'failed_at' => now(),
-            'completed_at' => now(),
+
+            'failed_at' =>
+                now(),
+
+            'completed_at' =>
+                now(),
         ])->save();
     }
 
@@ -382,15 +437,27 @@ class OutgoingMailFailoverService
         $attempt->forceFill([
             'status' =>
                 EmailMessageAttemptStatus::Failed,
-            'retryable' => false,
-            'failover_allowed' => true,
-            'error_class' => $exception::class,
+
+            'retryable' =>
+                false,
+
+            'failover_allowed' =>
+                true,
+
+            'error_class' =>
+                $exception::class,
+
             'error_code' =>
                 'driver_not_registered',
+
             'error_message' =>
                 $exception->getMessage(),
-            'failed_at' => now(),
-            'completed_at' => now(),
+
+            'failed_at' =>
+                now(),
+
+            'completed_at' =>
+                now(),
         ])->save();
     }
 
@@ -401,15 +468,27 @@ class OutgoingMailFailoverService
         $attempt->forceFill([
             'status' =>
                 EmailMessageAttemptStatus::Failed,
-            'retryable' => false,
-            'failover_allowed' => false,
-            'error_class' => $exception::class,
+
+            'retryable' =>
+                false,
+
+            'failover_allowed' =>
+                false,
+
+            'error_class' =>
+                $exception::class,
+
             'error_code' =>
                 'unexpected_driver_error',
+
             'error_message' =>
                 $exception->getMessage(),
-            'failed_at' => now(),
-            'completed_at' => now(),
+
+            'failed_at' =>
+                now(),
+
+            'completed_at' =>
+                now(),
         ])->save();
     }
 
@@ -423,15 +502,25 @@ class OutgoingMailFailoverService
             'mailbox_channel_id' =>
                 $channel?->id
                 ?? $message->mailbox_channel_id,
+
             'driver' =>
                 $channel?->driver
                 ?? $message->driver,
+
             'status' =>
                 EmailMessageStatus::Failed,
-            'processed_at' => now(),
-            'failed_at' => now(),
-            'failure_code' => $errorCode,
-            'failure_message' => $errorMessage,
+
+            'processed_at' =>
+                now(),
+
+            'failed_at' =>
+                now(),
+
+            'failure_code' =>
+                $errorCode,
+
+            'failure_message' =>
+                $errorMessage,
         ])->save();
     }
 
@@ -440,11 +529,15 @@ class OutgoingMailFailoverService
         Throwable $exception,
     ): array {
         return [
-            'channel_id' => $channel->id,
+            'channel_id' =>
+                $channel->id,
+
             'driver' =>
                 $channel->driver->value,
+
             'message' =>
                 $exception->getMessage(),
+
             'exception' =>
                 $exception::class,
         ];

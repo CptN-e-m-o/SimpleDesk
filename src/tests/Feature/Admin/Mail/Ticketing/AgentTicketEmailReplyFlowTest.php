@@ -32,11 +32,6 @@ class AgentTicketEmailReplyFlowTest extends TestCase
         Storage::fake('local');
         Queue::fake();
 
-        /*
-         * Этот набор проверяет базовый pipeline ответа агента.
-         * Антивирусный pipeline проверяется отдельно в
-         * EmailAttachmentAntivirusFlowTest.
-         */
         config()->set(
             'simpledesk-mail-antivirus.enabled',
             false

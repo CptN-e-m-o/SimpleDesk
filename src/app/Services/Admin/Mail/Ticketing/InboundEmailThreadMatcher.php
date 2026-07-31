@@ -10,11 +10,14 @@ class InboundEmailThreadMatcher
     public function match(
         EmailMessage $incomingMessage
     ): ?Ticket {
+        if ($incomingMessage->mailbox_id === null) {
+            return null;
+        }
+
         foreach (
             $this->candidateMessageIds(
                 $incomingMessage
-            )
-            as $candidateMessageId
+            ) as $candidateMessageId
         ) {
             $matchedEmailMessage =
                 EmailMessage::query()
@@ -23,6 +26,10 @@ class InboundEmailThreadMatcher
                         'id',
                         '!=',
                         $incomingMessage->id
+                    )
+                    ->where(
+                        'mailbox_id',
+                        $incomingMessage->mailbox_id
                     )
                     ->whereNotNull(
                         'ticket_id'
@@ -60,6 +67,13 @@ class InboundEmailThreadMatcher
                 $matchedEmailMessage?->ticket;
 
             if ($ticket === null) {
+                continue;
+            }
+
+            if (
+                (int) $ticket->mailbox_id
+                !== (int) $incomingMessage->mailbox_id
+            ) {
                 continue;
             }
 
