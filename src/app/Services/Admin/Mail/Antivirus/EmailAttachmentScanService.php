@@ -46,7 +46,7 @@ class EmailAttachmentScanService
             $attachment->path
         );
 
-        if ($stream === false) {
+        if (!is_resource($stream)) {
             throw new AttachmentScanException(
                 message: "Attachment [{$attachment->file_name}] cannot be opened for antivirus scanning.",
                 errorCode: 'attachment_scan_stream_open_failed',
@@ -66,7 +66,9 @@ class EmailAttachmentScanService
                 expectedSize: $attachment->size,
             );
         } finally {
-            fclose($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
         }
 
         $this->storeResult(
@@ -304,7 +306,7 @@ class EmailAttachmentScanService
             $attachment->path
         );
 
-        if ($stream === false) {
+        if (!is_resource($stream)) {
             throw new AttachmentScanException(
                 message: "Attachment [{$attachment->file_name}] cannot be read for checksum verification.",
                 errorCode: 'attachment_checksum_stream_failed',
@@ -327,7 +329,9 @@ class EmailAttachmentScanService
                 $context
             );
         } finally {
-            fclose($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
         }
 
         if (

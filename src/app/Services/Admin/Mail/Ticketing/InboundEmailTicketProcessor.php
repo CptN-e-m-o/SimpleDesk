@@ -4,6 +4,7 @@ namespace App\Services\Admin\Mail\Ticketing;
 
 use App\Data\Admin\Mail\InboundEmailDecisionData;
 use App\Data\Admin\Mail\ParsedInboundEmailContentData;
+use App\Enums\Admin\Mail\EmailAttachmentScanStatus;
 use App\Enums\Admin\Mail\EmailMessageDirection;
 use App\Enums\Admin\Mail\EmailMessageStatus;
 use App\Exceptions\Admin\Mail\InboundEmailAlreadyProcessingException;
@@ -42,6 +43,23 @@ class InboundEmailTicketProcessor
         } catch (
         InboundEmailAlreadyProcessingException $exception
         ) {
+            throw $exception;
+        } catch (
+        InboundEmailTicketingException $exception
+        ) {
+            if (
+                $exception->errorCode()
+                === 'inbound_attachments_pending'
+            ) {
+                throw $exception;
+            }
+
+            $this->markFailed(
+                emailMessageId:
+                $emailMessageId,
+                exception: $exception,
+            );
+
             throw $exception;
         } catch (Throwable $exception) {
             $this->markFailed(
@@ -100,6 +118,10 @@ class InboundEmailTicketProcessor
         }
 
         $this->assertMessageCanBeProcessed(
+            $emailMessage
+        );
+
+        $this->assertAttachmentsCanBeProcessed(
             $emailMessage
         );
 
@@ -356,6 +378,137 @@ class InboundEmailTicketProcessor
             'invalid_email_message_status',
             retryable: false,
         );
+    }
+
+    private function assertAttachmentsCanBeProcessed(
+        EmailMessage $emailMessage
+    ): void {
+        if (
+            !(bool) config(
+                'simpledesk-mail-antivirus.enabled',
+                false
+            )
+            || $emailMessage->attachments->isEmpty()
+        ) {
+            return;
+        }
+
+        $infectedAttachmentIds = $emailMessage
+            ->attachments
+            ->filter(
+                fn ($attachment): bool =>
+                    $attachment->scan_status
+                    === EmailAttachmentScanStatus::Infected
+            )
+            ->pluck('id')
+            ->values()
+            ->all();
+
+        if ($infectedAttachmentIds !== []) {
+            throw new InboundEmailTicketingException(
+                message:
+                "Email message [{$emailMessage->id}] "
+                . 'contains infected attachments: '
+                . implode(
+                    ', ',
+                    $infectedAttachmentIds
+                )
+                . '.',
+                errorCode:
+                'inbound_attachment_infected',
+                retryable: false,
+            );
+        }
+
+        $failedAttachmentIds = $emailMessage
+            ->attachments
+            ->filter(
+                fn ($attachment): bool =>
+                    $attachment->scan_status
+                    === EmailAttachmentScanStatus::Failed
+            )
+            ->pluck('id')
+            ->values()
+            ->all();
+
+        if ($failedAttachmentIds !== []) {
+            throw new InboundEmailTicketingException(
+                message:
+                "Email message [{$emailMessage->id}] "
+                . 'contains attachments that failed '
+                . 'antivirus scanning: '
+                . implode(
+                    ', ',
+                    $failedAttachmentIds
+                )
+                . '.',
+                errorCode:
+                'inbound_attachment_scan_failed',
+                retryable: false,
+            );
+        }
+
+        $pendingAttachmentIds = $emailMessage
+            ->attachments
+            ->filter(
+                fn ($attachment): bool =>
+                in_array(
+                    $attachment->scan_status,
+                    [
+                        EmailAttachmentScanStatus::NotScanned,
+                        EmailAttachmentScanStatus::Pending,
+                    ],
+                    true,
+                )
+            )
+            ->pluck('id')
+            ->values()
+            ->all();
+
+        if ($pendingAttachmentIds !== []) {
+            throw new InboundEmailTicketingException(
+                message:
+                "Email message [{$emailMessage->id}] "
+                . 'is waiting for antivirus scanning '
+                . 'of attachments: '
+                . implode(
+                    ', ',
+                    $pendingAttachmentIds
+                )
+                . '.',
+                errorCode:
+                'inbound_attachments_pending',
+                retryable: true,
+            );
+        }
+
+        $unexpectedAttachmentIds = $emailMessage
+            ->attachments
+            ->filter(
+                fn ($attachment): bool =>
+                    $attachment->scan_status
+                    !== EmailAttachmentScanStatus::Clean
+            )
+            ->pluck('id')
+            ->values()
+            ->all();
+
+        if ($unexpectedAttachmentIds !== []) {
+            throw new InboundEmailTicketingException(
+                message:
+                "Email message [{$emailMessage->id}] "
+                . 'contains attachments with unsupported '
+                . 'antivirus statuses: '
+                . implode(
+                    ', ',
+                    $unexpectedAttachmentIds
+                )
+                . '.',
+                errorCode:
+                'inbound_attachment_scan_status_invalid',
+                retryable: false,
+            );
+        }
     }
 
     private function createTicket(

@@ -7,6 +7,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
     depends_on:
       - pgsql
       - redis
@@ -83,6 +84,8 @@ services:
 volumes:
   pgsql_data:
   redis_data:
+  mail_attachment_storage:
+    name: simpledesk_mail_attachment_storage
 
 networks:
   simpledesk:
