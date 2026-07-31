@@ -1,22 +1,10 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Mail automation
-    |--------------------------------------------------------------------------
-    */
-
     'enabled' => env(
         'MAIL_AUTOMATION_ENABLED',
         true
     ),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Scheduler locking
-    |--------------------------------------------------------------------------
-    */
 
     'scheduler' => [
         'on_one_server' => env(
@@ -29,12 +17,6 @@ return [
             10
         ),
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Incoming mailbox synchronization
-    |--------------------------------------------------------------------------
-    */
 
     'sync' => [
         'enabled' => env(
@@ -66,12 +48,6 @@ return [
             55
         ),
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Pipeline recovery
-    |--------------------------------------------------------------------------
-    */
 
     'recovery' => [
         'enabled' => env(
@@ -122,5 +98,146 @@ return [
         'queue_connection' => env(
             'MAIL_AUTOMATION_RECOVERY_QUEUE_CONNECTION'
         ),
+    ],
+
+    'attachment_recovery' => [
+        'enabled' => env(
+            'MAIL_AUTOMATION_ATTACHMENT_RECOVERY_ENABLED',
+            true
+        ),
+
+        'interval_minutes' => env(
+            'MAIL_AUTOMATION_ATTACHMENT_RECOVERY_INTERVAL_MINUTES',
+            5
+        ),
+    ],
+
+    'health' => [
+        'enabled' => env(
+            'MAIL_AUTOMATION_HEALTH_ENABLED',
+            true
+        ),
+
+        'interval_minutes' => env(
+            'MAIL_AUTOMATION_HEALTH_INTERVAL_MINUTES',
+            15
+        ),
+
+        'batch_size' => env(
+            'MAIL_AUTOMATION_HEALTH_BATCH_SIZE',
+            100
+        ),
+    ],
+
+    'retention' => [
+        'enabled' => env(
+            'MAIL_RETENTION_ENABLED',
+            false
+        ),
+
+        'run_at' => env(
+            'MAIL_RETENTION_RUN_AT',
+            '02:30'
+        ),
+
+        'batch_size' => env(
+            'MAIL_RETENTION_BATCH_SIZE',
+            500
+        ),
+
+        'categories' => [
+            'raw_messages' => [
+                'enabled' => env(
+                    'MAIL_RETENTION_RAW_MESSAGES_ENABLED',
+                    true
+                ),
+
+                'days' => env(
+                    'MAIL_RETENTION_RAW_MESSAGES_DAYS',
+                    90
+                ),
+            ],
+
+            'clean_attachments' => [
+                'enabled' => env(
+                    'MAIL_RETENTION_CLEAN_ATTACHMENTS_ENABLED',
+                    true
+                ),
+
+                'days' => env(
+                    'MAIL_RETENTION_CLEAN_ATTACHMENTS_DAYS',
+                    180
+                ),
+            ],
+
+            'quarantined_attachments' => [
+                'enabled' => env(
+                    'MAIL_RETENTION_QUARANTINED_ATTACHMENTS_ENABLED',
+                    true
+                ),
+
+                'days' => env(
+                    'MAIL_RETENTION_QUARANTINED_ATTACHMENTS_DAYS',
+                    30
+                ),
+            ],
+
+            'attempts' => [
+                'enabled' => env(
+                    'MAIL_RETENTION_ATTEMPTS_ENABLED',
+                    true
+                ),
+
+                'days' => env(
+                    'MAIL_RETENTION_ATTEMPTS_DAYS',
+                    90
+                ),
+            ],
+
+            'quarantines' => [
+                'enabled' => env(
+                    'MAIL_RETENTION_QUARANTINES_ENABLED',
+                    true
+                ),
+
+                'days' => env(
+                    'MAIL_RETENTION_QUARANTINES_DAYS',
+                    90
+                ),
+            ],
+
+            'messages' => [
+                'enabled' => env(
+                    'MAIL_RETENTION_MESSAGES_ENABLED',
+                    true
+                ),
+
+                'days' => env(
+                    'MAIL_RETENTION_MESSAGES_DAYS',
+                    365
+                ),
+            ],
+
+            'audit' => [
+                'enabled' => env(
+                    'MAIL_RETENTION_AUDIT_ENABLED',
+                    false
+                ),
+
+                'days' => env(
+                    'MAIL_RETENTION_AUDIT_DAYS',
+                    365
+                ),
+
+                'model' => env(
+                    'MAIL_RETENTION_AUDIT_MODEL'
+                ),
+
+                'timestamp_column' => env(
+                    'MAIL_RETENTION_AUDIT_TIMESTAMP_COLUMN',
+                    'created_at'
+                ),
+            ],
+        ],
     ],
 ];

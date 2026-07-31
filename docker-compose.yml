@@ -14,6 +14,72 @@ services:
     networks:
       - simpledesk
 
+  queue_mail:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: simpledesk_queue_mail
+    restart: unless-stopped
+    working_dir: /var/www
+    command: >-
+      php artisan queue:work
+      --queue=mail-incoming,mail-outgoing,default
+      --sleep=1
+      --tries=5
+      --timeout=300
+      --backoff=5
+    volumes:
+      - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
+    depends_on:
+      - pgsql
+      - redis
+    stop_grace_period: 30s
+    networks:
+      - simpledesk
+
+  queue_antivirus:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: simpledesk_queue_antivirus
+    restart: unless-stopped
+    working_dir: /var/www
+    command: >-
+      php artisan queue:work
+      --queue=mail-antivirus
+      --sleep=1
+      --tries=5
+      --timeout=300
+      --backoff=5
+    volumes:
+      - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
+    depends_on:
+      - pgsql
+      - redis
+    stop_grace_period: 30s
+    networks:
+      - simpledesk
+
+  scheduler:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: simpledesk_scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan schedule:work
+    volumes:
+      - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
+    depends_on:
+      - pgsql
+      - redis
+    stop_grace_period: 30s
+    networks:
+      - simpledesk
+
   nginx:
     image: nginx:1.27-alpine
     container_name: simpledesk_nginx

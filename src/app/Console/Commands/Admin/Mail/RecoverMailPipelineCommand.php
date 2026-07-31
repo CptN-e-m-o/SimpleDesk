@@ -8,12 +8,10 @@ use Throwable;
 
 class RecoverMailPipelineCommand extends Command
 {
-    protected $signature =
-        'simpledesk:mail:recover
+    protected $signature = 'simpledesk:mail:recover
         {--limit= : Maximum records per recovery category}';
 
-    protected $description =
-        'Recover interrupted or undispatched mail pipeline operations';
+    protected $description = 'Recover interrupted or undispatched mail pipeline operations';
 
     public function handle(
         MailPipelineRecoveryService $recovery
@@ -51,28 +49,23 @@ class RecoverMailPipelineCommand extends Command
             [
                 [
                     'Stuck incoming reset',
-                    $result
-                        ->incomingStuckReset,
+                    $result->incomingStuckReset,
                 ],
                 [
                     'Received incoming dispatched',
-                    $result
-                        ->incomingReceivedDispatched,
+                    $result->incomingReceivedDispatched,
                 ],
                 [
                     'Stuck outgoing reset',
-                    $result
-                        ->outgoingStuckReset,
+                    $result->outgoingStuckReset,
                 ],
                 [
                     'Queued outgoing dispatched',
-                    $result
-                        ->outgoingQueuedDispatched,
+                    $result->outgoingQueuedDispatched,
                 ],
                 [
                     'Total actions',
-                    $result
-                        ->totalActions(),
+                    $result->totalActions(),
                 ],
             ]
         );
