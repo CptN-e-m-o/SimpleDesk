@@ -7,6 +7,8 @@ enum MailAdminAuditEvent: string
     case MailboxCreated = 'mailbox_created';
     case MailboxUpdated = 'mailbox_updated';
     case MailboxDeleted = 'mailbox_deleted';
+    case MailboxRestored = 'mailbox_restored';
+    case MailboxForceDeleted = 'mailbox_force_deleted';
 
     case ChannelCreated = 'channel_created';
     case ChannelUpdated = 'channel_updated';

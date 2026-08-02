@@ -150,9 +150,17 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                 items: [
                     {
                         label: 'Email Settings',
-                        href: '#',
+                        href: route(
+                            'admin.email.settings.index',
+                        ),
                         icon: Mail,
-                        isActive: () => false,
+                        permission: 'admin.mail.view',
+                        isActive: (currentUrl: string) =>
+                            currentUrl ===
+                            '/admin/email/settings' ||
+                            currentUrl.startsWith(
+                                '/admin/email/settings/',
+                            ),
                     },
                     {
                         label: 'BreakLines',

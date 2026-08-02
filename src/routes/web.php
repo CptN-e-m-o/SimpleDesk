@@ -157,13 +157,157 @@ Route::middleware('auth')->group(function () {
 
             Route::get(
                 '/settings',
-                MailboxSettingsController::class
+                [MailboxSettingsController::class, 'index']
             )
                 ->middleware(
                     'permission:admin.mail.view|admin.mail.manage_mailboxes'
                 )
                 ->name('settings.index');
 
+            Route::get(
+                '/settings/mailboxes/create',
+                [MailboxSettingsController::class, 'create']
+            )
+                ->middleware(
+                    'permission:admin.mail.manage_mailboxes'
+                )
+                ->name('settings.mailboxes.create');
+
+            Route::post(
+                '/settings/mailboxes',
+                [MailboxSettingsController::class, 'store']
+            )
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_created',
+                ])
+                ->name('settings.mailboxes.store');
+
+            Route::get(
+                '/settings/mailboxes/{mailbox}',
+                [MailboxSettingsController::class, 'show']
+            )
+                ->middleware(
+                    'permission:admin.mail.view|admin.mail.manage_mailboxes'
+                )
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.show');
+
+            Route::post(
+                '/settings/mailboxes/{mailbox}/restore',
+                [MailboxSettingsController::class, 'restore']
+            )
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_restored',
+                ])
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.restore');
+
+            Route::delete(
+                '/settings/mailboxes/{mailbox}/force',
+                [MailboxSettingsController::class, 'forceDestroy']
+            )
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_force_deleted',
+                ])
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.force-destroy');
+
+            Route::get(
+                '/settings/mailboxes/{mailbox}/edit',
+                [MailboxSettingsController::class, 'edit']
+            )
+                ->middleware(
+                    'permission:admin.mail.manage_mailboxes'
+                )
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.edit');
+
+            Route::put(
+                '/settings/mailboxes/{mailbox}',
+                [MailboxSettingsController::class, 'update']
+            )
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_updated',
+                ])
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.update');
+
+            Route::get(
+                '/settings/mailboxes/{mailbox}/setup/incoming',
+                [MailboxSettingsController::class, 'incoming']
+            )
+                ->middleware(
+                    'permission:admin.mail.manage_channels'
+                )
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.setup.incoming');
+
+            Route::post(
+                '/settings/mailboxes/{mailbox}/setup/incoming',
+                [MailboxSettingsController::class, 'storeIncoming']
+            )
+                ->middleware([
+                    'permission:admin.mail.manage_channels',
+                    'mail.audit:channel_created',
+                ])
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.setup.incoming.store');
+
+            Route::get(
+                '/settings/mailboxes/{mailbox}/setup/outgoing',
+                [MailboxSettingsController::class, 'outgoing']
+            )
+                ->middleware(
+                    'permission:admin.mail.manage_channels'
+                )
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.setup.outgoing');
+
+            Route::post(
+                '/settings/mailboxes/{mailbox}/setup/outgoing',
+                [MailboxSettingsController::class, 'storeOutgoing']
+            )
+                ->middleware([
+                    'permission:admin.mail.manage_channels',
+                    'mail.audit:channel_created',
+                ])
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.setup.outgoing.store');
+
+            Route::get(
+                '/settings/mailboxes/{mailbox}/setup/review',
+                [MailboxSettingsController::class, 'review']
+            )
+                ->middleware(
+                    'permission:admin.mail.manage_mailboxes'
+                )
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.setup.review');
+
+            Route::post(
+                '/settings/mailboxes/{mailbox}/setup/finish',
+                [MailboxSettingsController::class, 'finish']
+            )
+                ->middleware(
+                    'permission:admin.mail.manage_mailboxes'
+                )
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.setup.finish');
+
+            Route::delete(
+                '/settings/mailboxes/{mailbox}',
+                [MailboxSettingsController::class, 'destroy']
+            )
+                ->middleware([
+                    'permission:admin.mail.manage_mailboxes',
+                    'mail.audit:mailbox_deleted',
+                ])
+                ->whereNumber('mailbox')
+                ->name('settings.mailboxes.destroy');
             /*
              * Backend routes
              */

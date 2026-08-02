@@ -30,6 +30,8 @@ export type Mailbox = {
     channels_count: number
     created_at: string | null
     updated_at: string | null
+    is_deleted: boolean
+    deleted_at: string | null
 }
 
 export type MailboxSummary = {
