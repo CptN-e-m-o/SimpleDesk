@@ -138,6 +138,7 @@ export default function Index() {
             title: 'Email Settings',
             description:
                 'Configure support mailboxes and manage incoming and outgoing email.',
+            href: route('admin.email.settings.index'),
             icon: Mailbox,
         },
         {

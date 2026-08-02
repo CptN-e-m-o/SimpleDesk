@@ -7,9 +7,76 @@ services:
     working_dir: /var/www
     volumes:
       - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
     depends_on:
       - pgsql
       - redis
+    networks:
+      - simpledesk
+
+  queue_mail:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: simpledesk_queue_mail
+    restart: unless-stopped
+    working_dir: /var/www
+    command: >-
+      php artisan queue:work
+      --queue=mail-incoming,mail-outgoing,default
+      --sleep=1
+      --tries=5
+      --timeout=300
+      --backoff=5
+    volumes:
+      - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
+    depends_on:
+      - pgsql
+      - redis
+    stop_grace_period: 30s
+    networks:
+      - simpledesk
+
+  queue_antivirus:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: simpledesk_queue_antivirus
+    restart: unless-stopped
+    working_dir: /var/www
+    command: >-
+      php artisan queue:work
+      --queue=mail-antivirus
+      --sleep=1
+      --tries=5
+      --timeout=300
+      --backoff=5
+    volumes:
+      - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
+    depends_on:
+      - pgsql
+      - redis
+    stop_grace_period: 30s
+    networks:
+      - simpledesk
+
+  scheduler:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: simpledesk_scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan schedule:work
+    volumes:
+      - ./src:/var/www
+      - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
+    depends_on:
+      - pgsql
+      - redis
+    stop_grace_period: 30s
     networks:
       - simpledesk
 
@@ -61,9 +128,30 @@ services:
     networks:
       - simpledesk
 
+  greenmail:
+    image: greenmail/standalone:2.1.10
+    container_name: simpledesk-greenmail
+    restart: unless-stopped
+    ports:
+      - "3025:3025"
+      - "3143:3143"
+      - "8081:8080"
+    environment:
+      GREENMAIL_OPTS: >-
+        -Dgreenmail.setup.test.smtp
+        -Dgreenmail.setup.test.imap
+        -Dgreenmail.hostname=0.0.0.0
+        -Dgreenmail.users=support:secret@simpledesk.test
+        -Dgreenmail.users.login=email
+        -Dgreenmail.verbose
+    networks:
+      - simpledesk
+
 volumes:
   pgsql_data:
   redis_data:
+  mail_attachment_storage:
+    name: simpledesk_mail_attachment_storage
 
 networks:
   simpledesk:

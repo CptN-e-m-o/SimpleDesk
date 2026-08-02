@@ -39,7 +39,7 @@ class SuperAdminUserSeeder extends Seeder
 
                 'timezone' => 'Europe/Berlin',
 
-                'signature' => <<<HTML
+                'signature' => <<<'HTML'
 <p>
 Best regards,<br>
 System Administrator<br>

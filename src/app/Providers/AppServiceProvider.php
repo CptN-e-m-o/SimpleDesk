@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
-use App\Models\User\UserLoginSession;
-use Illuminate\Auth\Events\Logout;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Support\Facades\Event;
-use App\Services\Auth\UserLoginSessionLogger;
 use App\Models\User\User;
+use App\Models\User\UserLoginSession;
+use App\Services\Auth\UserLoginSessionLogger;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

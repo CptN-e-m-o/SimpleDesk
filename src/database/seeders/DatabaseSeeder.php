@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Permissions\Agent\AdminPanel\PermissionAdminMailSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -16,6 +17,7 @@ class DatabaseSeeder extends Seeder
 
             PermissionSeeder::class,
             RolePermissionSeeder::class,
+            PermissionAdminMailSeeder::class,
 
             SuperAdminUserSeeder::class,
             AdminUserSeeder::class,

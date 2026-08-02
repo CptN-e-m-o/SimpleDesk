@@ -86,6 +86,20 @@ function getDialogDescription(action?: DepartmentAction) {
     )
 }
 
+function getDepartmentManagers(
+    department: Department,
+) {
+    return department.managers ?? []
+}
+
+function getManagersLabel(
+    department: Department,
+): string {
+    return getDepartmentManagers(department)
+        .map((manager) => manager.name)
+        .join(', ')
+}
+
 export default function Index({ departments = [] }: Props) {
     const [search, setSearch] = useState('')
     const [departmentAction, setDepartmentAction] =
@@ -116,8 +130,12 @@ export default function Index({ departments = [] }: Props) {
         if (!query) return departments
 
         return departments.filter((department) => {
-            const managers = department.managers
-                .map((manager) => manager.name.toLowerCase())
+            const managers = getDepartmentManagers(
+                department,
+            )
+                .map((manager) =>
+                    manager.name.toLowerCase(),
+                )
                 .join(' ')
             const status = getDepartmentSearchStatus(department)
             const type = formatDepartmentType(department.type).toLowerCase()
@@ -411,12 +429,7 @@ export default function Index({ departments = [] }: Props) {
                                         {sortedDepartments.map(
                                             (department) => {
                                                 const managersLabel =
-                                                    department.managers
-                                                        .map(
-                                                            (manager) =>
-                                                                manager.name,
-                                                        )
-                                                        .join(', ')
+                                                    getManagersLabel(department)
 
                                                 return (
                                                     <tr
@@ -564,9 +577,7 @@ export default function Index({ departments = [] }: Props) {
                                 <div className="grid gap-4 lg:hidden">
                                     {sortedDepartments.map((department) => {
                                         const managersLabel =
-                                            department.managers
-                                                .map((manager) => manager.name)
-                                                .join(', ')
+                                            getManagersLabel(department)
 
                                         return (
                                             <div

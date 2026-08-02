@@ -140,9 +140,9 @@ class TicketController extends Controller
     {
         do {
             $ticketNumber = 'SD-'
-                . now()->format('Y')
-                . '-'
-                . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
+                .now()->format('Y')
+                .'-'
+                .str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
         } while (Ticket::query()->where('ticket_number', $ticketNumber)->exists());
 
         return $ticketNumber;

@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Admin\Department;
+use App\Models\Admin\Mail\EmailAttachment;
+use App\Models\Admin\Mail\EmailMessage;
+use App\Models\Admin\Mail\Mailbox;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Ticket extends Model
 {
@@ -17,6 +22,8 @@ class Ticket extends Model
         'requester_id',
         'category_id',
         'assignee_id',
+        'mailbox_id',
+        'department_id',
         'subject',
         'priority',
         'status',
@@ -82,28 +89,62 @@ class Ticket extends Model
     public static function statusOptions(): array
     {
         return [
-            ['value' => '', 'label' => 'All statuses'],
-            ['value' => self::STATUS_OPEN, 'label' => 'Open'],
-            ['value' => self::STATUS_IN_PROGRESS, 'label' => 'In Progress'],
-            ['value' => self::STATUS_WAITING_FOR_CUSTOMER, 'label' => 'Waiting for Customer'],
-            ['value' => self::STATUS_RESOLVED, 'label' => 'Resolved'],
-            ['value' => self::STATUS_CLOSED, 'label' => 'Closed'],
+            [
+                'value' => '',
+                'label' => 'All statuses',
+            ],
+            [
+                'value' => self::STATUS_OPEN,
+                'label' => 'Open',
+            ],
+            [
+                'value' => self::STATUS_IN_PROGRESS,
+                'label' => 'In Progress',
+            ],
+            [
+                'value' => self::STATUS_WAITING_FOR_CUSTOMER,
+                'label' => 'Waiting for Customer',
+            ],
+            [
+                'value' => self::STATUS_RESOLVED,
+                'label' => 'Resolved',
+            ],
+            [
+                'value' => self::STATUS_CLOSED,
+                'label' => 'Closed',
+            ],
         ];
     }
 
     public static function priorityOptions(): array
     {
         return [
-            ['value' => '', 'label' => 'All priorities'],
-            ['value' => self::PRIORITY_LOW, 'label' => 'Low'],
-            ['value' => self::PRIORITY_MEDIUM, 'label' => 'Medium'],
-            ['value' => self::PRIORITY_HIGH, 'label' => 'High'],
-            ['value' => self::PRIORITY_URGENT, 'label' => 'Urgent'],
+            [
+                'value' => '',
+                'label' => 'All priorities',
+            ],
+            [
+                'value' => self::PRIORITY_LOW,
+                'label' => 'Low',
+            ],
+            [
+                'value' => self::PRIORITY_MEDIUM,
+                'label' => 'Medium',
+            ],
+            [
+                'value' => self::PRIORITY_HIGH,
+                'label' => 'High',
+            ],
+            [
+                'value' => self::PRIORITY_URGENT,
+                'label' => 'Urgent',
+            ],
         ];
     }
 
-    public static function statusLabel(string $status): string
-    {
+    public static function statusLabel(
+        string $status
+    ): string {
         return match ($status) {
             self::STATUS_OPEN => 'Open',
             self::STATUS_IN_PROGRESS => 'In Progress',
@@ -114,8 +155,9 @@ class Ticket extends Model
         };
     }
 
-    public static function priorityLabel(string $priority): string
-    {
+    public static function priorityLabel(
+        string $priority
+    ): string {
         return match ($priority) {
             self::PRIORITY_LOW => 'Low',
             self::PRIORITY_MEDIUM => 'Medium',
@@ -136,21 +178,73 @@ class Ticket extends Model
 
     public function requester(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'requester_id');
+        return $this
+            ->belongsTo(
+                User::class,
+                'requester_id'
+            )
+            ->withTrashed();
     }
 
     public function assignee(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'assignee_id');
+        return $this
+            ->belongsTo(
+                User::class,
+                'assignee_id'
+            )
+            ->withTrashed();
     }
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(TicketCategory::class, 'category_id');
+        return $this->belongsTo(
+            TicketCategory::class,
+            'category_id'
+        );
+    }
+
+    public function mailbox(): BelongsTo
+    {
+        return $this->belongsTo(
+            Mailbox::class
+        );
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(
+            Department::class
+        );
     }
 
     public function replies(): HasMany
     {
-        return $this->hasMany(TicketReply::class);
+        return $this->hasMany(
+            TicketReply::class
+        );
+    }
+
+    public function emailMessages(): HasMany
+    {
+        return $this->hasMany(
+            EmailMessage::class
+        );
+    }
+
+    public function emailAttachments(): HasManyThrough
+    {
+        return $this
+            ->hasManyThrough(
+                EmailAttachment::class,
+                EmailMessage::class,
+                'ticket_id',
+                'email_message_id',
+                'id',
+                'id',
+            )
+            ->orderBy(
+                'email_attachments.position'
+            );
     }
 }
