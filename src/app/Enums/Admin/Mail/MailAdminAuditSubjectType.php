@@ -11,4 +11,5 @@ enum MailAdminAuditSubjectType: string
     case EmailAttachment = 'email_attachment';
     case EmailQuarantine = 'email_quarantine';
     case Antivirus = 'antivirus';
+    case ReplyParsingRule = 'reply_parsing_rule';
 }

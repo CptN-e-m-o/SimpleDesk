@@ -11,6 +11,7 @@ use App\Models\Admin\Mail\EmailMessageQuarantine;
 use App\Models\Admin\Mail\Mailbox;
 use App\Models\Admin\Mail\MailboxChannel;
 use App\Models\Admin\Mail\MailProviderConnection;
+use App\Models\Admin\Mail\ReplyParsingRule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,6 +57,12 @@ class MailAdminAuditTargetResolver
             MailAdminAuditEvent::MailboxDeleted,
             MailAdminAuditEvent::MailboxSyncRequested => MailAdminAuditSubjectType::Mailbox,
 
+            MailAdminAuditEvent::ReplyParsingRuleCreated,
+            MailAdminAuditEvent::ReplyParsingRuleUpdated,
+            MailAdminAuditEvent::ReplyParsingRuleDeleted,
+            MailAdminAuditEvent::ReplyParsingRuleRestored,
+            MailAdminAuditEvent::ReplyParsingRuleForceDeleted => MailAdminAuditSubjectType::ReplyParsingRule,
+
             MailAdminAuditEvent::ChannelCreated,
             MailAdminAuditEvent::ChannelUpdated,
             MailAdminAuditEvent::ChannelDeleted,
@@ -94,6 +101,11 @@ class MailAdminAuditTargetResolver
             MailAdminAuditEvent::ProviderConnectionDeleted,
             MailAdminAuditEvent::ProviderConnectionTested => 'providerConnection',
 
+            MailAdminAuditEvent::ReplyParsingRuleUpdated,
+            MailAdminAuditEvent::ReplyParsingRuleDeleted,
+            MailAdminAuditEvent::ReplyParsingRuleRestored,
+            MailAdminAuditEvent::ReplyParsingRuleForceDeleted => 'rule',
+
             MailAdminAuditEvent::OutgoingMessageRetryRequested => 'message',
 
             MailAdminAuditEvent::AttachmentRescanRequested => 'attachment',
@@ -110,7 +122,23 @@ class MailAdminAuditTargetResolver
 
         $target = $request->route($parameter);
 
-        return $target instanceof Model ? $target : null;
+        if ($target instanceof Model) {
+            return $target;
+        }
+
+        if (is_numeric($target)
+            && in_array($event, [
+                MailAdminAuditEvent::ReplyParsingRuleUpdated,
+                MailAdminAuditEvent::ReplyParsingRuleDeleted,
+                MailAdminAuditEvent::ReplyParsingRuleRestored,
+                MailAdminAuditEvent::ReplyParsingRuleForceDeleted,
+            ], true)) {
+            return (new ReplyParsingRule())->forceFill([
+                'id' => (int) $target,
+            ]);
+        }
+
+        return null;
     }
 
     private function responseSubjectId(

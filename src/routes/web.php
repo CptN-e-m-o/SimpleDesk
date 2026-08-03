@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\Mail\MailDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\MailProviderConnectionController;
 use App\Http\Controllers\Admin\Mail\MailProviderConnectionTestController;
 use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
+use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
@@ -308,6 +309,62 @@ Route::middleware('auth')->group(function () {
                 ])
                 ->whereNumber('mailbox')
                 ->name('settings.mailboxes.destroy');
+
+            Route::get('/reply-parsing', [ReplyParsingRuleController::class, 'index'])
+                ->middleware('permission:admin.mail.view_reply_parsing|admin.mail.manage_reply_parsing')
+                ->name('reply-parsing.index');
+
+            Route::get('/reply-parsing/create', [ReplyParsingRuleController::class, 'create'])
+                ->middleware('permission:admin.mail.manage_reply_parsing')
+                ->name('reply-parsing.create');
+
+            Route::post('/reply-parsing', [ReplyParsingRuleController::class, 'store'])
+                ->middleware([
+                    'permission:admin.mail.manage_reply_parsing',
+                    'mail.audit:reply_parsing_rule_created',
+                ])
+                ->name('reply-parsing.store');
+
+            Route::get('/reply-parsing/{rule}/edit', [ReplyParsingRuleController::class, 'edit'])
+                ->middleware('permission:admin.mail.manage_reply_parsing')
+                ->whereNumber('rule')
+                ->name('reply-parsing.edit');
+
+            Route::put('/reply-parsing/{rule}', [ReplyParsingRuleController::class, 'update'])
+                ->middleware([
+                    'permission:admin.mail.manage_reply_parsing',
+                    'mail.audit:reply_parsing_rule_updated',
+                ])
+                ->whereNumber('rule')
+                ->name('reply-parsing.update');
+
+            Route::delete('/reply-parsing/{rule}', [ReplyParsingRuleController::class, 'destroy'])
+                ->middleware([
+                    'permission:admin.mail.manage_reply_parsing',
+                    'mail.audit:reply_parsing_rule_deleted',
+                ])
+                ->whereNumber('rule')
+                ->name('reply-parsing.destroy');
+
+            Route::post('/reply-parsing/{rule}/restore', [ReplyParsingRuleController::class, 'restore'])
+                ->middleware([
+                    'permission:admin.mail.manage_reply_parsing',
+                    'mail.audit:reply_parsing_rule_restored',
+                ])
+                ->whereNumber('rule')
+                ->name('reply-parsing.restore');
+
+            Route::delete('/reply-parsing/{rule}/force', [ReplyParsingRuleController::class, 'forceDestroy'])
+                ->middleware([
+                    'permission:admin.mail.manage_reply_parsing',
+                    'mail.audit:reply_parsing_rule_force_deleted',
+                ])
+                ->whereNumber('rule')
+                ->name('reply-parsing.force-destroy');
+
+            Route::post('/reply-parsing/preview', [ReplyParsingRuleController::class, 'preview'])
+                ->middleware('permission:admin.mail.manage_reply_parsing')
+                ->name('reply-parsing.preview');
             /*
              * Backend routes
              */

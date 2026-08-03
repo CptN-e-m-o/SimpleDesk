@@ -3,6 +3,7 @@
 namespace App\Services\Admin\Mail\ReplyParsing;
 
 use App\Data\Admin\Mail\ParsedInboundEmailContentData;
+use App\Enums\Admin\Mail\ReplyParsingContentType;
 use App\Models\Admin\Mail\EmailMessage;
 use DOMDocument;
 use DOMElement;
@@ -12,6 +13,10 @@ use Throwable;
 
 class InboundEmailReplyParser
 {
+    public function __construct(
+        private readonly ReplyParsingService $replyParsing,
+    ) {}
+
     public function parse(
         EmailMessage $message
     ): ParsedInboundEmailContentData {
@@ -27,12 +32,19 @@ class InboundEmailReplyParser
             );
 
         [
-            $originalBody,
+            $sourceContent,
             $source,
-            $htmlQuotedTextRemoved,
+            $contentType,
         ] = $this->sourceBody(
-            message: $message,
-            stripHtmlQuotedText: $stripQuotedText,
+            $message
+        );
+
+        [
+            $originalBody,
+        ] = $this->contentToText(
+            content: $sourceContent,
+            contentType: $contentType,
+            stripHtmlQuotedText: false,
         );
 
         $originalBody = $this->normalizeText(
@@ -58,12 +70,42 @@ class InboundEmailReplyParser
             );
         }
 
-        $body = $originalBody;
+        $workingContent = $sourceContent;
+
+        $quotedTextRemoved = false;
+
+        if (
+            $stripQuotedText
+            && $contentType !== null
+        ) {
+            [
+                $workingContent,
+                $configuredRuleMatched,
+            ] = $this->applyConfiguredRules(
+                content: $workingContent,
+                contentType: $contentType,
+            );
+
+            $quotedTextRemoved =
+                $configuredRuleMatched;
+        }
+
+        [
+            $body,
+            $htmlQuotedTextRemoved,
+        ] = $this->contentToText(
+            content: $workingContent,
+            contentType: $contentType,
+            stripHtmlQuotedText: $stripQuotedText,
+        );
+
+        $body = $this->normalizeText(
+            $body
+        );
 
         $quotedTextRemoved =
-            $htmlQuotedTextRemoved;
-
-        $signatureRemoved = false;
+            $quotedTextRemoved
+            || $htmlQuotedTextRemoved;
 
         if ($stripQuotedText) {
             [
@@ -77,6 +119,8 @@ class InboundEmailReplyParser
                 $quotedTextRemoved
                 || $plainTextQuoteRemoved;
         }
+
+        $signatureRemoved = false;
 
         if (
             (bool) config(
@@ -128,11 +172,14 @@ class InboundEmailReplyParser
     }
 
     /**
-     * @return array{0: string, 1: string, 2: bool}
+     * @return array{
+     *     0: string,
+     *     1: string,
+     *     2: ReplyParsingContentType|null
+     * }
      */
     private function sourceBody(
-        EmailMessage $message,
-        bool $stripHtmlQuotedText,
+        EmailMessage $message
     ): array {
         $textBody = trim(
             (string) $message->text_body
@@ -154,23 +201,15 @@ class InboundEmailReplyParser
             return [
                 $textBody,
                 'text',
-                false,
+                ReplyParsingContentType::PlainText,
             ];
         }
 
         if ($htmlBody !== '') {
-            [
-                $htmlText,
-                $quotedTextRemoved,
-            ] = $this->htmlToText(
-                html: $htmlBody,
-                stripQuotedText: $stripHtmlQuotedText,
-            );
-
             return [
-                $htmlText,
+                $htmlBody,
                 'html',
-                $quotedTextRemoved,
+                ReplyParsingContentType::Html,
             ];
         }
 
@@ -178,15 +217,75 @@ class InboundEmailReplyParser
             return [
                 $textBody,
                 'text',
-                false,
+                ReplyParsingContentType::PlainText,
             ];
         }
 
         return [
             '',
             'empty',
+            null,
+        ];
+    }
+
+    /**
+     * @return array{0: string, 1: bool}
+     */
+    private function contentToText(
+        string $content,
+        ?ReplyParsingContentType $contentType,
+        bool $stripHtmlQuotedText,
+    ): array {
+        if (
+            $contentType
+            === ReplyParsingContentType::Html
+        ) {
+            return $this->htmlToText(
+                html: $content,
+                stripQuotedText: $stripHtmlQuotedText,
+            );
+        }
+
+        return [
+            $this->normalizeText(
+                $content
+            ),
             false,
         ];
+    }
+
+    /**
+     * @return array{0: string, 1: bool}
+     */
+    private function applyConfiguredRules(
+        string $content,
+        ReplyParsingContentType $contentType,
+    ): array {
+        if ($content === '') {
+            return [
+                '',
+                false,
+            ];
+        }
+
+        try {
+            $result = $this->replyParsing->parse(
+                content: $content,
+                contentType: $contentType,
+            );
+
+            return [
+                $result->parsedContent,
+                $result->matched,
+            ];
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return [
+                $content,
+                false,
+            ];
+        }
     }
 
     /**
@@ -481,8 +580,8 @@ class InboundEmailReplyParser
         }
 
         return isset(
-            $matchedHeaders['from']
-        ) && count($matchedHeaders) >= 3;
+                $matchedHeaders['from']
+            ) && count($matchedHeaders) >= 3;
     }
 
     /**
@@ -1021,11 +1120,11 @@ class InboundEmailReplyParser
         }
 
         return rtrim(
-            mb_substr(
-                $body,
-                0,
-                $limit
-            )
-        )."\n\n[Содержимое сокращено системой]";
+                mb_substr(
+                    $body,
+                    0,
+                    $limit
+                )
+            )."\n\n[Содержимое сокращено системой]";
     }
 }

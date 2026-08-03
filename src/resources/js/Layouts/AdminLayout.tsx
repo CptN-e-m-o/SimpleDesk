@@ -163,10 +163,20 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                             ),
                     },
                     {
-                        label: 'BreakLines',
-                        href: '#',
+                        label: 'Reply Parsing',
+                        href: route(
+                            'admin.email.reply-parsing.index',
+                        ),
                         icon: GitBranch,
-                        isActive: () => false,
+                        permissions: [
+                            'admin.mail.view_reply_parsing',
+                            'admin.mail.manage_reply_parsing',
+                        ],
+                        isActive: (currentUrl: string) =>
+                            currentUrl === '/admin/email/reply-parsing' ||
+                            currentUrl.startsWith(
+                                '/admin/email/reply-parsing/',
+                            ),
                     },
                     {
                         label: 'Diagnostics',

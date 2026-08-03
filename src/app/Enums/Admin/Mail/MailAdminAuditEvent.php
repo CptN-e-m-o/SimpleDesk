@@ -10,6 +10,12 @@ enum MailAdminAuditEvent: string
     case MailboxRestored = 'mailbox_restored';
     case MailboxForceDeleted = 'mailbox_force_deleted';
 
+    case ReplyParsingRuleCreated = 'reply_parsing_rule_created';
+    case ReplyParsingRuleUpdated = 'reply_parsing_rule_updated';
+    case ReplyParsingRuleDeleted = 'reply_parsing_rule_deleted';
+    case ReplyParsingRuleRestored = 'reply_parsing_rule_restored';
+    case ReplyParsingRuleForceDeleted = 'reply_parsing_rule_force_deleted';
+
     case ChannelCreated = 'channel_created';
     case ChannelUpdated = 'channel_updated';
     case ChannelDeleted = 'channel_deleted';
