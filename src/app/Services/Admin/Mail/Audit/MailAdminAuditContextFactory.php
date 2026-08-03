@@ -90,6 +90,15 @@ class MailAdminAuditContextFactory
                 'is_default_outgoing',
             ]),
 
+            MailAdminAuditEvent::ReplyParsingRuleCreated,
+            MailAdminAuditEvent::ReplyParsingRuleUpdated => $request->only([
+                'name',
+                'pattern_type',
+                'content_type',
+                'display_order',
+                'is_active',
+            ]),
+
             MailAdminAuditEvent::ChannelCreated,
             MailAdminAuditEvent::ChannelUpdated => $this->channelRequestContext($request),
 

@@ -79,6 +79,16 @@ class PermissionAdminMailSeeder extends Seeder
                 'label' => 'View email administrative audit',
                 'sort_order' => 110,
             ],
+            [
+                'key' => 'admin.mail.view_reply_parsing',
+                'label' => 'View reply parsing rules',
+                'sort_order' => 120,
+            ],
+            [
+                'key' => 'admin.mail.manage_reply_parsing',
+                'label' => 'Manage reply parsing rules',
+                'sort_order' => 130,
+            ],
         ];
 
         $permissionIds = [];

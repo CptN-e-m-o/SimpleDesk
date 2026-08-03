@@ -145,6 +145,7 @@ export default function Index() {
             title: 'Reply Parsing',
             description:
                 'Define rules for removing quoted messages and unnecessary content from email replies.',
+            href: route('admin.email.reply-parsing.index'),
             icon: TextQuote,
         },
         {
