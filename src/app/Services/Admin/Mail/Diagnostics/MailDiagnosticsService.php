@@ -5,12 +5,14 @@ namespace App\Services\Admin\Mail\Diagnostics;
 use App\Enums\Admin\Mail\EmailAttachmentScanStatus;
 use App\Enums\Admin\Mail\EmailMessageDirection;
 use App\Enums\Admin\Mail\EmailMessageStatus;
+use App\Enums\Admin\Mail\MailAdminAuditEvent;
 use App\Enums\Admin\Mail\MailboxChannelDirection;
 use App\Enums\Admin\Mail\MailboxHealthStatus;
 use App\Models\Admin\Mail\EmailAttachment;
 use App\Models\Admin\Mail\EmailAttachmentRejection;
 use App\Models\Admin\Mail\EmailMessage;
 use App\Models\Admin\Mail\EmailMessageQuarantine;
+use App\Models\Admin\Mail\MailAdminAuditLog;
 use App\Models\Admin\Mail\Mailbox;
 use App\Models\Admin\Mail\MailboxChannel;
 use App\Models\Admin\Mail\MailboxChannelSyncState;
@@ -47,6 +49,503 @@ class MailDiagnosticsService
             'quarantine' => $this->quarantineSummary(),
 
             'recent_errors' => $this->recentErrors(),
+        ];
+    }
+
+    public function dashboard(): array
+    {
+        $mailboxes = Mailbox::query();
+        $channels = MailboxChannel::query()
+            ->whereHas('mailbox')
+            ->with([
+                'mailbox:id,name,email_address,is_active',
+                'providerConnection:id,is_active',
+                'syncState:mailbox_channel_id,consecutive_failures',
+            ])
+            ->orderBy('mailbox_id')
+            ->orderBy('direction')
+            ->orderBy('failover_order')
+            ->orderBy('id')
+            ->get();
+
+        $messageStatistics = $this->dashboardMessageStatistics();
+        $channelItems = $channels
+            ->map(fn (MailboxChannel $channel): array => $this->dashboardChannel($channel))
+            ->values()
+            ->all();
+        $antivirus = $this->antivirusSnapshot();
+        $system = $this->systemSnapshot();
+        $overall = $this->overallStatus(
+            channels: $channelItems,
+            messages: $messageStatistics,
+            antivirus: $antivirus,
+            system: $system,
+        );
+
+        $failedChannels = collect($channelItems)
+            ->where('health_status', MailboxHealthStatus::Failed->value)
+            ->count();
+        $warningChannels = collect($channelItems)
+            ->where('health_status', MailboxHealthStatus::Warning->value)
+            ->count();
+
+        return [
+            'generated_at' => now()->toIso8601String(),
+            'summary' => [
+                'overall_status' => $overall['status'],
+                'overall_message' => $overall['message'],
+                'mailboxes_total' => (clone $mailboxes)->count(),
+                'mailboxes_active' => (clone $mailboxes)->where('is_active', true)->count(),
+                'channels_total' => count($channelItems),
+                'channels_healthy' => collect($channelItems)->where('health_status', MailboxHealthStatus::Healthy->value)->count(),
+                'channels_degraded' => $warningChannels,
+                'channels_failed' => $failedChannels,
+                'messages_last_24_hours' => $messageStatistics['incoming_last_24_hours'] + $messageStatistics['outgoing_last_24_hours'],
+                'failed_messages_last_24_hours' => $messageStatistics['failed_last_24_hours'],
+                'stuck_messages' =>
+                    $messageStatistics['stuck_preparing']
+                    + $messageStatistics['stuck_queued']
+                    + $messageStatistics['stuck_processing']
+                    + $messageStatistics['stuck_sending'],
+                'antivirus_status' => $antivirus['status'],
+            ],
+            'channels' => $channelItems,
+            'message_statistics' => $messageStatistics,
+            'recent_failures' => $this->dashboardRecentFailures(),
+            'antivirus' => $antivirus,
+            'system' => $system,
+        ];
+    }
+
+    private function dashboardChannel(MailboxChannel $channel): array
+    {
+        $providerAvailable = $channel->provider_connection_id === null
+            || ($channel->providerConnection?->is_active ?? false);
+        $available = $channel->is_enabled
+            && ($channel->mailbox?->is_active ?? false)
+            && $providerAvailable;
+        $cooldownUntil = null;
+
+        if ($channel->health_status === MailboxHealthStatus::Failed
+            && $channel->last_error_at !== null) {
+            $cooldownUntil = $channel->last_error_at
+                ->addSeconds((int) config('simpledesk-mail.failover.failed_channel_cooldown_seconds', 300))
+                ->toIso8601String();
+        }
+
+        return [
+            'id' => $channel->id,
+            'mailbox_id' => $channel->mailbox_id,
+            'mailbox_name' => $channel->mailbox?->name,
+            'mailbox_email' => $channel->mailbox?->email_address,
+            'name' => $channel->name,
+            'direction' => $channel->direction->value,
+            'driver' => $channel->driver->value,
+            'is_enabled' => $channel->is_enabled,
+            'is_available' => $available,
+            'health_status' => $channel->health_status->value,
+            'consecutive_failures' => $channel->syncState?->consecutive_failures,
+            'last_success_at' => $channel->last_success_at?->toIso8601String(),
+            'last_failure_at' => $channel->last_error_at?->toIso8601String(),
+            'last_checked_at' => $channel->last_checked_at?->toIso8601String(),
+            'last_error_message' => $channel->last_error_message === null
+                ? null
+                : $this->redactor->redactString($channel->last_error_message),
+            'cooldown_until' => $cooldownUntil,
+            'can_test' => $channel->is_enabled && ($channel->mailbox?->is_active ?? false),
+        ];
+    }
+
+    private function dashboardMessageStatistics(): array
+    {
+        $dayAgo = now()->subDay();
+
+        $recent = EmailMessage::query()
+            ->where(
+                'created_at',
+                '>=',
+                $dayAgo
+            );
+
+        return [
+            'incoming_last_24_hours' => (clone $recent)
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Incoming->value
+                )
+                ->count(),
+
+            'outgoing_last_24_hours' => (clone $recent)
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Outgoing->value
+                )
+                ->count(),
+
+            'processed_last_24_hours' => EmailMessage::query()
+                ->where(
+                    'processed_at',
+                    '>=',
+                    $dayAgo
+                )
+                ->count(),
+
+            'sent_last_24_hours' => EmailMessage::query()
+                ->where(
+                    'sent_at',
+                    '>=',
+                    $dayAgo
+                )
+                ->count(),
+
+            'failed_last_24_hours' => EmailMessage::query()
+                ->where(
+                    'failed_at',
+                    '>=',
+                    $dayAgo
+                )
+                ->count(),
+
+            'currently_processing' => EmailMessage::query()
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Incoming->value
+                )
+                ->where(
+                    'status',
+                    EmailMessageStatus::Processing->value
+                )
+                ->count(),
+
+            'currently_sending' => EmailMessage::query()
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Outgoing->value
+                )
+                ->where(
+                    'status',
+                    EmailMessageStatus::Sending->value
+                )
+                ->count(),
+
+            'stuck_preparing' => EmailMessage::query()
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Outgoing->value
+                )
+                ->where(
+                    'status',
+                    EmailMessageStatus::Preparing->value
+                )
+                ->where(
+                    'created_at',
+                    '<=',
+                    $this
+                        ->thresholds
+                        ->preparingCutoff()
+                )
+                ->count(),
+
+            'stuck_queued' => EmailMessage::query()
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Outgoing->value
+                )
+                ->where(
+                    'status',
+                    EmailMessageStatus::Queued->value
+                )
+                ->where(function (
+                    Builder $query
+                ): void {
+                    $query
+                        ->where(function (
+                            Builder $query
+                        ): void {
+                            $query
+                                ->whereNotNull(
+                                    'queued_at'
+                                )
+                                ->where(
+                                    'queued_at',
+                                    '<=',
+                                    $this
+                                        ->thresholds
+                                        ->queuedCutoff()
+                                );
+                        })
+                        ->orWhere(function (
+                            Builder $query
+                        ): void {
+                            $query
+                                ->whereNull(
+                                    'queued_at'
+                                )
+                                ->where(
+                                    'created_at',
+                                    '<=',
+                                    $this
+                                        ->thresholds
+                                        ->queuedCutoff()
+                                );
+                        });
+                })
+                ->count(),
+
+            'stuck_processing' => EmailMessage::query()
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Incoming->value
+                )
+                ->where(
+                    'status',
+                    EmailMessageStatus::Processing->value
+                )
+                ->whereNotNull(
+                    'processing_started_at'
+                )
+                ->where(
+                    'processing_started_at',
+                    '<=',
+                    $this
+                        ->thresholds
+                        ->processingCutoff()
+                )
+                ->count(),
+
+            'stuck_sending' => EmailMessage::query()
+                ->where(
+                    'direction',
+                    EmailMessageDirection::Outgoing->value
+                )
+                ->where(
+                    'status',
+                    EmailMessageStatus::Sending->value
+                )
+                ->whereNotNull(
+                    'processing_started_at'
+                )
+                ->where(
+                    'processing_started_at',
+                    '<=',
+                    $this
+                        ->thresholds
+                        ->sendingCutoff()
+                )
+                ->count(),
+        ];
+    }
+
+    private function dashboardRecentFailures(): array
+    {
+        return EmailMessage::query()
+            ->where('status', EmailMessageStatus::Failed->value)
+            ->with('mailbox:id,name')
+            ->latest('failed_at')
+            ->latest('id')
+            ->limit(10)
+            ->get()
+            ->map(fn (EmailMessage $message): array => [
+                'id' => $message->id,
+                'direction' => $message->direction->value,
+                'subject' => $message->subject,
+                'mailbox_id' => $message->mailbox_id,
+                'mailbox_name' => $message->mailbox?->name,
+                'failure_code' => $message->failure_code,
+                'failure_message' => $message->failure_message === null
+                    ? null
+                    : $this->redactor->redactString($message->failure_message),
+                'failed_at' => $message->failed_at?->toIso8601String(),
+                'ticket_id' => $message->ticket_id,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function antivirusSnapshot(): array
+    {
+        $configured = (bool) config('simpledesk-mail-antivirus.enabled', false);
+        $audit = MailAdminAuditLog::query()
+            ->where('event', MailAdminAuditEvent::AntivirusConnectionTested->value)
+            ->latest('created_at')
+            ->first();
+        $successful = data_get($audit?->context, 'result.successful');
+        $status = ! $configured
+            ? 'not_configured'
+            : ($successful === true ? 'healthy' : ($successful === false ? 'failed' : 'unknown'));
+        $message = data_get($audit?->context, 'result.message');
+
+        return [
+            'configured' => $configured,
+            'status' => $status,
+            'last_checked_at' => $audit?->created_at?->toIso8601String(),
+            'message' => is_string($message)
+                ? $this->redactor->redactString($message)
+                : ($configured ? 'Antivirus has not been tested yet.' : 'Attachment antivirus scanning is optional and not configured.'),
+        ];
+    }
+
+    private function systemSnapshot(): array
+    {
+        return [
+            'mail_ticketing_enabled' => (bool) config(
+                'simpledesk-mail-ticketing.enabled',
+                true
+            ),
+
+            'outgoing_replies_enabled' => (bool) config(
+                'simpledesk-mail-ticketing.outgoing_replies.enabled',
+                true
+            ),
+
+            'incoming_queue' => (string) config(
+                'simpledesk-mail-ticketing.queue',
+                'mail-incoming'
+            ),
+
+            'incoming_queue_connection' => (string) (
+                config(
+                    'simpledesk-mail-ticketing.queue_connection'
+                )
+                    ?: config('queue.default')
+            ),
+
+            'outgoing_queue' => (string) config(
+                'simpledesk-mail-ticketing.outgoing_replies.queue',
+                'mail-outgoing'
+            ),
+
+            'outgoing_queue_connection' => (string) (
+                config(
+                    'simpledesk-mail-ticketing.outgoing_replies.queue_connection'
+                )
+                    ?: config('queue.default')
+            ),
+
+            'attachment_scanning_enabled' => (bool) config(
+                'simpledesk-mail-antivirus.enabled',
+                false
+            ),
+
+            'reply_parsing_enabled' => (bool) config(
+                'simpledesk-mail-reply-parsing.enabled',
+                true
+            ),
+        ];
+    }
+
+    private function overallStatus(
+        array $channels,
+        array $messages,
+        array $antivirus,
+        array $system,
+    ): array {
+        $availableChannels = collect(
+            $channels
+        )->where(
+            'is_available',
+            true
+        );
+
+        $operationalIncoming = $availableChannels
+            ->where(
+                'direction',
+                MailboxChannelDirection::Incoming->value
+            )
+            ->reject(
+                fn (array $channel): bool => $channel['health_status']
+                    === MailboxHealthStatus::Failed->value
+            )
+            ->count();
+
+        $operationalOutgoing = $availableChannels
+            ->where(
+                'direction',
+                MailboxChannelDirection::Outgoing->value
+            )
+            ->reject(
+                fn (array $channel): bool => $channel['health_status']
+                    === MailboxHealthStatus::Failed->value
+            )
+            ->count();
+
+        if (
+            $messages['stuck_preparing']
+            + $messages['stuck_queued']
+            + $messages['stuck_processing']
+            + $messages['stuck_sending']
+            > 0
+        ) {
+            return [
+                'status' => 'critical',
+
+                'message' => 'Email processing contains stuck messages.',
+            ];
+        }
+
+        if (
+            $system['mail_ticketing_enabled']
+            && $operationalIncoming === 0
+        ) {
+            return [
+                'status' => 'critical',
+
+                'message' => 'Mail ticketing is enabled, but no operational incoming channel is available.',
+            ];
+        }
+
+        if (
+            $system['outgoing_replies_enabled']
+            && $operationalOutgoing === 0
+        ) {
+            return [
+                'status' => 'critical',
+
+                'message' => 'Outgoing replies are enabled, but no operational outgoing channel is available.',
+            ];
+        }
+
+        if (
+            $antivirus['configured']
+            && $antivirus['status'] === 'failed'
+        ) {
+            return [
+                'status' => 'critical',
+
+                'message' => 'Required attachment antivirus is unavailable.',
+            ];
+        }
+
+        $hasChannelWarning =
+            $availableChannels->contains(
+                fn (array $channel): bool => in_array(
+                    $channel['health_status'],
+                    [
+                        MailboxHealthStatus::Warning->value,
+                        MailboxHealthStatus::Failed->value,
+                        'unknown',
+                    ],
+                    true
+                )
+            );
+
+        $hasWarning =
+            $hasChannelWarning
+            || $messages['failed_last_24_hours'] > 0
+            || ! $antivirus['configured'];
+
+        if ($hasWarning) {
+            return [
+                'status' => 'warning',
+
+                'message' => 'Email is operational, but one or more items need attention.',
+            ];
+        }
+
+        return [
+            'status' => 'healthy',
+
+            'message' => 'Mail channels and processing are operating normally.',
         ];
     }
 
@@ -169,48 +668,48 @@ class MailDiagnosticsService
                 ),
 
                 'stale_pending' => (clone $attachmentBase)
-                ->where(
-                    'scan_status',
-                    EmailAttachmentScanStatus::Pending
-                        ->value
-                )
-                ->where(
-                    'updated_at',
-                    '<=',
-                    $this
-                        ->thresholds
-                        ->attachmentPendingCutoff()
-                )
-                ->count(),
+                    ->where(
+                        'scan_status',
+                        EmailAttachmentScanStatus::Pending
+                            ->value
+                    )
+                    ->where(
+                        'updated_at',
+                        '<=',
+                        $this
+                            ->thresholds
+                            ->attachmentPendingCutoff()
+                    )
+                    ->count(),
 
                 'rejected' => EmailAttachmentRejection::query()
-                ->whereHas(
-                    'emailMessage',
-                    fn (
-                        Builder $query
-                    ) => $query->where(
-                        'mailbox_id',
-                        $mailbox->id
+                    ->whereHas(
+                        'emailMessage',
+                        fn (
+                            Builder $query
+                        ) => $query->where(
+                            'mailbox_id',
+                            $mailbox->id
+                        )
                     )
-                )
-                ->count(),
+                    ->count(),
             ],
 
             'quarantine' => [
                 'total' => (clone $quarantineBase)->count(),
 
                 'open' => (clone $quarantineBase)
-                ->whereNull('resolved_at')
-                ->count(),
+                    ->whereNull('resolved_at')
+                    ->count(),
 
                 'released_for_retry' => (clone $quarantineBase)
-                ->whereNotNull('released_at')
-                ->whereNull('resolved_at')
-                ->count(),
+                    ->whereNotNull('released_at')
+                    ->whereNull('resolved_at')
+                    ->count(),
 
                 'resolved' => (clone $quarantineBase)
-                ->whereNotNull('resolved_at')
-                ->count(),
+                    ->whereNotNull('resolved_at')
+                    ->count(),
             ],
 
             'recent_errors' => $this->recentErrors(

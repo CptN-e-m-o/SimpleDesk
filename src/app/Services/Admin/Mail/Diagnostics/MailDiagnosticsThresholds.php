@@ -142,9 +142,12 @@ class MailDiagnosticsThresholds
     public function processingCutoff(): Carbon
     {
         return now()->subSeconds(
-            $this->seconds(
-                'processing_seconds',
-                900
+            max(
+                60,
+                (int) config(
+                    'simpledesk-mail-ticketing.processing_lock_seconds',
+                    600
+                )
             )
         );
     }
@@ -152,9 +155,12 @@ class MailDiagnosticsThresholds
     public function sendingCutoff(): Carbon
     {
         return now()->subSeconds(
-            $this->seconds(
-                'sending_seconds',
-                900
+            max(
+                60,
+                (int) config(
+                    'simpledesk-mail-ticketing.outgoing_replies.job.lock_seconds',
+                    300
+                )
             )
         );
     }

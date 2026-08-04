@@ -580,8 +580,8 @@ class InboundEmailReplyParser
         }
 
         return isset(
-                $matchedHeaders['from']
-            ) && count($matchedHeaders) >= 3;
+            $matchedHeaders['from']
+        ) && count($matchedHeaders) >= 3;
     }
 
     /**
@@ -1120,11 +1120,11 @@ class InboundEmailReplyParser
         }
 
         return rtrim(
-                mb_substr(
-                    $body,
-                    0,
-                    $limit
-                )
-            )."\n\n[Содержимое сокращено системой]";
+            mb_substr(
+                $body,
+                0,
+                $limit
+            )
+        )."\n\n[Содержимое сокращено системой]";
     }
 }

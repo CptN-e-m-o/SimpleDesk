@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Admin\Mail\ReplyParsing;
 
+use App\Data\Admin\Mail\ReplyParsingResultData;
 use App\Enums\Admin\Mail\ReplyParsingContentType;
 use App\Enums\Admin\Mail\ReplyParsingPatternType;
 use App\Models\Admin\Mail\ReplyParsingRule;
@@ -22,7 +23,7 @@ class ReplyParsingServiceTest extends TestCase
 
         $this->parser = new ReplyParsingService(
             $this->createStub(ReplyParsingRuleQuery::class),
-            new ReplyParsingPatternCompiler(),
+            new ReplyParsingPatternCompiler,
         );
     }
 
@@ -139,7 +140,7 @@ class ReplyParsingServiceTest extends TestCase
         string $content,
         array $rules,
         ReplyParsingContentType $contentType = ReplyParsingContentType::PlainText,
-    ): \App\Data\Admin\Mail\ReplyParsingResultData {
+    ): ReplyParsingResultData {
         return $this->parser->parse($content, $contentType, $rules);
     }
 

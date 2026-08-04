@@ -89,8 +89,7 @@ class SaveOutgoingMailboxSetupRequest extends FormRequest
 
             'username' => [
                 Rule::requiredIf(
-                    fn (): bool =>
-                        $this->input('auth_type')
+                    fn (): bool => $this->input('auth_type')
                         === MailAuthenticationType::Password->value
                 ),
                 'nullable',

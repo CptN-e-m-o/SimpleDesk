@@ -8,6 +8,7 @@ use App\Services\Admin\Mail\ReplyParsing\ReplyParsingPatternCompiler;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 abstract class ReplyParsingRuleRequest extends FormRequest
 {
@@ -44,7 +45,7 @@ abstract class ReplyParsingRuleRequest extends FormRequest
                             $value,
                             $patternType,
                         );
-                    } catch (\Illuminate\Validation\ValidationException $exception) {
+                    } catch (ValidationException $exception) {
                         $fail($exception->errors()['pattern'][0] ?? 'The regular expression is invalid.');
                     }
                 },

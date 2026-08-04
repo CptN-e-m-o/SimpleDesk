@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\Mail\AttachmentAntivirusConnectionTestController;
+use App\Http\Controllers\Admin\Mail\Diagnostics\MailDiagnosticsController as MailDiagnosticsPageController;
 use App\Http\Controllers\Admin\Mail\EmailAttachmentDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\EmailAttachmentDownloadController;
 use App\Http\Controllers\Admin\Mail\EmailAttachmentRejectionDiagnosticsController;
@@ -10,7 +11,6 @@ use App\Http\Controllers\Admin\Mail\EmailAttachmentRescanController;
 use App\Http\Controllers\Admin\Mail\EmailMessageDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineIgnoreController;
-use App\Http\Controllers\Admin\Mail\MailboxSettingsController;
 use App\Http\Controllers\Admin\Mail\EmailQuarantineRetryController;
 use App\Http\Controllers\Admin\Mail\MailAdminAuditLogController;
 use App\Http\Controllers\Admin\Mail\MailboxChannelConnectionTestController;
@@ -18,7 +18,7 @@ use App\Http\Controllers\Admin\Mail\MailboxChannelController;
 use App\Http\Controllers\Admin\Mail\MailboxController;
 use App\Http\Controllers\Admin\Mail\MailboxDiagnosticsController;
 use App\Http\Controllers\Admin\Mail\MailboxManualSyncController;
-use App\Http\Controllers\Admin\Mail\MailDiagnosticsController;
+use App\Http\Controllers\Admin\Mail\MailboxSettingsController;
 use App\Http\Controllers\Admin\Mail\MailProviderConnectionController;
 use App\Http\Controllers\Admin\Mail\MailProviderConnectionTestController;
 use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
@@ -372,9 +372,24 @@ Route::middleware('auth')->group(function () {
                 ->middleware('permission:admin.mail.view_audit')
                 ->name('audit-logs.index');
 
-            Route::get('/diagnostics', MailDiagnosticsController::class)
-                ->middleware('permission:admin.mail.view_diagnostics')
-                ->name('diagnostics.overview');
+            Route::get('/diagnostics', [MailDiagnosticsPageController::class, 'index'])
+                ->middleware('permission:admin.mail.view_diagnostics|admin.mail.test_connections|admin.mail.view')
+                ->name('diagnostics.index');
+
+            Route::post('/diagnostics/channels/{channel}/test', MailboxChannelConnectionTestController::class)
+                ->middleware([
+                    'permission:admin.mail.test_connections',
+                    'mail.audit:channel_connection_tested',
+                ])
+                ->whereNumber('channel')
+                ->name('diagnostics.channels.test');
+
+            Route::post('/diagnostics/antivirus/test', AttachmentAntivirusConnectionTestController::class)
+                ->middleware([
+                    'permission:admin.mail.test_connections',
+                    'mail.audit:antivirus_connection_tested',
+                ])
+                ->name('diagnostics.antivirus.test');
 
             Route::get('/mailboxes/{mailbox}/diagnostics', MailboxDiagnosticsController::class)
                 ->middleware('permission:admin.mail.view_diagnostics')
