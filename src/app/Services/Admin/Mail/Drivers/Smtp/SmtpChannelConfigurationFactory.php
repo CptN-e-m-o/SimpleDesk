@@ -9,9 +9,12 @@ use App\Enums\Admin\Mail\MailboxDriver;
 use App\Enums\Admin\Mail\SmtpEncryption;
 use App\Exceptions\Admin\Mail\MailDriverException;
 use App\Models\Admin\Mail\MailboxChannel;
+use App\Services\Admin\Mail\OAuth\MailOAuthTokenService;
 
 class SmtpChannelConfigurationFactory
 {
+    public function __construct(private readonly MailOAuthTokenService $tokens) {}
+
     public function make(
         MailboxChannel $channel
     ): SmtpChannelConfigurationData {
@@ -161,10 +164,7 @@ class SmtpChannelConfigurationFactory
                         ?->account_identifier,
                     'SMTP username is required for OAuth2 authentication.'
                 ),
-                $this->requiredCredential(
-                    $secrets['access_token'] ?? null,
-                    'SMTP OAuth2 access token is required.'
-                ),
+                $this->oauthToken($channel),
             ],
 
             default => throw $this->configurationException(
@@ -172,6 +172,24 @@ class SmtpChannelConfigurationFactory
                 .'is not supported by the SMTP driver.'
             ),
         };
+    }
+
+    private function oauthToken(MailboxChannel $channel): string
+    {
+        if ($channel->providerConnection === null) {
+            throw $this->configurationException('SMTP OAuth2 requires a provider connection.');
+        }
+
+        return $this->tokens->accessToken($channel->providerConnection);
+    }
+
+    public function refreshOAuthToken(MailboxChannel $channel): void
+    {
+        $channel->loadMissing('providerConnection');
+
+        if ($channel->auth_type === MailAuthenticationType::OAuth2 && $channel->providerConnection !== null) {
+            $this->tokens->accessToken($channel->providerConnection, true);
+        }
     }
 
     private function requiredString(

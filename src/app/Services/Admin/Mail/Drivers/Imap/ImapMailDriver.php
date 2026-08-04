@@ -10,6 +10,7 @@ use App\Data\Admin\Mail\MailConnectionTestResultData;
 use App\Data\Admin\Mail\NormalizedInboundMessageData;
 use App\Enums\Admin\Mail\ImapInitialSyncPolicy;
 use App\Enums\Admin\Mail\IncomingAcknowledgeAction;
+use App\Enums\Admin\Mail\MailAuthenticationType;
 use App\Enums\Admin\Mail\MailboxDriver;
 use App\Exceptions\Admin\Mail\MailDriverException;
 use App\Models\Admin\Mail\MailboxChannel;
@@ -33,7 +34,8 @@ class ImapMailDriver implements IncomingMailDriver
     }
 
     public function test(
-        MailboxChannel $channel
+        MailboxChannel $channel,
+        bool $oauthRetried = false,
     ): MailConnectionTestResultData {
         $configuration = $this
             ->configurationFactory
@@ -96,10 +98,35 @@ class ImapMailDriver implements IncomingMailDriver
                 ],
             );
         } catch (Throwable $exception) {
-            throw $this->exceptions->map(
+            $mapped = $this->exceptions->map(
                 exception: $exception,
                 operation: 'connection test',
             );
+
+            if (
+                ! $oauthRetried
+                && $channel->auth_type
+                === MailAuthenticationType::OAuth2
+                && $mapped->driverErrorCode()
+                === 'imap_authentication_failed'
+            ) {
+                $this->disconnect(
+                    $client
+                );
+
+                $this
+                    ->configurationFactory
+                    ->refreshOAuthToken(
+                        $channel
+                    );
+
+                return $this->test(
+                    $channel,
+                    true
+                );
+            }
+
+            throw $mapped;
         } finally {
             $this->disconnect($client);
         }
@@ -109,6 +136,7 @@ class ImapMailDriver implements IncomingMailDriver
         MailboxChannel $channel,
         ?IncomingCursorData $cursor = null,
         int $limit = 100,
+        bool $oauthRetried = false,
     ): IncomingFetchResultData {
         $configuration = $this
             ->configurationFactory
@@ -374,10 +402,37 @@ class ImapMailDriver implements IncomingMailDriver
                 failures: $normalizationFailures,
             );
         } catch (Throwable $exception) {
-            throw $this->exceptions->map(
+            $mapped = $this->exceptions->map(
                 exception: $exception,
                 operation: 'fetch',
             );
+
+            if (
+                ! $oauthRetried
+                && $channel->auth_type
+                === MailAuthenticationType::OAuth2
+                && $mapped->driverErrorCode()
+                === 'imap_authentication_failed'
+            ) {
+                $this->disconnect(
+                    $client
+                );
+
+                $this
+                    ->configurationFactory
+                    ->refreshOAuthToken(
+                        $channel
+                    );
+
+                return $this->fetch(
+                    $channel,
+                    $cursor,
+                    $limit,
+                    true
+                );
+            }
+
+            throw $mapped;
         } finally {
             $this->disconnect($client);
         }
@@ -399,6 +454,7 @@ class ImapMailDriver implements IncomingMailDriver
         MailboxChannel $channel,
         array $messages,
         IncomingAcknowledgeAction $action,
+        bool $oauthRetried = false,
     ): int {
         if ($messages === []) {
             return 0;
@@ -546,10 +602,37 @@ class ImapMailDriver implements IncomingMailDriver
 
             return $acknowledged;
         } catch (Throwable $exception) {
-            throw $this->exceptions->map(
+            $mapped = $this->exceptions->map(
                 exception: $exception,
                 operation: 'acknowledgement',
             );
+
+            if (
+                ! $oauthRetried
+                && $channel->auth_type
+                === MailAuthenticationType::OAuth2
+                && $mapped->driverErrorCode()
+                === 'imap_authentication_failed'
+            ) {
+                $this->disconnect(
+                    $client
+                );
+
+                $this
+                    ->configurationFactory
+                    ->refreshOAuthToken(
+                        $channel
+                    );
+
+                return $this->acknowledgeMany(
+                    $channel,
+                    $messages,
+                    $action,
+                    true
+                );
+            }
+
+            throw $mapped;
         } finally {
             $this->disconnect($client);
         }

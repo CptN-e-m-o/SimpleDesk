@@ -102,8 +102,7 @@ class MailDiagnosticsService
                 'channels_failed' => $failedChannels,
                 'messages_last_24_hours' => $messageStatistics['incoming_last_24_hours'] + $messageStatistics['outgoing_last_24_hours'],
                 'failed_messages_last_24_hours' => $messageStatistics['failed_last_24_hours'],
-                'stuck_messages' =>
-                    $messageStatistics['stuck_preparing']
+                'stuck_messages' => $messageStatistics['stuck_preparing']
                     + $messageStatistics['stuck_queued']
                     + $messageStatistics['stuck_processing']
                     + $messageStatistics['stuck_sending'],

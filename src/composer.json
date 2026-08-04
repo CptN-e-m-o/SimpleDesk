@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.3",
         "ext-pdo": "*",
+        "firebase/php-jwt": "^7.1",
         "geoip2/geoip2": "^3.3",
         "inertiajs/inertia-laravel": "^3.0",
         "jenssegers/agent": "^2.6",

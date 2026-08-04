@@ -167,6 +167,11 @@ export default function Index() {
             title: 'OAuth Integrations',
             description:
                 'Connect supported email providers securely using OAuth authentication.',
+            href: route('admin.email.oauth-integrations.index'),
+            permissions: [
+                'admin.mail.view_oauth_integrations',
+                'admin.mail.manage_oauth_integrations',
+            ],
             icon: KeyRound,
         },
     ]

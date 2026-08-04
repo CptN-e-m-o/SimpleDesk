@@ -15,6 +15,9 @@ use App\Services\Admin\Mail\MailChannelHealthRecorder;
 use App\Services\Admin\Mail\MailChannelSelector;
 use App\Services\Admin\Mail\MailDriverRegistry;
 use App\Services\Admin\Mail\MailMessageIdempotencyKeyFactory;
+use App\Services\Admin\Mail\OAuth\MailOAuthProviderRegistry;
+use App\Services\Admin\Mail\OAuth\Providers\GoogleMailOAuthProvider;
+use App\Services\Admin\Mail\OAuth\Providers\MicrosoftMailOAuthProvider;
 use App\Services\Admin\Mail\OutgoingEmailMessageFactory;
 use App\Services\Admin\Mail\OutgoingMailAttachmentValidator;
 use App\Services\Admin\Mail\OutgoingMailFailoverService;
@@ -30,6 +33,14 @@ class MailServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(
+            MailOAuthProviderRegistry::class,
+            fn (Application $app): MailOAuthProviderRegistry => new MailOAuthProviderRegistry([
+                $app->make(GoogleMailOAuthProvider::class),
+                $app->make(MicrosoftMailOAuthProvider::class),
+            ])
+        );
+
         $this->mergeConfigFrom(
             config_path('simpledesk-mail.php'),
             'simpledesk-mail',

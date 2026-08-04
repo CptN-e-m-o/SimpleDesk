@@ -89,6 +89,21 @@ class PermissionAdminMailSeeder extends Seeder
                 'label' => 'Manage reply parsing rules',
                 'sort_order' => 130,
             ],
+            [
+                'key' => 'admin.mail.view_oauth_integrations',
+                'label' => 'View OAuth integrations',
+                'sort_order' => 140,
+            ],
+            [
+                'key' => 'admin.mail.manage_oauth_integrations',
+                'label' => 'Manage OAuth integrations',
+                'sort_order' => 150,
+            ],
+            [
+                'key' => 'admin.mail.connect_oauth_accounts',
+                'label' => 'Connect OAuth mail accounts',
+                'sort_order' => 160,
+            ],
         ];
 
         $permissionIds = [];

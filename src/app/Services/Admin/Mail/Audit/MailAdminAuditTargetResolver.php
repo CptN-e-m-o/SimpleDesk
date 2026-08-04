@@ -71,7 +71,18 @@ class MailAdminAuditTargetResolver
             MailAdminAuditEvent::ProviderConnectionCreated,
             MailAdminAuditEvent::ProviderConnectionUpdated,
             MailAdminAuditEvent::ProviderConnectionDeleted,
-            MailAdminAuditEvent::ProviderConnectionTested => MailAdminAuditSubjectType::ProviderConnection,
+            MailAdminAuditEvent::ProviderConnectionTested,
+            MailAdminAuditEvent::OAuthIntegrationCreated,
+            MailAdminAuditEvent::OAuthIntegrationUpdated,
+            MailAdminAuditEvent::OAuthAuthorizationStarted,
+            MailAdminAuditEvent::OAuthAccountConnected,
+            MailAdminAuditEvent::OAuthTokenRefreshed,
+            MailAdminAuditEvent::OAuthConnectionTested,
+            MailAdminAuditEvent::OAuthAccountDisconnected,
+            MailAdminAuditEvent::OAuthIntegrationDeleted,
+            MailAdminAuditEvent::OAuthIntegrationRestored,
+            MailAdminAuditEvent::OAuthIntegrationForceDeleted => MailAdminAuditSubjectType::ProviderConnection,
+            MailAdminAuditEvent::OAuthAuthorizationFailed => MailAdminAuditSubjectType::ProviderConnection,
 
             MailAdminAuditEvent::OutgoingMessageRetryRequested => MailAdminAuditSubjectType::EmailMessage,
 
@@ -100,6 +111,17 @@ class MailAdminAuditTargetResolver
             MailAdminAuditEvent::ProviderConnectionUpdated,
             MailAdminAuditEvent::ProviderConnectionDeleted,
             MailAdminAuditEvent::ProviderConnectionTested => 'providerConnection',
+
+            MailAdminAuditEvent::OAuthIntegrationUpdated,
+            MailAdminAuditEvent::OAuthAuthorizationStarted,
+            MailAdminAuditEvent::OAuthAccountConnected,
+            MailAdminAuditEvent::OAuthTokenRefreshed,
+            MailAdminAuditEvent::OAuthConnectionTested,
+            MailAdminAuditEvent::OAuthAccountDisconnected,
+            MailAdminAuditEvent::OAuthIntegrationDeleted,
+            MailAdminAuditEvent::OAuthIntegrationRestored,
+            MailAdminAuditEvent::OAuthIntegrationForceDeleted => 'connection',
+            MailAdminAuditEvent::OAuthAuthorizationFailed => 'connection',
 
             MailAdminAuditEvent::ReplyParsingRuleUpdated,
             MailAdminAuditEvent::ReplyParsingRuleDeleted,
@@ -132,8 +154,15 @@ class MailAdminAuditTargetResolver
                 MailAdminAuditEvent::ReplyParsingRuleDeleted,
                 MailAdminAuditEvent::ReplyParsingRuleRestored,
                 MailAdminAuditEvent::ReplyParsingRuleForceDeleted,
+                MailAdminAuditEvent::OAuthIntegrationRestored,
+                MailAdminAuditEvent::OAuthIntegrationForceDeleted,
             ], true)) {
-            return (new ReplyParsingRule)->forceFill([
+            $model = in_array($event, [
+                MailAdminAuditEvent::OAuthIntegrationRestored,
+                MailAdminAuditEvent::OAuthIntegrationForceDeleted,
+            ], true) ? new MailProviderConnection : new ReplyParsingRule;
+
+            return $model->forceFill([
                 'id' => (int) $target,
             ]);
         }

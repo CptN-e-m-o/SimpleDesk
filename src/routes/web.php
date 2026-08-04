@@ -21,6 +21,12 @@ use App\Http\Controllers\Admin\Mail\MailboxManualSyncController;
 use App\Http\Controllers\Admin\Mail\MailboxSettingsController;
 use App\Http\Controllers\Admin\Mail\MailProviderConnectionController;
 use App\Http\Controllers\Admin\Mail\MailProviderConnectionTestController;
+use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthAuthorizationController;
+use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthCallbackController;
+use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthConnectionTestController;
+use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthDisconnectController;
+use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthIntegrationController;
+use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthRefreshController;
 use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
@@ -565,6 +571,36 @@ Route::middleware('auth')->group(function () {
                     'mail.audit:provider_connection_deleted',
                 ])
                 ->name('provider-connections.destroy');
+
+            Route::prefix('/oauth-integrations')->name('oauth-integrations.')->group(function (): void {
+                Route::get('/callback', MailOAuthCallbackController::class)
+                    ->middleware('permission:admin.mail.connect_oauth_accounts|admin.mail.manage_oauth_integrations')->name('callback');
+                Route::get('/', [MailOAuthIntegrationController::class, 'index'])
+                    ->middleware('permission:admin.mail.view_oauth_integrations|admin.mail.manage_oauth_integrations')
+                    ->name('index');
+                Route::get('/create', [MailOAuthIntegrationController::class, 'create'])
+                    ->middleware('permission:admin.mail.manage_oauth_integrations')->name('create');
+                Route::post('/', [MailOAuthIntegrationController::class, 'store'])
+                    ->middleware(['permission:admin.mail.manage_oauth_integrations', 'mail.audit:oauth_integration_created'])->name('store');
+                Route::get('/{connection}/edit', [MailOAuthIntegrationController::class, 'edit'])
+                    ->middleware('permission:admin.mail.view_oauth_integrations|admin.mail.manage_oauth_integrations')->whereNumber('connection')->name('edit');
+                Route::put('/{connection}', [MailOAuthIntegrationController::class, 'update'])
+                    ->middleware(['permission:admin.mail.manage_oauth_integrations', 'mail.audit:oauth_integration_updated'])->whereNumber('connection')->name('update');
+                Route::delete('/{connection}', [MailOAuthIntegrationController::class, 'destroy'])
+                    ->middleware(['permission:admin.mail.manage_oauth_integrations', 'mail.audit:oauth_integration_deleted'])->whereNumber('connection')->name('destroy');
+                Route::post('/{connection}/restore', [MailOAuthIntegrationController::class, 'restore'])
+                    ->middleware(['permission:admin.mail.manage_oauth_integrations', 'mail.audit:oauth_integration_restored'])->whereNumber('connection')->name('restore');
+                Route::delete('/{connection}/force', [MailOAuthIntegrationController::class, 'forceDestroy'])
+                    ->middleware(['permission:admin.mail.manage_oauth_integrations', 'mail.audit:oauth_integration_force_deleted'])->whereNumber('connection')->name('force-destroy');
+                Route::get('/{connection}/authorize', MailOAuthAuthorizationController::class)
+                    ->middleware(['permission:admin.mail.connect_oauth_accounts|admin.mail.manage_oauth_integrations', 'mail.audit:oauth_authorization_started'])->whereNumber('connection')->name('authorize');
+                Route::post('/{connection}/refresh', MailOAuthRefreshController::class)
+                    ->middleware(['permission:admin.mail.connect_oauth_accounts|admin.mail.manage_oauth_integrations', 'mail.audit:oauth_token_refreshed'])->whereNumber('connection')->name('refresh');
+                Route::post('/{connection}/test', MailOAuthConnectionTestController::class)
+                    ->middleware(['permission:admin.mail.test_connections', 'mail.audit:oauth_connection_tested'])->whereNumber('connection')->name('test');
+                Route::post('/{connection}/disconnect', MailOAuthDisconnectController::class)
+                    ->middleware(['permission:admin.mail.connect_oauth_accounts|admin.mail.manage_oauth_integrations', 'mail.audit:oauth_account_disconnected'])->whereNumber('connection')->name('disconnect');
+            });
         });
     });
 

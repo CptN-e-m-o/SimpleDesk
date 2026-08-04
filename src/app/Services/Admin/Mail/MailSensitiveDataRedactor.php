@@ -95,6 +95,10 @@ class MailSensitiveDataRedactor
             )
         );
 
+        if (in_array($normalized, ['code', 'authorization_code', 'code_verifier', 'pkce_verifier', 'state'], true)) {
+            return true;
+        }
+
         foreach (
             [
                 'password',
