@@ -28,6 +28,18 @@ enum MailAdminAuditEvent: string
 
     case AntivirusConnectionTested = 'antivirus_connection_tested';
 
+    case OAuthIntegrationCreated = 'oauth_integration_created';
+    case OAuthIntegrationUpdated = 'oauth_integration_updated';
+    case OAuthAuthorizationStarted = 'oauth_authorization_started';
+    case OAuthAccountConnected = 'oauth_account_connected';
+    case OAuthTokenRefreshed = 'oauth_token_refreshed';
+    case OAuthConnectionTested = 'oauth_connection_tested';
+    case OAuthAccountDisconnected = 'oauth_account_disconnected';
+    case OAuthIntegrationDeleted = 'oauth_integration_deleted';
+    case OAuthIntegrationRestored = 'oauth_integration_restored';
+    case OAuthIntegrationForceDeleted = 'oauth_integration_force_deleted';
+    case OAuthAuthorizationFailed = 'oauth_authorization_failed';
+
     case MailboxSyncRequested = 'mailbox_sync_requested';
     case OutgoingMessageRetryRequested = 'outgoing_message_retry_requested';
     case AttachmentRescanRequested = 'attachment_rescan_requested';

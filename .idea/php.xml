@@ -143,6 +143,7 @@
       <path value="$PROJECT_DIR$/src/vendor/geoip2/geoip2" />
       <path value="$PROJECT_DIR$/src/vendor/maxmind-db/reader" />
       <path value="$PROJECT_DIR$/src/vendor/webklex/php-imap" />
+      <path value="$PROJECT_DIR$/src/vendor/firebase/php-jwt" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />

@@ -196,10 +196,20 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                             ),
                     },
                     {
-                        label: 'Email OAuth Integration',
-                        href: '#',
+                        label: 'OAuth Integrations',
+                        href: route(
+                            'admin.email.oauth-integrations.index',
+                        ),
                         icon: CheckCircle2,
-                        isActive: () => false,
+                        permissions: [
+                            'admin.mail.view_oauth_integrations',
+                            'admin.mail.manage_oauth_integrations',
+                        ],
+                        isActive: (currentUrl: string) =>
+                            currentUrl === '/admin/email/oauth-integrations' ||
+                            currentUrl.startsWith(
+                                '/admin/email/oauth-integrations/',
+                            ),
                     },
                 ],
             },
