@@ -16,8 +16,7 @@ class WorkScheduleExceptionController extends Controller
 {
     public function __construct(
         private readonly WorkScheduleExceptionService $service
-    ) {
-    }
+    ) {}
 
     public function index(
         WorkScheduleAssignment $assignment
