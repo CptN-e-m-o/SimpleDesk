@@ -30,8 +30,7 @@ class MailboxSettingsController extends Controller
     public function __construct(
         private readonly MailboxAdminService $mailboxes,
         private readonly MailboxChannelAdminService $channels,
-    ) {
-    }
+    ) {}
 
     public function index(): Response
     {
@@ -56,8 +55,7 @@ class MailboxSettingsController extends Controller
 
         $items = $mailboxes
             ->map(
-                fn (Mailbox $mailbox): array =>
-                $this->mailboxData(
+                fn (Mailbox $mailbox): array => $this->mailboxData(
                     $mailbox
                 )
             )
@@ -65,8 +63,7 @@ class MailboxSettingsController extends Controller
 
         $configuredCount = $items
             ->filter(
-                fn (array $mailbox): bool =>
-                $this->isConfigured(
+                fn (array $mailbox): bool => $this->isConfigured(
                     $mailbox
                 )
             )
@@ -78,43 +75,35 @@ class MailboxSettingsController extends Controller
                 'mailboxes' => $items,
 
                 'summary' => [
-                    'total' =>
-                        $items->count(),
+                    'total' => $items->count(),
 
-                    'active' =>
-                        $items
-                            ->where(
-                                'is_active',
-                                true
+                    'active' => $items
+                        ->where(
+                            'is_active',
+                            true
+                        )
+                        ->count(),
+
+                    'configured' => $configuredCount,
+
+                    'healthy' => $items
+                        ->filter(
+                            fn (array $mailbox): bool => $this->isHealthy(
+                                $mailbox
                             )
-                            ->count(),
+                        )
+                        ->count(),
 
-                    'configured' =>
-                        $configuredCount,
-
-                    'healthy' =>
-                        $items
-                            ->filter(
-                                fn (array $mailbox): bool =>
-                                $this->isHealthy(
-                                    $mailbox
-                                )
+                    'needs_attention' => $items
+                        ->filter(
+                            fn (array $mailbox): bool => $this->needsAttention(
+                                $mailbox
                             )
-                            ->count(),
-
-                    'needs_attention' =>
-                        $items
-                            ->filter(
-                                fn (array $mailbox): bool =>
-                                $this->needsAttention(
-                                    $mailbox
-                                )
-                            )
-                            ->count(),
+                        )
+                        ->count(),
                 ],
 
-                'system_mail_configured' =>
-                    $configuredCount > 0,
+                'system_mail_configured' => $configuredCount > 0,
             ]
         );
     }
@@ -132,11 +121,9 @@ class MailboxSettingsController extends Controller
                 static fn (
                     Department $department
                 ): array => [
-                    'id' =>
-                        $department->id,
+                    'id' => $department->id,
 
-                    'name' =>
-                        $department->name,
+                    'name' => $department->name,
                 ]
             )
             ->values();
@@ -144,11 +131,9 @@ class MailboxSettingsController extends Controller
         return Inertia::render(
             'Admin/Email/Mailboxes/Create',
             [
-                'departments' =>
-                    $departments,
+                'departments' => $departments,
 
-                'system_mail_configured' =>
-                    $this->systemMailConfigured(),
+                'system_mail_configured' => $this->systemMailConfigured(),
             ]
         );
     }
@@ -196,7 +181,7 @@ class MailboxSettingsController extends Controller
         $enumValue = static function (
             mixed $value
         ): ?string {
-            if ($value instanceof \BackedEnum) {
+            if ($value instanceof BackedEnum) {
                 return (string) $value->value;
             }
 
@@ -215,27 +200,22 @@ class MailboxSettingsController extends Controller
                         $mailbox
                     ),
 
-                    'internal_notes' =>
-                        $mailbox->internal_notes,
+                    'internal_notes' => $mailbox->internal_notes,
 
-                    'email_messages_count' =>
-                        (int) $mailbox
-                            ->email_messages_count,
+                    'email_messages_count' => (int) $mailbox
+                        ->email_messages_count,
 
-                    'created_at' =>
-                        $mailbox
-                            ->created_at
-                            ?->toIso8601String(),
+                    'created_at' => $mailbox
+                        ->created_at
+                        ?->toIso8601String(),
 
-                    'updated_at' =>
-                        $mailbox
-                            ->updated_at
-                            ?->toIso8601String(),
+                    'updated_at' => $mailbox
+                        ->updated_at
+                        ?->toIso8601String(),
 
-                    'deleted_at' =>
-                        $mailbox
-                            ->deleted_at
-                            ?->toIso8601String(),
+                    'deleted_at' => $mailbox
+                        ->deleted_at
+                        ?->toIso8601String(),
 
                     'channels' => $mailbox
                         ->channels
@@ -243,60 +223,48 @@ class MailboxSettingsController extends Controller
                             static fn (
                                 $channel
                             ): array => [
-                                'id' =>
-                                    $channel->id,
+                                'id' => $channel->id,
 
-                                'name' =>
-                                    $channel->name,
+                                'name' => $channel->name,
 
-                                'direction' =>
-                                    $enumValue(
-                                        $channel->direction
-                                    ),
+                                'direction' => $enumValue(
+                                    $channel->direction
+                                ),
 
-                                'driver' =>
-                                    $enumValue(
-                                        $channel->driver
-                                    ),
+                                'driver' => $enumValue(
+                                    $channel->driver
+                                ),
 
-                                'auth_type' =>
-                                    $enumValue(
-                                        $channel->auth_type
-                                    ),
+                                'auth_type' => $enumValue(
+                                    $channel->auth_type
+                                ),
 
-                                'is_enabled' =>
-                                    (bool) $channel
-                                        ->is_enabled,
+                                'is_enabled' => (bool) $channel
+                                    ->is_enabled,
 
-                                'is_primary' =>
-                                    (bool) $channel
-                                        ->is_primary,
+                                'is_primary' => (bool) $channel
+                                    ->is_primary,
 
-                                'failover_order' =>
-                                    (int) $channel
-                                        ->failover_order,
+                                'failover_order' => (int) $channel
+                                    ->failover_order,
 
-                                'health_status' =>
-                                    $enumValue(
-                                        $channel->health_status
-                                    ),
+                                'health_status' => $enumValue(
+                                    $channel->health_status
+                                ),
 
-                                'configuration' =>
-                                    is_array(
-                                        $channel->configuration
-                                    )
+                                'configuration' => is_array(
+                                    $channel->configuration
+                                )
                                         ? $channel->configuration
                                         : [],
 
-                                'created_at' =>
-                                    $channel
-                                        ->created_at
-                                        ?->toIso8601String(),
+                                'created_at' => $channel
+                                    ->created_at
+                                    ?->toIso8601String(),
 
-                                'updated_at' =>
-                                    $channel
-                                        ->updated_at
-                                        ?->toIso8601String(),
+                                'updated_at' => $channel
+                                    ->updated_at
+                                    ?->toIso8601String(),
                             ]
                         )
                         ->values(),
@@ -324,11 +292,9 @@ class MailboxSettingsController extends Controller
                 static fn (
                     Department $department
                 ): array => [
-                    'id' =>
-                        $department->id,
+                    'id' => $department->id,
 
-                    'name' =>
-                        $department->name,
+                    'name' => $department->name,
                 ]
             )
             ->values();
@@ -337,52 +303,39 @@ class MailboxSettingsController extends Controller
             'Admin/Email/Mailboxes/Edit',
             [
                 'mailbox' => [
-                    'id' =>
-                        $mailbox->id,
+                    'id' => $mailbox->id,
 
-                    'name' =>
-                        $mailbox->name,
+                    'name' => $mailbox->name,
 
-                    'email_address' =>
-                        $mailbox->email_address,
+                    'email_address' => $mailbox->email_address,
 
-                    'display_name' =>
-                        $mailbox->display_name,
+                    'display_name' => $mailbox->display_name,
 
-                    'department_id' =>
-                        $mailbox->department_id,
+                    'department_id' => $mailbox->department_id,
 
-                    'is_active' =>
-                        (bool) $mailbox->is_active,
+                    'is_active' => (bool) $mailbox->is_active,
 
-                    'is_default_outgoing' =>
-                        (bool) $mailbox
-                            ->is_default_outgoing,
+                    'is_default_outgoing' => (bool) $mailbox
+                        ->is_default_outgoing,
 
-                    'internal_notes' =>
-                        $mailbox->internal_notes,
+                    'internal_notes' => $mailbox->internal_notes,
 
-                    'incoming_configured' =>
-                        $mailbox
-                            ->incoming_channels_count > 0,
+                    'incoming_configured' => $mailbox
+                        ->incoming_channels_count > 0,
 
-                    'outgoing_configured' =>
-                        $mailbox
-                            ->outgoing_channels_count > 0,
+                    'outgoing_configured' => $mailbox
+                        ->outgoing_channels_count > 0,
 
-                    'created_at' =>
-                        $mailbox
-                            ->created_at
-                            ?->toIso8601String(),
+                    'created_at' => $mailbox
+                        ->created_at
+                        ?->toIso8601String(),
 
-                    'updated_at' =>
-                        $mailbox
-                            ->updated_at
-                            ?->toIso8601String(),
+                    'updated_at' => $mailbox
+                        ->updated_at
+                        ?->toIso8601String(),
                 ],
 
-                'departments' =>
-                    $departments,
+                'departments' => $departments,
             ]
         );
     }
@@ -472,57 +425,47 @@ class MailboxSettingsController extends Controller
     ): Response {
         $channel = $this->setupChannel(
             mailbox: $mailbox,
-            direction:
-            MailboxChannelDirection::Incoming,
-            driver:
-            MailboxDriver::Imap,
+            direction: MailboxChannelDirection::Incoming,
+            driver: MailboxDriver::Imap,
         );
 
         return Inertia::render(
             'Admin/Email/Mailboxes/Setup/Incoming',
             [
-                'mailbox' =>
-                    $this->setupMailboxData(
-                        $mailbox
-                    ),
+                'mailbox' => $this->setupMailboxData(
+                    $mailbox
+                ),
 
-                'channel' =>
-                    $channel !== null
+                'channel' => $channel !== null
                         ? $this->incomingFormData(
-                        $channel
-                    )
+                            $channel
+                        )
                         : null,
 
-                'encryption_options' =>
-                    collect(
-                        ImapEncryption::cases()
+                'encryption_options' => collect(
+                    ImapEncryption::cases()
+                )
+                    ->map(
+                        fn (
+                            ImapEncryption $encryption
+                        ): array => [
+                            'value' => $encryption->value,
+
+                            'label' => $this->enumLabel(
+                                $encryption->value
+                            ),
+
+                            'default_port' => $encryption
+                                ->defaultPort(),
+                        ]
                     )
-                        ->map(
-                            fn (
-                                ImapEncryption $encryption
-                            ): array => [
-                                'value' =>
-                                    $encryption->value,
-
-                                'label' =>
-                                    $this->enumLabel(
-                                        $encryption->value
-                                    ),
-
-                                'default_port' =>
-                                    $encryption
-                                        ->defaultPort(),
-                            ]
-                        )
-                        ->values(),
+                    ->values(),
 
                 'defaults' => [
-                    'encryption' =>
-                        ImapEncryption::Tls->value,
+                    'encryption' => ImapEncryption::Tls->value,
 
-                    'port' =>
-                        ImapEncryption::Tls
-                            ->defaultPort(),
+                    'port' => ImapEncryption::Tls
+                        ->defaultPort(),
                 ],
             ]
         );
@@ -536,10 +479,8 @@ class MailboxSettingsController extends Controller
 
         $channel = $this->setupChannel(
             mailbox: $mailbox,
-            direction:
-            MailboxChannelDirection::Incoming,
-            driver:
-            MailboxDriver::Imap,
+            direction: MailboxChannelDirection::Incoming,
+            driver: MailboxDriver::Imap,
         );
 
         [
@@ -547,96 +488,71 @@ class MailboxSettingsController extends Controller
             $clearSecretKeys,
         ] = $this->passwordCredentials(
             channel: $channel,
-            authType:
-            $validated['auth_type'],
-            username:
-            $validated['username'] ?? null,
-            password:
-            $validated['password'] ?? null,
-            transportName:
-            'IMAP',
+            authType: $validated['auth_type'],
+            username: $validated['username'] ?? null,
+            password: $validated['password'] ?? null,
+            transportName: 'IMAP',
         );
 
         $data = [
-            'provider_connection_id' =>
-                null,
+            'provider_connection_id' => null,
 
-            'name' =>
-                $validated['name'],
+            'name' => $validated['name'],
 
-            'direction' =>
-                MailboxChannelDirection::Incoming
-                    ->value,
+            'direction' => MailboxChannelDirection::Incoming
+                ->value,
 
-            'driver' =>
-                MailboxDriver::Imap->value,
+            'driver' => MailboxDriver::Imap->value,
 
-            'auth_type' =>
-                $validated['auth_type'],
+            'auth_type' => $validated['auth_type'],
 
-            'is_enabled' =>
-                (bool) $validated['is_enabled'],
+            'is_enabled' => (bool) $validated['is_enabled'],
 
-            'is_primary' =>
-                (bool) $validated['is_primary'],
+            'is_primary' => (bool) $validated['is_primary'],
 
-            'failover_order' =>
-                (int) $validated['failover_order'],
+            'failover_order' => (int) $validated['failover_order'],
 
             'configuration' => [
-                'host' =>
-                    $validated['host'],
+                'host' => $validated['host'],
 
-                'port' =>
-                    (int) $validated['port'],
+                'port' => (int) $validated['port'],
 
-                'encryption' =>
-                    $validated['encryption'],
+                'encryption' => $validated['encryption'],
 
-                'validate_cert' =>
-                    (bool) $validated[
+                'validate_cert' => (bool) $validated[
                     'validate_cert'
                     ],
 
-                'folder' =>
-                    $validated['folder'],
+                'folder' => $validated['folder'],
 
-                'processed_folder' =>
-                    $validated[
+                'processed_folder' => $validated[
                     'processed_folder'
                     ] ?? null,
 
-                'create_processed_folder' =>
-                    (bool) $validated[
+                'create_processed_folder' => (bool) $validated[
                     'create_processed_folder'
                     ],
 
-                'expunge_on_delete' =>
-                    (bool) $validated[
+                'expunge_on_delete' => (bool) $validated[
                     'expunge_on_delete'
                     ],
 
-                'store_raw_message' =>
-                    (bool) $validated[
+                'store_raw_message' => (bool) $validated[
                     'store_raw_message'
                     ],
 
-                'max_raw_message_bytes' =>
-                    (int) $validated[
+                'max_raw_message_bytes' => (int) $validated[
                     'max_raw_message_mb'
                     ] * 1024 * 1024,
 
-                'max_attachment_bytes' =>
-                    (int) $validated[
+                'max_attachment_bytes' => (int) $validated[
                     'max_attachment_mb'
                     ] * 1024 * 1024,
             ],
 
-            'secret_configuration' =>
-                $secrets,
+            'secret_configuration' => $secrets,
 
-            'clear_secret_keys' =>
-                $clearSecretKeys,
+            'clear_secret_keys' => $clearSecretKeys,
         ];
 
         if ($channel === null) {
@@ -667,58 +583,48 @@ class MailboxSettingsController extends Controller
     ): Response {
         $channel = $this->setupChannel(
             mailbox: $mailbox,
-            direction:
-            MailboxChannelDirection::Outgoing,
-            driver:
-            MailboxDriver::Smtp,
+            direction: MailboxChannelDirection::Outgoing,
+            driver: MailboxDriver::Smtp,
         );
 
         return Inertia::render(
             'Admin/Email/Mailboxes/Setup/Outgoing',
             [
-                'mailbox' =>
-                    $this->setupMailboxData(
-                        $mailbox
-                    ),
+                'mailbox' => $this->setupMailboxData(
+                    $mailbox
+                ),
 
-                'channel' =>
-                    $channel !== null
+                'channel' => $channel !== null
                         ? $this->outgoingFormData(
-                        $channel
-                    )
+                            $channel
+                        )
                         : null,
 
-                'encryption_options' =>
-                    collect(
-                        SmtpEncryption::cases()
+                'encryption_options' => collect(
+                    SmtpEncryption::cases()
+                )
+                    ->map(
+                        fn (
+                            SmtpEncryption $encryption
+                        ): array => [
+                            'value' => $encryption->value,
+
+                            'label' => $this->enumLabel(
+                                $encryption->value
+                            ),
+
+                            'default_port' => $encryption
+                                ->defaultPort(),
+                        ]
                     )
-                        ->map(
-                            fn (
-                                SmtpEncryption $encryption
-                            ): array => [
-                                'value' =>
-                                    $encryption->value,
-
-                                'label' =>
-                                    $this->enumLabel(
-                                        $encryption->value
-                                    ),
-
-                                'default_port' =>
-                                    $encryption
-                                        ->defaultPort(),
-                            ]
-                        )
-                        ->values(),
+                    ->values(),
 
                 'defaults' => [
-                    'encryption' =>
-                        SmtpEncryption::StartTls
-                            ->value,
+                    'encryption' => SmtpEncryption::StartTls
+                        ->value,
 
-                    'port' =>
-                        SmtpEncryption::StartTls
-                            ->defaultPort(),
+                    'port' => SmtpEncryption::StartTls
+                        ->defaultPort(),
                 ],
             ]
         );
@@ -732,10 +638,8 @@ class MailboxSettingsController extends Controller
 
         $channel = $this->setupChannel(
             mailbox: $mailbox,
-            direction:
-            MailboxChannelDirection::Outgoing,
-            driver:
-            MailboxDriver::Smtp,
+            direction: MailboxChannelDirection::Outgoing,
+            driver: MailboxDriver::Smtp,
         );
 
         [
@@ -743,106 +647,79 @@ class MailboxSettingsController extends Controller
             $clearSecretKeys,
         ] = $this->passwordCredentials(
             channel: $channel,
-            authType:
-            $validated['auth_type'],
-            username:
-            $validated['username'] ?? null,
-            password:
-            $validated['password'] ?? null,
-            transportName:
-            'SMTP',
+            authType: $validated['auth_type'],
+            username: $validated['username'] ?? null,
+            password: $validated['password'] ?? null,
+            transportName: 'SMTP',
         );
 
         $configuration = [
-            'host' =>
-                $validated['host'],
+            'host' => $validated['host'],
 
-            'port' =>
-                (int) $validated['port'],
+            'port' => (int) $validated['port'],
 
-            'encryption' =>
-                $validated['encryption'],
+            'encryption' => $validated['encryption'],
 
-            'timeout' =>
-                (int) $validated['timeout'],
+            'timeout' => (int) $validated['timeout'],
 
-            'verify_peer' =>
-                (bool) $validated[
+            'verify_peer' => (bool) $validated[
                 'verify_peer'
                 ],
 
-            'local_domain' =>
-                $validated[
+            'local_domain' => $validated[
                 'local_domain'
                 ] ?? null,
 
-            'source_ip' =>
-                $validated[
+            'source_ip' => $validated[
                 'source_ip'
                 ] ?? null,
 
-            'max_per_second' =>
-                $validated[
+            'max_per_second' => $validated[
                 'max_per_second'
                 ] ?? null,
 
-            'restart_threshold' =>
-                $validated[
+            'restart_threshold' => $validated[
                 'restart_threshold'
                 ] ?? null,
 
-            'restart_threshold_sleep' =>
-                (int) $validated[
+            'restart_threshold_sleep' => (int) $validated[
                 'restart_threshold_sleep'
                 ],
 
-            'ping_threshold' =>
-                $validated[
+            'ping_threshold' => $validated[
                 'ping_threshold'
                 ] ?? null,
         ];
 
         $data = [
-            'provider_connection_id' =>
-                null,
+            'provider_connection_id' => null,
 
-            'name' =>
-                $validated['name'],
+            'name' => $validated['name'],
 
-            'direction' =>
-                MailboxChannelDirection::Outgoing
-                    ->value,
+            'direction' => MailboxChannelDirection::Outgoing
+                ->value,
 
-            'driver' =>
-                MailboxDriver::Smtp->value,
+            'driver' => MailboxDriver::Smtp->value,
 
-            'auth_type' =>
-                $validated['auth_type'],
+            'auth_type' => $validated['auth_type'],
 
-            'is_enabled' =>
-                (bool) $validated['is_enabled'],
+            'is_enabled' => (bool) $validated['is_enabled'],
 
-            'is_primary' =>
-                (bool) $validated['is_primary'],
+            'is_primary' => (bool) $validated['is_primary'],
 
-            'failover_order' =>
-                (int) $validated['failover_order'],
+            'failover_order' => (int) $validated['failover_order'],
 
-            'configuration' =>
-                Arr::where(
-                    $configuration,
-                    static fn (
-                        mixed $value
-                    ): bool =>
-                        $value !== null
-                        && $value !== ''
-                ),
+            'configuration' => Arr::where(
+                $configuration,
+                static fn (
+                    mixed $value
+                ): bool => $value !== null
+                    && $value !== ''
+            ),
 
-            'secret_configuration' =>
-                $secrets,
+            'secret_configuration' => $secrets,
 
-            'clear_secret_keys' =>
-                $clearSecretKeys,
+            'clear_secret_keys' => $clearSecretKeys,
         ];
 
         if ($channel === null) {
@@ -882,19 +759,15 @@ class MailboxSettingsController extends Controller
         ]);
 
         $incoming = $this->preferredChannel(
-            channels:
-            $mailbox->channels,
+            channels: $mailbox->channels,
 
-            direction:
-            MailboxChannelDirection::Incoming,
+            direction: MailboxChannelDirection::Incoming,
         );
 
         $outgoing = $this->preferredChannel(
-            channels:
-            $mailbox->channels,
+            channels: $mailbox->channels,
 
-            direction:
-            MailboxChannelDirection::Outgoing,
+            direction: MailboxChannelDirection::Outgoing,
         );
 
         return Inertia::render(
@@ -905,42 +778,34 @@ class MailboxSettingsController extends Controller
                         $mailbox
                     ),
 
-                    'display_name' =>
-                        $mailbox->display_name,
+                    'display_name' => $mailbox->display_name,
 
-                    'department' =>
-                        $mailbox->department !== null
+                    'department' => $mailbox->department !== null
                             ? [
-                            'id' =>
-                                $mailbox
+                                'id' => $mailbox
                                     ->department
                                     ->id,
 
-                            'name' =>
-                                $mailbox
+                                'name' => $mailbox
                                     ->department
                                     ->name,
-                        ]
+                            ]
                             : null,
 
-                    'is_active' =>
-                        (bool) $mailbox
-                            ->is_active,
+                    'is_active' => (bool) $mailbox
+                        ->is_active,
 
-                    'is_default_outgoing' =>
-                        (bool) $mailbox
-                            ->is_default_outgoing,
+                    'is_default_outgoing' => (bool) $mailbox
+                        ->is_default_outgoing,
                 ],
 
-                'incoming_channel' =>
-                    $this->reviewChannelData(
-                        $incoming
-                    ),
+                'incoming_channel' => $this->reviewChannelData(
+                    $incoming
+                ),
 
-                'outgoing_channel' =>
-                    $this->reviewChannelData(
-                        $outgoing
-                    ),
+                'outgoing_channel' => $this->reviewChannelData(
+                    $outgoing
+                ),
             ]
         );
     }
@@ -962,14 +827,11 @@ class MailboxSettingsController extends Controller
         Mailbox $mailbox
     ): array {
         return [
-            'id' =>
-                $mailbox->id,
+            'id' => $mailbox->id,
 
-            'name' =>
-                $mailbox->name,
+            'name' => $mailbox->name,
 
-            'email_address' =>
-                $mailbox->email_address,
+            'email_address' => $mailbox->email_address,
         ];
     }
 
@@ -1004,99 +866,80 @@ class MailboxSettingsController extends Controller
             $channel->secret_configuration ?? [];
 
         return [
-            'id' =>
-                $channel->id,
+            'id' => $channel->id,
 
-            'name' =>
-                $channel->name,
+            'name' => $channel->name,
 
-            'auth_type' =>
-                $channel->auth_type->value,
+            'auth_type' => $channel->auth_type->value,
 
-            'host' =>
-                $configuration['host'] ?? '',
+            'host' => $configuration['host'] ?? '',
 
-            'port' =>
-                (int) (
-                    $configuration['port']
-                    ?? ImapEncryption::Tls
+            'port' => (int) (
+                $configuration['port']
+                ?? ImapEncryption::Tls
                     ->defaultPort()
-                ),
+            ),
 
-            'encryption' =>
-                $configuration['encryption']
+            'encryption' => $configuration['encryption']
                 ?? ImapEncryption::Tls->value,
 
-            'username' =>
-                $secrets['username']
+            'username' => $secrets['username']
                 ?? $configuration['username']
                     ?? '',
 
-            'password_configured' =>
-                !empty(
+            'password_configured' => ! empty(
                 $secrets['password']
-                ),
+            ),
 
-            'validate_cert' =>
-                (bool) (
-                    $configuration[
-                    'validate_cert'
-                    ] ?? true
-                ),
+            'validate_cert' => (bool) (
+                $configuration[
+                'validate_cert'
+                ] ?? true
+            ),
 
-            'folder' =>
-                $configuration['folder']
+            'folder' => $configuration['folder']
                 ?? 'INBOX',
 
-            'processed_folder' =>
-                $configuration[
+            'processed_folder' => $configuration[
                 'processed_folder'
                 ] ?? '',
 
-            'create_processed_folder' =>
-                (bool) (
-                    $configuration[
-                    'create_processed_folder'
-                    ] ?? true
-                ),
+            'create_processed_folder' => (bool) (
+                $configuration[
+                'create_processed_folder'
+                ] ?? true
+            ),
 
-            'expunge_on_delete' =>
-                (bool) (
-                    $configuration[
-                    'expunge_on_delete'
-                    ] ?? true
-                ),
+            'expunge_on_delete' => (bool) (
+                $configuration[
+                'expunge_on_delete'
+                ] ?? true
+            ),
 
-            'store_raw_message' =>
-                (bool) (
-                    $configuration[
-                    'store_raw_message'
-                    ] ?? true
-                ),
+            'store_raw_message' => (bool) (
+                $configuration[
+                'store_raw_message'
+                ] ?? true
+            ),
 
-            'max_raw_message_mb' =>
-                $this->bytesToMegabytes(
-                    $configuration[
-                    'max_raw_message_bytes'
-                    ] ?? 50 * 1024 * 1024
-                ),
+            'max_raw_message_mb' => $this->bytesToMegabytes(
+                $configuration[
+                'max_raw_message_bytes'
+                ] ?? 50 * 1024 * 1024
+            ),
 
-            'max_attachment_mb' =>
-                $this->bytesToMegabytes(
-                    $configuration[
-                    'max_attachment_bytes'
-                    ] ?? 25 * 1024 * 1024
-                ),
+            'max_attachment_mb' => $this->bytesToMegabytes(
+                $configuration[
+                'max_attachment_bytes'
+                ] ?? 25 * 1024 * 1024
+            ),
 
-            'is_enabled' =>
-                (bool) $channel->is_enabled,
+            'is_enabled' => (bool) $channel->is_enabled,
 
-            'is_primary' =>
-                (bool) $channel->is_primary,
+            'is_primary' => (bool) $channel->is_primary,
 
-            'failover_order' =>
-                (int) $channel
-                    ->failover_order,
+            'failover_order' => (int) $channel
+                ->failover_order,
         ];
     }
 
@@ -1110,94 +953,75 @@ class MailboxSettingsController extends Controller
             $channel->secret_configuration ?? [];
 
         return [
-            'id' =>
-                $channel->id,
+            'id' => $channel->id,
 
-            'name' =>
-                $channel->name,
+            'name' => $channel->name,
 
-            'auth_type' =>
-                $channel->auth_type->value,
+            'auth_type' => $channel->auth_type->value,
 
-            'host' =>
-                $configuration['host'] ?? '',
+            'host' => $configuration['host'] ?? '',
 
-            'port' =>
-                (int) (
-                    $configuration['port']
-                    ?? SmtpEncryption::StartTls
+            'port' => (int) (
+                $configuration['port']
+                ?? SmtpEncryption::StartTls
                     ->defaultPort()
-                ),
+            ),
 
-            'encryption' =>
-                $configuration['encryption']
+            'encryption' => $configuration['encryption']
                 ?? SmtpEncryption::StartTls
                     ->value,
 
-            'username' =>
-                $secrets['username']
+            'username' => $secrets['username']
                 ?? $configuration['username']
                     ?? '',
 
-            'password_configured' =>
-                !empty(
+            'password_configured' => ! empty(
                 $secrets['password']
-                ),
+            ),
 
-            'timeout' =>
-                (int) (
-                    $configuration['timeout']
-                    ?? 30
-                ),
+            'timeout' => (int) (
+                $configuration['timeout']
+                ?? 30
+            ),
 
-            'verify_peer' =>
-                (bool) (
-                    $configuration[
-                    'verify_peer'
-                    ] ?? true
-                ),
-
-            'local_domain' =>
+            'verify_peer' => (bool) (
                 $configuration[
+                'verify_peer'
+                ] ?? true
+            ),
+
+            'local_domain' => $configuration[
                 'local_domain'
                 ] ?? '',
 
-            'source_ip' =>
-                $configuration[
+            'source_ip' => $configuration[
                 'source_ip'
                 ] ?? '',
 
-            'max_per_second' =>
-                $configuration[
+            'max_per_second' => $configuration[
                 'max_per_second'
                 ] ?? '',
 
-            'restart_threshold' =>
-                $configuration[
+            'restart_threshold' => $configuration[
                 'restart_threshold'
                 ] ?? '',
 
-            'restart_threshold_sleep' =>
-                (int) (
-                    $configuration[
-                    'restart_threshold_sleep'
-                    ] ?? 0
-                ),
-
-            'ping_threshold' =>
+            'restart_threshold_sleep' => (int) (
                 $configuration[
+                'restart_threshold_sleep'
+                ] ?? 0
+            ),
+
+            'ping_threshold' => $configuration[
                 'ping_threshold'
                 ] ?? '',
 
-            'is_enabled' =>
-                (bool) $channel->is_enabled,
+            'is_enabled' => (bool) $channel->is_enabled,
 
-            'is_primary' =>
-                (bool) $channel->is_primary,
+            'is_primary' => (bool) $channel->is_primary,
 
-            'failover_order' =>
-                (int) $channel
-                    ->failover_order,
+            'failover_order' => (int) $channel
+                ->failover_order,
         ];
     }
 
@@ -1233,7 +1057,7 @@ class MailboxSettingsController extends Controller
         if (
             $password === ''
             && empty(
-            $existingSecrets['password']
+                $existingSecrets['password']
             )
         ) {
             throw ValidationException::withMessages([
@@ -1244,10 +1068,9 @@ class MailboxSettingsController extends Controller
         }
 
         $secrets = [
-            'username' =>
-                trim(
-                    (string) $username
-                ),
+            'username' => trim(
+                (string) $username
+            ),
         ];
 
         if ($password !== '') {
@@ -1277,67 +1100,52 @@ class MailboxSettingsController extends Controller
             $channel->secret_configuration ?? [];
 
         return [
-            'id' =>
-                $channel->id,
+            'id' => $channel->id,
 
-            'name' =>
-                $channel->name,
+            'name' => $channel->name,
 
-            'driver' =>
-                $channel->driver->value,
+            'driver' => $channel->driver->value,
 
-            'auth_type' =>
-                $channel->auth_type->value,
+            'auth_type' => $channel->auth_type->value,
 
-            'health_status' =>
-                $channel->health_status->value,
+            'health_status' => $channel->health_status->value,
 
-            'is_enabled' =>
-                (bool) $channel->is_enabled,
+            'is_enabled' => (bool) $channel->is_enabled,
 
-            'is_primary' =>
-                (bool) $channel->is_primary,
+            'is_primary' => (bool) $channel->is_primary,
 
-            'host' =>
-                $configuration['host'] ?? null,
+            'host' => $configuration['host'] ?? null,
 
-            'port' =>
-                $configuration['port'] ?? null,
+            'port' => $configuration['port'] ?? null,
 
-            'encryption' =>
-                $configuration[
+            'encryption' => $configuration[
                 'encryption'
                 ] ?? null,
 
-            'username' =>
-                $secrets['username']
+            'username' => $secrets['username']
                 ?? $configuration['username']
                     ?? null,
 
-            'credentials_configured' =>
-                $channel->auth_type
+            'credentials_configured' => $channel->auth_type
                 === MailAuthenticationType::None
-                || !empty(
-                $secrets['password']
+                || ! empty(
+                    $secrets['password']
                 )
-                || !empty(
-                $secrets['access_token']
+                || ! empty(
+                    $secrets['access_token']
                 ),
 
-            'last_checked_at' =>
-                $channel
-                    ->last_checked_at
-                    ?->toIso8601String(),
+            'last_checked_at' => $channel
+                ->last_checked_at
+                ?->toIso8601String(),
 
-            'last_success_at' =>
-                $channel
-                    ->last_success_at
-                    ?->toIso8601String(),
+            'last_success_at' => $channel
+                ->last_success_at
+                ?->toIso8601String(),
 
-            'last_error_at' =>
-                $channel
-                    ->last_error_at
-                    ?->toIso8601String(),
+            'last_error_at' => $channel
+                ->last_error_at
+                ?->toIso8601String(),
         ];
     }
 
@@ -1346,89 +1154,69 @@ class MailboxSettingsController extends Controller
     ): array {
         $incomingChannel =
             $this->preferredChannel(
-                channels:
-                $mailbox->channels,
+                channels: $mailbox->channels,
 
-                direction:
-                MailboxChannelDirection::Incoming,
+                direction: MailboxChannelDirection::Incoming,
             );
 
         $outgoingChannel =
             $this->preferredChannel(
-                channels:
-                $mailbox->channels,
+                channels: $mailbox->channels,
 
-                direction:
-                MailboxChannelDirection::Outgoing,
+                direction: MailboxChannelDirection::Outgoing,
             );
 
         return [
-            'id' =>
-                $mailbox->id,
+            'id' => $mailbox->id,
 
-            'name' =>
-                $mailbox->name,
+            'name' => $mailbox->name,
 
-            'email_address' =>
-                $mailbox->email_address,
+            'email_address' => $mailbox->email_address,
 
-            'display_name' =>
-                $mailbox->display_name,
+            'display_name' => $mailbox->display_name,
 
-            'is_active' =>
-                (bool) $mailbox->is_active,
+            'is_active' => (bool) $mailbox->is_active,
 
-            'is_deleted' =>
-                $mailbox->trashed(),
+            'is_deleted' => $mailbox->trashed(),
 
-            'deleted_at' =>
-                $mailbox
-                    ->deleted_at
-                    ?->toIso8601String(),
+            'deleted_at' => $mailbox
+                ->deleted_at
+                ?->toIso8601String(),
 
-            'is_default_outgoing' =>
-                (bool) $mailbox
-                    ->is_default_outgoing,
+            'is_default_outgoing' => (bool) $mailbox
+                ->is_default_outgoing,
 
-            'department' =>
-                $mailbox->department !== null
+            'department' => $mailbox->department !== null
                     ? [
-                    'id' =>
-                        $mailbox
+                        'id' => $mailbox
                             ->department
                             ->id,
 
-                    'name' =>
-                        $mailbox
+                        'name' => $mailbox
                             ->department
                             ->name,
-                ]
+                    ]
                     : null,
 
-            'incoming_channel' =>
-                $this->channelData(
-                    $incomingChannel
-                ),
+            'incoming_channel' => $this->channelData(
+                $incomingChannel
+            ),
 
-            'outgoing_channel' =>
-                $this->channelData(
-                    $outgoingChannel
-                ),
+            'outgoing_channel' => $this->channelData(
+                $outgoingChannel
+            ),
 
-            'channels_count' =>
-                $mailbox
-                    ->channels
-                    ->count(),
+            'channels_count' => $mailbox
+                ->channels
+                ->count(),
 
-            'created_at' =>
-                $mailbox
-                    ->created_at
-                    ?->toIso8601String(),
+            'created_at' => $mailbox
+                ->created_at
+                ?->toIso8601String(),
 
-            'updated_at' =>
-                $mailbox
-                    ->updated_at
-                    ?->toIso8601String(),
+            'updated_at' => $mailbox
+                ->updated_at
+                ?->toIso8601String(),
         ];
     }
 
@@ -1440,8 +1228,7 @@ class MailboxSettingsController extends Controller
             ->filter(
                 fn (
                     MailboxChannel $channel
-                ): bool =>
-                    $channel->direction
+                ): bool => $channel->direction
                     === $direction
             )
             ->values();
@@ -1450,8 +1237,7 @@ class MailboxSettingsController extends Controller
             $directionChannels->first(
                 fn (
                     MailboxChannel $channel
-                ): bool =>
-                    (bool) $channel->is_primary
+                ): bool => (bool) $channel->is_primary
                     && (bool) $channel->is_enabled
             );
 
@@ -1463,8 +1249,7 @@ class MailboxSettingsController extends Controller
             $directionChannels->first(
                 fn (
                     MailboxChannel $channel
-                ): bool =>
-                (bool) $channel->is_enabled
+                ): bool => (bool) $channel->is_enabled
             );
 
         if ($enabledChannel !== null) {
@@ -1482,45 +1267,34 @@ class MailboxSettingsController extends Controller
         }
 
         return [
-            'id' =>
-                $channel->id,
+            'id' => $channel->id,
 
-            'name' =>
-                $channel->name,
+            'name' => $channel->name,
 
-            'direction' =>
-                $channel->direction->value,
+            'direction' => $channel->direction->value,
 
-            'driver' =>
-                $channel->driver->value,
+            'driver' => $channel->driver->value,
 
-            'health_status' =>
-                $channel->health_status->value,
+            'health_status' => $channel->health_status->value,
 
-            'is_primary' =>
-                (bool) $channel->is_primary,
+            'is_primary' => (bool) $channel->is_primary,
 
-            'is_enabled' =>
-                (bool) $channel->is_enabled,
+            'is_enabled' => (bool) $channel->is_enabled,
 
-            'failover_order' =>
-                (int) $channel
-                    ->failover_order,
+            'failover_order' => (int) $channel
+                ->failover_order,
 
-            'last_checked_at' =>
-                $channel
-                    ->last_checked_at
-                    ?->toIso8601String(),
+            'last_checked_at' => $channel
+                ->last_checked_at
+                ?->toIso8601String(),
 
-            'last_success_at' =>
-                $channel
-                    ->last_success_at
-                    ?->toIso8601String(),
+            'last_success_at' => $channel
+                ->last_success_at
+                ?->toIso8601String(),
 
-            'last_error_at' =>
-                $channel
-                    ->last_error_at
-                    ?->toIso8601String(),
+            'last_error_at' => $channel
+                ->last_error_at
+                ?->toIso8601String(),
         ];
     }
 
@@ -1573,7 +1347,7 @@ class MailboxSettingsController extends Controller
     private function isHealthy(
         array $mailbox
     ): bool {
-        if (!$this->isConfigured($mailbox)) {
+        if (! $this->isConfigured($mailbox)) {
             return false;
         }
 

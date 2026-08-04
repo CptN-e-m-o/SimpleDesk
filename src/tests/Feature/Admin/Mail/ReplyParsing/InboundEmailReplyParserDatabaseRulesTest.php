@@ -153,10 +153,9 @@ class InboundEmailReplyParserDatabaseRulesTest extends TestCase
         );
 
         $message = $this->message(
-            textBody:
-            "New response.\n\n"
+            textBody: "New response.\n\n"
             ."=== OLD CONTENT ===\n"
-            ."Previous response.",
+            .'Previous response.',
             htmlBody: null,
         );
 
@@ -242,7 +241,7 @@ class InboundEmailReplyParserDatabaseRulesTest extends TestCase
         ?string $textBody,
         ?string $htmlBody,
     ): EmailMessage {
-        $message = new EmailMessage();
+        $message = new EmailMessage;
 
         $message->forceFill([
             'text_body' => $textBody,
@@ -262,11 +261,9 @@ class InboundEmailReplyParserDatabaseRulesTest extends TestCase
             'name' => $name,
             'pattern' => $pattern,
 
-            'pattern_type' =>
-                $patternType->value,
+            'pattern_type' => $patternType->value,
 
-            'content_type' =>
-                $contentType->value,
+            'content_type' => $contentType->value,
 
             'display_order' => 10,
             'is_active' => true,

@@ -19,7 +19,7 @@ class ReplyParsingService
     public function parse(
         string $content,
         ReplyParsingContentType $contentType,
-        iterable|null $rules = null,
+        ?iterable $rules = null,
     ): ReplyParsingResultData {
         if ($contentType === ReplyParsingContentType::Both) {
             throw ValidationException::withMessages([

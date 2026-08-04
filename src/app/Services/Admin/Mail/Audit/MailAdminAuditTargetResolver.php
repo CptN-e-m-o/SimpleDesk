@@ -133,7 +133,7 @@ class MailAdminAuditTargetResolver
                 MailAdminAuditEvent::ReplyParsingRuleRestored,
                 MailAdminAuditEvent::ReplyParsingRuleForceDeleted,
             ], true)) {
-            return (new ReplyParsingRule())->forceFill([
+            return (new ReplyParsingRule)->forceFill([
                 'id' => (int) $target,
             ]);
         }

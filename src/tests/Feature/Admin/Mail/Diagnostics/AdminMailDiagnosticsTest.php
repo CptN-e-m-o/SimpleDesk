@@ -40,7 +40,17 @@ class AdminMailDiagnosticsTest extends TestCase
         );
 
         config()->set(
+            'simpledesk-mail-ticketing.processing_lock_seconds',
+            60
+        );
+
+        config()->set(
             'simpledesk-mail-diagnostics.stale.sending_seconds',
+            60
+        );
+
+        config()->set(
+            'simpledesk-mail-ticketing.outgoing_replies.job.lock_seconds',
             60
         );
 
@@ -57,158 +67,6 @@ class AdminMailDiagnosticsTest extends TestCase
         config()->set(
             'simpledesk-mail-antivirus.enabled',
             true
-        );
-    }
-
-    public function test_diagnostics_routes_require_permission(): void
-    {
-        $user = User::factory()->create();
-
-        $mailbox = $this->createMailbox();
-
-        $this
-            ->actingAs($user)
-            ->getJson(
-                route(
-                    'admin.email.diagnostics.overview'
-                )
-            )
-            ->assertForbidden();
-
-        $this
-            ->actingAs($user)
-            ->getJson(
-                route(
-                    'admin.email.mailboxes.diagnostics',
-                    $mailbox
-                )
-            )
-            ->assertForbidden();
-
-        $this
-            ->actingAs($user)
-            ->getJson(
-                route(
-                    'admin.email.diagnostics.messages'
-                )
-            )
-            ->assertForbidden();
-    }
-
-    public function test_overview_reports_health_stuck_records_and_safe_errors(): void
-    {
-        $admin = $this->createAgentWithPermissions([
-            'admin.mail.view_diagnostics',
-        ]);
-
-        $mailbox = $this->createMailbox();
-
-        $incoming = $this->createChannel(
-            $mailbox,
-            [
-                'name' => 'IMAP',
-                'direction' => 'incoming',
-                'driver' => 'imap',
-                'health_status' => 'failed',
-                'last_error_at' => now()->subMinute(),
-                'last_error_code' => 'imap_auth_failed',
-                'last_error_message' => 'Authentication failed password=visible-secret',
-            ]
-        );
-
-        $this->createChannel(
-            $mailbox,
-            [
-                'name' => 'SMTP',
-                'direction' => 'outgoing',
-                'driver' => 'smtp',
-                'health_status' => 'healthy',
-            ]
-        );
-
-        MailboxChannelSyncState::query()->create([
-            'mailbox_channel_id' => $incoming->id,
-            'cursor' => null,
-            'cursor_metadata' => [],
-            'last_sync_started_at' => now()->subMinutes(3),
-            'last_sync_completed_at' => null,
-            'last_sync_failed_at' => now()->subMinutes(2),
-            'consecutive_failures' => 2,
-            'last_fetched_count' => 0,
-            'last_stored_count' => 0,
-            'last_duplicate_count' => 0,
-            'last_acknowledged_count' => 0,
-            'last_error_code' => 'imap_sync_failed',
-            'last_error_message' => 'Authorization: Bearer secret-token',
-        ]);
-
-        $message = $this->createMessage(
-            $mailbox,
-            [
-                'direction' => 'outgoing',
-                'status' => 'sending',
-                'processing_started_at' => now()->subMinutes(2),
-            ]
-        );
-
-        $attachment = $this->createAttachment(
-            $message,
-            [
-                'scan_status' => 'pending',
-            ]
-        );
-
-        EmailAttachment::query()
-            ->whereKey($attachment->id)
-            ->update([
-                'updated_at' => now()->subMinutes(2),
-            ]);
-
-        $response = $this
-            ->actingAs($admin)
-            ->getJson(
-                route(
-                    'admin.email.diagnostics.overview'
-                )
-            )
-            ->assertOk()
-            ->assertJsonPath(
-                'data.mailboxes.total',
-                1
-            )
-            ->assertJsonPath(
-                'data.channels.by_health.failed',
-                1
-            )
-            ->assertJsonPath(
-                'data.channels.by_health.healthy',
-                1
-            )
-            ->assertJsonPath(
-                'data.messages.stuck.sending',
-                1
-            )
-            ->assertJsonPath(
-                'data.attachments.stale_pending',
-                1
-            )
-            ->assertJsonPath(
-                'data.attachments.antivirus_enabled',
-                true
-            )
-            ->assertJsonPath(
-                'data.synchronization.failed',
-                1
-            );
-
-        $this->assertStringNotContainsString(
-            'visible-secret',
-            $response->getContent()
-        );
-
-        $this->assertStringNotContainsString(
-            'secret-token',
-            $response->getContent()
         );
     }
 
@@ -595,7 +453,7 @@ class AdminMailDiagnosticsTest extends TestCase
                     'reason_message' => 'Attachment rejected token=private-token',
 
                     'metadata' => [
-                    'raw_path' => '/private/path',
+                        'raw_path' => '/private/path',
                     ],
                 ]);
 

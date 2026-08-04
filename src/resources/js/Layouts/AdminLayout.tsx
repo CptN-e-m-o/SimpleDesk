@@ -180,9 +180,20 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                     },
                     {
                         label: 'Diagnostics',
-                        href: '#',
+                        href: route(
+                            'admin.email.diagnostics.index',
+                        ),
                         icon: Wrench,
-                        isActive: () => false,
+                        permissions: [
+                            'admin.mail.view_diagnostics',
+                            'admin.mail.test_connections',
+                            'admin.mail.view',
+                        ],
+                        isActive: (currentUrl: string) =>
+                            currentUrl === '/admin/email/diagnostics' ||
+                            currentUrl.startsWith(
+                                '/admin/email/diagnostics/',
+                            ),
                     },
                     {
                         label: 'Email OAuth Integration',

@@ -13,12 +13,14 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { route } from 'ziggy-js'
+import { usePermissions } from '@/hooks/usePermissions'
 
 type DashboardItem = {
     title: string
     description: string
     icon: LucideIcon
     href?: string
+    permissions?: string[]
 }
 
 type DashboardCardProps = {
@@ -102,6 +104,7 @@ function DashboardCard({ item }: DashboardCardProps) {
 }
 
 export default function Index() {
+    const { canAny } = usePermissions()
     const staffItems: DashboardItem[] = [
         {
             title: 'Agents',
@@ -152,6 +155,12 @@ export default function Index() {
             title: 'Email Diagnostics',
             description:
                 'Test mailbox connections and troubleshoot email delivery or retrieval issues.',
+            href: route('admin.email.diagnostics.index'),
+            permissions: [
+                'admin.mail.view_diagnostics',
+                'admin.mail.test_connections',
+                'admin.mail.view',
+            ],
             icon: MailSearch,
         },
         {
@@ -213,12 +222,18 @@ export default function Index() {
 
                     <div className="p-6">
                         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                            {emailItems.map((item) => (
+                            {emailItems
+                                .filter(
+                                    (item) =>
+                                        !item.permissions ||
+                                        canAny(item.permissions),
+                                )
+                                .map((item) => (
                                 <DashboardCard
                                     key={item.title}
                                     item={item}
                                 />
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </section>
