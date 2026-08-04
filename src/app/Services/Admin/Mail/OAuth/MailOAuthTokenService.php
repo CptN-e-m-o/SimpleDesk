@@ -90,10 +90,8 @@ class MailOAuthTokenService
                         connection: $connection,
                         currentToken: $currentToken,
                         previousToken: $tokenBeforeLock,
-                        previousExpiresAt:
-                        $expiresAtBeforeLock,
-                        previousRefreshedAt:
-                        $refreshedAtBeforeLock,
+                        previousExpiresAt: $expiresAtBeforeLock,
+                        previousRefreshedAt: $refreshedAtBeforeLock,
                     )
                 ) {
                     return $currentToken;
@@ -129,7 +127,7 @@ class MailOAuthTokenService
 
                     return $tokens->accessToken;
                 } catch (
-                MailOAuthTokenRefreshException $exception
+                    MailOAuthTokenRefreshException $exception
                 ) {
                     throw $exception;
                 } catch (Throwable) {
@@ -141,17 +139,13 @@ class MailOAuthTokenService
                     try {
                         $connection
                             ->forceFill([
-                                'health_status' =>
-                                    MailboxHealthStatus::Failed,
+                                'health_status' => MailboxHealthStatus::Failed,
 
-                                'last_error_at' =>
-                                    now(),
+                                'last_error_at' => now(),
 
-                                'last_error_code' =>
-                                    'oauth_token_refresh_failed',
+                                'last_error_code' => 'oauth_token_refresh_failed',
 
-                                'last_error_message' =>
-                                    self::REFRESH_FAILED_MESSAGE,
+                                'last_error_message' => self::REFRESH_FAILED_MESSAGE,
                             ])
                             ->save();
                     } catch (Throwable) {

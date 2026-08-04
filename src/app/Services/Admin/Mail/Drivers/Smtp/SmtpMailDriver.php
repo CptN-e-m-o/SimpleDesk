@@ -63,23 +63,18 @@ class SmtpMailDriver implements OutgoingMailDriver
                     latencyMilliseconds: $latencyMilliseconds,
 
                     details: [
-                        'host' =>
-                            $configuration->host,
+                        'host' => $configuration->host,
 
-                        'port' =>
-                            $configuration->port,
+                        'port' => $configuration->port,
 
-                        'encryption' =>
-                            $configuration
-                                ->encryption
-                                ->value,
+                        'encryption' => $configuration
+                            ->encryption
+                            ->value,
 
-                        'authenticated' =>
-                            $configuration->username
+                        'authenticated' => $configuration->username
                             !== null,
 
-                        'verify_peer' =>
-                            $configuration->verifyPeer,
+                        'verify_peer' => $configuration->verifyPeer,
                     ],
                 );
             } catch (Throwable $exception) {
@@ -102,6 +97,7 @@ class SmtpMailDriver implements OutgoingMailDriver
                         ->refreshOAuthToken(
                             $channel
                         );
+
                     continue;
                 }
 
@@ -158,14 +154,11 @@ class SmtpMailDriver implements OutgoingMailDriver
                 }
 
                 return new OutgoingSendResultData(
-                    externalMessageId:
-                    $sentMessage->getMessageId(),
+                    externalMessageId: $sentMessage->getMessageId(),
 
-                    internetMessageId:
-                    $message->internetMessageId,
+                    internetMessageId: $message->internetMessageId,
 
-                    acceptedRecipients:
-                    array_values(
+                    acceptedRecipients: array_values(
                         array_merge(
                             $message->to,
                             $message->cc,
@@ -173,28 +166,22 @@ class SmtpMailDriver implements OutgoingMailDriver
                         )
                     ),
 
-                    rejectedRecipients:
-                    [],
+                    rejectedRecipients: [],
 
-                    sentAt:
-                    new DateTimeImmutable,
+                    sentAt: new DateTimeImmutable,
 
                     providerResponse: [
-                        'transport_message_id' =>
-                            $sentMessage->getMessageId(),
+                        'transport_message_id' => $sentMessage->getMessageId(),
                     ],
 
                     metadata: [
-                        'host' =>
-                            $configuration->host,
+                        'host' => $configuration->host,
 
-                        'port' =>
-                            $configuration->port,
+                        'port' => $configuration->port,
 
-                        'encryption' =>
-                            $configuration
-                                ->encryption
-                                ->value,
+                        'encryption' => $configuration
+                            ->encryption
+                            ->value,
                     ],
                 );
             } catch (Throwable $exception) {
@@ -217,7 +204,6 @@ class SmtpMailDriver implements OutgoingMailDriver
                         ->refreshOAuthToken(
                             $channel
                         );
-
 
                     continue;
                 }

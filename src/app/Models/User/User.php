@@ -4,6 +4,7 @@ namespace App\Models\User;
 
 use App\Models\Admin\Department;
 use App\Models\Admin\Team;
+use App\Models\Admin\WorkScheduleAssignment;
 use App\Models\Concerns\HasPermissions;
 use App\Models\Role;
 use App\Models\Ticket;
@@ -145,5 +146,10 @@ class User extends Authenticatable
     public function securityEvents(): HasMany
     {
         return $this->hasMany(UserSecurityEvent::class);
+    }
+
+    public function workScheduleAssignments(): HasMany
+    {
+        return $this->hasMany(WorkScheduleAssignment::class);
     }
 }

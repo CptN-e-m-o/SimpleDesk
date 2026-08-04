@@ -27,6 +27,7 @@ import {
     Briefcase,
     GitBranch,
     Check,
+    CalendarClock,
 } from 'lucide-react'
 
 import {
@@ -141,6 +142,13 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         isActive: (currentUrl: string) =>
                             currentUrl === '/admin/teams' ||
                             currentUrl.startsWith('/admin/teams/'),
+                    },
+                    {
+                        label: 'Work Schedules',
+                        href: route('admin.work-schedules.index'),
+                        icon: CalendarClock,
+                        permission: 'admin.staff.work_schedules.view',
+                        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/work-schedules') || currentUrl.startsWith('/admin/work-schedule-'),
                     },
                 ],
             },

@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             TeamSeeder::class,
             TeamMemberSeeder::class,
+            WorkScheduleSeeder::class,
         ]);
     }
 }

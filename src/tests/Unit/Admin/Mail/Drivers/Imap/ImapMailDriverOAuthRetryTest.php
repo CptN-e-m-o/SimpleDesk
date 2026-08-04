@@ -195,17 +195,13 @@ class ImapMailDriverOAuthRetryTest extends TestCase
             ->once();
 
         $driver = new ImapMailDriver(
-            configurationFactory:
-            $configurationFactory,
+            configurationFactory: $configurationFactory,
 
-            clientFactory:
-            $clientFactory,
+            clientFactory: $clientFactory,
 
-            normalizer:
-            $normalizer,
+            normalizer: $normalizer,
 
-            exceptions:
-            $exceptions,
+            exceptions: $exceptions,
         );
 
         $result = $driver->test(
@@ -423,17 +419,13 @@ class ImapMailDriverOAuthRetryTest extends TestCase
             ->once();
 
         $driver = new ImapMailDriver(
-            configurationFactory:
-            $configurationFactory,
+            configurationFactory: $configurationFactory,
 
-            clientFactory:
-            $clientFactory,
+            clientFactory: $clientFactory,
 
-            normalizer:
-            $normalizer,
+            normalizer: $normalizer,
 
-            exceptions:
-            $exceptions,
+            exceptions: $exceptions,
         );
 
         try {
@@ -445,7 +437,7 @@ class ImapMailDriverOAuthRetryTest extends TestCase
                 'Expected the second IMAP authentication failure to be thrown.'
             );
         } catch (
-        MailDriverException $exception
+            MailDriverException $exception
         ) {
             $this->assertSame(
                 'imap_authentication_failed',
@@ -550,17 +542,13 @@ class ImapMailDriverOAuthRetryTest extends TestCase
             ->once();
 
         $driver = new ImapMailDriver(
-            configurationFactory:
-            $configurationFactory,
+            configurationFactory: $configurationFactory,
 
-            clientFactory:
-            $clientFactory,
+            clientFactory: $clientFactory,
 
-            normalizer:
-            $normalizer,
+            normalizer: $normalizer,
 
-            exceptions:
-            $exceptions,
+            exceptions: $exceptions,
         );
 
         try {
@@ -572,7 +560,7 @@ class ImapMailDriverOAuthRetryTest extends TestCase
                 'Expected the IMAP authentication failure to be thrown.'
             );
         } catch (
-        MailDriverException $exception
+            MailDriverException $exception
         ) {
             $this->assertSame(
                 'imap_authentication_failed',
@@ -588,8 +576,7 @@ class ImapMailDriverOAuthRetryTest extends TestCase
         $channel = new MailboxChannel;
 
         $channel->forceFill([
-            'auth_type' =>
-                $authType->value,
+            'auth_type' => $authType->value,
         ]);
 
         return $channel;
@@ -600,67 +587,48 @@ class ImapMailDriverOAuthRetryTest extends TestCase
         MailAuthenticationType $authType
     ): ImapChannelConfigurationData {
         return new ImapChannelConfigurationData(
-            host:
-            'imap.example.test',
+            host: 'imap.example.test',
 
-            port:
-            993,
+            port: 993,
 
-            encryption:
-            ImapEncryption::Tls,
+            encryption: ImapEncryption::Tls,
 
-            authType:
-            $authType,
+            authType: $authType,
 
-            username:
-            'mailbox@example.test',
+            username: 'mailbox@example.test',
 
-            password:
-            $password,
+            password: $password,
 
-            validateCertificate:
-            true,
+            validateCertificate: true,
 
-            folder:
-            'INBOX',
+            folder: 'INBOX',
 
-            processedFolder:
-            'Processed',
+            processedFolder: 'Processed',
 
-            createProcessedFolder:
-            true,
+            createProcessedFolder: true,
 
-            expungeOnDelete:
-            true,
+            expungeOnDelete: true,
 
-            storeRawMessage:
-            true,
+            storeRawMessage: true,
 
-            maxRawMessageBytes:
-            50 * 1024 * 1024,
+            maxRawMessageBytes: 50 * 1024 * 1024,
 
-            maxAttachmentBytes:
-            25 * 1024 * 1024,
+            maxAttachmentBytes: 25 * 1024 * 1024,
         );
     }
 
     private function authenticationFailure(): MailDriverException
     {
         return new MailDriverException(
-            message:
-            'IMAP authentication failed.',
+            message: 'IMAP authentication failed.',
 
-            driverErrorCode:
-            'imap_authentication_failed',
+            driverErrorCode: 'imap_authentication_failed',
 
-            retryable:
-            false,
+            retryable: false,
 
-            failoverAllowed:
-            true,
+            failoverAllowed: true,
 
-            affectsChannelHealth:
-            true,
+            affectsChannelHealth: true,
         );
     }
 }

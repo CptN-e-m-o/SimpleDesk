@@ -418,7 +418,7 @@ class AdminMailConnectionTestingTest extends TestCase
                 return 'fake-antivirus';
             }
 
-            public function testConnection(): MailConnectionTestResultData
+            public function test_connection(): MailConnectionTestResultData
             {
                 return MailConnectionTestResultData::success(
                     message: 'Antivirus connection succeeded.',

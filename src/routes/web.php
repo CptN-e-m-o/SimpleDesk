@@ -31,6 +31,9 @@ use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\Admin\WorkScheduleAssignmentController;
+use App\Http\Controllers\Admin\WorkScheduleController;
+use App\Http\Controllers\Admin\WorkScheduleExceptionController;
 use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
@@ -141,6 +144,25 @@ Route::middleware('auth')->group(function () {
         Route::resource('agents', AgentController::class)
             ->withTrashed(['show', 'edit', 'update'])
             ->middleware('permission:admin.staff.manage_agents');
+
+        Route::get('work-schedules', [WorkScheduleController::class, 'index'])->middleware('permission:admin.staff.work_schedules.view')->name('work-schedules.index');
+        Route::get('work-schedules/create', [WorkScheduleController::class, 'create'])->middleware('permission:admin.staff.work_schedules.create')->name('work-schedules.create');
+        Route::post('work-schedules', [WorkScheduleController::class, 'store'])->middleware('permission:admin.staff.work_schedules.create')->name('work-schedules.store');
+        Route::get('work-schedules/{workSchedule}', [WorkScheduleController::class, 'show'])->middleware('permission:admin.staff.work_schedules.view')->whereNumber('workSchedule')->name('work-schedules.show');
+        Route::get('work-schedules/{workSchedule}/edit', [WorkScheduleController::class, 'edit'])->middleware('permission:admin.staff.work_schedules.update')->whereNumber('workSchedule')->name('work-schedules.edit');
+        Route::put('work-schedules/{workSchedule}', [WorkScheduleController::class, 'update'])->middleware('permission:admin.staff.work_schedules.update')->whereNumber('workSchedule')->name('work-schedules.update');
+        Route::post('work-schedules/{workSchedule}/duplicate', [WorkScheduleController::class, 'duplicate'])->middleware('permission:admin.staff.work_schedules.create')->whereNumber('workSchedule')->name('work-schedules.duplicate');
+        Route::patch('work-schedules/{workSchedule}/toggle', [WorkScheduleController::class, 'toggle'])->middleware('permission:admin.staff.work_schedules.update')->whereNumber('workSchedule')->name('work-schedules.toggle');
+        Route::delete('work-schedules/{workSchedule}', [WorkScheduleController::class, 'destroy'])->middleware('permission:admin.staff.work_schedules.archive')->whereNumber('workSchedule')->name('work-schedules.destroy');
+        Route::post('work-schedules/{workSchedule}/restore', [WorkScheduleController::class, 'restore'])->middleware('permission:admin.staff.work_schedules.archive')->whereNumber('workSchedule')->name('work-schedules.restore');
+        Route::post('work-schedules/{workSchedule}/assignments', [WorkScheduleAssignmentController::class, 'store'])->middleware('permission:admin.staff.work_schedules.manage_assignments')->whereNumber('workSchedule')->name('work-schedules.assignments.store');
+        Route::put('work-schedule-assignments/{assignment}', [WorkScheduleAssignmentController::class, 'update'])->middleware('permission:admin.staff.work_schedules.manage_assignments')->whereNumber('assignment')->name('work-schedule-assignments.update');
+        Route::patch('work-schedule-assignments/{assignment}/end', [WorkScheduleAssignmentController::class, 'end'])->middleware('permission:admin.staff.work_schedules.manage_assignments')->whereNumber('assignment')->name('work-schedule-assignments.end');
+        Route::delete('work-schedule-assignments/{assignment}', [WorkScheduleAssignmentController::class, 'destroy'])->middleware('permission:admin.staff.work_schedules.manage_assignments')->whereNumber('assignment')->name('work-schedule-assignments.destroy');
+        Route::get('work-schedule-assignments/{assignment}/exceptions', [WorkScheduleExceptionController::class, 'index'])->middleware('permission:admin.staff.work_schedules.manage_exceptions')->whereNumber('assignment')->name('work-schedule-exceptions.index');
+        Route::post('work-schedule-assignments/{assignment}/exceptions', [WorkScheduleExceptionController::class, 'store'])->middleware('permission:admin.staff.work_schedules.manage_exceptions')->whereNumber('assignment')->name('work-schedule-exceptions.store');
+        Route::put('work-schedule-exceptions/{exception}', [WorkScheduleExceptionController::class, 'update'])->middleware('permission:admin.staff.work_schedules.manage_exceptions')->whereNumber('exception')->name('work-schedule-exceptions.update');
+        Route::delete('work-schedule-exceptions/{exception}', [WorkScheduleExceptionController::class, 'destroy'])->middleware('permission:admin.staff.work_schedules.manage_exceptions')->whereNumber('exception')->name('work-schedule-exceptions.destroy');
 
         Route::get('users/{agent}', [AgentController::class, 'showUser'])
             ->withTrashed()

@@ -65,6 +65,12 @@ class PermissionAdminStaffSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 60,
             ],
+            ['key' => 'admin.staff.work_schedules.view', 'label' => 'View work schedules', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 70],
+            ['key' => 'admin.staff.work_schedules.create', 'label' => 'Create work schedules', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 80],
+            ['key' => 'admin.staff.work_schedules.update', 'label' => 'Update work schedules', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 90],
+            ['key' => 'admin.staff.work_schedules.archive', 'label' => 'Archive and restore work schedules', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 100],
+            ['key' => 'admin.staff.work_schedules.manage_assignments', 'label' => 'Manage work schedule assignments', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 110],
+            ['key' => 'admin.staff.work_schedules.manage_exceptions', 'label' => 'Manage work schedule exceptions', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 120],
         ];
 
         foreach ($permissions as $permission) {

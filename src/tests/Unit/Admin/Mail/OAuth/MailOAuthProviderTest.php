@@ -6,11 +6,12 @@ use App\Enums\Admin\Mail\MailAuthenticationType;
 use App\Enums\Admin\Mail\MailProvider;
 use App\Models\Admin\Mail\MailProviderConnection;
 use App\Services\Admin\Mail\OAuth\MailOAuthProviderRegistry;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Support\Facades\Http;
-use Tests\TestCase;
 use App\Services\Admin\Mail\OAuth\Providers\MicrosoftMailOAuthIdTokenValidator;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Mockery;
+use Tests\TestCase;
 
 class MailOAuthProviderTest extends TestCase
 {
@@ -66,32 +67,25 @@ class MailOAuthProviderTest extends TestCase
         Http::preventStrayRequests();
 
         Http::fake([
-            'https://login.microsoftonline.com/common/oauth2/v2.0/token' =>
-                Http::response([
-                    'access_token' =>
-                        'microsoft-access-token',
+            'https://login.microsoftonline.com/common/oauth2/v2.0/token' => Http::response([
+                'access_token' => 'microsoft-access-token',
 
-                    'refresh_token' =>
-                        'microsoft-refresh-token',
+                'refresh_token' => 'microsoft-refresh-token',
 
-                    'expires_in' =>
-                        3600,
+                'expires_in' => 3600,
 
-                    'token_type' =>
-                        'Bearer',
+                'token_type' => 'Bearer',
 
-                    'scope' =>
-                        implode(' ', [
-                            'openid',
-                            'email',
-                            'offline_access',
-                            'https://outlook.office.com/IMAP.AccessAsUser.All',
-                            'https://outlook.office.com/SMTP.Send',
-                        ]),
-
-                    'id_token' =>
-                        'signed-microsoft-id-token',
+                'scope' => implode(' ', [
+                    'openid',
+                    'email',
+                    'offline_access',
+                    'https://outlook.office.com/IMAP.AccessAsUser.All',
+                    'https://outlook.office.com/SMTP.Send',
                 ]),
+
+                'id_token' => 'signed-microsoft-id-token',
+            ]),
         ]);
 
         $connection = $this->connection(
@@ -124,11 +118,9 @@ class MailOAuthProviderTest extends TestCase
                 }
             )
             ->andReturn([
-                'id' =>
-                    'microsoft-account-id',
+                'id' => 'microsoft-account-id',
 
-                'email' =>
-                    'mailbox@example.test',
+                'email' => 'mailbox@example.test',
             ]);
 
         $this->app->instance(
@@ -177,7 +169,7 @@ class MailOAuthProviderTest extends TestCase
 
         Http::assertSent(
             static function (
-                \Illuminate\Http\Client\Request $request
+                Request $request
             ): bool {
                 return
                     $request->url()
@@ -199,7 +191,7 @@ class MailOAuthProviderTest extends TestCase
 
         Http::assertNotSent(
             static function (
-                \Illuminate\Http\Client\Request $request
+                Request $request
             ): bool {
                 return str_contains(
                     $request->url(),
