@@ -158,17 +158,13 @@ class SmtpMailDriverOAuthRetryTest extends TestCase
             ->ordered();
 
         $driver = new SmtpMailDriver(
-            configurationFactory:
-            $configurationFactory,
+            configurationFactory: $configurationFactory,
 
-            transportFactory:
-            $transportFactory,
+            transportFactory: $transportFactory,
 
-            emailFactory:
-            $emailFactory,
+            emailFactory: $emailFactory,
 
-            exceptions:
-            $exceptions,
+            exceptions: $exceptions,
         );
 
         $result = $driver->test(
@@ -334,17 +330,13 @@ class SmtpMailDriverOAuthRetryTest extends TestCase
             ->ordered();
 
         $driver = new SmtpMailDriver(
-            configurationFactory:
-            $configurationFactory,
+            configurationFactory: $configurationFactory,
 
-            transportFactory:
-            $transportFactory,
+            transportFactory: $transportFactory,
 
-            emailFactory:
-            $emailFactory,
+            emailFactory: $emailFactory,
 
-            exceptions:
-            $exceptions,
+            exceptions: $exceptions,
         );
 
         try {
@@ -356,7 +348,7 @@ class SmtpMailDriverOAuthRetryTest extends TestCase
                 'Expected the second SMTP authentication failure to be thrown.'
             );
         } catch (
-        MailDriverException $exception
+            MailDriverException $exception
         ) {
             $this->assertSame(
                 'smtp_authentication_failed',
@@ -448,17 +440,13 @@ class SmtpMailDriverOAuthRetryTest extends TestCase
             ->once();
 
         $driver = new SmtpMailDriver(
-            configurationFactory:
-            $configurationFactory,
+            configurationFactory: $configurationFactory,
 
-            transportFactory:
-            $transportFactory,
+            transportFactory: $transportFactory,
 
-            emailFactory:
-            $emailFactory,
+            emailFactory: $emailFactory,
 
-            exceptions:
-            $exceptions,
+            exceptions: $exceptions,
         );
 
         try {
@@ -470,7 +458,7 @@ class SmtpMailDriverOAuthRetryTest extends TestCase
                 'Expected the SMTP authentication failure to be thrown.'
             );
         } catch (
-        MailDriverException $exception
+            MailDriverException $exception
         ) {
             $this->assertSame(
                 'smtp_authentication_failed',
@@ -486,8 +474,7 @@ class SmtpMailDriverOAuthRetryTest extends TestCase
         $channel = new MailboxChannel;
 
         $channel->forceFill([
-            'auth_type' =>
-                $authType->value,
+            'auth_type' => $authType->value,
         ]);
 
         return $channel;
@@ -519,8 +506,7 @@ class SmtpMailDriverOAuthRetryTest extends TestCase
     {
         return new MailDriverException(
             message: 'SMTP authentication failed.',
-            driverErrorCode:
-            'smtp_authentication_failed',
+            driverErrorCode: 'smtp_authentication_failed',
             retryable: false,
             failoverAllowed: true,
             affectsChannelHealth: true,

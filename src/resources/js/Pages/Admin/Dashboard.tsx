@@ -1,8 +1,10 @@
 import AdminLayout from '@/Layouts/AdminLayout'
+import { usePermissions } from '@/hooks/usePermissions'
 import { Head, Link } from '@inertiajs/react'
 import {
     ArrowRight,
     Building2,
+    CalendarClock,
     KeyRound,
     Mailbox,
     MailSearch,
@@ -13,7 +15,6 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { route } from 'ziggy-js'
-import { usePermissions } from '@/hooks/usePermissions'
 
 type DashboardItem = {
     title: string
@@ -105,6 +106,7 @@ function DashboardCard({ item }: DashboardCardProps) {
 
 export default function Index() {
     const { canAny } = usePermissions()
+
     const staffItems: DashboardItem[] = [
         {
             title: 'Agents',
@@ -133,6 +135,14 @@ export default function Index() {
                 'Group agents into teams for routing and collaboration.',
             href: route('admin.teams.index'),
             icon: UsersRound,
+        },
+        {
+            title: 'Work Schedules',
+            description:
+                'Configure agent working hours, assignments, and schedule exceptions.',
+            href: route('admin.work-schedules.index'),
+            permissions: ['admin.staff.work_schedules.view'],
+            icon: CalendarClock,
         },
     ]
 
@@ -199,12 +209,18 @@ export default function Index() {
 
                     <div className="p-6">
                         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                            {staffItems.map((item) => (
-                                <DashboardCard
-                                    key={item.title}
-                                    item={item}
-                                />
-                            ))}
+                            {staffItems
+                                .filter(
+                                    (item) =>
+                                        !item.permissions ||
+                                        canAny(item.permissions),
+                                )
+                                .map((item) => (
+                                    <DashboardCard
+                                        key={item.title}
+                                        item={item}
+                                    />
+                                ))}
                         </div>
                     </div>
                 </section>
@@ -234,10 +250,10 @@ export default function Index() {
                                         canAny(item.permissions),
                                 )
                                 .map((item) => (
-                                <DashboardCard
-                                    key={item.title}
-                                    item={item}
-                                />
+                                    <DashboardCard
+                                        key={item.title}
+                                        item={item}
+                                    />
                                 ))}
                         </div>
                     </div>

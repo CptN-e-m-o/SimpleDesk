@@ -30,10 +30,9 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         $keys = $this->rsaKeys();
 
         Http::fake([
-            'https://login.microsoftonline.com/common/discovery/v2.0/keys' =>
-                Http::response(
-                    $keys['jwks']
-                ),
+            'https://login.microsoftonline.com/common/discovery/v2.0/keys' => Http::response(
+                $keys['jwks']
+            ),
         ]);
 
         $connection = $this->connection();
@@ -73,10 +72,9 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         $keys = $this->rsaKeys();
 
         Http::fake([
-            'https://login.microsoftonline.com/common/discovery/v2.0/keys' =>
-                Http::response(
-                    $keys['jwks']
-                ),
+            'https://login.microsoftonline.com/common/discovery/v2.0/keys' => Http::response(
+                $keys['jwks']
+            ),
         ]);
 
         $token = $this->idToken(
@@ -109,10 +107,9 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         $keys = $this->rsaKeys();
 
         Http::fake([
-            'https://login.microsoftonline.com/common/discovery/v2.0/keys' =>
-                Http::response(
-                    $keys['jwks']
-                ),
+            'https://login.microsoftonline.com/common/discovery/v2.0/keys' => Http::response(
+                $keys['jwks']
+            ),
         ]);
 
         $token = $this->idToken(
@@ -145,10 +142,9 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         $keys = $this->rsaKeys();
 
         Http::fake([
-            'https://login.microsoftonline.com/common/discovery/v2.0/keys' =>
-                Http::response(
-                    $keys['jwks']
-                ),
+            'https://login.microsoftonline.com/common/discovery/v2.0/keys' => Http::response(
+                $keys['jwks']
+            ),
         ]);
 
         $token = $this->idToken(
@@ -187,10 +183,9 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         $keys = $this->rsaKeys();
 
         Http::fake([
-            'https://login.microsoftonline.com/common/discovery/v2.0/keys' =>
-                Http::response(
-                    $keys['jwks']
-                ),
+            'https://login.microsoftonline.com/common/discovery/v2.0/keys' => Http::response(
+                $keys['jwks']
+            ),
         ]);
 
         $token = $this->idToken(
@@ -198,8 +193,7 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
             [
                 'aud' => 'client-id',
                 'nonce' => 'expected-nonce',
-                'iss' =>
-                    'https://login.microsoftonline.com/'
+                'iss' => 'https://login.microsoftonline.com/'
                     .'22222222-2222-4222-8222-222222222222'
                     .'/v2.0',
             ]
@@ -235,10 +229,9 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         Http::fake([
             'https://login.microsoftonline.com/'
             .$configuredTenant
-            .'/discovery/v2.0/keys' =>
-                Http::response(
-                    $keys['jwks']
-                ),
+            .'/discovery/v2.0/keys' => Http::response(
+                $keys['jwks']
+            ),
         ]);
 
         $connection = $this->connection(
@@ -252,8 +245,7 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
                 'aud' => 'client-id',
                 'nonce' => 'expected-nonce',
                 'tid' => $tokenTenant,
-                'iss' =>
-                    'https://login.microsoftonline.com/'
+                'iss' => 'https://login.microsoftonline.com/'
                     .$tokenTenant
                     .'/v2.0',
             ]
@@ -281,10 +273,9 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         $keys = $this->rsaKeys();
 
         Http::fake([
-            'https://login.microsoftonline.com/common/discovery/v2.0/keys' =>
-                Http::response(
-                    $keys['jwks']
-                ),
+            'https://login.microsoftonline.com/common/discovery/v2.0/keys' => Http::response(
+                $keys['jwks']
+            ),
         ]);
 
         $token = $this->idToken(
@@ -321,39 +312,29 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
     ): MailProviderConnection {
         return MailProviderConnection::query()
             ->create([
-                'name' =>
-                    'Microsoft OAuth',
+                'name' => 'Microsoft OAuth',
 
-                'provider' =>
-                    'microsoft',
+                'provider' => 'microsoft',
 
-                'auth_type' =>
-                    MailAuthenticationType::OAuth2,
+                'auth_type' => MailAuthenticationType::OAuth2,
 
-                'tenant_identifier' =>
-                    $tenantIdentifier,
+                'tenant_identifier' => $tenantIdentifier,
 
                 'configuration' => [
-                    'client_id' =>
-                        'client-id',
+                    'client_id' => 'client-id',
 
-                    'tenant_mode' =>
-                        $tenantMode,
+                    'tenant_mode' => $tenantMode,
                 ],
 
                 'secret_configuration' => [
-                    'client_secret' =>
-                        'client-secret-value',
+                    'client_secret' => 'client-secret-value',
                 ],
 
-                'scopes' =>
-                    [],
+                'scopes' => [],
 
-                'is_active' =>
-                    true,
+                'is_active' => true,
 
-                'health_status' =>
-                    'unknown',
+                'health_status' => 'unknown',
             ]);
     }
 
@@ -366,44 +347,33 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
 
         $claims = array_merge(
             [
-                'aud' =>
-                    'client-id',
+                'aud' => 'client-id',
 
-                'iss' =>
-                    'https://login.microsoftonline.com/'
+                'iss' => 'https://login.microsoftonline.com/'
                     .$tenantId
                     .'/v2.0',
 
-                'iat' =>
-                    now()->getTimestamp(),
+                'iat' => now()->getTimestamp(),
 
-                'nbf' =>
-                    now()
-                        ->subSecond()
-                        ->getTimestamp(),
+                'nbf' => now()
+                    ->subSecond()
+                    ->getTimestamp(),
 
-                'exp' =>
-                    now()
-                        ->addHour()
-                        ->getTimestamp(),
+                'exp' => now()
+                    ->addHour()
+                    ->getTimestamp(),
 
-                'nonce' =>
-                    'expected-nonce',
+                'nonce' => 'expected-nonce',
 
-                'tid' =>
-                    $tenantId,
+                'tid' => $tenantId,
 
-                'ver' =>
-                    '2.0',
+                'ver' => '2.0',
 
-                'sub' =>
-                    'provider-account-id',
+                'sub' => 'provider-account-id',
 
-                'email' =>
-                    'mailbox@example.test',
+                'email' => 'mailbox@example.test',
 
-                'preferred_username' =>
-                    'mailbox@example.test',
+                'preferred_username' => 'mailbox@example.test',
             ],
             $overrides
         );
@@ -460,33 +430,26 @@ class MicrosoftMailOAuthIdTokenValidatorTest extends TestCase
         }
 
         return [
-            'private_key' =>
-                $privateKey,
+            'private_key' => $privateKey,
 
             'jwks' => [
                 'keys' => [
                     [
-                        'kty' =>
-                            'RSA',
+                        'kty' => 'RSA',
 
-                        'use' =>
-                            'sig',
+                        'use' => 'sig',
 
-                        'kid' =>
-                            'microsoft-test-key',
+                        'kid' => 'microsoft-test-key',
 
-                        'alg' =>
-                            'RS256',
+                        'alg' => 'RS256',
 
-                        'n' =>
-                            $this->base64Url(
-                                $details['rsa']['n']
-                            ),
+                        'n' => $this->base64Url(
+                            $details['rsa']['n']
+                        ),
 
-                        'e' =>
-                            $this->base64Url(
-                                $details['rsa']['e']
-                            ),
+                        'e' => $this->base64Url(
+                            $details['rsa']['e']
+                        ),
                     ],
                 ],
             ],
