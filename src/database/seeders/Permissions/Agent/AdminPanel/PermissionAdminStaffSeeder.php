@@ -71,6 +71,45 @@ class PermissionAdminStaffSeeder extends Seeder
             ['key' => 'admin.staff.work_schedules.archive', 'label' => 'Archive and restore work schedules', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 100],
             ['key' => 'admin.staff.work_schedules.manage_assignments', 'label' => 'Manage work schedule assignments', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 110],
             ['key' => 'admin.staff.work_schedules.manage_exceptions', 'label' => 'Manage work schedule exceptions', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 120],
+            ['key' => 'admin.staff.agent_statuses.view', 'label' => 'View agent statuses', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 130],
+            ['key' => 'admin.staff.agent_statuses.create', 'label' => 'Create agent statuses', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 140],
+            ['key' => 'admin.staff.agent_statuses.update', 'label' => 'Update agent statuses', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 150],
+            ['key' => 'admin.staff.agent_statuses.archive', 'label' => 'Archive agent statuses', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 160],
+            [
+                'key' => 'admin.staff.agent_statuses.delete',
+                'label' => 'Permanently delete unused archived agent statuses',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 170,
+            ],
+            [
+                'key' => 'admin.staff.agent_statuses.manage_agents',
+                'label' => 'Manage agent current statuses',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 180,
+            ],
+            [
+                'key' => 'admin.staff.agent_statuses.view_history',
+                'label' => 'View agent status history',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 190,
+            ],
+            [
+                'key' => 'agent.status.change_own',
+                'label' => 'Change own status',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 200,
+            ],
+            [
+                'key' => 'agent.status.view_own_history',
+                'label' => 'View own status history',
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => 210,
+            ],
         ];
 
         foreach ($permissions as $permission) {

@@ -1,0 +1,3 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import AgentLayout from '@/Layouts/AgentLayout'; import { Head } from '@inertiajs/react'
+export default function History({periods}:{periods:{data:any[]}}){return <AgentLayout title="My status history"><Head title="My status history"/><div className="rounded-3xl border bg-white p-6">{periods.data.map(p=><div key={p.id} className="border-b py-4"><div className="font-medium">{p.status?.name}</div><div className="text-sm text-gray-500">{new Date(p.started_at).toLocaleString()} — {p.ended_at?new Date(p.ended_at).toLocaleString():'Current'} · {p.source}</div>{p.note&&<p className="mt-1 text-sm">{p.note}</p>}</div>)}</div></AgentLayout>}

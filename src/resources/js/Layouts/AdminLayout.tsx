@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { Link, router, usePage } from '@inertiajs/react'
 import {
+    Activity,
     LayoutDashboard,
     UserCog,
     Building2,
@@ -149,6 +150,13 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         icon: CalendarClock,
                         permission: 'admin.staff.work_schedules.view',
                         isActive: (currentUrl: string) => currentUrl.startsWith('/admin/work-schedules') || currentUrl.startsWith('/admin/work-schedule-'),
+                    },
+                    {
+                        label: 'Agent Statuses',
+                        href: route('admin.agent-statuses.index'),
+                        icon: Activity,
+                        permission: 'admin.staff.agent_statuses.view',
+                        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/agent-statuses'),
                     },
                 ],
             },

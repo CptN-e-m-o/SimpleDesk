@@ -5,6 +5,7 @@ namespace App\Models\User;
 use App\Models\Admin\Department;
 use App\Models\Admin\Team;
 use App\Models\Admin\WorkScheduleAssignment;
+use App\Models\Admin\AgentStatusPeriod;
 use App\Models\Concerns\HasPermissions;
 use App\Models\Role;
 use App\Models\Ticket;
@@ -151,5 +152,20 @@ class User extends Authenticatable
     public function workScheduleAssignments(): HasMany
     {
         return $this->hasMany(WorkScheduleAssignment::class);
+    }
+
+    public function statusPeriods(): HasMany
+    {
+        return $this->hasMany(AgentStatusPeriod::class);
+    }
+
+    public function currentGlobalStatusPeriod(): HasMany
+    {
+        return $this->statusPeriods()->where('scope', 'global')->whereNull('ended_at')->latest('started_at');
+    }
+
+    public function currentChannelStatusPeriods(): HasMany
+    {
+        return $this->statusPeriods()->where('scope', 'channel')->whereNull('ended_at');
     }
 }

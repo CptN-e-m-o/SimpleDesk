@@ -24,6 +24,7 @@ import {
 
 import type { SharedData } from '@/types'
 import { usePermissions } from '@/hooks/usePermissions'
+import AgentStatusControl from '@/Components/AgentStatusControl'
 
 type Props = {
     readonly title?: string
@@ -192,6 +193,7 @@ export default function AgentLayout({ title = 'Dashboard', children }: Props) {
                             </div>
 
                             <div className="flex items-center gap-2 sm:gap-3">
+                                <AgentStatusControl />
                                 {canCreateClientTicket && (
                                     <Link
                                         href={route('tickets.create')}

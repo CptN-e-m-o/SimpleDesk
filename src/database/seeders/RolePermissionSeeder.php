@@ -127,6 +127,15 @@ class RolePermissionSeeder extends Seeder
             'admin.staff.work_schedules.archive',
             'admin.staff.work_schedules.manage_assignments',
             'admin.staff.work_schedules.manage_exceptions',
+            'admin.staff.agent_statuses.view',
+            'admin.staff.agent_statuses.create',
+            'admin.staff.agent_statuses.update',
+            'admin.staff.agent_statuses.archive',
+            'admin.staff.agent_statuses.delete',
+            'admin.staff.agent_statuses.manage_agents',
+            'admin.staff.agent_statuses.view_history',
+            'agent.status.change_own',
+            'agent.status.view_own_history',
             'admin.tickets.manage_ticket_settings',
             'admin.tickets.manage_status',
             'admin.tickets.manage_labels',
@@ -322,6 +331,8 @@ class RolePermissionSeeder extends Seeder
     private function agentPermissions(): array
     {
         return [
+            'agent.status.change_own',
+            'agent.status.view_own_history',
             'agent.tickets.create',
             'agent.tickets.respond',
             'agent.tickets.reply',

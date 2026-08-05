@@ -15,4 +15,8 @@ export interface SharedData extends InertiaPageProps {
         success?: string | null
         error?: string | null
     }
+    agentStatus?: {
+        current: { id: number; name: string; icon: string; color: string; availability: string; expires_at?: string | null }
+        options: Array<{ id: number; name: string; icon: string; color: string; availability: string; default_duration_minutes?: number | null }>
+    } | null
 }
