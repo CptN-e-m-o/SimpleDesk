@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\AgentStatusController;
+use App\Http\Controllers\Admin\AgentStatusManagementController;
+use App\Http\Controllers\Agent\OwnAgentStatusController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\Mail\AttachmentAntivirusConnectionTestController;
 use App\Http\Controllers\Admin\Mail\Diagnostics\MailDiagnosticsController as MailDiagnosticsPageController;
@@ -78,6 +81,9 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
 
     Route::prefix('agent')->name('agent.')->group(function () {
+        Route::post('/status', [OwnAgentStatusController::class, 'store'])->middleware('permission:agent.status.change_own')->name('status.store');
+        Route::post('/status/default', [OwnAgentStatusController::class, 'default'])->middleware('permission:agent.status.change_own')->name('status.default');
+        Route::get('/status/history', [OwnAgentStatusController::class, 'history'])->middleware('permission:agent.status.view_own_history')->name('status.history');
         Route::get('/tickets', function () {
             return Inertia::render('Tickets/Agent/Index');
         })
@@ -144,6 +150,30 @@ Route::middleware('auth')->group(function () {
         Route::resource('agents', AgentController::class)
             ->withTrashed(['show', 'edit', 'update'])
             ->middleware('permission:admin.staff.manage_agents');
+
+        Route::get('agent-statuses', [AgentStatusController::class, 'index'])->middleware('permission:admin.staff.agent_statuses.view')->name('agent-statuses.index');
+        Route::get('agent-statuses/create', [AgentStatusController::class, 'create'])->middleware('permission:admin.staff.agent_statuses.create')->name('agent-statuses.create');
+        Route::post('agent-statuses', [AgentStatusController::class, 'store'])->middleware('permission:admin.staff.agent_statuses.create')->name('agent-statuses.store');
+        Route::get('agent-statuses/{agentStatus}/edit', [AgentStatusController::class, 'edit'])->middleware('permission:admin.staff.agent_statuses.update')->name('agent-statuses.edit');
+        Route::put('agent-statuses/{agentStatus}', [AgentStatusController::class, 'update'])->middleware('permission:admin.staff.agent_statuses.update')->name('agent-statuses.update');
+        Route::post('agent-statuses/{agentStatus}/duplicate', [AgentStatusController::class, 'duplicate'])->middleware('permission:admin.staff.agent_statuses.create')->name('agent-statuses.duplicate');
+        Route::patch('agent-statuses/{agentStatus}/toggle', [AgentStatusController::class, 'toggle'])->middleware('permission:admin.staff.agent_statuses.update')->name('agent-statuses.toggle');
+        Route::patch('agent-statuses/{agentStatus}/default', [AgentStatusController::class, 'makeDefault'])->middleware('permission:admin.staff.agent_statuses.update')->name('agent-statuses.default');
+        Route::delete('agent-statuses/{agentStatus}', [AgentStatusController::class, 'destroy'])->middleware('permission:admin.staff.agent_statuses.archive')->name('agent-statuses.destroy');
+        Route::post('agent-statuses/{agentStatus}/restore', [AgentStatusController::class, 'restore'])->middleware('permission:admin.staff.agent_statuses.archive')->name('agent-statuses.restore');
+        Route::delete(
+            'agent-statuses/{agentStatus}/force-delete',
+            [AgentStatusController::class, 'forceDelete']
+        )
+            ->middleware(
+                'permission:admin.staff.agent_statuses.delete'
+            )
+            ->whereNumber('agentStatus')
+            ->name('agent-statuses.force-delete');
+        Route::get('agents/{agent}/status', [AgentStatusManagementController::class, 'show'])->middleware('permission:admin.staff.agent_statuses.manage_agents')->name('agents.status.show');
+        Route::post('agents/{agent}/status', [AgentStatusManagementController::class, 'store'])->middleware('permission:admin.staff.agent_statuses.manage_agents')->name('agents.status.store');
+        Route::post('agents/{agent}/status/default', [AgentStatusManagementController::class, 'default'])->middleware('permission:admin.staff.agent_statuses.manage_agents')->name('agents.status.default');
+        Route::get('agents/{agent}/status/history', [AgentStatusManagementController::class, 'history'])->middleware('permission:admin.staff.agent_statuses.view_history')->name('agents.status.history');
 
         Route::get('work-schedules', [WorkScheduleController::class, 'index'])->middleware('permission:admin.staff.work_schedules.view')->name('work-schedules.index');
         Route::get('work-schedules/create', [WorkScheduleController::class, 'create'])->middleware('permission:admin.staff.work_schedules.create')->name('work-schedules.create');

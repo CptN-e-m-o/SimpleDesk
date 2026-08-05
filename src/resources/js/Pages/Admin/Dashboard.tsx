@@ -3,6 +3,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { Head, Link } from '@inertiajs/react'
 import {
     ArrowRight,
+    Activity,
     Building2,
     CalendarClock,
     KeyRound,
@@ -143,6 +144,13 @@ export default function Index() {
             href: route('admin.work-schedules.index'),
             permissions: ['admin.staff.work_schedules.view'],
             icon: CalendarClock,
+        },
+        {
+            title: 'Agent Statuses',
+            description: 'Manage agent availability, routing eligibility, and temporary statuses.',
+            href: route('admin.agent-statuses.index'),
+            permissions: ['admin.staff.agent_statuses.view'],
+            icon: Activity,
         },
     ]
 
