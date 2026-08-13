@@ -34,7 +34,7 @@ services:
     depends_on:
       - pgsql
       - redis
-    stop_grace_period: 30s
+    stop_grace_period: 330s
     networks:
       - simpledesk
 
@@ -58,7 +58,7 @@ services:
     depends_on:
       - pgsql
       - redis
-    stop_grace_period: 30s
+    stop_grace_period: 330s
     networks:
       - simpledesk
 
