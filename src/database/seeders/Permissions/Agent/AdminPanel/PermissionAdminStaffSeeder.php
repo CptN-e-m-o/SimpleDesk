@@ -110,6 +110,11 @@ class PermissionAdminStaffSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 210,
             ],
+            ['key' => 'admin.staff.skills.view', 'label' => 'View skills', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 220],
+            ['key' => 'admin.staff.skills.create', 'label' => 'Create skills', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 230],
+            ['key' => 'admin.staff.skills.update', 'label' => 'Update skills', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 240],
+            ['key' => 'admin.staff.skills.archive', 'label' => 'Archive and restore skills', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 250],
+            ['key' => 'admin.staff.skills.delete', 'label' => 'Permanently delete archived skills', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 260],
         ];
 
         foreach ($permissions as $permission) {

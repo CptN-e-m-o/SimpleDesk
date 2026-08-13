@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\AgentStatusController;
 use App\Http\Controllers\Admin\AgentStatusManagementController;
-use App\Http\Controllers\Agent\OwnAgentStatusController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\Mail\AttachmentAntivirusConnectionTestController;
 use App\Http\Controllers\Admin\Mail\Diagnostics\MailDiagnosticsController as MailDiagnosticsPageController;
@@ -33,10 +32,12 @@ use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthRefreshController;
 use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\WorkScheduleAssignmentController;
 use App\Http\Controllers\Admin\WorkScheduleController;
 use App\Http\Controllers\Admin\WorkScheduleExceptionController;
+use App\Http\Controllers\Agent\OwnAgentStatusController;
 use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
@@ -150,6 +151,17 @@ Route::middleware('auth')->group(function () {
         Route::resource('agents', AgentController::class)
             ->withTrashed(['show', 'edit', 'update'])
             ->middleware('permission:admin.staff.manage_agents');
+
+        Route::get('skills', [SkillController::class, 'index'])->middleware('permission:admin.staff.skills.view')->name('skills.index');
+        Route::get('skills/create', [SkillController::class, 'create'])->middleware('permission:admin.staff.skills.create')->name('skills.create');
+        Route::post('skills', [SkillController::class, 'store'])->middleware('permission:admin.staff.skills.create')->name('skills.store');
+        Route::get('skills/{skill}/edit', [SkillController::class, 'edit'])->middleware('permission:admin.staff.skills.update')->whereNumber('skill')->name('skills.edit');
+        Route::put('skills/{skill}', [SkillController::class, 'update'])->middleware('permission:admin.staff.skills.update')->whereNumber('skill')->name('skills.update');
+        Route::post('skills/{skill}/duplicate', [SkillController::class, 'duplicate'])->middleware('permission:admin.staff.skills.create')->whereNumber('skill')->name('skills.duplicate');
+        Route::patch('skills/{skill}/toggle', [SkillController::class, 'toggle'])->middleware('permission:admin.staff.skills.update')->whereNumber('skill')->name('skills.toggle');
+        Route::delete('skills/{skill}', [SkillController::class, 'destroy'])->middleware('permission:admin.staff.skills.archive')->whereNumber('skill')->name('skills.destroy');
+        Route::post('skills/{skill}/restore', [SkillController::class, 'restore'])->middleware('permission:admin.staff.skills.archive')->whereNumber('skill')->name('skills.restore');
+        Route::delete('skills/{skill}/force-delete', [SkillController::class, 'forceDelete'])->middleware('permission:admin.staff.skills.delete')->whereNumber('skill')->name('skills.force-delete');
 
         Route::get('agent-statuses', [AgentStatusController::class, 'index'])->middleware('permission:admin.staff.agent_statuses.view')->name('agent-statuses.index');
         Route::get('agent-statuses/create', [AgentStatusController::class, 'create'])->middleware('permission:admin.staff.agent_statuses.create')->name('agent-statuses.create');

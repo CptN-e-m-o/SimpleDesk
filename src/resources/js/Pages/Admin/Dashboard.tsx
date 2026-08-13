@@ -13,6 +13,7 @@ import {
     TextQuote,
     UserCog,
     UsersRound,
+    Sparkles,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { route } from 'ziggy-js'
@@ -151,6 +152,13 @@ export default function Index() {
             href: route('admin.agent-statuses.index'),
             permissions: ['admin.staff.agent_statuses.view'],
             icon: Activity,
+        },
+        {
+            title: 'Skills',
+            description: 'Build reusable ticket classification rules with ANY or ALL conditions.',
+            href: route('admin.skills.index'),
+            permissions: ['admin.staff.skills.view'],
+            icon: Sparkles,
         },
     ]
 

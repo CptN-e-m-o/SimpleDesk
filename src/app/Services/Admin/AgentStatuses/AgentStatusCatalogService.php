@@ -267,9 +267,9 @@ class AgentStatusCatalogService
         $index = 2;
 
         while (
-        AgentStatus::withTrashed()
-            ->where('slug', $slug)
-            ->exists()
+            AgentStatus::withTrashed()
+                ->where('slug', $slug)
+                ->exists()
         ) {
             $slug = $base.'-'.$index;
             $index++;

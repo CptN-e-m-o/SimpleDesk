@@ -10,6 +10,8 @@ enum AgentStatusAvailability: string
 
     public function weight(): int
     {
-        return match ($this) { self::Available => 0, self::Limited => 1, self::Unavailable => 2 };
+        return match ($this) {
+            self::Available => 0, self::Limited => 1, self::Unavailable => 2
+        };
     }
 }
