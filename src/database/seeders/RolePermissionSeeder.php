@@ -91,6 +91,20 @@ class RolePermissionSeeder extends Seeder
             'admin.settings.manage_languages',
             'admin.settings.manage_social_widget_settings',
             'admin.settings.manage_client_panel_filter',
+
+            'admin.settings.manage_system',
+
+            'admin.settings.drivers.view',
+            'admin.settings.drivers.manage',
+
+            'admin.settings.infrastructure_connections.view',
+            'admin.settings.infrastructure_connections.create',
+            'admin.settings.infrastructure_connections.update',
+            'admin.settings.infrastructure_connections.archive',
+            'admin.settings.infrastructure_connections.delete',
+            'admin.settings.infrastructure_connections.test',
+
+            'admin.settings.system_audit.view',
         ];
     }
 

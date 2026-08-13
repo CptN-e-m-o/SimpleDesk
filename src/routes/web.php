@@ -33,6 +33,10 @@ use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\System\DriverController;
+use App\Http\Controllers\Admin\System\InfrastructureConnectionController;
+use App\Http\Controllers\Admin\System\InfrastructureConnectionTestController;
+use App\Http\Controllers\Admin\System\SystemAuditLogController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\WorkScheduleAssignmentController;
 use App\Http\Controllers\Admin\WorkScheduleController;
@@ -97,6 +101,20 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::prefix('system')->name('system.')->group(function (): void {
+            Route::get('drivers', DriverController::class)->middleware('permission:admin.settings.drivers.view')->name('drivers.index');
+            Route::get('connections', [InfrastructureConnectionController::class, 'index'])->middleware('permission:admin.settings.infrastructure_connections.view')->name('connections.index');
+            Route::get('connections/create', [InfrastructureConnectionController::class, 'create'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.create');
+            Route::post('connections', [InfrastructureConnectionController::class, 'store'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.store');
+            Route::get('connections/{connection}/edit', [InfrastructureConnectionController::class, 'edit'])->middleware('permission:admin.settings.infrastructure_connections.update')->name('connections.edit');
+            Route::put('connections/{connection}', [InfrastructureConnectionController::class, 'update'])->middleware('permission:admin.settings.infrastructure_connections.update')->name('connections.update');
+            Route::patch('connections/{connection}/toggle', [InfrastructureConnectionController::class, 'toggle'])->middleware('permission:admin.settings.infrastructure_connections.update')->name('connections.toggle');
+            Route::post('connections/{connection}/test', InfrastructureConnectionTestController::class)->middleware('permission:admin.settings.infrastructure_connections.test')->name('connections.test');
+            Route::delete('connections/{connection}', [InfrastructureConnectionController::class, 'destroy'])->middleware('permission:admin.settings.infrastructure_connections.archive')->name('connections.destroy');
+            Route::post('connections/{id}/restore', [InfrastructureConnectionController::class, 'restore'])->middleware('permission:admin.settings.infrastructure_connections.archive')->whereNumber('id')->name('connections.restore');
+            Route::delete('connections/{id}/force-delete', [InfrastructureConnectionController::class, 'forceDelete'])->middleware('permission:admin.settings.infrastructure_connections.delete')->whereNumber('id')->name('connections.force-delete');
+            Route::get('audit', SystemAuditLogController::class)->middleware('permission:admin.settings.system_audit.view')->name('audit.index');
+        });
         Route::get('/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })
