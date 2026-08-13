@@ -184,7 +184,7 @@ export default function Index({
         <AdminLayout title="System Audit">
             <Head title="System Audit" />
 
-            <div className="space-y-6 p-4 sm:p-6">
+            <div className="space-y-6">
                 <header className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
                     <div className="flex flex-col justify-between gap-5 bg-gradient-to-r from-sky-50/80 via-white to-white p-6 sm:flex-row sm:items-center">
                         <div className="flex items-start gap-4">

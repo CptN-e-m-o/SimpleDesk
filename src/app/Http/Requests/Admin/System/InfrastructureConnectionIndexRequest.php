@@ -17,6 +17,50 @@ class InfrastructureConnectionIndexRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['search' => ['nullable', 'string', 'max:255'], 'type' => ['nullable', Rule::enum(InfrastructureConnectionType::class)], 'source' => ['nullable', Rule::enum(InfrastructureConnectionSource::class)], 'health' => ['nullable', Rule::enum(InfrastructureHealthStatus::class)], 'archived' => ['nullable', Rule::in(['active', 'archived', 'all'])]];
+        return [
+            'search' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'type' => [
+                'nullable',
+                Rule::enum(
+                    InfrastructureConnectionType::class,
+                ),
+            ],
+
+            'source' => [
+                'nullable',
+                Rule::enum(
+                    InfrastructureConnectionSource::class,
+                ),
+            ],
+
+            'state' => [
+                'nullable',
+                Rule::in([
+                    'enabled',
+                    'disabled',
+                ]),
+            ],
+
+            'health' => [
+                'nullable',
+                Rule::enum(
+                    InfrastructureHealthStatus::class,
+                ),
+            ],
+
+            'archived' => [
+                'nullable',
+                Rule::in([
+                    'active',
+                    'archived',
+                    'all',
+                ]),
+            ],
+        ];
     }
 }

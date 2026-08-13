@@ -18,16 +18,32 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { route } from 'ziggy-js'
 
+type DriverCategoryKey =
+    | 'queue'
+    | 'cache'
+    | 'broadcasting'
+    | 'search'
+    | 'storage'
+
 type DriverCategory = {
+    key: DriverCategoryKey
     name: string
     description: string
-    icon: LucideIcon
     details: string
     examples: string[]
+    icon: LucideIcon
 }
 
-const categories: DriverCategory[] = [
-    {
+type Props = {
+    categories: string[]
+}
+
+const categoryDefinitions: Record<
+    DriverCategoryKey,
+    DriverCategory
+> = {
+    queue: {
+        key: 'queue',
         name: 'Queues',
         description:
             'Deliver asynchronous application work reliably.',
@@ -42,7 +58,9 @@ const categories: DriverCategory[] = [
         ],
         icon: Workflow,
     },
-    {
+
+    cache: {
+        key: 'cache',
         name: 'Cache',
         description:
             'Accelerate reads and coordinate shared application state.',
@@ -57,7 +75,9 @@ const categories: DriverCategory[] = [
         ],
         icon: Database,
     },
-    {
+
+    broadcasting: {
+        key: 'broadcasting',
         name: 'Real-time',
         description:
             'Broadcast live application events to connected clients.',
@@ -70,7 +90,9 @@ const categories: DriverCategory[] = [
         ],
         icon: Radio,
     },
-    {
+
+    search: {
+        key: 'search',
         name: 'Search',
         description:
             'Power indexed discovery across SimpleDesk data.',
@@ -84,7 +106,9 @@ const categories: DriverCategory[] = [
         ],
         icon: Search,
     },
-    {
+
+    storage: {
+        key: 'storage',
         name: 'Storage',
         description:
             'Store private files, exports, and application objects.',
@@ -96,10 +120,26 @@ const categories: DriverCategory[] = [
         ],
         icon: HardDrive,
     },
-]
+}
 
-export default function Index() {
+export default function Index({
+                                  categories,
+                              }: Props) {
     const { can } = usePermissions()
+
+    const visibleCategories =
+        categories
+            .map((category) =>
+                getCategoryDefinition(
+                    category,
+                ),
+            )
+            .filter(
+                (
+                    category,
+                ): category is DriverCategory =>
+                    category !== null,
+            )
 
     return (
         <AdminLayout title="System Drivers">
@@ -119,9 +159,10 @@ export default function Index() {
                                 </h1>
 
                                 <p className="mt-1 max-w-3xl text-sm leading-6 text-gray-500">
-                                    Configure how SimpleDesk subsystems use
-                                    infrastructure resources for queues,
-                                    caching, real-time communication, search,
+                                    Configure how SimpleDesk
+                                    subsystems use infrastructure
+                                    resources for queues, caching,
+                                    real-time communication, search,
                                     and file storage.
                                 </p>
                             </div>
@@ -147,8 +188,9 @@ export default function Index() {
                             <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
 
                             <p className="text-sm leading-6 text-gray-600">
-                                Until a subsystem is explicitly configured
-                                through System Drivers, its existing deployment
+                                Until a subsystem is explicitly
+                                configured through System Drivers,
+                                its existing deployment
                                 configuration remains unchanged.
                             </p>
                         </div>
@@ -163,79 +205,126 @@ export default function Index() {
                             </h2>
 
                             <p className="mt-1 text-sm leading-6 text-gray-500">
-                                Each category owns its own driver configuration
-                                while reusing shared infrastructure connections
-                                where appropriate.
+                                Each category owns its own driver
+                                configuration while reusing shared
+                                infrastructure connections where
+                                appropriate.
                             </p>
                         </div>
                     </div>
 
-                    <div className="grid gap-5 p-5 sm:p-6 md:grid-cols-2 xl:grid-cols-3">
-                        {categories.map(
-                            ({
-                                 name,
-                                 description,
-                                 details,
-                                 examples,
-                                 icon: Icon,
-                             }) => (
-                                <article
-                                    key={name}
-                                    className="group flex min-h-[290px] flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
-                                >
-                                    <div className="flex flex-1 flex-col p-5">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 ring-1 ring-inset ring-sky-100 transition group-hover:bg-sky-100">
-                                                <Icon className="h-6 w-6 text-sky-600" />
+                    {visibleCategories.length > 0 ? (
+                        <div className="grid gap-5 p-5 sm:p-6 md:grid-cols-2 xl:grid-cols-3">
+                            {visibleCategories.map(
+                                ({
+                                     key,
+                                     name,
+                                     description,
+                                     details,
+                                     examples,
+                                     icon: Icon,
+                                 }) => (
+                                    <article
+                                        key={key}
+                                        className="group flex min-h-[290px] flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
+                                    >
+                                        <div className="flex flex-1 flex-col p-5">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 ring-1 ring-inset ring-sky-100 transition group-hover:bg-sky-100">
+                                                    <Icon className="h-6 w-6 text-sky-600" />
+                                                </div>
+
+                                                <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 ring-1 ring-inset ring-gray-200">
+                                                    System-managed
+                                                    setup inactive
+                                                </span>
                                             </div>
 
-                                            <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 ring-1 ring-inset ring-gray-200">
-                                                System-managed setup inactive
+                                            <div className="mt-5">
+                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                    {name}
+                                                </h3>
+
+                                                <p className="mt-1 text-sm font-medium text-gray-600">
+                                                    {description}
+                                                </p>
+
+                                                <p className="mt-3 text-sm leading-6 text-gray-500">
+                                                    {details}
+                                                </p>
+                                            </div>
+
+                                            <div className="mt-5 flex flex-wrap gap-2">
+                                                {examples.map(
+                                                    (
+                                                        example,
+                                                    ) => (
+                                                        <span
+                                                            key={
+                                                                example
+                                                            }
+                                                            className="rounded-lg bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-200"
+                                                        >
+                                                            {
+                                                                example
+                                                            }
+                                                        </span>
+                                                    ),
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/60 px-5 py-4">
+                                            <span className="text-xs font-medium text-gray-400">
+                                                Managed configuration
+                                                is not active yet
                                             </span>
+
+                                            <ArrowRight className="h-4 w-4 text-gray-300" />
                                         </div>
+                                    </article>
+                                ),
+                            )}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
+                                <ServerCog className="h-7 w-7 text-gray-400" />
+                            </div>
 
-                                        <div className="mt-5">
-                                            <h3 className="text-lg font-semibold text-gray-900">
-                                                {name}
-                                            </h3>
+                            <h3 className="mt-4 font-semibold text-gray-900">
+                                No driver categories available
+                            </h3>
 
-                                            <p className="mt-1 text-sm font-medium text-gray-600">
-                                                {description}
-                                            </p>
-
-                                            <p className="mt-3 text-sm leading-6 text-gray-500">
-                                                {details}
-                                            </p>
-                                        </div>
-
-                                        <div className="mt-5 flex flex-wrap gap-2">
-                                            {examples.map(
-                                                (example) => (
-                                                    <span
-                                                        key={example}
-                                                        className="rounded-lg bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-200"
-                                                    >
-                                                        {example}
-                                                    </span>
-                                                ),
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/60 px-5 py-4">
-                                        <span className="text-xs font-medium text-gray-400">
-                                            Managed configuration is not
-                                            active yet
-                                        </span>
-
-                                        <ArrowRight className="h-4 w-4 text-gray-300" />
-                                    </div>
-                                </article>
-                            ),
-                        )}
-                    </div>
+                            <p className="mt-1 max-w-md text-sm leading-6 text-gray-500">
+                                SimpleDesk did not expose any
+                                supported system driver categories.
+                            </p>
+                        </div>
+                    )}
                 </section>
             </div>
         </AdminLayout>
+    )
+}
+
+function getCategoryDefinition(
+    value: string,
+): DriverCategory | null {
+    if (
+        !isDriverCategoryKey(value)
+    ) {
+        return null
+    }
+
+    return categoryDefinitions[value]
+}
+
+function isDriverCategoryKey(
+    value: string,
+): value is DriverCategoryKey {
+    return Object.prototype.hasOwnProperty.call(
+        categoryDefinitions,
+        value,
     )
 }

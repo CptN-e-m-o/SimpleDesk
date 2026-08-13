@@ -1,4 +1,11 @@
 import AdminLayout from '@/Layouts/AdminLayout'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/ui/select'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
     Head,
@@ -9,9 +16,9 @@ import {
     Activity,
     Archive,
     Cable,
-    Check,
     CheckCircle2,
-    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     CircleOff,
     Clock3,
     Gauge,
@@ -21,22 +28,20 @@ import {
     RefreshCw,
     RotateCcw,
     Search,
-    Server,
     SlidersHorizontal,
     Trash2,
     X,
     XCircle,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import {
     useEffect,
-    useMemo,
-    useRef,
     useState,
 } from 'react'
-import type { ReactNode } from 'react'
 import type {
-    LucideIcon,
-} from 'lucide-react'
+    FormEvent,
+    ReactNode,
+} from 'react'
 import { route } from 'ziggy-js'
 
 type HealthStatus =
@@ -64,13 +69,50 @@ type Connection = {
     latest_health_check?: LatestHealthCheck | null
 }
 
-type Props = {
-    connections: Connection[]
+type Definition = {
+    type: string
+    label: string
+    description?: string
 }
 
-type SelectOption = {
-    value: string
+type PaginationLink = {
+    url: string | null
     label: string
+    active: boolean
+}
+
+type ConnectionsPagination = {
+    data: Connection[]
+    links: PaginationLink[]
+    total: number
+    from?: number | null
+    to?: number | null
+    current_page: number
+    last_page: number
+}
+
+type Filters = {
+    search?: string
+    type?: string
+    source?: string
+    state?: string
+    health?: string
+    archived?: string
+}
+
+type Stats = {
+    total: number
+    enabled: number
+    healthy: number
+    problems: number
+    archived: number
+}
+
+type Props = {
+    connections: ConnectionsPagination
+    definitions: Definition[]
+    filters?: Filters
+    stats: Stats
 }
 
 type TestResult = {
@@ -81,129 +123,100 @@ type TestResult = {
     failed?: boolean
 }
 
+const ALL = '__all__'
+
 export default function Index({
                                   connections,
+                                  definitions,
+                                  filters = {},
+                                  stats,
                               }: Props) {
     const { can } = usePermissions()
 
-    const [search, setSearch] = useState('')
-    const [source, setSource] = useState('')
-    const [state, setState] = useState('')
-    const [health, setHealth] = useState('')
+    const [search, setSearch] = useState(
+        filters.search ?? '',
+    )
+
     const [testing, setTesting] =
         useState<number | null>(null)
 
     const [testResult, setTestResult] =
         useState<TestResult | null>(null)
 
-    const healthy = connections.filter(
-        (connection) =>
-            connection.latest_health_check?.status ===
-            'healthy',
-    ).length
+    useEffect(() => {
+        setSearch(filters.search ?? '')
+    }, [filters.search])
 
-    const problems = connections.filter(
-        (connection) =>
-            [
-                'degraded',
-                'unhealthy',
-                'unavailable',
-            ].includes(
-                connection.latest_health_check?.status ??
-                '',
-            ),
-    ).length
-
-    const enabled = connections.filter(
-        (connection) =>
-            connection.is_enabled &&
-            !connection.deleted_at,
-    ).length
+    const activeFilters = {
+        search: filters.search ?? '',
+        type: filters.type ?? '',
+        source: filters.source ?? '',
+        state: filters.state ?? '',
+        health: filters.health ?? '',
+        archived: filters.archived ?? 'active',
+    }
 
     const hasFilters =
-        search.trim() !== '' ||
-        source !== '' ||
-        state !== '' ||
-        health !== ''
+        activeFilters.search !== '' ||
+        activeFilters.type !== '' ||
+        activeFilters.source !== '' ||
+        activeFilters.state !== '' ||
+        activeFilters.health !== '' ||
+        activeFilters.archived !== 'active'
 
-    const filteredConnections = useMemo(() => {
-        const normalizedSearch = search
-            .trim()
-            .toLowerCase()
+    const navigate = (
+        changes: Partial<typeof activeFilters>,
+    ) => {
+        const next = {
+            ...activeFilters,
+            ...changes,
+        }
 
-        return connections.filter((connection) => {
-            if (
-                normalizedSearch !== '' &&
-                ![
-                    connection.name,
-                    connection.type,
-                    connection.source,
-                ].some((value) =>
-                    value
-                        .toLowerCase()
-                        .includes(normalizedSearch),
-                )
-            ) {
-                return false
-            }
+        router.get(
+            route(
+                'admin.system.connections.index',
+            ),
+            removeEmptyFilters(next),
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        )
+    }
 
-            if (
-                source !== '' &&
-                connection.source !== source
-            ) {
-                return false
-            }
+    const submitSearch = (
+        event: FormEvent<HTMLFormElement>,
+    ) => {
+        event.preventDefault()
 
-            if (state === 'enabled') {
-                if (
-                    connection.deleted_at ||
-                    !connection.is_enabled
-                ) {
-                    return false
-                }
-            }
-
-            if (state === 'disabled') {
-                if (
-                    connection.deleted_at ||
-                    connection.is_enabled
-                ) {
-                    return false
-                }
-            }
-
-            if (
-                state === 'archived' &&
-                !connection.deleted_at
-            ) {
-                return false
-            }
-
-            if (health !== '') {
-                const currentHealth =
-                    connection.latest_health_check
-                        ?.status ?? 'unknown'
-
-                if (currentHealth !== health) {
-                    return false
-                }
-            }
-
-            return true
+        navigate({
+            search: search.trim(),
         })
-    }, [
-        connections,
-        search,
-        source,
-        state,
-        health,
-    ])
+    }
+
+    const clearSearch = () => {
+        setSearch('')
+
+        navigate({
+            search: '',
+        })
+    }
 
     const resetFilters = () => {
         setSearch('')
-        setSource('')
-        setState('')
-        setHealth('')
+
+        router.get(
+            route(
+                'admin.system.connections.index',
+            ),
+            {},
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        )
     }
 
     const testConnection = async (
@@ -242,19 +255,23 @@ export default function Index({
                 },
             )
 
-            const result = await readJsonResponse(
-                response,
-            )
+            const result =
+                await readJsonResponse(
+                    response,
+                )
 
             if (!response.ok) {
                 throw new Error(
-                    getResponseMessage(result) ||
+                    getResponseMessage(
+                        result,
+                    ) ||
                     'The connection test failed.',
                 )
             }
 
             setTestResult({
-                connectionId: connection.id,
+                connectionId:
+                connection.id,
                 status:
                     getStringValue(
                         result,
@@ -275,7 +292,8 @@ export default function Index({
             router.reload()
         } catch (error) {
             setTestResult({
-                connectionId: connection.id,
+                connectionId:
+                connection.id,
                 status: 'failed',
                 message:
                     error instanceof Error
@@ -362,11 +380,20 @@ export default function Index({
         )
     }
 
+    const testedConnection =
+        testResult
+            ? connections.data.find(
+            (connection) =>
+                connection.id ===
+                testResult.connectionId,
+        ) ?? null
+            : null
+
     return (
         <AdminLayout title="Infrastructure Connections">
             <Head title="Infrastructure Connections" />
 
-            <div className="space-y-6 p-4 sm:p-6">
+            <div className="space-y-6">
                 <header className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
                     <div className="flex flex-col justify-between gap-5 bg-gradient-to-r from-sky-50/80 via-white to-white p-6 sm:flex-row sm:items-center">
                         <div className="flex items-start gap-4">
@@ -379,7 +406,7 @@ export default function Index({
                                     Infrastructure Connections
                                 </h1>
 
-                                <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+                                <p className="mt-1 max-w-3xl text-sm leading-6 text-gray-500">
                                     Configure and monitor secure
                                     connections to infrastructure
                                     resources used by SimpleDesk
@@ -395,7 +422,7 @@ export default function Index({
                                 href={route(
                                     'admin.system.connections.create',
                                 )}
-                                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-200"
+                                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-sky-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-200"
                             >
                                 <Plus className="h-4 w-4" />
                                 New connection
@@ -403,29 +430,36 @@ export default function Index({
                         ) : null}
                     </div>
 
-                    <div className="grid border-t border-gray-200 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid border-t border-gray-200 sm:grid-cols-2 xl:grid-cols-5">
                         <Metric
-                            label="Total connections"
-                            value={connections.length}
+                            label="Total"
+                            value={stats.total}
                             icon={Cable}
                         />
 
                         <Metric
                             label="Enabled"
-                            value={enabled}
+                            value={stats.enabled}
                             icon={CheckCircle2}
                         />
 
                         <Metric
                             label="Healthy"
-                            value={healthy}
+                            value={stats.healthy}
                             icon={Activity}
                         />
 
                         <Metric
                             label="Problems"
-                            value={problems}
+                            value={stats.problems}
                             icon={XCircle}
+                        />
+
+                        <Metric
+                            label="Archived"
+                            value={stats.archived}
+                            icon={Archive}
+                            last
                         />
                     </div>
                 </header>
@@ -434,11 +468,7 @@ export default function Index({
                     <TestResultBanner
                         result={testResult}
                         connection={
-                            connections.find(
-                                (connection) =>
-                                    connection.id ===
-                                    testResult.connectionId,
-                            ) ?? null
+                            testedConnection
                         }
                         onClose={() =>
                             setTestResult(null)
@@ -459,9 +489,10 @@ export default function Index({
                                 </h2>
 
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Find connections by name,
-                                    source, operational state,
-                                    or latest health result.
+                                    Filter connections on the server
+                                    without loading the complete
+                                    infrastructure catalog into the
+                                    browser.
                                 </p>
                             </div>
                         </div>
@@ -469,7 +500,9 @@ export default function Index({
                         {hasFilters ? (
                             <button
                                 type="button"
-                                onClick={resetFilters}
+                                onClick={
+                                    resetFilters
+                                }
                                 className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
                             >
                                 <X className="h-4 w-4" />
@@ -478,190 +511,268 @@ export default function Index({
                         ) : null}
                     </div>
 
-                    <div className="grid gap-4 rounded-b-[28px] p-5 sm:p-6 md:grid-cols-2 xl:grid-cols-[minmax(280px,1fr)_220px_220px_220px]">
-                        <FilterField label="Search">
-                            <div className="relative">
+                    <div className="grid gap-4 rounded-b-[28px] p-5 sm:p-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                        <FilterField
+                            label="Search"
+                            className="md:col-span-2 xl:col-span-1 2xl:col-span-1"
+                        >
+                            <form
+                                onSubmit={
+                                    submitSearch
+                                }
+                                className="relative"
+                            >
                                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 
                                 <input
                                     type="search"
                                     value={search}
-                                    onChange={(event) =>
+                                    onChange={(
+                                        event,
+                                    ) =>
                                         setSearch(
-                                            event.target
+                                            event
+                                                .target
                                                 .value,
                                         )
                                     }
-                                    placeholder="Search connections..."
+                                    placeholder="Search by name..."
                                     className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-10 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
                                 />
 
                                 {search !== '' ? (
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setSearch('')
+                                        onClick={
+                                            clearSearch
                                         }
                                         aria-label="Clear search"
-                                        title="Clear search"
-                                        className="absolute right-3 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+                                        className="absolute right-2.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
                                     >
-                                        <X className="h-3.5 w-3.5" />
+                                        <X className="h-4 w-4" />
                                     </button>
                                 ) : null}
-                            </div>
+                            </form>
+                        </FilterField>
+
+                        <FilterField label="Type">
+                            <FilterSelect
+                                value={
+                                    activeFilters.type
+                                }
+                                placeholder="All types"
+                                onChange={(
+                                    value,
+                                ) =>
+                                    navigate({
+                                        type: value,
+                                    })
+                                }
+                            >
+                                {definitions.map(
+                                    (
+                                        definition,
+                                    ) => (
+                                        <SelectItem
+                                            key={
+                                                definition.type
+                                            }
+                                            value={
+                                                definition.type
+                                            }
+                                        >
+                                            {
+                                                definition.label
+                                            }
+                                        </SelectItem>
+                                    ),
+                                )}
+                            </FilterSelect>
                         </FilterField>
 
                         <FilterField label="Source">
-                            <ConnectionSelect
-                                value={source}
-                                options={[
-                                    {
-                                        value: '',
-                                        label: 'All sources',
-                                    },
-                                    {
-                                        value: 'managed',
-                                        label: 'Managed',
-                                    },
-                                    {
-                                        value: 'deployment',
-                                        label:
-                                            'Deployment',
-                                    },
-                                ]}
-                                onChange={setSource}
-                            />
+                            <FilterSelect
+                                value={
+                                    activeFilters.source
+                                }
+                                placeholder="All sources"
+                                onChange={(
+                                    value,
+                                ) =>
+                                    navigate({
+                                        source: value,
+                                    })
+                                }
+                            >
+                                <SelectItem value="managed">
+                                    Managed
+                                </SelectItem>
+
+                                <SelectItem value="deployment">
+                                    Deployment
+                                </SelectItem>
+                            </FilterSelect>
                         </FilterField>
 
                         <FilterField label="State">
-                            <ConnectionSelect
-                                value={state}
-                                options={[
-                                    {
-                                        value: '',
-                                        label: 'All states',
-                                    },
-                                    {
-                                        value: 'enabled',
-                                        label: 'Enabled',
-                                    },
-                                    {
-                                        value: 'disabled',
-                                        label: 'Disabled',
-                                    },
-                                    {
-                                        value: 'archived',
-                                        label: 'Archived',
-                                    },
-                                ]}
-                                onChange={setState}
-                            />
+                            <FilterSelect
+                                value={
+                                    activeFilters.state
+                                }
+                                placeholder="All states"
+                                onChange={(
+                                    value,
+                                ) =>
+                                    navigate({
+                                        state: value,
+                                    })
+                                }
+                            >
+                                <SelectItem value="enabled">
+                                    Enabled
+                                </SelectItem>
+
+                                <SelectItem value="disabled">
+                                    Disabled
+                                </SelectItem>
+                            </FilterSelect>
                         </FilterField>
 
                         <FilterField label="Health">
-                            <ConnectionSelect
-                                value={health}
-                                options={[
-                                    {
-                                        value: '',
-                                        label: 'All health',
-                                    },
-                                    {
-                                        value: 'healthy',
-                                        label: 'Healthy',
-                                    },
-                                    {
-                                        value: 'degraded',
-                                        label: 'Degraded',
-                                    },
-                                    {
-                                        value: 'unhealthy',
-                                        label:
-                                            'Unhealthy',
-                                    },
-                                    {
-                                        value: 'unavailable',
-                                        label:
-                                            'Unavailable',
-                                    },
-                                    {
-                                        value: 'unknown',
-                                        label: 'Unknown',
-                                    },
-                                ]}
-                                onChange={setHealth}
-                            />
+                            <FilterSelect
+                                value={
+                                    activeFilters.health
+                                }
+                                placeholder="All health"
+                                onChange={(
+                                    value,
+                                ) =>
+                                    navigate({
+                                        health: value,
+                                    })
+                                }
+                            >
+                                <SelectItem value="unknown">
+                                    Unknown
+                                </SelectItem>
+
+                                <SelectItem value="healthy">
+                                    Healthy
+                                </SelectItem>
+
+                                <SelectItem value="degraded">
+                                    Degraded
+                                </SelectItem>
+
+                                <SelectItem value="unhealthy">
+                                    Unhealthy
+                                </SelectItem>
+
+                                <SelectItem value="unavailable">
+                                    Unavailable
+                                </SelectItem>
+                            </FilterSelect>
+                        </FilterField>
+
+                        <FilterField label="Records">
+                            <Select
+                                value={
+                                    activeFilters.archived
+                                }
+                                onValueChange={(
+                                    value,
+                                ) =>
+                                    navigate({
+                                        archived:
+                                        value,
+                                    })
+                                }
+                            >
+                                <SelectTrigger className="h-11 w-full rounded-xl border-gray-200 bg-white">
+                                    <SelectValue />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    <SelectItem value="active">
+                                        Active records
+                                    </SelectItem>
+
+                                    <SelectItem value="archived">
+                                        Archived
+                                    </SelectItem>
+
+                                    <SelectItem value="all">
+                                        All records
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </FilterField>
                     </div>
                 </section>
 
                 <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
-                    <div className="flex flex-col justify-between gap-2 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
+                    <div className="flex flex-col justify-between gap-3 border-b border-gray-200 bg-gray-50/70 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
                         <div>
                             <h2 className="font-semibold text-gray-900">
                                 Connections
                             </h2>
 
                             <p className="mt-1 text-sm text-gray-500">
-                                {filteredConnections.length ===
-                                1
-                                    ? '1 connection matches the current filters.'
-                                    : `${filteredConnections.length} connections match the current filters.`}
+                                {connections.total ===
+                                0
+                                    ? 'No matching infrastructure connections.'
+                                    : `Showing ${connections.from ?? 0}–${connections.to ?? 0} of ${connections.total} matching connections.`}
                             </p>
                         </div>
 
-                        {connections.length > 0 ? (
-                            <span className="text-sm text-gray-400">
-                                {filteredConnections.length} of{' '}
-                                {connections.length} shown
+                        {activeFilters.archived ===
+                        'archived' ? (
+                            <span className="inline-flex self-start rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200 sm:self-auto">
+                                Archive view
+                            </span>
+                        ) : activeFilters.archived ===
+                        'all' ? (
+                            <span className="inline-flex self-start rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200 sm:self-auto">
+                                Active + archived
                             </span>
                         ) : null}
                     </div>
 
-                    {filteredConnections.length > 0 ? (
+                    {connections.data.length >
+                    0 ? (
                         <>
                             <div className="hidden overflow-x-auto lg:block">
-                                <table className="w-full min-w-[1060px] table-fixed text-left text-sm">
-                                    <colgroup>
-                                        <col className="w-[23%]" />
-                                        <col className="w-[13%]" />
-                                        <col className="w-[12%]" />
-                                        <col className="w-[19%]" />
-                                        <col className="w-[17%]" />
-                                        <col className="w-[16%]" />
-                                    </colgroup>
-
-                                    <thead>
-                                    <tr className="border-b border-gray-200 bg-gray-50/80 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        <th className="px-5 py-4">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-white text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                    <tr>
+                                        <th className="px-6 py-3.5">
                                             Connection
                                         </th>
 
-                                        <th className="px-4 py-4">
+                                        <th className="px-4 py-3.5">
                                             Source
                                         </th>
 
-                                        <th className="px-4 py-4">
+                                        <th className="px-4 py-3.5">
                                             State
                                         </th>
 
-                                        <th className="px-4 py-4">
+                                        <th className="px-4 py-3.5">
                                             Health
                                         </th>
 
-                                        <th className="px-4 py-4">
+                                        <th className="px-4 py-3.5">
                                             Last checked
                                         </th>
 
-                                        <th className="sticky right-0 z-20 border-l border-gray-200 bg-gray-50 px-4 py-4 text-right shadow-[-8px_0_18px_-16px_rgba(15,23,42,0.45)]">
+                                        <th className="px-6 py-3.5 text-right">
                                             Actions
                                         </th>
                                     </tr>
                                     </thead>
 
                                     <tbody className="divide-y divide-gray-100">
-                                    {filteredConnections.map(
+                                    {connections.data.map(
                                         (
                                             connection,
                                         ) => (
@@ -672,35 +783,26 @@ export default function Index({
                                                 connection={
                                                     connection
                                                 }
+                                                can={
+                                                    can
+                                                }
                                                 testing={
-                                                    testing ===
-                                                    connection.id
+                                                    testing
                                                 }
-                                                can={can}
-                                                onTest={() =>
-                                                    testConnection(
-                                                        connection,
-                                                    )
+                                                onTest={
+                                                    testConnection
                                                 }
-                                                onToggle={() =>
-                                                    toggleConnection(
-                                                        connection,
-                                                    )
+                                                onToggle={
+                                                    toggleConnection
                                                 }
-                                                onArchive={() =>
-                                                    archiveConnection(
-                                                        connection,
-                                                    )
+                                                onArchive={
+                                                    archiveConnection
                                                 }
-                                                onRestore={() =>
-                                                    restoreConnection(
-                                                        connection,
-                                                    )
+                                                onRestore={
+                                                    restoreConnection
                                                 }
-                                                onDelete={() =>
-                                                    deleteConnection(
-                                                        connection,
-                                                    )
+                                                onDelete={
+                                                    deleteConnection
                                                 }
                                             />
                                         ),
@@ -709,9 +811,11 @@ export default function Index({
                                 </table>
                             </div>
 
-                            <div className="grid gap-4 p-4 lg:hidden">
-                                {filteredConnections.map(
-                                    (connection) => (
+                            <div className="divide-y divide-gray-100 lg:hidden">
+                                {connections.data.map(
+                                    (
+                                        connection,
+                                    ) => (
                                         <ConnectionCard
                                             key={
                                                 connection.id
@@ -719,48 +823,47 @@ export default function Index({
                                             connection={
                                                 connection
                                             }
-                                            testing={
-                                                testing ===
-                                                connection.id
-                                            }
                                             can={can}
-                                            onTest={() =>
-                                                testConnection(
-                                                    connection,
-                                                )
+                                            testing={
+                                                testing
                                             }
-                                            onToggle={() =>
-                                                toggleConnection(
-                                                    connection,
-                                                )
+                                            onTest={
+                                                testConnection
                                             }
-                                            onArchive={() =>
-                                                archiveConnection(
-                                                    connection,
-                                                )
+                                            onToggle={
+                                                toggleConnection
                                             }
-                                            onRestore={() =>
-                                                restoreConnection(
-                                                    connection,
-                                                )
+                                            onArchive={
+                                                archiveConnection
                                             }
-                                            onDelete={() =>
-                                                deleteConnection(
-                                                    connection,
-                                                )
+                                            onRestore={
+                                                restoreConnection
+                                            }
+                                            onDelete={
+                                                deleteConnection
                                             }
                                         />
                                     ),
                                 )}
                             </div>
+
+                            <Pagination
+                                pagination={
+                                    connections
+                                }
+                            />
                         </>
                     ) : (
                         <EmptyState
-                            filtered={hasFilters}
+                            hasFilters={
+                                hasFilters
+                            }
+                            onReset={
+                                resetFilters
+                            }
                             canCreate={can(
                                 'admin.settings.infrastructure_connections.create',
                             )}
-                            onReset={resetFilters}
                         />
                     )}
                 </section>
@@ -771,54 +874,41 @@ export default function Index({
 
 function ConnectionRow({
                            connection,
-                           testing,
                            can,
+                           testing,
                            onTest,
                            onToggle,
                            onArchive,
                            onRestore,
                            onDelete,
-                       }: {
-    connection: Connection
-    testing: boolean
-    can: (permission: string) => boolean
-    onTest: () => void
-    onToggle: () => void
-    onArchive: () => void
-    onRestore: () => void
-    onDelete: () => void
-}) {
-    const archived = Boolean(
-        connection.deleted_at,
-    )
-
+                       }: ConnectionActionsProps) {
     return (
-        <tr
-            className={`group transition ${
-                archived
-                    ? 'bg-gray-50/70'
-                    : 'hover:bg-gray-50/80'
-            }`}
-        >
-            <td className="px-5 py-4 align-top">
+        <tr className="bg-white transition hover:bg-gray-50/60">
+            <td className="px-6 py-4">
                 <ConnectionIdentity
-                    connection={connection}
+                    connection={
+                        connection
+                    }
                 />
             </td>
 
-            <td className="px-4 py-4 align-top">
+            <td className="px-4 py-4">
                 <SourceBadge
-                    source={connection.source}
+                    source={
+                        connection.source
+                    }
                 />
             </td>
 
-            <td className="px-4 py-4 align-top">
+            <td className="px-4 py-4">
                 <StateBadge
-                    connection={connection}
+                    connection={
+                        connection
+                    }
                 />
             </td>
 
-            <td className="px-4 py-4 align-top">
+            <td className="px-4 py-4">
                 <HealthCell
                     health={
                         connection.latest_health_check
@@ -826,7 +916,7 @@ function ConnectionRow({
                 />
             </td>
 
-            <td className="px-4 py-4 align-top">
+            <td className="px-4 py-4">
                 <LastChecked
                     health={
                         connection.latest_health_check
@@ -834,23 +924,33 @@ function ConnectionRow({
                 />
             </td>
 
-            <td
-                className={`sticky right-0 z-10 border-l border-gray-100 px-4 py-4 align-top shadow-[-8px_0_18px_-16px_rgba(15,23,42,0.45)] transition ${
-                    archived
-                        ? 'bg-gray-50'
-                        : 'bg-white group-hover:bg-gray-50'
-                }`}
-            >
-                <ConnectionActions
-                    connection={connection}
-                    testing={testing}
-                    can={can}
-                    onTest={onTest}
-                    onToggle={onToggle}
-                    onArchive={onArchive}
-                    onRestore={onRestore}
-                    onDelete={onDelete}
-                />
+            <td className="px-6 py-4">
+                <div className="flex justify-end">
+                    <Actions
+                        connection={
+                            connection
+                        }
+                        can={can}
+                        testing={
+                            testing
+                        }
+                        onTest={
+                            onTest
+                        }
+                        onToggle={
+                            onToggle
+                        }
+                        onArchive={
+                            onArchive
+                        }
+                        onRestore={
+                            onRestore
+                        }
+                        onDelete={
+                            onDelete
+                        }
+                    />
+                </div>
             </td>
         </tr>
     )
@@ -858,87 +958,251 @@ function ConnectionRow({
 
 function ConnectionCard({
                             connection,
-                            testing,
                             can,
+                            testing,
                             onTest,
                             onToggle,
                             onArchive,
                             onRestore,
                             onDelete,
-                        }: {
-    connection: Connection
-    testing: boolean
-    can: (permission: string) => boolean
-    onTest: () => void
-    onToggle: () => void
-    onArchive: () => void
-    onRestore: () => void
-    onDelete: () => void
-}) {
+                        }: ConnectionActionsProps) {
     return (
-        <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-            <div className="space-y-4 p-4">
+        <article className="p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
                 <div className="flex items-start justify-between gap-4">
                     <ConnectionIdentity
-                        connection={connection}
+                        connection={
+                            connection
+                        }
                     />
 
                     <StateBadge
-                        connection={connection}
+                        connection={
+                            connection
+                        }
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 border-y border-gray-100 py-4">
-                    <div>
-                        <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
-                            Source
-                        </span>
-
+                <div className="grid gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-3">
+                    <MobileDetail
+                        label="Source"
+                    >
                         <SourceBadge
                             source={
                                 connection.source
                             }
                         />
-                    </div>
+                    </MobileDetail>
 
-                    <div>
-                        <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
-                            Health
-                        </span>
-
+                    <MobileDetail
+                        label="Health"
+                    >
                         <HealthCell
                             health={
                                 connection.latest_health_check
                             }
                         />
-                    </div>
+                    </MobileDetail>
+
+                    <MobileDetail
+                        label="Last checked"
+                    >
+                        <LastChecked
+                            health={
+                                connection.latest_health_check
+                            }
+                        />
+                    </MobileDetail>
                 </div>
 
-                <div>
-                    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">
-                        Last checked
-                    </span>
-
-                    <LastChecked
-                        health={
-                            connection.latest_health_check
+                <div className="flex flex-wrap gap-2">
+                    <Actions
+                        connection={
+                            connection
+                        }
+                        can={can}
+                        testing={
+                            testing
+                        }
+                        onTest={
+                            onTest
+                        }
+                        onToggle={
+                            onToggle
+                        }
+                        onArchive={
+                            onArchive
+                        }
+                        onRestore={
+                            onRestore
+                        }
+                        onDelete={
+                            onDelete
                         }
                     />
                 </div>
-
-                <ConnectionActions
-                    connection={connection}
-                    testing={testing}
-                    can={can}
-                    onTest={onTest}
-                    onToggle={onToggle}
-                    onArchive={onArchive}
-                    onRestore={onRestore}
-                    onDelete={onDelete}
-                    mobile
-                />
             </div>
         </article>
+    )
+}
+
+type ConnectionActionsProps = {
+    connection: Connection
+    can: (permission: string) => boolean
+    testing: number | null
+    onTest: (
+        connection: Connection,
+    ) => void
+    onToggle: (
+        connection: Connection,
+    ) => void
+    onArchive: (
+        connection: Connection,
+    ) => void
+    onRestore: (
+        connection: Connection,
+    ) => void
+    onDelete: (
+        connection: Connection,
+    ) => void
+}
+
+function Actions({
+                     connection,
+                     can,
+                     testing,
+                     onTest,
+                     onToggle,
+                     onArchive,
+                     onRestore,
+                     onDelete,
+                 }: ConnectionActionsProps) {
+    const archived =
+        Boolean(
+            connection.deleted_at,
+        )
+
+    if (archived) {
+        return (
+            <div className="flex flex-wrap justify-end gap-2">
+                {can(
+                    'admin.settings.infrastructure_connections.archive',
+                ) ? (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            onRestore(
+                                connection,
+                            )
+                        }
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                    >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Restore
+                    </button>
+                ) : null}
+
+                {can(
+                    'admin.settings.infrastructure_connections.delete',
+                ) ? (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            onDelete(
+                                connection,
+                            )
+                        }
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                    >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                    </button>
+                ) : null}
+            </div>
+        )
+    }
+
+    return (
+        <div className="flex flex-wrap justify-end gap-2">
+            {can(
+                'admin.settings.infrastructure_connections.update',
+            ) ? (
+                <Link
+                    href={route(
+                        'admin.system.connections.edit',
+                        connection.id,
+                    )}
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Edit
+                </Link>
+            ) : null}
+
+            {can(
+                'admin.settings.infrastructure_connections.test',
+            ) ? (
+                <button
+                    type="button"
+                    disabled={
+                        testing !== null
+                    }
+                    onClick={() =>
+                        onTest(connection)
+                    }
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    {testing ===
+                    connection.id ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                        <Play className="h-3.5 w-3.5" />
+                    )}
+
+                    {testing ===
+                    connection.id
+                        ? 'Testing…'
+                        : 'Test'}
+                </button>
+            ) : null}
+
+            {can(
+                'admin.settings.infrastructure_connections.update',
+            ) ? (
+                <button
+                    type="button"
+                    onClick={() =>
+                        onToggle(
+                            connection,
+                        )
+                    }
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+                >
+                    <CircleOff className="h-3.5 w-3.5" />
+
+                    {connection.is_enabled
+                        ? 'Disable'
+                        : 'Enable'}
+                </button>
+            ) : null}
+
+            {can(
+                'admin.settings.infrastructure_connections.archive',
+            ) ? (
+                <button
+                    type="button"
+                    onClick={() =>
+                        onArchive(
+                            connection,
+                        )
+                    }
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700"
+                >
+                    <Archive className="h-3.5 w-3.5" />
+                    Archive
+                </button>
+            ) : null}
+        </div>
     )
 }
 
@@ -948,9 +1212,9 @@ function ConnectionIdentity({
     connection: Connection
 }) {
     return (
-        <div className="flex min-w-0 items-start gap-3">
+        <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 ring-1 ring-inset ring-sky-100">
-                <Server className="h-5 w-5 text-sky-600" />
+                <Cable className="h-5 w-5 text-sky-600" />
             </div>
 
             <div className="min-w-0">
@@ -958,8 +1222,11 @@ function ConnectionIdentity({
                     {connection.name}
                 </div>
 
-                <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                    {humanize(connection.type)}
+                <div className="mt-0.5 text-xs font-medium text-gray-400">
+                    {humanize(
+                        connection.type,
+                    )}
+                    {' · '}#{connection.id}
                 </div>
             </div>
         </div>
@@ -971,11 +1238,12 @@ function SourceBadge({
                      }: {
     source: string
 }) {
-    const managed = source === 'managed'
+    const managed =
+        source === 'managed'
 
     return (
         <span
-            className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
+            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
                 managed
                     ? 'bg-sky-50 text-sky-700 ring-sky-100'
                     : 'bg-violet-50 text-violet-700 ring-violet-100'
@@ -995,8 +1263,7 @@ function StateBadge({
 }) {
     if (connection.deleted_at) {
         return (
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200">
-                <Archive className="h-3.5 w-3.5" />
+            <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-100">
                 Archived
             </span>
         )
@@ -1004,16 +1271,14 @@ function StateBadge({
 
     if (connection.is_enabled) {
         return (
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-100">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+            <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-100">
                 Enabled
             </span>
         )
     }
 
     return (
-        <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-100">
-            <CircleOff className="h-3.5 w-3.5" />
+        <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200">
             Disabled
         </span>
     )
@@ -1027,33 +1292,27 @@ function HealthCell({
     const status =
         health?.status ?? 'unknown'
 
-    const config = healthAppearance(status)
+    const config =
+        healthConfig(status)
 
-    const Icon = config.icon
+    const Icon =
+        config.icon
 
     return (
-        <div className="min-w-0">
+        <div>
             <div
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${config.className}`}
+                className={`inline-flex items-center gap-1.5 text-sm font-semibold ${config.text}`}
             >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
 
-                {config.label}
-
-                {health?.latency_ms != null ? (
-                    <span className="font-medium opacity-70">
-                        · {health.latency_ms} ms
-                    </span>
-                ) : null}
+                {humanize(status)}
             </div>
 
-            {health?.message ? (
-                <p
-                    title={health.message}
-                    className="mt-1.5 max-w-[240px] truncate text-xs text-gray-400"
-                >
-                    {health.message}
-                </p>
+            {health?.latency_ms != null ? (
+                <div className="mt-1 flex items-center gap-1 text-xs text-gray-400">
+                    <Gauge className="h-3.5 w-3.5" />
+                    {health.latency_ms} ms
+                </div>
             ) : null}
         </div>
     )
@@ -1072,294 +1331,78 @@ function LastChecked({
         )
     }
 
-    const date = new Date(
-        health.created_at,
-    )
-
     return (
-        <div className="flex items-start gap-2">
+        <div className="flex items-start gap-2 text-sm text-gray-500">
             <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
 
-            <div>
-                <div className="whitespace-nowrap text-sm font-medium text-gray-700">
-                    {new Intl.DateTimeFormat(
-                        undefined,
-                        {
-                            dateStyle: 'medium',
-                        },
-                    ).format(date)}
-                </div>
-
-                <div className="mt-0.5 text-xs text-gray-400">
-                    {new Intl.DateTimeFormat(
-                        undefined,
-                        {
-                            timeStyle: 'short',
-                        },
-                    ).format(date)}
-                </div>
-            </div>
+            <span>
+                {formatDate(
+                    health.created_at,
+                )}
+            </span>
         </div>
     )
 }
 
-function ConnectionActions({
-                               connection,
-                               testing,
-                               can,
-                               onTest,
-                               onToggle,
-                               onArchive,
-                               onRestore,
-                               onDelete,
-                               mobile = false,
-                           }: {
-    connection: Connection
-    testing: boolean
-    can: (permission: string) => boolean
-    onTest: () => void
-    onToggle: () => void
-    onArchive: () => void
-    onRestore: () => void
-    onDelete: () => void
-    mobile?: boolean
-}) {
-    const archived = Boolean(
-        connection.deleted_at,
-    )
-
-    if (archived) {
-        return (
-            <div
-                className={`flex gap-2 ${
-                    mobile
-                        ? 'w-full'
-                        : 'justify-end'
-                }`}
-            >
-                {can(
-                    'admin.settings.infrastructure_connections.archive',
-                ) ? (
-                    <ActionButton
-                        icon={RotateCcw}
-                        label="Restore"
-                        onClick={onRestore}
-                        grow={mobile}
-                    />
-                ) : null}
-
-                {can(
-                    'admin.settings.infrastructure_connections.delete',
-                ) ? (
-                    <ActionButton
-                        icon={Trash2}
-                        label="Delete"
-                        onClick={onDelete}
-                        danger
-                        grow={mobile}
-                    />
-                ) : null}
-            </div>
-        )
-    }
-
-    return (
-        <div
-            className={`flex flex-wrap gap-2 ${
-                mobile
-                    ? 'w-full'
-                    : 'justify-end'
-            }`}
-        >
-            {can(
-                'admin.settings.infrastructure_connections.test',
-            ) ? (
-                <ActionButton
-                    icon={
-                        testing
-                            ? RefreshCw
-                            : Play
-                    }
-                    label={
-                        testing
-                            ? 'Testing…'
-                            : 'Test'
-                    }
-                    onClick={onTest}
-                    disabled={testing}
-                    spinning={testing}
-                    grow={mobile}
-                />
-            ) : null}
-
-            {can(
-                'admin.settings.infrastructure_connections.update',
-            ) ? (
-                <>
-                    <Link
-                        href={route(
-                            'admin.system.connections.edit',
-                            connection.id,
-                        )}
-                        className={`inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 ${
-                            mobile
-                                ? 'flex-1'
-                                : ''
-                        }`}
-                    >
-                        <Pencil className="h-4 w-4" />
-                        Edit
-                    </Link>
-
-                    <ActionButton
-                        icon={
-                            connection.is_enabled
-                                ? CircleOff
-                                : CheckCircle2
-                        }
-                        label={
-                            connection.is_enabled
-                                ? 'Disable'
-                                : 'Enable'
-                        }
-                        onClick={onToggle}
-                        grow={mobile}
-                    />
-                </>
-            ) : null}
-
-            {can(
-                'admin.settings.infrastructure_connections.archive',
-            ) ? (
-                <ActionButton
-                    icon={Archive}
-                    label="Archive"
-                    onClick={onArchive}
-                    grow={mobile}
-                />
-            ) : null}
-        </div>
-    )
-}
-
-function ActionButton({
-                          icon: Icon,
-                          label,
-                          onClick,
-                          danger = false,
-                          disabled = false,
-                          spinning = false,
-                          grow = false,
+function FilterSelect({
+                          value,
+                          placeholder,
+                          onChange,
+                          children,
                       }: {
-    icon: LucideIcon
-    label: string
-    onClick: () => void
-    danger?: boolean
-    disabled?: boolean
-    spinning?: boolean
-    grow?: boolean
+    value: string
+    placeholder: string
+    onChange: (value: string) => void
+    children: ReactNode
 }) {
     return (
-        <button
-            type="button"
-            onClick={onClick}
-            disabled={disabled}
-            className={`inline-flex h-9 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                grow ? 'flex-1' : ''
-            } ${
-                danger
-                    ? 'border-red-200 bg-white text-red-600 hover:bg-red-50'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
-            }`}
+        <Select
+            value={
+                value === ''
+                    ? ALL
+                    : value
+            }
+            onValueChange={(
+                nextValue,
+            ) =>
+                onChange(
+                    nextValue === ALL
+                        ? ''
+                        : nextValue,
+                )
+            }
         >
-            <Icon
-                className={`h-4 w-4 ${
-                    spinning
-                        ? 'animate-spin'
-                        : ''
-                }`}
-            />
+            <SelectTrigger className="h-11 w-full rounded-xl border-gray-200 bg-white">
+                <SelectValue />
+            </SelectTrigger>
 
-            {label}
-        </button>
+            <SelectContent>
+                <SelectItem value={ALL}>
+                    {placeholder}
+                </SelectItem>
+
+                {children}
+            </SelectContent>
+        </Select>
     )
 }
 
-function TestResultBanner({
-                              result,
-                              connection,
-                              onClose,
-                          }: {
-    result: TestResult
-    connection: Connection | null
-    onClose: () => void
+function FilterField({
+                         label,
+                         className = '',
+                         children,
+                     }: {
+    label: string
+    className?: string
+    children: ReactNode
 }) {
-    const successful =
-        !result.failed &&
-        result.status === 'healthy'
-
     return (
-        <div
-            className={`flex items-start justify-between gap-4 rounded-[22px] border p-4 shadow-sm ${
-                successful
-                    ? 'border-emerald-200 bg-emerald-50/70'
-                    : 'border-amber-200 bg-amber-50/70'
-            }`}
-        >
-            <div className="flex items-start gap-3">
-                <div
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-                        successful
-                            ? 'bg-emerald-100'
-                            : 'bg-amber-100'
-                    }`}
-                >
-                    {successful ? (
-                        <CheckCircle2 className="h-5 w-5 text-emerald-700" />
-                    ) : (
-                        <Gauge className="h-5 w-5 text-amber-700" />
-                    )}
-                </div>
-
-                <div>
-                    <div className="font-semibold text-gray-900">
-                        {connection?.name ??
-                            'Connection'}{' '}
-                        test result
-                    </div>
-
-                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600">
-                        <span className="font-medium capitalize">
-                            {humanize(
-                                result.status,
-                            )}
-                        </span>
-
-                        {result.latencyMs !=
-                        null ? (
-                            <span>
-                                {result.latencyMs} ms
-                            </span>
-                        ) : null}
-
-                        {result.message ? (
-                            <span>
-                                {result.message}
-                            </span>
-                        ) : null}
-                    </div>
-                </div>
+        <div className={className}>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                {label}
             </div>
 
-            <button
-                type="button"
-                onClick={onClose}
-                aria-label="Dismiss test result"
-                title="Dismiss"
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-white/70 hover:text-gray-700"
-            >
-                <X className="h-4 w-4" />
-            </button>
+            {children}
         </div>
     )
 }
@@ -1368,23 +1411,31 @@ function Metric({
                     label,
                     value,
                     icon: Icon,
+                    last = false,
                 }: {
     label: string
     value: number
     icon: LucideIcon
+    last?: boolean
 }) {
     return (
-        <div className="flex items-center gap-3 border-gray-200 px-5 py-4 sm:border-r sm:nth-[2n]:border-r-0 xl:nth-[2n]:border-r xl:last:border-r-0">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100">
-                <Icon className="h-4 w-4 text-gray-500" />
+        <div
+            className={`flex items-center gap-3 border-b border-gray-200 px-5 py-4 sm:border-b-0 sm:border-r sm:px-6 ${
+                last
+                    ? 'xl:border-r-0'
+                    : ''
+            }`}
+        >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100">
+                <Icon className="h-5 w-5 text-gray-500" />
             </div>
 
             <div>
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-2xl font-semibold tracking-tight text-gray-900">
                     {value}
                 </div>
 
-                <div className="text-xs font-medium text-gray-500">
+                <div className="text-xs font-medium text-gray-400">
                     {label}
                 </div>
             </div>
@@ -1392,186 +1443,208 @@ function Metric({
     )
 }
 
-function FilterField({
-                         label,
-                         children,
-                     }: {
+function MobileDetail({
+                          label,
+                          children,
+                      }: {
     label: string
     children: ReactNode
 }) {
     return (
         <div>
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                 {label}
-            </span>
+            </div>
 
             {children}
         </div>
     )
 }
 
-function ConnectionSelect({
-                              value,
-                              options,
-                              onChange,
-                          }: {
-    value: string
-    options: SelectOption[]
-    onChange: (value: string) => void
+function Pagination({
+                        pagination,
+                    }: {
+    pagination: ConnectionsPagination
 }) {
-    const [open, setOpen] =
-        useState(false)
+    if (
+        pagination.last_page <= 1
+    ) {
+        return null
+    }
 
-    const ref =
-        useRef<HTMLDivElement>(null)
+    const previous =
+        pagination.links[0]
 
-    const selected =
-        options.find(
-            (option) =>
-                option.value === value,
-        ) ?? options[0]
+    const next =
+        pagination.links[
+        pagination.links.length - 1
+            ]
 
-    useEffect(() => {
-        const close = (
-            event: MouseEvent,
-        ) => {
-            if (
-                !ref.current?.contains(
-                    event.target as Node,
-                )
-            ) {
-                setOpen(false)
-            }
-        }
-
-        document.addEventListener(
-            'mousedown',
-            close,
+    const numericLinks =
+        pagination.links.slice(
+            1,
+            -1,
         )
 
-        return () => {
-            document.removeEventListener(
-                'mousedown',
-                close,
-            )
-        }
-    }, [])
-
     return (
-        <div
-            ref={ref}
-            className="relative"
-        >
-            <button
-                type="button"
-                onClick={() =>
-                    setOpen(
-                        (current) => !current,
-                    )
-                }
-                className="flex h-11 w-full items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-3.5 text-left text-sm text-gray-700 outline-none transition hover:border-gray-300 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
-            >
-                <span className="truncate">
-                    {selected?.label ??
-                        'Select'}
+        <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="text-sm text-gray-500">
+                Page{' '}
+                <span className="font-semibold text-gray-700">
+                    {
+                        pagination.current_page
+                    }
+                </span>{' '}
+                of{' '}
+                <span className="font-semibold text-gray-700">
+                    {
+                        pagination.last_page
+                    }
                 </span>
+            </div>
 
-                <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-gray-400 transition ${
-                        open
-                            ? 'rotate-180'
-                            : ''
-                    }`}
+            <div className="flex items-center gap-1.5">
+                <PaginationButton
+                    href={previous?.url}
+                    disabled={
+                        !previous?.url
+                    }
+                    label="Previous"
+                    icon={
+                        ChevronLeft
+                    }
                 />
-            </button>
 
-            {open ? (
-                <div className="absolute z-50 mt-2 max-h-64 w-full min-w-[180px] overflow-y-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl">
-                    {options.map(
-                        (option) => {
-                            const active =
-                                option.value ===
-                                value
-
-                            return (
-                                <button
-                                    key={
-                                        option.value
-                                    }
-                                    type="button"
-                                    onClick={() => {
-                                        onChange(
-                                            option.value,
-                                        )
-                                        setOpen(
-                                            false,
-                                        )
-                                    }}
-                                    className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition ${
-                                        active
-                                            ? 'bg-sky-50 font-semibold text-sky-700'
-                                            : 'text-gray-700 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <span className="truncate">
-                                        {
-                                            option.label
-                                        }
-                                    </span>
-
-                                    {active ? (
-                                        <Check className="h-4 w-4 shrink-0" />
-                                    ) : null}
-                                </button>
-                            )
-                        },
+                <div className="hidden items-center gap-1.5 sm:flex">
+                    {numericLinks.map(
+                        (link) => (
+                            <Link
+                                key={`${link.label}-${link.url}`}
+                                href={
+                                    link.url ??
+                                    '#'
+                                }
+                                preserveScroll
+                                className={`inline-flex h-9 min-w-9 items-center justify-center rounded-xl px-2.5 text-sm font-semibold transition ${
+                                    link.active
+                                        ? 'bg-sky-600 text-white shadow-sm'
+                                        : link.url
+                                            ? 'border border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
+                                            : 'cursor-default text-gray-300'
+                                }`}
+                            >
+                                {decodePaginationLabel(
+                                    link.label,
+                                )}
+                            </Link>
+                        ),
                     )}
                 </div>
-            ) : null}
+
+                <PaginationButton
+                    href={next?.url}
+                    disabled={
+                        !next?.url
+                    }
+                    label="Next"
+                    icon={
+                        ChevronRight
+                    }
+                    iconRight
+                />
+            </div>
         </div>
     )
 }
 
+function PaginationButton({
+                              href,
+                              disabled,
+                              label,
+                              icon: Icon,
+                              iconRight = false,
+                          }: {
+    href?: string | null
+    disabled: boolean
+    label: string
+    icon: LucideIcon
+    iconRight?: boolean
+}) {
+    if (disabled || !href) {
+        return (
+            <span className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm font-semibold text-gray-300">
+                {!iconRight ? (
+                    <Icon className="h-4 w-4" />
+                ) : null}
+
+                {label}
+
+                {iconRight ? (
+                    <Icon className="h-4 w-4" />
+                ) : null}
+            </span>
+        )
+    }
+
+    return (
+        <Link
+            href={href}
+            preserveScroll
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+        >
+            {!iconRight ? (
+                <Icon className="h-4 w-4" />
+            ) : null}
+
+            {label}
+
+            {iconRight ? (
+                <Icon className="h-4 w-4" />
+            ) : null}
+        </Link>
+    )
+}
+
 function EmptyState({
-                        filtered,
-                        canCreate,
+                        hasFilters,
                         onReset,
+                        canCreate,
                     }: {
-    filtered: boolean
-    canCreate: boolean
+    hasFilters: boolean
     onReset: () => void
+    canCreate: boolean
 }) {
     return (
         <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
-                <Cable className="h-6 w-6 text-gray-400" />
+                <Cable className="h-7 w-7 text-gray-400" />
             </div>
 
             <h3 className="mt-4 font-semibold text-gray-900">
-                {filtered
-                    ? 'No connections found'
-                    : 'No infrastructure connections yet'}
+                {hasFilters
+                    ? 'No matching connections'
+                    : 'No infrastructure connections'}
             </h3>
 
-            <p className="mt-2 max-w-md text-sm leading-6 text-gray-500">
-                {filtered
-                    ? 'No infrastructure connections match the current filters.'
-                    : 'Create a connection when SimpleDesk needs secure access to an infrastructure resource.'}
+            <p className="mt-1 max-w-md text-sm leading-6 text-gray-500">
+                {hasFilters
+                    ? 'No infrastructure connections match the selected filters.'
+                    : 'Create a reusable infrastructure connection before assigning it to a SimpleDesk subsystem.'}
             </p>
 
             <div className="mt-5 flex flex-wrap justify-center gap-2">
-                {filtered ? (
+                {hasFilters ? (
                     <button
                         type="button"
                         onClick={onReset}
                         className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 hover:text-gray-900"
                     >
-                        <X className="h-4 w-4" />
-                        Clear filters
+                        <RefreshCw className="h-4 w-4" />
+                        Reset filters
                     </button>
                 ) : null}
 
-                {!filtered &&
+                {!hasFilters &&
                 canCreate ? (
                     <Link
                         href={route(
@@ -1588,54 +1661,186 @@ function EmptyState({
     )
 }
 
-function healthAppearance(
-    status: HealthStatus,
+function TestResultBanner({
+                              result,
+                              connection,
+                              onClose,
+                          }: {
+    result: TestResult
+    connection: Connection | null
+    onClose: () => void
+}) {
+    const status =
+        result.failed
+            ? 'failed'
+            : result.status
+
+    const healthy =
+        status === 'healthy'
+
+    const degraded =
+        status === 'degraded'
+
+    const unavailable =
+        status === 'unavailable' ||
+        status === 'failed'
+
+    const containerClass =
+        healthy
+            ? 'border-emerald-200 bg-emerald-50'
+            : degraded
+                ? 'border-amber-200 bg-amber-50'
+                : unavailable
+                    ? 'border-red-200 bg-red-50'
+                    : 'border-red-200 bg-red-50'
+
+    const textClass =
+        healthy
+            ? 'text-emerald-900'
+            : degraded
+                ? 'text-amber-900'
+                : 'text-red-900'
+
+    const secondaryClass =
+        healthy
+            ? 'text-emerald-700'
+            : degraded
+                ? 'text-amber-700'
+                : 'text-red-700'
+
+    const Icon =
+        healthy
+            ? CheckCircle2
+            : XCircle
+
+    return (
+        <section
+            className={`rounded-[24px] border px-5 py-4 ${containerClass}`}
+        >
+            <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                    <Icon
+                        className={`mt-0.5 h-5 w-5 shrink-0 ${secondaryClass}`}
+                    />
+
+                    <div>
+                        <div
+                            className={`font-semibold ${textClass}`}
+                        >
+                            Connection test:{' '}
+                            {humanize(status)}
+                        </div>
+
+                        <p
+                            className={`mt-1 text-sm leading-6 ${secondaryClass}`}
+                        >
+                            {connection
+                                ? `${connection.name}: `
+                                : ''}
+                            {result.message ??
+                                'No additional details were returned.'}
+
+                            {result.latencyMs !=
+                            null
+                                ? ` · ${result.latencyMs} ms`
+                                : ''}
+                        </p>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Dismiss result"
+                    className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition hover:bg-white/60 ${secondaryClass}`}
+                >
+                    <X className="h-4 w-4" />
+                </button>
+            </div>
+        </section>
+    )
+}
+
+function healthConfig(
+    status: string,
 ): {
-    label: string
     icon: LucideIcon
-    className: string
+    text: string
 } {
     switch (status) {
         case 'healthy':
             return {
-                label: 'Healthy',
                 icon: CheckCircle2,
-                className:
-                    'bg-emerald-50 text-emerald-700 ring-emerald-100',
+                text: 'text-emerald-600',
             }
 
         case 'degraded':
             return {
-                label: 'Degraded',
                 icon: Activity,
-                className:
-                    'bg-amber-50 text-amber-700 ring-amber-100',
+                text: 'text-amber-600',
             }
 
         case 'unhealthy':
             return {
-                label: 'Unhealthy',
                 icon: XCircle,
-                className:
-                    'bg-red-50 text-red-700 ring-red-100',
+                text: 'text-red-600',
             }
 
         case 'unavailable':
             return {
-                label: 'Unavailable',
                 icon: CircleOff,
-                className:
-                    'bg-red-50 text-red-700 ring-red-100',
+                text: 'text-red-600',
             }
 
         default:
             return {
-                label: 'Unknown',
-                icon: Gauge,
-                className:
-                    'bg-gray-100 text-gray-600 ring-gray-200',
+                icon: Clock3,
+                text: 'text-gray-400',
             }
     }
+}
+
+function removeEmptyFilters(
+    filters: Record<
+        string,
+        string
+    >,
+): Record<string, string> {
+    return Object.fromEntries(
+        Object.entries(filters).filter(
+            ([key, value]) =>
+                value !== '' &&
+                !(
+                    key ===
+                    'archived' &&
+                    value ===
+                    'active'
+                ),
+        ),
+    )
+}
+
+function formatDate(
+    value: string,
+): string {
+    const date =
+        new Date(value)
+
+    if (
+        Number.isNaN(
+            date.getTime(),
+        )
+    ) {
+        return 'Unknown'
+    }
+
+    return new Intl.DateTimeFormat(
+        undefined,
+        {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        },
+    ).format(date)
 }
 
 function humanize(
@@ -1656,11 +1861,21 @@ function humanize(
         )
 }
 
+function decodePaginationLabel(
+    label: string,
+): string {
+    return label
+        .replace(/&laquo;/g, '«')
+        .replace(/&raquo;/g, '»')
+        .replace(/&hellip;/g, '…')
+        .replace(/&amp;/g, '&')
+}
+
 async function readJsonResponse(
     response: Response,
 ): Promise<Record<string, unknown>> {
     try {
-        const value: unknown =
+        const value =
             await response.json()
 
         if (
@@ -1673,20 +1888,22 @@ async function readJsonResponse(
                 unknown
             >
         }
-
-        return {}
     } catch {
-        return {}
+        // handled by empty object below
     }
+
+    return {}
 }
 
 function getStringValue(
     value: Record<string, unknown>,
     key: string,
 ): string | null {
-    const candidate = value[key]
+    const candidate =
+        value[key]
 
-    return typeof candidate === 'string'
+    return typeof candidate ===
+    'string'
         ? candidate
         : null
 }
@@ -1695,11 +1912,33 @@ function getNumberValue(
     value: Record<string, unknown>,
     key: string,
 ): number | null {
-    const candidate = value[key]
+    const candidate =
+        value[key]
 
-    return typeof candidate === 'number'
-        ? candidate
-        : null
+    if (
+        typeof candidate ===
+        'number' &&
+        Number.isFinite(candidate)
+    ) {
+        return candidate
+    }
+
+    if (
+        typeof candidate ===
+        'string' &&
+        candidate.trim() !== ''
+    ) {
+        const parsed =
+            Number(candidate)
+
+        if (
+            Number.isFinite(parsed)
+        ) {
+            return parsed
+        }
+    }
+
+    return null
 }
 
 function getResponseMessage(
