@@ -590,30 +590,108 @@ export default function SkillForm({
                             </div>
                         </div>
                     </section>
-                </div>
-            </div>
 
-            <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white/95 backdrop-blur">
-                <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-                    <div className="hidden min-w-0 sm:block">
-                        <div className="text-sm font-medium text-gray-700">
-                            {editing
-                                ? 'Update skill'
-                                : 'Create skill'}
+                    <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+                        <SectionHeader
+                            icon={CheckCircle2}
+                            title="Summary"
+                            description="Review the current configuration before saving."
+                        />
+
+                        <div className="p-5 sm:p-6">
+                            <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/80 to-white p-5">
+                                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                                                <Sparkles className="h-5 w-5" />
+                                            </div>
+
+                                            <div className="min-w-0">
+                                                <div className="truncate font-semibold text-gray-900">
+                                                    {form.data.name || 'Untitled skill'}
+                                                </div>
+
+                                                <div className="mt-0.5 text-xs text-gray-500">
+                                                    {activeRuleCount}{' '}
+                                                    {activeRuleCount === 1
+                                                        ? 'condition'
+                                                        : 'conditions'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        <SummaryBadge
+                                            label={`Match ${form.data.match_type.toUpperCase()}`}
+                                            className={
+                                                form.data.match_type === 'all'
+                                                    ? 'bg-violet-100 text-violet-700 ring-violet-200'
+                                                    : 'bg-sky-100 text-sky-700 ring-sky-200'
+                                            }
+                                        />
+
+                                        <SummaryBadge
+                                            label={
+                                                form.data.is_active
+                                                    ? 'Active'
+                                                    : 'Inactive'
+                                            }
+                                            className={
+                                                form.data.is_active
+                                                    ? 'bg-emerald-100 text-emerald-700 ring-emerald-200'
+                                                    : 'bg-gray-100 text-gray-600 ring-gray-200'
+                                            }
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mt-5 border-t border-violet-100 pt-5">
+                                    {form.data.rules.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {form.data.rules.map(
+                                                (rule, index) => (
+                                                    <div
+                                                        key={`${rule.field_key}-${rule.operator}-${index}`}
+                                                        className="flex items-start gap-3 rounded-xl bg-white/70 px-3 py-2.5 ring-1 ring-inset ring-violet-100"
+                                                    >
+                                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-[11px] font-bold text-violet-700">
+                                        {index + 1}
+                                    </span>
+
+                                                        <div className="min-w-0 text-sm">
+                                        <span className="font-semibold text-gray-700">
+                                            {fieldLabel(rule.field_key)}
+                                        </span>
+
+                                                            <span className="mx-2 text-gray-300">
+                                            ·
+                                        </span>
+
+                                                            <span className="text-gray-500">
+                                            {formatLabel(rule.operator)}
+                                        </span>
+                                                        </div>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="text-sm text-gray-400">
+                                            No conditions configured.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
+                    </section>
 
-                        <div className="mt-0.5 text-xs text-gray-400">
-                            {form.isDirty
-                                ? 'You have unsaved changes.'
-                                : 'No unsaved changes.'}
-                        </div>
-                    </div>
+                    {/* ВОТ СЮДА */}
 
-                    <div className="ml-auto flex items-center gap-3">
+                    <section className="flex flex-col-reverse gap-3 rounded-[28px] border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-end sm:p-5">
                         <Link
-                            href={route(
-                                'admin.skills.index',
-                            )}
+                            href={route('admin.skills.index')}
                             className="inline-flex h-11 items-center justify-center rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
                         >
                             Cancel
@@ -623,8 +701,7 @@ export default function SkillForm({
                             type="button"
                             disabled={
                                 form.processing ||
-                                ruleSchema.length ===
-                                0
+                                ruleSchema.length === 0
                             }
                             onClick={submit}
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-50"
@@ -641,7 +718,7 @@ export default function SkillForm({
                                     ? 'Save changes'
                                     : 'Create skill'}
                         </button>
-                    </div>
+                    </section>
                 </div>
             </div>
         </AdminLayout>
