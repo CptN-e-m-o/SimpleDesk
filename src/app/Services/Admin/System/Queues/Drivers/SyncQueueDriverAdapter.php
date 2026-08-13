@@ -17,16 +17,31 @@ class SyncQueueDriverAdapter implements QueueDriverAdapter
 
     public function definition(): QueueDriverDefinitionData
     {
-        return new QueueDriverDefinitionData($this->type(), 'Sync', 'Run queued work in the current request process.', false);
+        return new QueueDriverDefinitionData(
+            type: $this->type(),
+            label: 'Sync',
+            description:
+            'Run queued work immediately in the current application process.',
+            requiresInfrastructure: false,
+            infrastructureType: null,
+            recommendedForProduction: false,
+        );
     }
 
-    public function validateAndNormalize(array $configuration): array
-    {
+    public function validateAndNormalize(
+        array $configuration,
+    ): array {
         return [];
     }
 
-    public function runtimeConfiguration(QueueDriverConfiguration $configuration): QueueRuntimeConfigurationData
-    {
-        return new QueueRuntimeConfigurationData(['driver' => 'sync']);
+    public function runtimeConfiguration(
+        QueueDriverConfiguration $configuration,
+    ): QueueRuntimeConfigurationData {
+        return new QueueRuntimeConfigurationData(
+            queueConnection: [
+                'driver' =>
+                    'sync',
+            ],
+        );
     }
 }

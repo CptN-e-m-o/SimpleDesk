@@ -11,14 +11,15 @@ use App\Enums\Admin\System\QueueDriverType;
 use App\Models\Admin\System\InfrastructureConnection;
 use App\Models\Admin\System\QueueDriverConfiguration;
 use App\Services\Admin\System\Infrastructure\Connections\RedisInfrastructureRuntimeConfigurationFactory;
+use App\Services\Admin\System\Queues\QueueSafetyPolicy;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class RedisQueueDriverAdapter implements QueueDriverAdapter
 {
     public function __construct(
         private readonly RedisInfrastructureRuntimeConfigurationFactory $runtimeFactory,
+        private readonly QueueSafetyPolicy $safety,
     ) {}
 
     public function type(): QueueDriverType
@@ -28,65 +29,256 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
 
     public function definition(): QueueDriverDefinitionData
     {
-        return new QueueDriverDefinitionData($this->type(), 'Redis', 'Use an enabled Redis infrastructure connection for queued jobs.');
+        return new QueueDriverDefinitionData(
+            type: $this->type(),
+            label: 'Redis',
+            description:
+            'Use an enabled Redis infrastructure connection for queued jobs.',
+            requiresInfrastructure: true,
+            infrastructureType:
+            InfrastructureConnectionType::Redis->value,
+            recommendedForProduction: true,
+        );
     }
 
-    public function validateAndNormalize(array $configuration): array
-    {
-        $validated = Validator::make($configuration, [
-            'infrastructure_connection_id' => [
-                'required',
-                'integer',
-                Rule::exists('infrastructure_connections', 'id')->where(fn ($query) => $query
-                    ->whereNull('deleted_at')
-                    ->where('is_enabled', true)
-                    ->where('type', InfrastructureConnectionType::Redis->value)),
-            ],
-            'retry_after' => ['required', 'integer', 'min:1'],
-            'block_for' => ['nullable', 'integer', 'min:0'],
-            'after_commit' => ['required', 'boolean'],
-        ])->validate();
+    public function validateAndNormalize(
+        array $configuration,
+    ): array {
+        $blockFor =
+            array_key_exists(
+                'block_for',
+                $configuration,
+            )
+                ? $configuration['block_for']
+                : config(
+                'simpledesk-queues.defaults.redis_block_for',
+                5,
+            );
+
+        $input = [
+            'infrastructure_connection_id' =>
+                $configuration[
+                'infrastructure_connection_id'
+                ] ?? null,
+
+            'retry_after' =>
+                $configuration[
+                'retry_after'
+                ]
+                ?? config(
+                    'simpledesk-queues.defaults.retry_after',
+                    360,
+                ),
+
+            'block_for' =>
+                $blockFor,
+
+            'after_commit' =>
+                $configuration[
+                'after_commit'
+                ]
+                ?? config(
+                    'simpledesk-queues.defaults.after_commit',
+                    false,
+                ),
+        ];
+
+        $validated =
+            Validator::make(
+                $input,
+                [
+                    'infrastructure_connection_id' => [
+                        'required',
+                        'integer',
+                    ],
+
+                    'retry_after' =>
+                        $this
+                            ->safety
+                            ->retryAfterRules(),
+
+                    'block_for' => [
+                        'nullable',
+                        'integer',
+                        'between:1,60',
+                    ],
+
+                    'after_commit' => [
+                        'required',
+                        'boolean',
+                    ],
+                ],
+                [
+                    ...$this
+                        ->safety
+                        ->retryAfterMessages(),
+
+                    'block_for.between' =>
+                        'Redis block for must be null or between 1 and 60 seconds. A value of 0 is not allowed.',
+                ],
+            )->validate();
+
+        $connection =
+            InfrastructureConnection::withTrashed()
+                ->find(
+                    (int) $validated[
+                    'infrastructure_connection_id'
+                    ],
+                );
+
+        if (! $connection) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' =>
+                    'The selected Redis infrastructure connection does not exist.',
+            ]);
+        }
+
+        if ($connection->trashed()) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' =>
+                    'The selected Redis infrastructure connection is archived.',
+            ]);
+        }
+
+        if (
+            $connection->type !==
+            InfrastructureConnectionType::Redis
+        ) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' =>
+                    'The selected infrastructure connection is not Redis.',
+            ]);
+        }
+
+        if (! $connection->is_enabled) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' =>
+                    'The selected Redis infrastructure connection is disabled.',
+            ]);
+        }
 
         return [
-            'infrastructure_connection_id' => (int) $validated['infrastructure_connection_id'],
-            'retry_after' => (int) $validated['retry_after'],
-            'block_for' => isset($validated['block_for']) ? (int) $validated['block_for'] : null,
-            'after_commit' => (bool) $validated['after_commit'],
+            'infrastructure_connection_id' =>
+                $connection->id,
+
+            'retry_after' =>
+                (int) $validated[
+                'retry_after'
+                ],
+
+            'block_for' =>
+                $validated[
+                'block_for'
+                ] === null
+                    ? null
+                    : (int) $validated[
+                'block_for'
+                ],
+
+            'after_commit' =>
+                (bool) $validated[
+                'after_commit'
+                ],
         ];
     }
 
-    public function runtimeConfiguration(QueueDriverConfiguration $configuration): QueueRuntimeConfigurationData
-    {
-        $values = $this->validateAndNormalize($configuration->configuration ?? []);
-        $connection = InfrastructureConnection::query()->find($values['infrastructure_connection_id']);
+    public function runtimeConfiguration(
+        QueueDriverConfiguration $configuration,
+    ): QueueRuntimeConfigurationData {
+        $values =
+            $this->validateAndNormalize(
+                $configuration->configuration ?? [],
+            );
+
+        $connection =
+            InfrastructureConnection::withTrashed()
+                ->find(
+                    $values[
+                    'infrastructure_connection_id'
+                    ],
+                );
 
         if (! $connection) {
-            throw ValidationException::withMessages(['configuration.infrastructure_connection_id' => 'The selected Redis infrastructure connection is unavailable.']);
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' =>
+                    'The configured Redis infrastructure connection no longer exists.',
+            ]);
         }
 
         $redisConnections = [];
 
-        if ($connection->source === InfrastructureConnectionSource::Managed) {
-            $redisConnectionName = 'simpledesk-infrastructure-'.$connection->id;
-            $redisConnections[$redisConnectionName] = $this->runtimeFactory->make($connection);
-        } else {
-            $redisConnectionName = (string) ($connection->configuration['connection_name'] ?? '');
+        if (
+            $connection->source ===
+            InfrastructureConnectionSource::Managed
+        ) {
+            $redisConnectionName =
+                'simpledesk-infrastructure-'
+                .$connection->id;
 
-            if ($redisConnectionName === '' || ! is_array(config("database.redis.{$redisConnectionName}"))) {
-                throw ValidationException::withMessages(['configuration.infrastructure_connection_id' => 'The deployment Redis connection no longer exists.']);
+            $redisConnections[
+            $redisConnectionName
+            ] =
+                $this
+                    ->runtimeFactory
+                    ->make(
+                        $connection,
+                    );
+        } else {
+            $redisConnectionName =
+                trim(
+                    (string) (
+                        $connection
+                            ->configuration[
+                        'connection_name'
+                        ]
+                        ?? ''
+                    ),
+                );
+
+            if (
+                $redisConnectionName === ''
+                || ! is_array(
+                    config(
+                        "database.redis.{$redisConnectionName}",
+                    ),
+                )
+            ) {
+                throw ValidationException::withMessages([
+                    'infrastructure_connection_id' =>
+                        'The deployment Redis connection referenced by this infrastructure connection no longer exists.',
+                ]);
             }
         }
 
         return new QueueRuntimeConfigurationData(
             queueConnection: [
-                'driver' => 'redis',
-                'connection' => $redisConnectionName,
-                'queue' => 'default',
-                'retry_after' => $values['retry_after'],
-                'block_for' => $values['block_for'],
-                'after_commit' => $values['after_commit'],
+                'driver' =>
+                    'redis',
+
+                'connection' =>
+                    $redisConnectionName,
+
+                'queue' =>
+                    'default',
+
+                'retry_after' =>
+                    $values[
+                    'retry_after'
+                    ],
+
+                'block_for' =>
+                    $values[
+                    'block_for'
+                    ],
+
+                'after_commit' =>
+                    $values[
+                    'after_commit'
+                    ],
             ],
-            redisConnections: $redisConnections,
+
+            redisConnections:
+            $redisConnections,
         );
     }
 }
