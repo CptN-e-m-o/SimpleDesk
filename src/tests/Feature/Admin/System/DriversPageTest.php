@@ -20,8 +20,7 @@ class DriversPageTest extends TestCase
                 request(),
             ),
         )->assertInertia(
-            fn ($page) =>
-            $page
+            fn ($page) => $page
                 ->component(
                     'Admin/System/Drivers/Index',
                 )

@@ -27,8 +27,8 @@ class QueueDriverRegistry
         $type =
             is_string($type)
                 ? QueueDriverType::tryFrom(
-                $type,
-            )
+                    $type,
+                )
                 : $type;
 
         if (! $type) {
@@ -114,8 +114,7 @@ class QueueDriverRegistry
         return array_map(
             fn (
                 QueueDriverType $type,
-            ): QueueDriverDefinitionData =>
-            $this
+            ): QueueDriverDefinitionData => $this
                 ->adapter(
                     $type,
                 )

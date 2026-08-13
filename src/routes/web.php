@@ -36,6 +36,8 @@ use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\System\DriverController;
 use App\Http\Controllers\Admin\System\InfrastructureConnectionController;
 use App\Http\Controllers\Admin\System\InfrastructureConnectionTestController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverConfigurationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverConfigurationTestController;
 use App\Http\Controllers\Admin\System\SystemAuditLogController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\WorkScheduleAssignmentController;
@@ -103,6 +105,16 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('system')->name('system.')->group(function (): void {
             Route::get('drivers', DriverController::class)->middleware('permission:admin.settings.drivers.view')->name('drivers.index');
+            Route::get('drivers/queues', [QueueDriverConfigurationController::class, 'index'])->middleware('permission:admin.settings.queues.view')->name('queues.index');
+            Route::get('drivers/queues/create', [QueueDriverConfigurationController::class, 'create'])->middleware('permission:admin.settings.queues.create')->name('queues.create');
+            Route::post('drivers/queues', [QueueDriverConfigurationController::class, 'store'])->middleware('permission:admin.settings.queues.create')->name('queues.store');
+            Route::get('drivers/queues/{configuration}/edit', [QueueDriverConfigurationController::class, 'edit'])->middleware('permission:admin.settings.queues.update')->name('queues.edit');
+            Route::put('drivers/queues/{configuration}', [QueueDriverConfigurationController::class, 'update'])->middleware('permission:admin.settings.queues.update')->name('queues.update');
+            Route::patch('drivers/queues/{configuration}/enabled', [QueueDriverConfigurationController::class, 'setEnabled'])->middleware('permission:admin.settings.queues.update')->name('queues.enabled');
+            Route::delete('drivers/queues/{configuration}', [QueueDriverConfigurationController::class, 'destroy'])->middleware('permission:admin.settings.queues.archive')->name('queues.destroy');
+            Route::post('drivers/queues/{id}/restore', [QueueDriverConfigurationController::class, 'restore'])->middleware('permission:admin.settings.queues.archive')->whereNumber('id')->name('queues.restore');
+            Route::delete('drivers/queues/{id}/force-delete', [QueueDriverConfigurationController::class, 'forceDelete'])->middleware('permission:admin.settings.queues.delete')->whereNumber('id')->name('queues.force-delete');
+            Route::post('drivers/queues/{configuration}/test', QueueDriverConfigurationTestController::class)->middleware('permission:admin.settings.queues.test')->name('queues.test');
             Route::get('connections', [InfrastructureConnectionController::class, 'index'])->middleware('permission:admin.settings.infrastructure_connections.view')->name('connections.index');
             Route::get('connections/create', [InfrastructureConnectionController::class, 'create'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.create');
             Route::post('connections', [InfrastructureConnectionController::class, 'store'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.store');

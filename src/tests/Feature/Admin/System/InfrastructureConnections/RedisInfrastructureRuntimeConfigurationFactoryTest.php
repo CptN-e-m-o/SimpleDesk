@@ -53,36 +53,27 @@ class RedisInfrastructureRuntimeConfigurationFactoryTest extends TestCase
         $connection =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
                     'configuration' => [
-                        'host' =>
-                            'managed-redis.internal',
+                        'host' => 'managed-redis.internal',
 
-                        'port' =>
-                            6380,
+                        'port' => 6380,
 
-                        'database' =>
-                            12,
+                        'database' => 12,
 
-                        'username' =>
-                            'simpledesk',
+                        'username' => 'simpledesk',
 
-                        'tls' =>
-                            true,
+                        'tls' => true,
 
-                        'connect_timeout_seconds' =>
-                            2.5,
+                        'connect_timeout_seconds' => 2.5,
                     ],
 
                     'credentials' => [
-                        'password' =>
-                            'managed-password',
+                        'password' => 'managed-password',
                     ],
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $runtime =
@@ -201,31 +192,23 @@ class RedisInfrastructureRuntimeConfigurationFactoryTest extends TestCase
         $connection =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
                     'configuration' => [
-                        'host' =>
-                            'redis.internal',
+                        'host' => 'redis.internal',
 
-                        'port' =>
-                            6379,
+                        'port' => 6379,
 
-                        'database' =>
-                            0,
+                        'database' => 0,
 
-                        'username' =>
-                            '',
+                        'username' => '',
 
-                        'tls' =>
-                            false,
+                        'tls' => false,
 
-                        'connect_timeout_seconds' =>
-                            5,
+                        'connect_timeout_seconds' => 5,
                     ],
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $runtime =
@@ -247,11 +230,9 @@ class RedisInfrastructureRuntimeConfigurationFactoryTest extends TestCase
         $connection =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
-                    'is_enabled' =>
-                        false,
+                    'is_enabled' => false,
                 ]);
 
         $this->expectException(
@@ -274,11 +255,9 @@ class RedisInfrastructureRuntimeConfigurationFactoryTest extends TestCase
         $connection =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $connection->delete();
@@ -303,19 +282,15 @@ class RedisInfrastructureRuntimeConfigurationFactoryTest extends TestCase
         $connection =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Deployment,
+                    'source' => InfrastructureConnectionSource::Deployment,
 
                     'configuration' => [
-                        'connection_name' =>
-                            'default',
+                        'connection_name' => 'default',
                     ],
 
-                    'credentials' =>
-                        [],
+                    'credentials' => [],
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $this->expectException(
@@ -338,31 +313,24 @@ class RedisInfrastructureRuntimeConfigurationFactoryTest extends TestCase
         $connection =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
                     /*
                      * host is deliberately missing.
                      */
                     'configuration' => [
-                        'port' =>
-                            6379,
+                        'port' => 6379,
 
-                        'database' =>
-                            0,
+                        'database' => 0,
 
-                        'username' =>
-                            '',
+                        'username' => '',
 
-                        'tls' =>
-                            false,
+                        'tls' => false,
 
-                        'connect_timeout_seconds' =>
-                            5,
+                        'connect_timeout_seconds' => 5,
                     ],
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $this->expectException(

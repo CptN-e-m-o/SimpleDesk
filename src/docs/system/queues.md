@@ -17,3 +17,13 @@ Managed mode requires an enabled, non-archived active configuration. At applicat
 SQS and Beanstalkd are represented in the queue domain but are not registered yet.
 
 Queue configuration never duplicates Redis host, username, password, TLS, or database settings. Existing queue names and Mail jobs are unchanged. Worker restart tracking exists in settings, but activation and restart orchestration will be implemented in a later task.
+
+## Management and observability
+
+The backend management layer stores normalized queue configurations and protects the active managed configuration from editing, disabling, archiving, or permanent deletion until restart orchestration exists. Archived configurations are disabled; restored configurations remain disabled until explicitly enabled.
+
+Each persisted configuration has append-only test history. Database tests verify connectivity and the `jobs` table without inserting rows, Redis tests reuse Infrastructure Connection health semantics, and Sync reports synchronous execution as healthy but not recommended for production. Queue mutations and tests are recorded in System Audit without infrastructure secrets.
+
+The workload registry observes existing Mail configuration for default, incoming, outgoing, and antivirus workloads, including explicit connection overrides. Backlog inspection is read-only and deduplicates physical connection/queue pairs. Permissions separately control view, create, update, archive, permanent delete, and test operations.
+
+Activation, return to deployment, worker restart orchestration, and the frontend are intentionally not implemented. The next frontend task can consume the `/admin/system/drivers/queues` endpoints. SimpleDesk does not write `.env` and this management layer does not change Mail dispatch behavior.

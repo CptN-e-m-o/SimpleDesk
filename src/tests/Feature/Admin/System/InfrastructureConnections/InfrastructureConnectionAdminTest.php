@@ -20,8 +20,7 @@ class InfrastructureConnectionAdminTest extends TestCase
             new InfrastructureConnectionRegistry(
                 $this->app,
                 [
-                    'redis' =>
-                        FakeInfrastructureConnectionAdapter::class,
+                    'redis' => FakeInfrastructureConnectionAdapter::class,
                 ],
             ),
         );
@@ -37,22 +36,16 @@ class InfrastructureConnectionAdminTest extends TestCase
         $connection =
             $service->create(
                 [
-                    'name' =>
-                        'Redis',
-                    'type' =>
-                        'redis',
-                    'source' =>
-                        'managed',
+                    'name' => 'Redis',
+                    'type' => 'redis',
+                    'source' => 'managed',
                     'configuration' => [
-                        'host' =>
-                            'redis',
+                        'host' => 'redis',
                     ],
                     'credentials' => [
-                        'password' =>
-                            'first-secret',
+                        'password' => 'first-secret',
                     ],
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ],
                 $actor,
             );
@@ -60,20 +53,15 @@ class InfrastructureConnectionAdminTest extends TestCase
         $service->update(
             $connection,
             [
-                'name' =>
-                    'Redis updated',
-                'source' =>
-                    'managed',
+                'name' => 'Redis updated',
+                'source' => 'managed',
                 'configuration' => [
-                    'host' =>
-                        'redis-new',
+                    'host' => 'redis-new',
                 ],
                 'credentials' => [
-                    'password' =>
-                        '',
+                    'password' => '',
                 ],
-                'is_enabled' =>
-                    false,
+                'is_enabled' => false,
             ],
             $actor,
         );
@@ -95,17 +83,13 @@ class InfrastructureConnectionAdminTest extends TestCase
         $service->update(
             $connection,
             [
-                'name' =>
-                    'Redis updated',
-                'source' =>
-                    'managed',
-                'configuration' =>
-                    [],
+                'name' => 'Redis updated',
+                'source' => 'managed',
+                'configuration' => [],
                 'remove_credentials' => [
                     'password',
                 ],
-                'is_enabled' =>
-                    false,
+                'is_enabled' => false,
             ],
             $actor,
         );

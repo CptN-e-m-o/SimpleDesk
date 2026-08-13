@@ -64,8 +64,7 @@ class SystemAuditLogTest extends TestCase
         );
 
         $log->update([
-            'action' =>
-                'tampered',
+            'action' => 'tampered',
         ]);
     }
 

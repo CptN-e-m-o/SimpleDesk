@@ -4,13 +4,18 @@ namespace App\Services\Admin\System\Queues\Drivers;
 
 use App\Contracts\Admin\System\Queues\QueueDriverAdapter;
 use App\Data\Admin\System\Queues\QueueDriverDefinitionData;
+use App\Data\Admin\System\Queues\QueueHealthResultData;
 use App\Data\Admin\System\Queues\QueueRuntimeConfigurationData;
 use App\Enums\Admin\System\InfrastructureConnectionSource;
 use App\Enums\Admin\System\InfrastructureConnectionType;
+use App\Enums\Admin\System\InfrastructureHealthStatus;
+use App\Enums\Admin\System\InfrastructureHealthTrigger;
 use App\Enums\Admin\System\QueueDriverType;
+use App\Enums\Admin\System\QueueHealthStatus;
 use App\Models\Admin\System\InfrastructureConnection;
 use App\Models\Admin\System\QueueDriverConfiguration;
 use App\Services\Admin\System\Infrastructure\Connections\RedisInfrastructureRuntimeConfigurationFactory;
+use App\Services\Admin\System\Infrastructure\InfrastructureConnectionHealthService;
 use App\Services\Admin\System\Queues\QueueSafetyPolicy;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +25,7 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
     public function __construct(
         private readonly RedisInfrastructureRuntimeConfigurationFactory $runtimeFactory,
         private readonly QueueSafetyPolicy $safety,
+        private readonly InfrastructureConnectionHealthService $health,
     ) {}
 
     public function type(): QueueDriverType
@@ -32,11 +38,9 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
         return new QueueDriverDefinitionData(
             type: $this->type(),
             label: 'Redis',
-            description:
-            'Use an enabled Redis infrastructure connection for queued jobs.',
+            description: 'Use an enabled Redis infrastructure connection for queued jobs.',
             requiresInfrastructure: true,
-            infrastructureType:
-            InfrastructureConnectionType::Redis->value,
+            infrastructureType: InfrastructureConnectionType::Redis->value,
             recommendedForProduction: true,
         );
     }
@@ -51,18 +55,16 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
             )
                 ? $configuration['block_for']
                 : config(
-                'simpledesk-queues.defaults.redis_block_for',
-                5,
-            );
+                    'simpledesk-queues.defaults.redis_block_for',
+                    5,
+                );
 
         $input = [
-            'infrastructure_connection_id' =>
-                $configuration[
+            'infrastructure_connection_id' => $configuration[
                 'infrastructure_connection_id'
                 ] ?? null,
 
-            'retry_after' =>
-                $configuration[
+            'retry_after' => $configuration[
                 'retry_after'
                 ]
                 ?? config(
@@ -70,11 +72,9 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
                     360,
                 ),
 
-            'block_for' =>
-                $blockFor,
+            'block_for' => $blockFor,
 
-            'after_commit' =>
-                $configuration[
+            'after_commit' => $configuration[
                 'after_commit'
                 ]
                 ?? config(
@@ -92,10 +92,9 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
                         'integer',
                     ],
 
-                    'retry_after' =>
-                        $this
-                            ->safety
-                            ->retryAfterRules(),
+                    'retry_after' => $this
+                        ->safety
+                        ->retryAfterRules(),
 
                     'block_for' => [
                         'nullable',
@@ -113,8 +112,7 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
                         ->safety
                         ->retryAfterMessages(),
 
-                    'block_for.between' =>
-                        'Redis block for must be null or between 1 and 60 seconds. A value of 0 is not allowed.',
+                    'block_for.between' => 'Redis block for must be null or between 1 and 60 seconds. A value of 0 is not allowed.',
                 ],
             )->validate();
 
@@ -128,15 +126,13 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
 
         if (! $connection) {
             throw ValidationException::withMessages([
-                'infrastructure_connection_id' =>
-                    'The selected Redis infrastructure connection does not exist.',
+                'infrastructure_connection_id' => 'The selected Redis infrastructure connection does not exist.',
             ]);
         }
 
         if ($connection->trashed()) {
             throw ValidationException::withMessages([
-                'infrastructure_connection_id' =>
-                    'The selected Redis infrastructure connection is archived.',
+                'infrastructure_connection_id' => 'The selected Redis infrastructure connection is archived.',
             ]);
         }
 
@@ -145,29 +141,24 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
             InfrastructureConnectionType::Redis
         ) {
             throw ValidationException::withMessages([
-                'infrastructure_connection_id' =>
-                    'The selected infrastructure connection is not Redis.',
+                'infrastructure_connection_id' => 'The selected infrastructure connection is not Redis.',
             ]);
         }
 
         if (! $connection->is_enabled) {
             throw ValidationException::withMessages([
-                'infrastructure_connection_id' =>
-                    'The selected Redis infrastructure connection is disabled.',
+                'infrastructure_connection_id' => 'The selected Redis infrastructure connection is disabled.',
             ]);
         }
 
         return [
-            'infrastructure_connection_id' =>
-                $connection->id,
+            'infrastructure_connection_id' => $connection->id,
 
-            'retry_after' =>
-                (int) $validated[
+            'retry_after' => (int) $validated[
                 'retry_after'
                 ],
 
-            'block_for' =>
-                $validated[
+            'block_for' => $validated[
                 'block_for'
                 ] === null
                     ? null
@@ -175,8 +166,7 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
                 'block_for'
                 ],
 
-            'after_commit' =>
-                (bool) $validated[
+            'after_commit' => (bool) $validated[
                 'after_commit'
                 ],
         ];
@@ -200,8 +190,7 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
 
         if (! $connection) {
             throw ValidationException::withMessages([
-                'infrastructure_connection_id' =>
-                    'The configured Redis infrastructure connection no longer exists.',
+                'infrastructure_connection_id' => 'The configured Redis infrastructure connection no longer exists.',
             ]);
         }
 
@@ -244,41 +233,45 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
                 )
             ) {
                 throw ValidationException::withMessages([
-                    'infrastructure_connection_id' =>
-                        'The deployment Redis connection referenced by this infrastructure connection no longer exists.',
+                    'infrastructure_connection_id' => 'The deployment Redis connection referenced by this infrastructure connection no longer exists.',
                 ]);
             }
         }
 
         return new QueueRuntimeConfigurationData(
             queueConnection: [
-                'driver' =>
-                    'redis',
+                'driver' => 'redis',
 
-                'connection' =>
-                    $redisConnectionName,
+                'connection' => $redisConnectionName,
 
-                'queue' =>
-                    'default',
+                'queue' => 'default',
 
-                'retry_after' =>
-                    $values[
+                'retry_after' => $values[
                     'retry_after'
                     ],
 
-                'block_for' =>
-                    $values[
+                'block_for' => $values[
                     'block_for'
                     ],
 
-                'after_commit' =>
-                    $values[
+                'after_commit' => $values[
                     'after_commit'
                     ],
             ],
 
-            redisConnections:
-            $redisConnections,
+            redisConnections: $redisConnections,
         );
+    }
+
+    public function test(QueueDriverConfiguration $configuration): QueueHealthResultData
+    {
+        $values = $this->validateAndNormalize($configuration->configuration ?? []);
+        $connection = InfrastructureConnection::query()->findOrFail($values['infrastructure_connection_id']);
+        $result = $this->health->test($connection, InfrastructureHealthTrigger::Scheduled);
+        $status = match ($result->status) {
+            InfrastructureHealthStatus::Healthy => QueueHealthStatus::Healthy,InfrastructureHealthStatus::Degraded => QueueHealthStatus::Degraded,InfrastructureHealthStatus::Unhealthy => QueueHealthStatus::Unhealthy,default => QueueHealthStatus::Unavailable
+        };
+
+        return new QueueHealthResultData($status, $result->latencyMs, $result->message ?? 'Redis queue connectivity test completed.', ['infrastructure_connection_id' => $connection->id, 'source' => $connection->source->value]);
     }
 }

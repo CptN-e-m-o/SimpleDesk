@@ -53,6 +53,12 @@ class PermissionAdminSettingsSeeder extends Seeder
             ['key' => 'admin.settings.infrastructure_connections.delete', 'label' => 'Permanently delete infrastructure connections', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 27, 'parent_key' => 'admin.settings.manage_system'],
             ['key' => 'admin.settings.infrastructure_connections.test', 'label' => 'Test infrastructure connections', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 28, 'parent_key' => 'admin.settings.manage_system'],
             ['key' => 'admin.settings.system_audit.view', 'label' => 'View system audit', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 29, 'parent_key' => 'admin.settings.manage_system'],
+            ['key' => 'admin.settings.queues.view', 'label' => 'View queue configurations', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 30, 'parent_key' => 'admin.settings.manage_system'],
+            ['key' => 'admin.settings.queues.create', 'label' => 'Create queue configurations', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 31, 'parent_key' => 'admin.settings.manage_system'],
+            ['key' => 'admin.settings.queues.update', 'label' => 'Update queue configurations', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 32, 'parent_key' => 'admin.settings.manage_system'],
+            ['key' => 'admin.settings.queues.archive', 'label' => 'Archive queue configurations', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 33, 'parent_key' => 'admin.settings.manage_system'],
+            ['key' => 'admin.settings.queues.delete', 'label' => 'Permanently delete queue configurations', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 34, 'parent_key' => 'admin.settings.manage_system'],
+            ['key' => 'admin.settings.queues.test', 'label' => 'Test queue configurations', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 35, 'parent_key' => 'admin.settings.manage_system'],
             [
                 'key' => 'admin.settings.manage_social_login',
                 'label' => 'Manage social login',

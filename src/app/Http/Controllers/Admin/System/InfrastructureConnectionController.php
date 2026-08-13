@@ -53,37 +53,30 @@ class InfrastructureConnectionController extends Controller
                             $connection,
                         ),
 
-                        'deleted_at' =>
-                            $connection
-                                ->deleted_at
-                                ?->toIso8601String(),
+                        'deleted_at' => $connection
+                            ->deleted_at
+                            ?->toIso8601String(),
 
-                        'latest_health_check' =>
-                            $connection
-                                ->latestHealthCheck
-                                ?->toArray(),
+                        'latest_health_check' => $connection
+                            ->latestHealthCheck
+                            ?->toArray(),
                     ],
                 );
 
         return Inertia::render(
             'Admin/System/Connections/Index',
             [
-                'connections' =>
-                    $connections,
+                'connections' => $connections,
 
-                'definitions' =>
-                    array_map(
-                        fn ($definition) =>
-                        $definition->toArray(),
-                        $this->registry
-                            ->definitions(),
-                    ),
+                'definitions' => array_map(
+                    fn ($definition) => $definition->toArray(),
+                    $this->registry
+                        ->definitions(),
+                ),
 
-                'filters' =>
-                    $filters,
+                'filters' => $filters,
 
-                'stats' =>
-                    $this->stats(),
+                'stats' => $this->stats(),
             ],
         );
     }
@@ -93,13 +86,11 @@ class InfrastructureConnectionController extends Controller
         return Inertia::render(
             'Admin/System/Connections/Create',
             [
-                'definitions' =>
-                    array_map(
-                        fn ($definition) =>
-                        $definition->toArray(),
-                        $this->registry
-                            ->definitions(),
-                    ),
+                'definitions' => array_map(
+                    fn ($definition) => $definition->toArray(),
+                    $this->registry
+                        ->definitions(),
+                ),
             ],
         );
     }
@@ -126,18 +117,15 @@ class InfrastructureConnectionController extends Controller
         return Inertia::render(
             'Admin/System/Connections/Edit',
             [
-                'connection' =>
-                    $this->catalog->safe(
-                        $connection,
-                    ),
+                'connection' => $this->catalog->safe(
+                    $connection,
+                ),
 
-                'definitions' =>
-                    array_map(
-                        fn ($definition) =>
-                        $definition->toArray(),
-                        $this->registry
-                            ->definitions(),
-                    ),
+                'definitions' => array_map(
+                    fn ($definition) => $definition->toArray(),
+                    $this->registry
+                        ->definitions(),
+                ),
             ],
         );
     }
@@ -290,8 +278,7 @@ class InfrastructureConnectionController extends Controller
                                 'latestHealthCheck',
                                 fn (
                                     Builder $latest,
-                                ) =>
-                                $latest->where(
+                                ) => $latest->where(
                                     'status',
                                     InfrastructureHealthStatus::Unknown->value,
                                 ),
@@ -303,8 +290,7 @@ class InfrastructureConnectionController extends Controller
                     'latestHealthCheck',
                     fn (
                         Builder $latest,
-                    ) =>
-                    $latest->where(
+                    ) => $latest->where(
                         'status',
                         $health,
                     ),
@@ -322,47 +308,40 @@ class InfrastructureConnectionController extends Controller
         ];
 
         return [
-            'total' =>
-                InfrastructureConnection::withTrashed()
-                    ->count(),
+            'total' => InfrastructureConnection::withTrashed()
+                ->count(),
 
-            'enabled' =>
-                InfrastructureConnection::query()
-                    ->where(
-                        'is_enabled',
-                        true,
-                    )
-                    ->count(),
+            'enabled' => InfrastructureConnection::query()
+                ->where(
+                    'is_enabled',
+                    true,
+                )
+                ->count(),
 
-            'healthy' =>
-                InfrastructureConnection::query()
-                    ->where('is_enabled', true)
-                    ->whereHas(
-                        'latestHealthCheck',
-                        fn (Builder $query) =>
-                        $query->where(
-                            'status',
-                            InfrastructureHealthStatus::Healthy->value,
-                        ),
-                    )
-                    ->count(),
+            'healthy' => InfrastructureConnection::query()
+                ->where('is_enabled', true)
+                ->whereHas(
+                    'latestHealthCheck',
+                    fn (Builder $query) => $query->where(
+                        'status',
+                        InfrastructureHealthStatus::Healthy->value,
+                    ),
+                )
+                ->count(),
 
-            'problems' =>
-                InfrastructureConnection::query()
-                    ->where('is_enabled', true)
-                    ->whereHas(
-                        'latestHealthCheck',
-                        fn (Builder $query) =>
-                        $query->whereIn(
-                            'status',
-                            $problemStatuses,
-                        ),
-                    )
-                    ->count(),
+            'problems' => InfrastructureConnection::query()
+                ->where('is_enabled', true)
+                ->whereHas(
+                    'latestHealthCheck',
+                    fn (Builder $query) => $query->whereIn(
+                        'status',
+                        $problemStatuses,
+                    ),
+                )
+                ->count(),
 
-            'archived' =>
-                InfrastructureConnection::onlyTrashed()
-                    ->count(),
+            'archived' => InfrastructureConnection::onlyTrashed()
+                ->count(),
         ];
     }
 }

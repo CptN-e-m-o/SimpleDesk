@@ -52,8 +52,7 @@ final class QueueSafetyPolicy
         string $attribute = 'retry_after',
     ): array {
         return [
-            $attribute.'.min' =>
-                'Retry after must be at least '
+            $attribute.'.min' => 'Retry after must be at least '
                 .$this->minimumRetryAfterSeconds()
                 .' seconds so it remains safely above the configured worker timeout.',
         ];

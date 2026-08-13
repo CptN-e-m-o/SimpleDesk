@@ -13,7 +13,7 @@ class RedisInfrastructureRuntimeConnectionRegistrar
     ) {}
 
     /**
-     * @param array<string, array<string, mixed>> $connections
+     * @param  array<string, array<string, mixed>>  $connections
      */
     public function registerMany(
         array $connections,
@@ -23,8 +23,7 @@ class RedisInfrastructureRuntimeConnectionRegistrar
         }
 
         foreach (
-            $connections
-            as $name => $configuration
+            $connections as $name => $configuration
         ) {
             $name =
                 trim(

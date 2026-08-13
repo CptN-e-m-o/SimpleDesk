@@ -51,8 +51,7 @@ class InfrastructureConnectionCatalogService
                     'type' => $type,
                     'source' => $data['source'],
                     ...$normalized,
-                    'is_enabled' =>
-                        $data['is_enabled'] ?? true,
+                    'is_enabled' => $data['is_enabled'] ?? true,
                     'created_by' => $actor->id,
                     'updated_by' => $actor->id,
                 ]);
@@ -68,10 +67,9 @@ class InfrastructureConnectionCatalogService
                     $adapter,
                 ),
                 [
-                    'credentials_changed' =>
-                        array_keys(
-                            $normalized['credentials'],
-                        ),
+                    'credentials_changed' => array_keys(
+                        $normalized['credentials'],
+                    ),
                 ],
                 $actor,
             );
@@ -107,8 +105,7 @@ class InfrastructureConnectionCatalogService
 
             $incoming = array_filter(
                 $data['credentials'] ?? [],
-                fn (mixed $value): bool =>
-                    $value !== null
+                fn (mixed $value): bool => $value !== null
                     && $value !== '',
             );
 
@@ -118,8 +115,7 @@ class InfrastructureConnectionCatalogService
             ];
 
             foreach (
-                $data['remove_credentials'] ?? []
-                as $field
+                $data['remove_credentials'] ?? [] as $field
             ) {
                 if (
                     in_array(
@@ -143,13 +139,11 @@ class InfrastructureConnectionCatalogService
 
             $connection->update([
                 'name' => $data['name'],
-                'source' =>
-                    $data['source']
+                'source' => $data['source']
                     ?? $connection->source,
                 ...$normalized,
 
-                'is_enabled' =>
-                    $data['is_enabled']
+                'is_enabled' => $data['is_enabled']
                     ?? $connection->is_enabled,
 
                 'updated_by' => $actor->id,
@@ -178,8 +172,7 @@ class InfrastructureConnectionCatalogService
                     $adapter,
                 ),
                 [
-                    'credentials_changed' =>
-                        $changedCredentials,
+                    'credentials_changed' => $changedCredentials,
                 ],
                 $actor,
             );
@@ -358,10 +351,8 @@ class InfrastructureConnectionCatalogService
             'id' => $connection->id,
             'name' => $connection->name,
             'type' => $connection->type->value,
-            'source' =>
-                $connection->source->value,
-            'is_enabled' =>
-                $connection->is_enabled,
+            'source' => $connection->source->value,
+            'is_enabled' => $connection->is_enabled,
             ...$adapter->publicRepresentation(
                 $connection,
             ),

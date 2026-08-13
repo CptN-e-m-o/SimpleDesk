@@ -47,12 +47,11 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
                             [],
                         ),
                     ),
-                    fn (string $key): bool =>
-                        ! in_array(
-                            $key,
-                            $reserved,
-                            true,
-                        )
+                    fn (string $key): bool => ! in_array(
+                        $key,
+                        $reserved,
+                        true,
+                    )
                         && is_array(
                             config(
                                 "database.redis.{$key}",
@@ -71,8 +70,7 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
             ],
             true,
             [
-                'deployment_connections' =>
-                    $connections,
+                'deployment_connections' => $connections,
             ],
         );
     }
@@ -96,8 +94,7 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
             )
         ) {
             throw ValidationException::withMessages([
-                'source' =>
-                    'The selected connection source is not supported.',
+                'source' => 'The selected connection source is not supported.',
             ]);
         }
 
@@ -127,16 +124,14 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
         InfrastructureConnection $connection,
     ): array {
         return [
-            'configuration' =>
-                $connection->configuration ?? [],
+            'configuration' => $connection->configuration ?? [],
 
             'credential_flags' => [
-                'password_configured' =>
-                    isset(
-                        $connection->secrets()[
-                        'password'
-                        ],
-                    ),
+                'password_configured' => isset(
+                    $connection->secrets()[
+                    'password'
+                    ],
+                ),
             ],
         ];
     }
@@ -192,36 +187,28 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
                         [
                             'temporary' => [
                                 'url' => null,
-                                'host' =>
-                                    $configuration[
+                                'host' => $configuration[
                                     'host'
                                     ],
-                                'port' =>
-                                    $configuration[
+                                'port' => $configuration[
                                     'port'
                                     ],
-                                'database' =>
-                                    $configuration[
+                                'database' => $configuration[
                                     'database'
                                     ],
-                                'username' =>
-                                    $configuration[
+                                'username' => $configuration[
                                     'username'
                                     ] ?: null,
-                                'password' =>
-                                    $secrets[
+                                'password' => $secrets[
                                     'password'
                                     ] ?? null,
-                                'timeout' =>
-                                    $configuration[
+                                'timeout' => $configuration[
                                     'connect_timeout_seconds'
                                     ],
-                                'read_timeout' =>
-                                    $configuration[
+                                'read_timeout' => $configuration[
                                     'connect_timeout_seconds'
                                     ],
-                                'scheme' =>
-                                    $scheme,
+                                'scheme' => $scheme,
                             ],
                         ],
                     );
@@ -337,8 +324,7 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
         $validated =
             Validator::make(
                 [
-                    'configuration' =>
-                        $configuration,
+                    'configuration' => $configuration,
                 ],
                 [
                     'configuration.connection_name' => [
@@ -351,8 +337,7 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
 
         return [
             'configuration' => [
-                'connection_name' =>
-                    $validated[
+                'connection_name' => $validated[
                     'configuration'
                     ][
                     'connection_name'
@@ -380,10 +365,8 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
         $validated =
             Validator::make(
                 [
-                    'configuration' =>
-                        $configuration,
-                    'credentials' =>
-                        $credentials,
+                    'configuration' => $configuration,
+                    'credentials' => $credentials,
                 ],
                 [
                     'configuration.host' => [
@@ -435,39 +418,31 @@ class RedisInfrastructureConnectionAdapter implements InfrastructureConnectionAd
 
         return [
             'configuration' => [
-                'host' =>
-                    $validatedConfiguration[
+                'host' => $validatedConfiguration[
                     'host'
                     ],
-                'port' =>
-                    (int) $validatedConfiguration[
+                'port' => (int) $validatedConfiguration[
                     'port'
                     ],
-                'database' =>
-                    (int) $validatedConfiguration[
+                'database' => (int) $validatedConfiguration[
                     'database'
                     ],
-                'username' =>
-                    $validatedConfiguration[
+                'username' => $validatedConfiguration[
                     'username'
                     ] ?? '',
-                'tls' =>
-                    (bool) $validatedConfiguration[
+                'tls' => (bool) $validatedConfiguration[
                     'tls'
                     ],
-                'connect_timeout_seconds' =>
-                    (float) $validatedConfiguration[
+                'connect_timeout_seconds' => (float) $validatedConfiguration[
                     'connect_timeout_seconds'
                     ],
             ],
 
-            'credentials' =>
-                $password !== null
+            'credentials' => $password !== null
                 && $password !== ''
                     ? [
-                    'password' =>
-                        $password,
-                ]
+                        'password' => $password,
+                    ]
                     : [],
         ];
     }

@@ -26,16 +26,13 @@ class QueueDriverValidationTest extends TestCase
         );
 
         $adapter->validateAndNormalize([
-            'database_connection' =>
-                config(
-                    'database.default',
-                ),
+            'database_connection' => config(
+                'database.default',
+            ),
 
-            'retry_after' =>
-                329,
+            'retry_after' => 329,
 
-            'after_commit' =>
-                false,
+            'after_commit' => false,
         ]);
     }
 
@@ -48,16 +45,13 @@ class QueueDriverValidationTest extends TestCase
 
         $configuration =
             $adapter->validateAndNormalize([
-                'database_connection' =>
-                    config(
-                        'database.default',
-                    ),
+                'database_connection' => config(
+                    'database.default',
+                ),
 
-                'retry_after' =>
-                    330,
+                'retry_after' => 330,
 
-                'after_commit' =>
-                    false,
+                'after_commit' => false,
             ]);
 
         $this->assertSame(
@@ -77,16 +71,13 @@ class QueueDriverValidationTest extends TestCase
 
         $configuration =
             $adapter->validateAndNormalize([
-                'database_connection' =>
-                    config(
-                        'database.default',
-                    ),
+                'database_connection' => config(
+                    'database.default',
+                ),
 
-                'retry_after' =>
-                    360,
+                'retry_after' => 360,
 
-                'after_commit' =>
-                    false,
+                'after_commit' => false,
             ]);
 
         $this->assertSame(
@@ -102,11 +93,9 @@ class QueueDriverValidationTest extends TestCase
         $infrastructure =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $adapter =
@@ -119,17 +108,13 @@ class QueueDriverValidationTest extends TestCase
         );
 
         $adapter->validateAndNormalize([
-            'infrastructure_connection_id' =>
-                $infrastructure->id,
+            'infrastructure_connection_id' => $infrastructure->id,
 
-            'retry_after' =>
-                360,
+            'retry_after' => 360,
 
-            'block_for' =>
-                0,
+            'block_for' => 0,
 
-            'after_commit' =>
-                false,
+            'after_commit' => false,
         ]);
     }
 
@@ -138,11 +123,9 @@ class QueueDriverValidationTest extends TestCase
         $infrastructure =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $adapter =
@@ -152,17 +135,13 @@ class QueueDriverValidationTest extends TestCase
 
         $configuration =
             $adapter->validateAndNormalize([
-                'infrastructure_connection_id' =>
-                    $infrastructure->id,
+                'infrastructure_connection_id' => $infrastructure->id,
 
-                'retry_after' =>
-                    360,
+                'retry_after' => 360,
 
-                'block_for' =>
-                    null,
+                'block_for' => null,
 
-                'after_commit' =>
-                    false,
+                'after_commit' => false,
             ]);
 
         $this->assertNull(
@@ -177,11 +156,9 @@ class QueueDriverValidationTest extends TestCase
         $infrastructure =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ]);
 
         $adapter =
@@ -191,17 +168,13 @@ class QueueDriverValidationTest extends TestCase
 
         $configuration =
             $adapter->validateAndNormalize([
-                'infrastructure_connection_id' =>
-                    $infrastructure->id,
+                'infrastructure_connection_id' => $infrastructure->id,
 
-                'retry_after' =>
-                    360,
+                'retry_after' => 360,
 
-                'block_for' =>
-                    5,
+                'block_for' => 5,
 
-                'after_commit' =>
-                    false,
+                'after_commit' => false,
             ]);
 
         $this->assertSame(

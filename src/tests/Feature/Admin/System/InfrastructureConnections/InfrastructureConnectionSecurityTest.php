@@ -22,8 +22,7 @@ class InfrastructureConnectionSecurityTest extends TestCase
             new InfrastructureConnectionRegistry(
                 $this->app,
                 [
-                    'redis' =>
-                        FakeInfrastructureConnectionAdapter::class,
+                    'redis' => FakeInfrastructureConnectionAdapter::class,
                 ],
             ),
         );
@@ -39,23 +38,18 @@ class InfrastructureConnectionSecurityTest extends TestCase
         $connection =
             $service->create(
                 [
-                    'name' =>
-                        'Secure Redis',
+                    'name' => 'Secure Redis',
 
-                    'type' =>
-                        'redis',
+                    'type' => 'redis',
 
-                    'source' =>
-                        'managed',
+                    'source' => 'managed',
 
                     'configuration' => [
-                        'host' =>
-                            'redis',
+                        'host' => 'redis',
                     ],
 
                     'credentials' => [
-                        'password' =>
-                            'never-plaintext',
+                        'password' => 'never-plaintext',
                     ],
                 ],
                 $actor,

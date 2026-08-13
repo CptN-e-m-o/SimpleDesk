@@ -30,35 +30,25 @@ class SystemAuditLogger
         }
 
         return SystemAuditLog::query()->create([
-            'actor_id' =>
-                $actor?->id,
+            'actor_id' => $actor?->id,
 
-            'area' =>
-                $area,
+            'area' => $area,
 
-            'action' =>
-                $action,
+            'action' => $action,
 
-            'subject_type' =>
-                $subjectType,
+            'subject_type' => $subjectType,
 
-            'subject_id' =>
-                $subjectId,
+            'subject_id' => $subjectId,
 
-            'before_state' =>
-                $before,
+            'before_state' => $before,
 
-            'after_state' =>
-                $after,
+            'after_state' => $after,
 
-            'metadata' =>
-                $metadata,
+            'metadata' => $metadata,
 
-            'ip_address' =>
-                $ipAddress,
+            'ip_address' => $ipAddress,
 
-            'user_agent' =>
-                $userAgent,
+            'user_agent' => $userAgent,
         ]);
     }
 }

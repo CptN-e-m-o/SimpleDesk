@@ -15,11 +15,11 @@ class QueueRuntimeBootstrapPolicy
             $this->commandName(
                 $argv
                 ?? (
-                $_SERVER[
-                'argv'
-                ]
-                ?? []
-            ),
+                    $_SERVER[
+                    'argv'
+                    ]
+                    ?? []
+                ),
             );
 
         return in_array(

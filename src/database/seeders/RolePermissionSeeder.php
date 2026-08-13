@@ -105,6 +105,12 @@ class RolePermissionSeeder extends Seeder
             'admin.settings.infrastructure_connections.test',
 
             'admin.settings.system_audit.view',
+            'admin.settings.queues.view',
+            'admin.settings.queues.create',
+            'admin.settings.queues.update',
+            'admin.settings.queues.archive',
+            'admin.settings.queues.delete',
+            'admin.settings.queues.test',
         ];
     }
 

@@ -19,26 +19,19 @@ final readonly class QueueDriverDefinitionData
     public function toArray(): array
     {
         return [
-            'type' =>
-                $this->type->value,
+            'type' => $this->type->value,
 
-            'label' =>
-                $this->label,
+            'label' => $this->label,
 
-            'description' =>
-                $this->description,
+            'description' => $this->description,
 
-            'requires_infrastructure' =>
-                $this->requiresInfrastructure,
+            'requires_infrastructure' => $this->requiresInfrastructure,
 
-            'infrastructure_type' =>
-                $this->infrastructureType,
+            'infrastructure_type' => $this->infrastructureType,
 
-            'recommended_for_production' =>
-                $this->recommendedForProduction,
+            'recommended_for_production' => $this->recommendedForProduction,
 
-            'options' =>
-                $this->options,
+            'options' => $this->options,
         ];
     }
 }

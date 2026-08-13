@@ -46,8 +46,7 @@ class RedisInfrastructureRuntimeConfigurationFactory
         $validator =
             Validator::make(
                 [
-                    'configuration' =>
-                        $connection->configuration ?? [],
+                    'configuration' => $connection->configuration ?? [],
                 ],
                 [
                     'configuration.host' => [
@@ -106,47 +105,39 @@ class RedisInfrastructureRuntimeConfigurationFactory
             $connection->secrets();
 
         $runtime = [
-            'url' =>
-                null,
+            'url' => null,
 
-            'host' =>
-                $configuration[
+            'host' => $configuration[
                 'host'
                 ],
 
-            'port' =>
-                (int) $configuration[
+            'port' => (int) $configuration[
                 'port'
                 ],
 
-            'database' =>
-                (int) $configuration[
+            'database' => (int) $configuration[
                 'database'
                 ],
 
-            'username' =>
-                (
-                    $configuration[
-                    'username'
-                    ] ?? ''
-                ) !== ''
+            'username' => (
+                $configuration[
+                'username'
+                ] ?? ''
+            ) !== ''
                     ? $configuration[
                 'username'
                 ]
                     : null,
 
-            'password' =>
-                $credentials[
+            'password' => $credentials[
                 'password'
                 ] ?? null,
 
-            'timeout' =>
-                (float) $configuration[
+            'timeout' => (float) $configuration[
                 'connect_timeout_seconds'
                 ],
 
-            'scheme' =>
-                $configuration[
+            'scheme' => $configuration[
                 'tls'
                 ]
                     ? 'tls'

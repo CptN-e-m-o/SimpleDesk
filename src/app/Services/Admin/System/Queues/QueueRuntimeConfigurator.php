@@ -113,7 +113,7 @@ class QueueRuntimeConfigurator
                         $configuration,
                     );
         } catch (
-        InvalidManagedQueueConfigurationException $exception
+            InvalidManagedQueueConfigurationException $exception
         ) {
             throw $exception;
         } catch (Throwable $exception) {
