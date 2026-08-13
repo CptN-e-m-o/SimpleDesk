@@ -2,10 +2,10 @@
 
 namespace App\Models\User;
 
+use App\Models\Admin\AgentStatusPeriod;
 use App\Models\Admin\Department;
 use App\Models\Admin\Team;
 use App\Models\Admin\WorkScheduleAssignment;
-use App\Models\Admin\AgentStatusPeriod;
 use App\Models\Concerns\HasPermissions;
 use App\Models\Role;
 use App\Models\Ticket;

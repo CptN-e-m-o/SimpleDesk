@@ -17,8 +17,7 @@ class AgentStatusController extends Controller
 {
     public function __construct(
         private AgentStatusCatalogService $service
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {

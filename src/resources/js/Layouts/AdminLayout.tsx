@@ -29,6 +29,7 @@ import {
     GitBranch,
     Check,
     CalendarClock,
+    Sparkles,
 } from 'lucide-react'
 
 import {
@@ -157,6 +158,13 @@ export default function AdminLayout({ title = 'Admin Panel', children }: Props) 
                         icon: Activity,
                         permission: 'admin.staff.agent_statuses.view',
                         isActive: (currentUrl: string) => currentUrl.startsWith('/admin/agent-statuses'),
+                    },
+                    {
+                        label: 'Skills',
+                        href: route('admin.skills.index'),
+                        icon: Sparkles,
+                        permission: 'admin.staff.skills.view',
+                        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/skills'),
                     },
                 ],
             },
