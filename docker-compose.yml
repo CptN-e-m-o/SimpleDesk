@@ -69,7 +69,14 @@ services:
     container_name: simpledesk_scheduler
     restart: unless-stopped
     working_dir: /var/www
-    command: php artisan schedule:work
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while true; do
+          php artisan schedule:run --no-interaction
+          sleep 60
+        done
     volumes:
       - ./src:/var/www
       - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
