@@ -19,11 +19,7 @@ class QueueDriverHealthServiceTest extends TestCase
 
     public function test_database_and_sync_health_are_persisted_and_audited(): void
     {
-        if (
-            ! Schema::hasTable(
-                'jobs',
-            )
-        ) {
+        if (!Schema::hasTable('jobs')) {
             Schema::create(
                 'jobs',
                 function ($table): void {
@@ -55,34 +51,27 @@ class QueueDriverHealthServiceTest extends TestCase
 
         foreach (
             $cases as [
-                $driver,
-                $values,
-            ]
+            $driver,
+            $values,
+        ]
         ) {
-            $configuration =
-                QueueDriverConfiguration::query()
-                    ->create([
-                        'name' => $driver->value,
+            $configuration = QueueDriverConfiguration::query()
+                ->create([
+                    'name' => $driver->value,
+                    'driver' => $driver,
+                    'configuration' => $values,
+                    'is_enabled' => true,
+                ]);
 
-                        'driver' => $driver,
-
-                        'configuration' => $values,
-
-                        'is_enabled' => true,
-                    ]);
-
-            $result =
-                app(
-                    QueueDriverHealthService::class,
-                )->test(
-                    $configuration,
-                );
+            $result = app(
+                QueueDriverHealthService::class,
+            )->test(
+                $configuration,
+            );
 
             $this->assertSame(
                 'healthy',
-                $result
-                    ->status
-                    ->value,
+                $result->status->value,
             );
 
             $this->assertNotNull(
@@ -114,7 +103,8 @@ class QueueDriverHealthServiceTest extends TestCase
             new QueueDriverRegistry(
                 $this->app,
                 [
-                    'redis' => LeakyQueueDriverAdapter::class,
+                    'redis' =>
+                        LeakyQueueDriverAdapter::class,
                 ],
             ),
         );
@@ -137,51 +127,67 @@ class QueueDriverHealthServiceTest extends TestCase
                 ->create([
                     'name' => 'Leaky health test',
 
-                    'driver' => QueueDriverType::Redis,
+                    'driver' =>
+                        QueueDriverType::Redis,
+
+                    'infrastructure_connection_id' =>
+                        $infrastructure->id,
 
                     'configuration' => [
-                        'infrastructure_connection_id' => $infrastructure->id,
+                        'retry_after' => 360,
+                        'block_for' => 5,
+                        'after_commit' => false,
                     ],
 
                     'is_enabled' => true,
                 ]);
 
-        $result =
-            app(
-                QueueDriverHealthService::class,
-            )->test(
-                $configuration,
-            );
-
-        $health =
+        $this->assertSame(
+            $infrastructure->id,
             $configuration
-                ->latestHealthCheck()
-                ->firstOrFail();
+                ->infrastructure_connection_id,
+        );
 
-        $audit =
-            SystemAuditLog::query()
-                ->where(
-                    'area',
-                    'queue_driver_configurations',
-                )
-                ->where(
-                    'action',
-                    'test',
-                )
-                ->latest('id')
-                ->firstOrFail();
+        $this->assertArrayNotHasKey(
+            'infrastructure_connection_id',
+            $configuration->configuration,
+        );
 
-        $serialized =
-            json_encode(
-                [
-                    'result' => $result->toArray(),
+        $result = app(
+            QueueDriverHealthService::class,
+        )->test(
+            $configuration,
+        );
 
-                    'health' => $health->toArray(),
+        $health = $configuration
+            ->latestHealthCheck()
+            ->firstOrFail();
 
-                    'audit' => $audit->toArray(),
-                ],
-                JSON_THROW_ON_ERROR,
-            );
+        $audit = SystemAuditLog::query()
+            ->where(
+                'area',
+                'queue_driver_configurations',
+            )
+            ->where(
+                'action',
+                'test',
+            )
+            ->latest('id')
+            ->firstOrFail();
+
+        $serialized = json_encode(
+            [
+                'result' =>
+                    $result->toArray(),
+
+                'health' =>
+                    $health->toArray(),
+
+                'audit' =>
+                    $audit->toArray(),
+            ],
+            JSON_THROW_ON_ERROR,
+        );
 
         $this->assertStringNotContainsString(
             $secret,
@@ -195,9 +201,7 @@ class QueueDriverHealthServiceTest extends TestCase
 
         $this->assertSame(
             'healthy',
-            $health
-                ->status
-                ->value,
+            $health->status->value,
         );
     }
 }

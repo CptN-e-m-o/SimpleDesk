@@ -30,7 +30,8 @@ class LeakyQueueDriverAdapter implements QueueDriverAdapter
 
             requiresInfrastructure: true,
 
-            infrastructureType: InfrastructureConnectionType::Redis->value,
+            infrastructureType:
+            InfrastructureConnectionType::Redis->value,
 
             recommendedForProduction: false,
         );
@@ -55,36 +56,44 @@ class LeakyQueueDriverAdapter implements QueueDriverAdapter
     public function test(
         QueueDriverConfiguration $configuration,
     ): QueueHealthResultData {
+        $connectionId =
+            $configuration
+                ->infrastructure_connection_id;
+
+        if (!$connectionId) {
+            throw new \RuntimeException(
+                'Test Redis Queue configuration has no infrastructure connection.',
+            );
+        }
+
         $connection =
             InfrastructureConnection::withTrashed()
                 ->findOrFail(
-                    (int) $configuration
-                        ->configuration[
-                    'infrastructure_connection_id'
-                    ],
+                    $connectionId,
                 );
 
-        $password =
-            (string) (
-                $connection
-                    ->secrets()[
-                'password'
-                ]
-                ?? ''
-            );
+        $password = (string) (
+            $connection
+                ->secrets()['password']
+            ?? ''
+        );
 
         return new QueueHealthResultData(
-            status: QueueHealthStatus::Healthy,
+            status:
+            QueueHealthStatus::Healthy,
 
             latencyMs: 4,
 
-            message: "Connected using {$password}.",
+            message:
+            "Connected using {$password}.",
 
             details: [
-                'diagnostic_dsn' => "redis://simpledesk:{$password}@redis.internal:6379/0",
+                'diagnostic_dsn' =>
+                    "redis://simpledesk:{$password}@redis.internal:6379/0",
 
                 'nested' => [
-                    'password_echo' => $password,
+                    'password_echo' =>
+                        $password,
                 ],
             ],
         );

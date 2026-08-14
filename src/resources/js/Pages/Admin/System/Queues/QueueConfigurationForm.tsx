@@ -1,13 +1,5 @@
-import type {
-    FormEvent,
-    ReactNode,
-} from 'react'
-
-import {
-    Link,
-    useForm,
-} from '@inertiajs/react'
-
+import type { FormEvent, ReactNode } from 'react'
+import { Link, useForm } from '@inertiajs/react'
 import {
     AlertTriangle,
     Check,
@@ -19,15 +11,10 @@ import {
     Settings2,
     Workflow,
 } from 'lucide-react'
-
-import type {
-    LucideIcon,
-} from 'lucide-react'
-
+import type { LucideIcon } from 'lucide-react'
 import { route } from 'ziggy-js'
 
 import InputError from '@/Components/InputError'
-
 import {
     Select,
     SelectContent,
@@ -35,13 +22,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/Components/ui/select'
-
 import { usePermissions } from '@/hooks/usePermissions'
 
-import {
-    QueueDriverBadge,
-} from './components/QueueBadges'
-
+import { QueueDriverBadge } from './components/QueueBadges'
 import type {
     QueueConfiguration,
     QueueConfigurationValues,
@@ -51,30 +34,18 @@ import type {
 } from './queueTypes'
 
 type Props = {
-    definitions:
-        QueueDriverDefinition[]
-
-    redisConnections:
-        RedisConnection[]
-
-    minimumRetryAfter:
-        number
-
-    configuration?:
-        QueueConfiguration
+    definitions: QueueDriverDefinition[]
+    redisConnections: RedisConnection[]
+    minimumRetryAfter: number
+    configuration?: QueueConfiguration
 }
 
 type FormData = {
     name: string
-
-    driver:
-        QueueDriver
-
-    is_enabled:
-        boolean
-
-    configuration:
-        QueueConfigurationValues
+    driver: QueueDriver
+    infrastructure_connection_id: number | '' | null
+    is_enabled: boolean
+    configuration: QueueConfigurationValues
 }
 
 export default function QueueConfigurationForm({
@@ -83,144 +54,99 @@ export default function QueueConfigurationForm({
                                                    minimumRetryAfter,
                                                    configuration,
                                                }: Props) {
-    const { can } =
-        usePermissions()
+    const { can } = usePermissions()
 
-    const editing =
-        Boolean(
-            configuration,
-        )
+    const editing = Boolean(configuration)
 
-    const initialDriver:
-        QueueDriver =
+    const initialDriver: QueueDriver =
         configuration?.driver
         ?? definitions[0]?.type
         ?? 'database'
 
-    const form =
-        useForm<FormData>({
-            name:
-                configuration?.name
-                ?? '',
-
-            driver:
-            initialDriver,
-
-            is_enabled:
-                configuration
-                    ?.is_enabled
-                ?? true,
-
-            configuration:
-                initialValues(
-                    initialDriver,
-                    definitions,
-                    redisConnections,
-                    minimumRetryAfter,
-                    configuration,
-                ),
-        })
-
-    const definition =
-        definitions.find(
-            (
-                item,
-            ) =>
-                item.type
-                === form.data.driver,
+    const initialInfrastructureConnectionId =
+        configuration?.infrastructure_connection_id
+        ?? (
+            initialDriver === 'redis'
+                ? redisConnections.find(
+                (connection) =>
+                    connection.is_enabled
+                    && !connection.deleted_at,
+            )?.id ?? ''
+                : null
         )
 
-    const errors =
-        form.errors as Record<
-            string,
-            string | undefined
-        >
+    const form = useForm<FormData>({
+        name: configuration?.name ?? '',
+        driver: initialDriver,
+        infrastructure_connection_id: initialInfrastructureConnectionId,
+        is_enabled: configuration?.is_enabled ?? true,
+        configuration: initialValues(
+            initialDriver,
+            definitions,
+            minimumRetryAfter,
+            configuration,
+        ),
+    })
+
+    const definition = definitions.find(
+        (item) => item.type === form.data.driver,
+    )
+
+    const errors = form.errors as Record<string, string | undefined>
 
     const databaseConnections =
-        form.data.driver
-        === 'database'
-            ? definition
-                ?.options
-                .database_connections
-            ?? []
+        form.data.driver === 'database'
+            ? definition?.options.database_connections ?? []
             : []
 
-    const currentDatabaseConnection =
-        String(
-            form.data
-                .configuration
-                .database_connection
-            ?? '',
-        )
+    const currentDatabaseConnection = String(
+        form.data.configuration.database_connection ?? '',
+    )
 
     const currentDatabaseUnavailable =
         editing
-        && currentDatabaseConnection
-        !== ''
-        && !databaseConnections.includes(
-            currentDatabaseConnection,
-        )
+        && currentDatabaseConnection !== ''
+        && !databaseConnections.includes(currentDatabaseConnection)
 
-    const currentRedisId =
-        positiveInteger(
-            form.data
-                .configuration
-                .infrastructure_connection_id,
-        )
+    const currentRedisId = positiveInteger(
+        form.data.infrastructure_connection_id,
+    )
 
-    const currentRedis =
-        currentRedisId
-            ? redisConnections.find(
-                (
-                    item,
-                ) =>
-                    item.id
-                    === currentRedisId,
-            )
-            : undefined
+    const currentRedis = currentRedisId
+        ? redisConnections.find(
+            (connection) => connection.id === currentRedisId,
+        )
+        : undefined
 
     const currentRedisUnavailable =
         currentRedisId !== null
         && (
             !currentRedis
             || !currentRedis.is_enabled
-            || Boolean(
-                currentRedis.deleted_at,
-            )
+            || Boolean(currentRedis.deleted_at)
         )
 
-    const eligibleRedis =
-        redisConnections.filter(
-            (
-                item,
-            ) =>
-                item.is_enabled
-                && !item.deleted_at,
-        )
+    const eligibleRedis = redisConnections.filter(
+        (connection) =>
+            connection.is_enabled
+            && !connection.deleted_at,
+    )
 
-    const canViewInfrastructure =
-        can(
-            'admin.settings.infrastructure_connections.view',
-        )
+    const canViewInfrastructure = can(
+        'admin.settings.infrastructure_connections.view',
+    )
 
-    const submit = (
-        event: FormEvent,
-    ) => {
+    const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
-        if (
-            editing
-            && configuration
-        ) {
+        if (editing && configuration) {
             form.put(
                 route(
                     'admin.system.queues.update',
                     configuration.id,
                 ),
-
                 {
-                    preserveScroll:
-                        true,
+                    preserveScroll: true,
                 },
             )
 
@@ -234,110 +160,79 @@ export default function QueueConfigurationForm({
         )
     }
 
-    const selectDriver = (
-        driver:
-        QueueDriver,
-    ) => {
+    const selectDriver = (driver: QueueDriver) => {
         if (editing) {
             return
         }
 
-        form.setData(
-            (
-                data,
-            ) => ({
-                ...data,
-
+        form.setData((data) => ({
+            ...data,
+            driver,
+            infrastructure_connection_id:
+                driver === 'redis'
+                    ? eligibleRedis[0]?.id ?? ''
+                    : null,
+            configuration: defaultsFor(
                 driver,
-
-                configuration:
-                    defaultsFor(
-                        driver,
-                        definitions,
-                        redisConnections,
-                        minimumRetryAfter,
-                    ),
-            }),
-        )
+                definitions,
+                minimumRetryAfter,
+            ),
+        }))
 
         form.clearErrors()
     }
 
-    const setConfiguration =
-        <
-            K extends keyof QueueConfigurationValues,
-        >(
-            key: K,
-            value:
-            QueueConfigurationValues[K],
-        ) => {
-            form.setData(
-                'configuration',
-
-                {
-                    ...form.data
-                        .configuration,
-
-                    [key]:
-                    value,
-                },
-            )
-        }
+    const setConfiguration = <
+        K extends keyof QueueConfigurationValues,
+    >(
+        key: K,
+        value: QueueConfigurationValues[K],
+    ) => {
+        form.setData(
+            'configuration',
+            {
+                ...form.data.configuration,
+                [key]: value,
+            },
+        )
+    }
 
     return (
         <form
-            onSubmit={
-                submit
-            }
+            onSubmit={submit}
             className="space-y-6"
         >
             <Section
-                icon={
-                    Settings2
-                }
+                icon={Settings2}
                 title="General"
                 description="Name this configuration and control whether it is available for managed Queue operations."
             >
                 <Field
                     label="Name"
                     required
-                    error={
-                        errors.name
-                    }
+                    error={errors.name}
                 >
                     <input
-                        value={
-                            form.data.name
-                        }
-                        onChange={
-                            (
-                                event,
-                            ) =>
-                                form.setData(
-                                    'name',
-                                    event
-                                        .target
-                                        .value,
-                                )
-                        }
-                        className={
-                            inputClass(
-                                Boolean(
-                                    errors.name,
-                                ),
+                        type="text"
+                        value={form.data.name}
+                        onChange={(event) =>
+                            form.setData(
+                                'name',
+                                event.target.value,
                             )
                         }
                         placeholder="Production queue"
                         autoComplete="off"
+                        className={inputClass(
+                            Boolean(errors.name),
+                        )}
                     />
                 </Field>
 
                 <Field
                     label="Driver"
                     required
-                    error={
-                        errors.driver
-                    }
+                    error={errors.driver}
                 >
                     {editing ? (
                         <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
@@ -348,114 +243,85 @@ export default function QueueConfigurationForm({
 
                                 <div>
                                     <QueueDriverBadge
-                                        driver={
-                                            form.data.driver
-                                        }
+                                        driver={form.data.driver}
                                     />
 
                                     <p className="mt-2 text-sm leading-6 text-gray-500">
-                                        The Queue driver cannot be
-                                        changed after this
-                                        configuration has been
-                                        created.
+                                        The Queue driver cannot be changed after
+                                        this configuration has been created.
                                     </p>
                                 </div>
                             </div>
                         </div>
                     ) : definitions.length > 0 ? (
                         <div className="grid gap-3 lg:grid-cols-3">
-                            {definitions.map(
-                                (
-                                    item,
-                                ) => {
-                                    const selected =
-                                        item.type
-                                        === form
-                                            .data
-                                            .driver
+                            {definitions.map((item) => {
+                                const selected =
+                                    item.type === form.data.driver
 
-                                    const Icon =
-                                        driverIcon(
-                                            item.type,
-                                        )
+                                const Icon = driverIcon(
+                                    item.type,
+                                )
 
-                                    return (
-                                        <button
-                                            key={
-                                                item.type
-                                            }
-                                            type="button"
-                                            onClick={
-                                                () =>
-                                                    selectDriver(
-                                                        item.type,
-                                                    )
-                                            }
-                                            aria-pressed={
-                                                selected
-                                            }
-                                            className={
-                                                `relative rounded-2xl border p-4 text-left transition ${
+                                return (
+                                    <button
+                                        key={item.type}
+                                        type="button"
+                                        onClick={() =>
+                                            selectDriver(
+                                                item.type,
+                                            )
+                                        }
+                                        aria-pressed={selected}
+                                        className={`relative rounded-2xl border p-4 text-left transition ${
+                                            selected
+                                                ? 'border-sky-300 bg-sky-50 shadow-sm ring-4 ring-sky-50'
+                                                : 'border-gray-200 bg-white hover:border-sky-200 hover:bg-sky-50/30'
+                                        }`}
+                                    >
+                                        <div className="flex items-start gap-3 pr-6">
+                                            <span
+                                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                                                     selected
-                                                        ? 'border-sky-300 bg-sky-50 shadow-sm ring-4 ring-sky-50'
-                                                        : 'border-gray-200 bg-white hover:border-sky-200 hover:bg-sky-50/30'
-                                                }`
-                                            }
-                                        >
-                                            <div className="flex items-start gap-3 pr-6">
-                                                <span
-                                                    className={
-                                                        `flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                                                            selected
-                                                                ? 'bg-sky-100 text-sky-700'
-                                                                : 'bg-gray-100 text-gray-500'
-                                                        }`
-                                                    }
-                                                >
-                                                    <Icon className="h-5 w-5" />
+                                                        ? 'bg-sky-100 text-sky-700'
+                                                        : 'bg-gray-100 text-gray-500'
+                                                }`}
+                                            >
+                                                <Icon className="h-5 w-5" />
+                                            </span>
+
+                                            <div className="min-w-0">
+                                                <span className="block font-semibold text-gray-900">
+                                                    {item.label}
                                                 </span>
 
-                                                <div className="min-w-0">
-                                                    <span className="block font-semibold text-gray-900">
-                                                        {
-                                                            item.label
-                                                        }
+                                                {item.requires_infrastructure ? (
+                                                    <span className="mt-1 block text-xs font-medium text-sky-700">
+                                                        Uses an Infrastructure
+                                                        Connection
                                                     </span>
-
-                                                    {item
-                                                        .requires_infrastructure ? (
-                                                        <span className="mt-1 block text-xs font-medium text-sky-700">
-                                                            Uses an
-                                                            Infrastructure
-                                                            Connection
-                                                        </span>
-                                                    ) : null}
-                                                </div>
+                                                ) : null}
                                             </div>
+                                        </div>
 
-                                            <p className="mt-3 text-sm leading-6 text-gray-500">
-                                                {
-                                                    item.description
-                                                }
-                                            </p>
+                                        <p className="mt-3 text-sm leading-6 text-gray-500">
+                                            {item.description}
+                                        </p>
 
-                                            {!item
-                                                .recommended_for_production ? (
-                                                <span className="mt-3 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                                                    Not recommended
-                                                    for production
-                                                </span>
-                                            ) : null}
+                                        {!item.recommended_for_production ? (
+                                            <span className="mt-3 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                                                Not recommended for production
+                                            </span>
+                                        ) : null}
 
-                                            {selected ? (
-                                                <span className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-sky-600 text-white">
-                                                    <Check className="h-3.5 w-3.5" />
-                                                </span>
-                                            ) : null}
-                                        </button>
-                                    )
-                                },
-                            )}
+                                        {selected ? (
+                                            <span className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-sky-600 text-white">
+                                                <Check className="h-3.5 w-3.5" />
+                                            </span>
+                                        ) : null}
+                                    </button>
+                                )
+                            })}
                         </div>
                     ) : (
                         <InlineWarning
@@ -466,33 +332,22 @@ export default function QueueConfigurationForm({
                 </Field>
 
                 <Toggle
-                    enabled={
-                        form.data
-                            .is_enabled
-                    }
-                    onChange={
-                        (
+                    enabled={form.data.is_enabled}
+                    onChange={(enabled) =>
+                        form.setData(
+                            'is_enabled',
                             enabled,
-                        ) =>
-                            form.setData(
-                                'is_enabled',
-                                enabled,
-                            )
+                        )
                     }
                     label="Enabled"
                     description="Enabled configurations can be used by managed Queue operations. Enabling this profile does not activate it."
-                    error={
-                        errors.is_enabled
-                    }
+                    error={errors.is_enabled}
                 />
             </Section>
 
-            {form.data.driver
-            === 'database' ? (
+            {form.data.driver === 'database' ? (
                 <Section
-                    icon={
-                        Database
-                    }
+                    icon={Database}
                     title="Database configuration"
                     description="Store queued jobs through one of the application's configured database connections."
                 >
@@ -503,8 +358,7 @@ export default function QueueConfigurationForm({
                         />
                     ) : null}
 
-                    {databaseConnections
-                        .length === 0
+                    {databaseConnections.length === 0
                     && !currentDatabaseUnavailable ? (
                         <InlineWarning
                             title="No database connections available"
@@ -523,34 +377,25 @@ export default function QueueConfigurationForm({
                             }
                         >
                             <Select
-                                value={
-                                    currentDatabaseConnection
-                                }
-                                onValueChange={
-                                    (
+                                value={currentDatabaseConnection}
+                                onValueChange={(value) =>
+                                    setConfiguration(
+                                        'database_connection',
                                         value,
-                                    ) =>
-                                        setConfiguration(
-                                            'database_connection',
-                                            value,
-                                        )
+                                    )
                                 }
                                 disabled={
-                                    databaseConnections
-                                        .length
-                                    === 0
+                                    databaseConnections.length === 0
                                 }
                             >
                                 <SelectTrigger
-                                    className={
-                                        selectTriggerClass(
-                                            Boolean(
-                                                errors[
-                                                    'configuration.database_connection'
-                                                    ],
-                                            ),
-                                        )
-                                    }
+                                    className={selectTriggerClass(
+                                        Boolean(
+                                            errors[
+                                                'configuration.database_connection'
+                                                ],
+                                        ),
+                                    )}
                                 >
                                     <SelectValue placeholder="Choose a database connection" />
                                 </SelectTrigger>
@@ -558,33 +403,22 @@ export default function QueueConfigurationForm({
                                 <SelectContent>
                                     {currentDatabaseUnavailable ? (
                                         <SelectItem
-                                            value={
-                                                currentDatabaseConnection
-                                            }
+                                            value={currentDatabaseConnection}
                                             disabled
                                         >
-                                            {
-                                                currentDatabaseConnection
-                                            }{' '}
-                                            · Unavailable
+                                            {currentDatabaseConnection}
+                                            {' · '}
+                                            Unavailable
                                         </SelectItem>
                                     ) : null}
 
                                     {databaseConnections.map(
-                                        (
-                                            name,
-                                        ) => (
+                                        (name) => (
                                             <SelectItem
-                                                value={
-                                                    name
-                                                }
-                                                key={
-                                                    name
-                                                }
+                                                value={name}
+                                                key={name}
                                             >
-                                                {
-                                                    name
-                                                }
+                                                {name}
                                             </SelectItem>
                                         ),
                                     )}
@@ -594,47 +428,33 @@ export default function QueueConfigurationForm({
 
                         <RetryField
                             value={
-                                form.data
-                                    .configuration
-                                    .retry_after
+                                form.data.configuration.retry_after
                                 ?? ''
                             }
-                            minimum={
-                                minimumRetryAfter
-                            }
+                            minimum={minimumRetryAfter}
                             error={
                                 errors[
                                     'configuration.retry_after'
                                     ]
                             }
-                            onChange={
-                                (
+                            onChange={(value) =>
+                                setConfiguration(
+                                    'retry_after',
                                     value,
-                                ) =>
-                                    setConfiguration(
-                                        'retry_after',
-                                        value,
-                                    )
+                                )
                             }
                         />
                     </div>
 
                     <Toggle
-                        enabled={
-                            Boolean(
-                                form.data
-                                    .configuration
-                                    .after_commit,
-                            )
-                        }
-                        onChange={
-                            (
+                        enabled={Boolean(
+                            form.data.configuration.after_commit,
+                        )}
+                        onChange={(enabled) =>
+                            setConfiguration(
+                                'after_commit',
                                 enabled,
-                            ) =>
-                                setConfiguration(
-                                    'after_commit',
-                                    enabled,
-                                )
+                            )
                         }
                         label="After commit"
                         description="Dispatch queued jobs only after the current database transaction commits successfully."
@@ -647,28 +467,20 @@ export default function QueueConfigurationForm({
                 </Section>
             ) : null}
 
-            {form.data.driver
-            === 'redis' ? (
+            {form.data.driver === 'redis' ? (
                 <Section
-                    icon={
-                        Gauge
-                    }
+                    icon={Gauge}
                     title="Redis configuration"
                     description="Use a Redis Infrastructure Connection without duplicating host, credentials, TLS, or connection ownership here."
                 >
                     {currentRedisUnavailable ? (
                         <RedisUnavailableWarning
-                            connection={
-                                currentRedis
-                            }
-                            connectionId={
-                                currentRedisId
-                            }
+                            connection={currentRedis}
+                            connectionId={currentRedisId}
                         />
                     ) : null}
 
-                    {eligibleRedis
-                        .length === 0
+                    {eligibleRedis.length === 0
                     && !currentRedisUnavailable ? (
                         <InlineWarning
                             title="No enabled Redis connections available"
@@ -680,46 +492,32 @@ export default function QueueConfigurationForm({
                         label="Infrastructure connection"
                         required
                         error={
-                            errors[
-                                'configuration.infrastructure_connection_id'
-                                ]
+                            errors.infrastructure_connection_id
                         }
                         hint="Queue configuration references the Infrastructure Connection; Redis credentials remain managed separately."
                     >
                         <Select
                             value={
                                 currentRedisId
-                                    ? String(
-                                        currentRedisId,
-                                    )
+                                    ? String(currentRedisId)
                                     : ''
                             }
-                            onValueChange={
-                                (
-                                    value,
-                                ) =>
-                                    setConfiguration(
-                                        'infrastructure_connection_id',
-                                        Number(
-                                            value,
-                                        ),
-                                    )
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'infrastructure_connection_id',
+                                    Number(value),
+                                )
                             }
                             disabled={
-                                eligibleRedis
-                                    .length === 0
+                                eligibleRedis.length === 0
                             }
                         >
                             <SelectTrigger
-                                className={
-                                    selectTriggerClass(
-                                        Boolean(
-                                            errors[
-                                                'configuration.infrastructure_connection_id'
-                                                ],
-                                        ),
-                                    )
-                                }
+                                className={selectTriggerClass(
+                                    Boolean(
+                                        errors.infrastructure_connection_id,
+                                    ),
+                                )}
                             >
                                 <SelectValue placeholder="Choose an enabled Redis connection" />
                             </SelectTrigger>
@@ -728,11 +526,9 @@ export default function QueueConfigurationForm({
                                 {currentRedisUnavailable
                                 && currentRedisId ? (
                                     <SelectItem
-                                        value={
-                                            String(
-                                                currentRedisId,
-                                            )
-                                        }
+                                        value={String(
+                                            currentRedisId,
+                                        )}
                                         disabled
                                     >
                                         {currentRedis
@@ -742,25 +538,15 @@ export default function QueueConfigurationForm({
                                 ) : null}
 
                                 {eligibleRedis.map(
-                                    (
-                                        connection,
-                                    ) => (
+                                    (connection) => (
                                         <SelectItem
-                                            key={
-                                                connection.id
-                                            }
-                                            value={
-                                                String(
-                                                    connection.id,
-                                                )
-                                            }
+                                            key={connection.id}
+                                            value={String(
+                                                connection.id,
+                                            )}
                                         >
-                                            {
-                                                connection.name
-                                            }
-
+                                            {connection.name}
                                             {' · '}
-
                                             {humanize(
                                                 connection.source,
                                             )}
@@ -777,8 +563,7 @@ export default function QueueConfigurationForm({
                                 )}
                                 className="mt-2 inline-flex text-sm font-medium text-sky-700 transition hover:text-sky-900"
                             >
-                                Manage infrastructure connections
-                                →
+                                Manage infrastructure connections →
                             </Link>
                         ) : null}
                     </Field>
@@ -786,34 +571,24 @@ export default function QueueConfigurationForm({
                     <div className="grid gap-5 xl:grid-cols-2">
                         <RetryField
                             value={
-                                form.data
-                                    .configuration
-                                    .retry_after
+                                form.data.configuration.retry_after
                                 ?? ''
                             }
-                            minimum={
-                                minimumRetryAfter
-                            }
+                            minimum={minimumRetryAfter}
                             error={
                                 errors[
                                     'configuration.retry_after'
                                     ]
                             }
-                            onChange={
-                                (
+                            onChange={(value) =>
+                                setConfiguration(
+                                    'retry_after',
                                     value,
-                                ) =>
-                                    setConfiguration(
-                                        'retry_after',
-                                        value,
-                                    )
+                                )
                             }
                         />
 
-                        {form.data
-                            .configuration
-                            .block_for
-                        !== null ? (
+                        {form.data.configuration.block_for !== null ? (
                             <Field
                                 label="Block for"
                                 required
@@ -827,44 +602,30 @@ export default function QueueConfigurationForm({
                                 <div className="relative">
                                     <input
                                         type="number"
-                                        min={
-                                            1
-                                        }
-                                        max={
-                                            60
-                                        }
-                                        step={
-                                            1
-                                        }
+                                        min={1}
+                                        max={60}
+                                        step={1}
                                         inputMode="numeric"
                                         value={
-                                            form.data
-                                                .configuration
+                                            form.data.configuration
                                                 .block_for
                                             ?? ''
                                         }
-                                        onChange={
-                                            (
-                                                event,
-                                            ) =>
-                                                setConfiguration(
-                                                    'block_for',
-                                                    integerOrEmpty(
-                                                        event
-                                                            .target
-                                                            .value,
-                                                    ),
-                                                )
-                                        }
-                                        className={
-                                            `${inputClass(
-                                                Boolean(
-                                                    errors[
-                                                        'configuration.block_for'
-                                                        ],
+                                        onChange={(event) =>
+                                            setConfiguration(
+                                                'block_for',
+                                                integerOrEmpty(
+                                                    event.target.value,
                                                 ),
-                                            )} pr-20`
+                                            )
                                         }
+                                        className={`${inputClass(
+                                            Boolean(
+                                                errors[
+                                                    'configuration.block_for'
+                                                    ],
+                                            ),
+                                        )} pr-20`}
                                     />
 
                                     <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400">
@@ -890,28 +651,19 @@ export default function QueueConfigurationForm({
                     <div className="grid gap-4 xl:grid-cols-2">
                         <Toggle
                             enabled={
-                                form.data
-                                    .configuration
-                                    .block_for
+                                form.data.configuration.block_for
                                 !== null
                             }
-                            onChange={
-                                (
-                                    enabled,
-                                ) =>
-                                    setConfiguration(
-                                        'block_for',
-                                        enabled
-                                            ? 5
-                                            : null,
-                                    )
+                            onChange={(enabled) =>
+                                setConfiguration(
+                                    'block_for',
+                                    enabled ? 5 : null,
+                                )
                             }
                             label="Blocking wait"
                             description="Wait briefly for a Redis job instead of continuously polling for work."
                             error={
-                                form.data
-                                    .configuration
-                                    .block_for
+                                form.data.configuration.block_for
                                 === null
                                     ? errors[
                                         'configuration.block_for'
@@ -921,21 +673,14 @@ export default function QueueConfigurationForm({
                         />
 
                         <Toggle
-                            enabled={
-                                Boolean(
-                                    form.data
-                                        .configuration
-                                        .after_commit,
-                                )
-                            }
-                            onChange={
-                                (
+                            enabled={Boolean(
+                                form.data.configuration.after_commit,
+                            )}
+                            onChange={(enabled) =>
+                                setConfiguration(
+                                    'after_commit',
                                     enabled,
-                                ) =>
-                                    setConfiguration(
-                                        'after_commit',
-                                        enabled,
-                                    )
+                                )
                             }
                             label="After commit"
                             description="Dispatch queued jobs only after the current database transaction commits successfully."
@@ -949,8 +694,7 @@ export default function QueueConfigurationForm({
                 </Section>
             ) : null}
 
-            {form.data.driver
-            === 'sync' ? (
+            {form.data.driver === 'sync' ? (
                 <section className="overflow-hidden rounded-[28px] border border-amber-200 bg-white shadow-sm">
                     <div className="flex gap-4 bg-amber-50 px-5 py-5 sm:px-6">
                         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-amber-200">
@@ -1012,9 +756,7 @@ export default function QueueConfigurationForm({
 
                     <button
                         type="submit"
-                        disabled={
-                            form.processing
-                        }
+                        disabled={form.processing}
                         className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-sky-600 px-5 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-wait disabled:opacity-60"
                     >
                         <Save className="h-4 w-4" />
@@ -1037,17 +779,10 @@ function Section({
                      description,
                      children,
                  }: {
-    icon:
-        LucideIcon
-
-    title:
-        string
-
-    description:
-        string
-
-    children:
-        ReactNode
+    icon: LucideIcon
+    title: string
+    description: string
+    children: ReactNode
 }) {
     return (
         <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
@@ -1083,20 +818,11 @@ function Field({
                    error,
                    children,
                }: {
-    label:
-        string
-
-    required?:
-        boolean
-
-    hint?:
-        string
-
-    error?:
-        string
-
-    children:
-        ReactNode
+    label: string
+    required?: boolean
+    hint?: string
+    error?: string
+    children: ReactNode
 }) {
     return (
         <div>
@@ -1112,17 +838,14 @@ function Field({
 
             {children}
 
-            {hint
-            && !error ? (
+            {hint && !error ? (
                 <p className="mt-1.5 text-xs leading-5 text-gray-500">
                     {hint}
                 </p>
             ) : null}
 
             <InputError
-                message={
-                    error
-                }
+                message={error}
                 className="mt-1.5"
             />
         </div>
@@ -1136,42 +859,28 @@ function Toggle({
                     description,
                     error,
                 }: {
-    enabled:
-        boolean
-
-    onChange:
-        (enabled: boolean) => void
-
-    label:
-        string
-
-    description:
-        string
-
-    error?:
-        string
+    enabled: boolean
+    onChange: (enabled: boolean) => void
+    label: string
+    description: string
+    error?: string
 }) {
     return (
         <div>
             <button
                 type="button"
                 role="switch"
-                aria-checked={
+                aria-checked={enabled}
+                onClick={() =>
+                    onChange(
+                        !enabled,
+                    )
+                }
+                className={`flex w-full items-center justify-between gap-5 rounded-2xl border p-4 text-left transition ${
                     enabled
-                }
-                onClick={
-                    () =>
-                        onChange(
-                            !enabled,
-                        )
-                }
-                className={
-                    `flex w-full items-center justify-between gap-5 rounded-2xl border p-4 text-left transition ${
-                        enabled
-                            ? 'border-sky-200 bg-sky-50/60'
-                            : 'border-gray-200 bg-gray-50/60 hover:border-gray-300'
-                    }`
-                }
+                        ? 'border-sky-200 bg-sky-50/60'
+                        : 'border-gray-200 bg-gray-50/60 hover:border-gray-300'
+                }`}
             >
                 <span className="min-w-0">
                     <span className="block text-sm font-semibold text-gray-800">
@@ -1184,30 +893,24 @@ function Toggle({
                 </span>
 
                 <span
-                    className={
-                        `relative h-6 w-11 shrink-0 rounded-full transition ${
-                            enabled
-                                ? 'bg-sky-600'
-                                : 'bg-gray-300'
-                        }`
-                    }
+                    className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                        enabled
+                            ? 'bg-sky-600'
+                            : 'bg-gray-300'
+                    }`}
                 >
                     <span
-                        className={
-                            `absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-                                enabled
-                                    ? 'translate-x-[22px]'
-                                    : 'translate-x-0.5'
-                            }`
-                        }
+                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                            enabled
+                                ? 'translate-x-[22px]'
+                                : 'translate-x-0.5'
+                        }`}
                     />
                 </span>
             </button>
 
             <InputError
-                message={
-                    error
-                }
+                message={error}
                 className="mt-1.5"
             />
         </div>
@@ -1220,64 +923,35 @@ function RetryField({
                         error,
                         onChange,
                     }: {
-    value:
-        number | ''
-
-    minimum:
-        number
-
-    error?:
-        string
-
-    onChange:
-        (
-            value:
-                number | '',
-        ) => void
+    value: number | ''
+    minimum: number
+    error?: string
+    onChange: (value: number | '') => void
 }) {
     return (
         <Field
             label="Retry after"
             required
-            hint={
-                `Must be at least ${minimum} seconds so a job cannot be retried while its worker may still be processing it.`
-            }
-            error={
-                error
-            }
+            hint={`Must be at least ${minimum} seconds so a job cannot be retried while its worker may still be processing it.`}
+            error={error}
         >
             <div className="relative">
                 <input
                     type="number"
-                    min={
-                        minimum
-                    }
-                    step={
-                        1
-                    }
+                    min={minimum}
+                    step={1}
                     inputMode="numeric"
-                    value={
-                        value
-                    }
-                    onChange={
-                        (
-                            event,
-                        ) =>
-                            onChange(
-                                integerOrEmpty(
-                                    event
-                                        .target
-                                        .value,
-                                ),
-                            )
-                    }
-                    className={
-                        `${inputClass(
-                            Boolean(
-                                error,
+                    value={value}
+                    onChange={(event) =>
+                        onChange(
+                            integerOrEmpty(
+                                event.target.value,
                             ),
-                        )} pr-20`
+                        )
                     }
+                    className={`${inputClass(
+                        Boolean(error),
+                    )} pr-20`}
                 />
 
                 <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400">
@@ -1292,11 +966,8 @@ function InlineWarning({
                            title,
                            description,
                        }: {
-    title:
-        string
-
-    description:
-        string
+    title: string
+    description: string
 }) {
     return (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -1321,23 +992,14 @@ function RedisUnavailableWarning({
                                      connection,
                                      connectionId,
                                  }: {
-    connection?:
-        RedisConnection
-
-    connectionId:
-        number | null
+    connection?: RedisConnection
+    connectionId: number | null
 }) {
-    if (
-        connection
-    ) {
+    if (connection) {
         return (
             <InlineWarning
-                title={
-                    `Previously selected Redis: ${connection.name}`
-                }
-                description={
-                    `${redisAvailabilityLabel(connection)}. This connection cannot be selected for new Queue configuration. Choose an enabled, non-archived Redis connection before saving changes.`
-                }
+                title={`Previously selected Redis: ${connection.name}`}
+                description={`${redisAvailabilityLabel(connection)}. This connection cannot be selected for new Queue configuration. Choose an enabled, non-archived Redis connection before saving changes.`}
             />
         )
     }
@@ -1355,66 +1017,28 @@ function RedisUnavailableWarning({
 }
 
 function defaultsFor(
-    driver:
-    QueueDriver,
-
-    definitions:
-    QueueDriverDefinition[],
-
-    redis:
-    RedisConnection[],
-
-    minimum:
-    number,
+    driver: QueueDriver,
+    definitions: QueueDriverDefinition[],
+    minimum: number,
 ): QueueConfigurationValues {
-    if (
-        driver
-        === 'database'
-    ) {
+    if (driver === 'database') {
         return {
             database_connection:
                 definitions.find(
-                    (
-                        item,
-                    ) =>
-                        item.type
-                        === 'database',
-                )
-                    ?.options
-                    .database_connections?.[0]
+                    (item) =>
+                        item.type === 'database',
+                )?.options.database_connections?.[0]
                 ?? '',
-
-            retry_after:
-            minimum,
-
-            after_commit:
-                false,
+            retry_after: minimum,
+            after_commit: false,
         }
     }
 
-    if (
-        driver
-        === 'redis'
-    ) {
+    if (driver === 'redis') {
         return {
-            infrastructure_connection_id:
-                redis.find(
-                    (
-                        item,
-                    ) =>
-                        item.is_enabled
-                        && !item.deleted_at,
-                )?.id
-                ?? '',
-
-            retry_after:
-            minimum,
-
-            block_for:
-                5,
-
-            after_commit:
-                false,
+            retry_after: minimum,
+            block_for: 5,
+            after_commit: false,
         }
     }
 
@@ -1422,32 +1046,18 @@ function defaultsFor(
 }
 
 function initialValues(
-    driver:
-    QueueDriver,
-
-    definitions:
-    QueueDriverDefinition[],
-
-    redis:
-    RedisConnection[],
-
-    minimum:
-    number,
-
-    configuration?:
-    QueueConfiguration,
+    driver: QueueDriver,
+    definitions: QueueDriverDefinition[],
+    minimum: number,
+    configuration?: QueueConfiguration,
 ): QueueConfigurationValues {
-    const defaults =
-        defaultsFor(
-            driver,
-            definitions,
-            redis,
-            minimum,
-        )
+    const defaults = defaultsFor(
+        driver,
+        definitions,
+        minimum,
+    )
 
-    if (
-        !configuration
-    ) {
+    if (!configuration) {
         return defaults
     }
 
@@ -1458,20 +1068,13 @@ function initialValues(
 }
 
 function driverIcon(
-    driver:
-    QueueDriver,
+    driver: QueueDriver,
 ): LucideIcon {
-    if (
-        driver
-        === 'database'
-    ) {
+    if (driver === 'database') {
         return Database
     }
 
-    if (
-        driver
-        === 'redis'
-    ) {
+    if (driver === 'redis') {
         return Gauge
     }
 
@@ -1479,8 +1082,7 @@ function driverIcon(
 }
 
 function positiveInteger(
-    value:
-    unknown,
+    value: unknown,
 ): number | null {
     if (
         value === null
@@ -1490,15 +1092,10 @@ function positiveInteger(
         return null
     }
 
-    const parsed =
-        Number(
-            value,
-        )
+    const parsed = Number(value)
 
     if (
-        !Number.isInteger(
-            parsed,
-        )
+        !Number.isInteger(parsed)
         || parsed <= 0
     ) {
         return null
@@ -1508,46 +1105,29 @@ function positiveInteger(
 }
 
 function integerOrEmpty(
-    value:
-    string,
+    value: string,
 ): number | '' {
-    if (
-        value === ''
-    ) {
+    if (value === '') {
         return ''
     }
 
-    const parsed =
-        Number(
-            value,
-        )
+    const parsed = Number(value)
 
-    if (
-        !Number.isFinite(
-            parsed,
-        )
-    ) {
+    if (!Number.isFinite(parsed)) {
         return ''
     }
 
-    return Math.trunc(
-        parsed,
-    )
+    return Math.trunc(parsed)
 }
 
 function redisAvailabilityLabel(
-    connection:
-    RedisConnection,
+    connection: RedisConnection,
 ): string {
-    if (
-        connection.deleted_at
-    ) {
+    if (connection.deleted_at) {
         return 'Archived / unavailable'
     }
 
-    if (
-        !connection.is_enabled
-    ) {
+    if (!connection.is_enabled) {
         return 'Disabled / unavailable'
     }
 
@@ -1555,8 +1135,7 @@ function redisAvailabilityLabel(
 }
 
 function humanize(
-    value:
-    string,
+    value: string,
 ) {
     return value
         .replace(
@@ -1565,9 +1144,7 @@ function humanize(
         )
         .replace(
             /\b\w/g,
-            (
-                letter,
-            ) =>
+            (letter) =>
                 letter.toUpperCase(),
         )
 }

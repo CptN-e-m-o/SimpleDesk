@@ -21,32 +21,58 @@ class QueueDriverConfiguration extends Model
         return [
             'driver' => QueueDriverType::class,
             'configuration' => 'array',
+            'infrastructure_connection_id' => 'integer',
             'is_enabled' => 'boolean',
         ];
     }
 
+    public function infrastructureConnection(): BelongsTo
+    {
+        return $this
+            ->belongsTo(
+                InfrastructureConnection::class,
+                'infrastructure_connection_id',
+            )
+            ->withTrashed();
+    }
+
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(
+            User::class,
+            'created_by',
+        );
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(
+            User::class,
+            'updated_by',
+        );
     }
 
     public function settings(): HasMany
     {
-        return $this->hasMany(QueueDriverSettings::class, 'active_configuration_id');
+        return $this->hasMany(
+            QueueDriverSettings::class,
+            'active_configuration_id',
+        );
     }
 
     public function healthChecks(): HasMany
     {
-        return $this->hasMany(QueueDriverHealthCheck::class);
+        return $this->hasMany(
+            QueueDriverHealthCheck::class,
+        );
     }
 
     public function latestHealthCheck(): HasOne
     {
-        return $this->hasOne(QueueDriverHealthCheck::class)->latestOfMany();
+        return $this
+            ->hasOne(
+                QueueDriverHealthCheck::class,
+            )
+            ->latestOfMany();
     }
 }

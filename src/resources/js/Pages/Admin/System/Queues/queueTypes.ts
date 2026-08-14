@@ -1,5 +1,26 @@
-export type QueueDriver = 'database' | 'redis' | 'sync'
-export type QueueHealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unavailable'
+export type QueueDriver =
+    | 'database'
+    | 'redis'
+    | 'sync'
+
+export type QueueHealthStatus =
+    | 'healthy'
+    | 'degraded'
+    | 'unhealthy'
+    | 'unavailable'
+
+export type QueueInfrastructureSource =
+    | 'managed'
+    | 'deployment'
+
+export type QueueConfigurationState =
+    | 'enabled'
+    | 'disabled'
+
+export type QueueArchiveFilter =
+    | 'active'
+    | 'archived'
+    | 'all'
 
 export type QueueDriverDefinition = {
     type: QueueDriver
@@ -8,34 +29,49 @@ export type QueueDriverDefinition = {
     requires_infrastructure: boolean
     infrastructure_type: string | null
     recommended_for_production: boolean
-    options: { database_connections?: string[] }
+
+    options: {
+        database_connections?: string[]
+    }
 }
 
 export type RedisConnection = {
     id: number
     name: string
-    source: string
+    type: 'redis'
+    source: QueueInfrastructureSource
     is_enabled: boolean
     deleted_at: string | null
 }
+
+export type QueueHealthDetails =
+    Record<string, unknown>
 
 export type QueueHealthResult = {
     status: QueueHealthStatus
     latency_ms: number | null
     message: string
-    details: Record<string, unknown>
+    details: QueueHealthDetails
 }
 
-export type QueueHealthCheck = QueueHealthResult & {
+export type QueueHealthCheck =
+    QueueHealthResult & {
     tested_by: number | null
     created_at: string | null
 }
 
 export type QueueConfigurationValues = {
     database_connection?: string
-    infrastructure_connection_id?: number | ''
-    retry_after?: number | ''
-    block_for?: number | null | ''
+
+    retry_after?:
+        | number
+        | ''
+
+    block_for?:
+        | number
+        | null
+        | ''
+
     after_commit?: boolean
 }
 
@@ -43,14 +79,25 @@ export type QueueConfiguration = {
     id: number
     name: string
     driver: QueueDriver
-    configuration: QueueConfigurationValues
+
+    infrastructure_connection_id:
+        number | null
+
+    configuration:
+        QueueConfigurationValues
+
     is_enabled: boolean
+    is_active: boolean
+
     deleted_at: string | null
     created_at: string | null
     updated_at: string | null
-    is_active: boolean
-    latest_health_check: QueueHealthCheck | null
-    infrastructure_connection?: RedisConnection | null
+
+    latest_health_check:
+        QueueHealthCheck | null
+
+    infrastructure_connection?:
+        RedisConnection | null
 }
 
 export type QueueWorkload = {
@@ -63,13 +110,18 @@ export type QueueWorkload = {
     enabled: boolean
 }
 
+export type QueueBacklogWorkload = {
+    key: string
+    label: string
+}
+
 export type BacklogQueue = {
     connection: string
     queue: string
     pending: number | null
     inspectable: boolean
     error: string | null
-    workloads: Array<{ key: string; label: string }>
+    workloads: QueueBacklogWorkload[]
 }
 
 export type QueueBacklog = {
@@ -79,7 +131,12 @@ export type QueueBacklog = {
     inspected_at: string
 }
 
-export type PaginationLink = { url: string | null; label: string; active: boolean }
+export type PaginationLink = {
+    url: string | null
+    label: string
+    active: boolean
+}
+
 export type QueuePagination = {
     data: QueueConfiguration[]
     links: PaginationLink[]
@@ -91,9 +148,17 @@ export type QueuePagination = {
 }
 
 export type QueueFilters = {
-    search?: string
-    driver?: string
-    state?: string
-    archived?: string
-    health?: string
+    search?: string | null
+
+    driver?:
+        QueueDriver | '' | null
+
+    state?:
+        QueueConfigurationState | '' | null
+
+    archived?:
+        QueueArchiveFilter | '' | null
+
+    health?:
+        QueueHealthStatus | '' | null
 }

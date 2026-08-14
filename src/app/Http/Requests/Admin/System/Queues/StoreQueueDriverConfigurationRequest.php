@@ -13,6 +13,41 @@ class StoreQueueDriverConfigurationRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['name' => ['required', 'string', 'max:255'], 'driver' => ['required', 'string', 'max:50'], 'configuration' => ['nullable', 'array'], 'is_enabled' => ['required', 'boolean']];
+        return [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'driver' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'infrastructure_connection_id' => [
+                'nullable',
+                'integer',
+                'min:1',
+            ],
+
+            'configuration' => [
+                'nullable',
+                'array',
+            ],
+
+            /*
+             * There must be exactly one source of truth.
+             */
+            'configuration.infrastructure_connection_id' => [
+                'prohibited',
+            ],
+
+            'is_enabled' => [
+                'required',
+                'boolean',
+            ],
+        ];
     }
 }

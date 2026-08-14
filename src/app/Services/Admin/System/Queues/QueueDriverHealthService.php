@@ -23,88 +23,65 @@ class QueueDriverHealthService
         QueueDriverConfiguration $configuration,
         ?User $actor = null,
     ): QueueHealthResultData {
-        $secrets =
-            $this->secretValues(
-                $configuration,
-            );
+        $secrets = $this->secretValues(
+            $configuration,
+        );
 
         try {
-            $result =
-                $this
-                    ->registry
-                    ->adapter(
-                        $configuration->driver,
-                    )
-                    ->test(
-                        $configuration,
-                    );
-        } catch (Throwable) {
-            $result =
-                new QueueHealthResultData(
-                    status: QueueHealthStatus::Unavailable,
-
-                    latencyMs: null,
-
-                    message: 'Queue configuration test failed safely.',
+            $result = $this
+                ->registry
+                ->adapter(
+                    $configuration->driver,
+                )
+                ->test(
+                    $configuration,
                 );
+        } catch (Throwable) {
+            $result = new QueueHealthResultData(
+                status: QueueHealthStatus::Unavailable,
+                latencyMs: null,
+                message: 'Queue configuration test failed safely.',
+            );
         }
 
-        $result =
-            new QueueHealthResultData(
-                status: $result->status,
-
-                latencyMs: $result->latencyMs,
-
-                message: (string) $this
-                    ->redactor
-                    ->redact(
-                        $result->message,
-                        $secrets,
-                    ),
-
-                details: (array) $this
-                    ->redactor
-                    ->redact(
-                        $result->details,
-                        $secrets,
-                    ),
-            );
+        $result = new QueueHealthResultData(
+            status: $result->status,
+            latencyMs: $result->latencyMs,
+            message: (string) $this
+                ->redactor
+                ->redact(
+                    $result->message,
+                    $secrets,
+                ),
+            details: (array) $this
+                ->redactor
+                ->redact(
+                    $result->details,
+                    $secrets,
+                ),
+        );
 
         $configuration
             ->healthChecks()
             ->create([
                 'status' => $result->status,
-
                 'latency_ms' => $result->latencyMs,
-
                 'message' => $result->message,
-
                 'details' => $result->details,
-
                 'tested_by' => $actor?->id,
             ]);
 
         $this->audit->log(
             area: 'queue_driver_configurations',
-
             action: 'test',
-
             subjectType: QueueDriverConfiguration::class,
-
             subjectId: $configuration->id,
-
             before: null,
-
             after: null,
-
             metadata: [
-                'status' => $result
-                    ->status
-                    ->value,
-
+                'status' => $result->status->value,
                 'latency_ms' => $result->latencyMs,
             ],
-
             actor: $actor,
         );
 
@@ -118,25 +95,16 @@ class QueueDriverHealthService
         QueueDriverConfiguration $configuration,
     ): array {
         $connectionId =
-            data_get(
-                $configuration->configuration,
-                'infrastructure_connection_id',
-            );
+            $configuration->infrastructure_connection_id;
 
-        if (
-            ! is_numeric(
-                $connectionId,
-            )
-            || (int) $connectionId <= 0
-        ) {
+        if (! $connectionId) {
             return [];
         }
 
-        $connection =
-            InfrastructureConnection::withTrashed()
-                ->find(
-                    (int) $connectionId,
-                );
+        $connection = InfrastructureConnection::withTrashed()
+            ->find(
+                $connectionId,
+            );
 
         if (! $connection) {
             return [];

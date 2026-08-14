@@ -44,35 +44,26 @@ class QueueDriverConfigurationHttpTest extends TestCase
             'sync',
         );
 
-        $configuration =
-            QueueDriverConfiguration::query()
-                ->create([
-                    'name' => 'Synchronous',
+        $configuration = QueueDriverConfiguration::query()
+            ->create([
+                'name' => 'Synchronous',
+                'driver' => QueueDriverType::Sync,
+                'configuration' => [],
+                'is_enabled' => true,
+            ]);
 
-                    'driver' => QueueDriverType::Sync,
-
-                    'configuration' => [],
-
-                    'is_enabled' => true,
-                ]);
-
-        $backlog =
-            $this->createMock(
-                QueueBacklogService::class,
-            );
+        $backlog = $this->createMock(
+            QueueBacklogService::class,
+        );
 
         $backlog
-            ->method(
-                'inspect',
-            )
+            ->method('inspect')
             ->willReturn([
                 'queues' => [],
-
                 'total_pending' => 0,
-
                 'has_errors' => false,
-
-                'inspected_at' => '2026-08-14T00:00:00+00:00',
+                'inspected_at' =>
+                    '2026-08-14T00:00:00+00:00',
             ]);
 
         $this->app->instance(
@@ -80,18 +71,17 @@ class QueueDriverConfigurationHttpTest extends TestCase
             $backlog,
         );
 
-        $response =
-            $this
-                ->actingAs(
-                    $this->user([
-                        'admin.settings.queues.view',
-                    ]),
-                )
-                ->get(
-                    route(
-                        'admin.system.queues.index',
-                    ),
-                );
+        $response = $this
+            ->actingAs(
+                $this->user([
+                    'admin.settings.queues.view',
+                ]),
+            )
+            ->get(
+                route(
+                    'admin.system.queues.index',
+                ),
+            );
 
         $response
             ->assertOk()
@@ -131,6 +121,10 @@ class QueueDriverConfigurationHttpTest extends TestCase
                     ->where(
                         'configurations.data.0.id',
                         $configuration->id,
+                    )
+                    ->where(
+                        'configurations.data.0.infrastructure_connection_id',
+                        null,
                     )
                     ->has(
                         'definitions',
@@ -179,43 +173,37 @@ class QueueDriverConfigurationHttpTest extends TestCase
 
     public function test_create_page_exposes_only_selectable_redis_connections_and_queue_defaults(): void
     {
-        $enabled =
-            InfrastructureConnection::factory()
-                ->create([
-                    'name' => 'Selectable Redis',
-
-                    'is_enabled' => true,
-                ]);
+        $enabled = InfrastructureConnection::factory()
+            ->create([
+                'name' => 'Selectable Redis',
+                'is_enabled' => true,
+            ]);
 
         InfrastructureConnection::factory()
             ->create([
                 'name' => 'Disabled Redis',
-
                 'is_enabled' => false,
             ]);
 
-        $archived =
-            InfrastructureConnection::factory()
-                ->create([
-                    'name' => 'Archived Redis',
-
-                    'is_enabled' => true,
-                ]);
+        $archived = InfrastructureConnection::factory()
+            ->create([
+                'name' => 'Archived Redis',
+                'is_enabled' => true,
+            ]);
 
         $archived->delete();
 
-        $response =
-            $this
-                ->actingAs(
-                    $this->user([
-                        'admin.settings.queues.create',
-                    ]),
-                )
-                ->get(
-                    route(
-                        'admin.system.queues.create',
-                    ),
-                );
+        $response = $this
+            ->actingAs(
+                $this->user([
+                    'admin.settings.queues.create',
+                ]),
+            )
+            ->get(
+                route(
+                    'admin.system.queues.create',
+                ),
+            );
 
         $response
             ->assertOk()
@@ -241,6 +229,10 @@ class QueueDriverConfigurationHttpTest extends TestCase
                         'Selectable Redis',
                     )
                     ->where(
+                        'redis_connections.0.type',
+                        'redis',
+                    )
+                    ->where(
                         'defaults.minimum_retry_after',
                         330,
                     ),
@@ -249,33 +241,28 @@ class QueueDriverConfigurationHttpTest extends TestCase
 
     public function test_edit_page_keeps_referenced_unavailable_redis_connection_visible(): void
     {
-        $infrastructure =
-            InfrastructureConnection::factory()
-                ->create([
-                    'name' => 'Previously selected Redis',
+        $infrastructure = InfrastructureConnection::factory()
+            ->create([
+                'name' => 'Previously selected Redis',
+                'is_enabled' => true,
+            ]);
 
-                    'is_enabled' => true,
-                ]);
+        $configuration = QueueDriverConfiguration::query()
+            ->create([
+                'name' => 'Redis Queue',
+                'driver' => QueueDriverType::Redis,
 
-        $configuration =
-            QueueDriverConfiguration::query()
-                ->create([
-                    'name' => 'Redis Queue',
+                'infrastructure_connection_id' =>
+                    $infrastructure->id,
 
-                    'driver' => QueueDriverType::Redis,
+                'configuration' => [
+                    'retry_after' => 360,
+                    'block_for' => 5,
+                    'after_commit' => false,
+                ],
 
-                    'configuration' => [
-                        'infrastructure_connection_id' => $infrastructure->id,
-
-                        'retry_after' => 360,
-
-                        'block_for' => 5,
-
-                        'after_commit' => false,
-                    ],
-
-                    'is_enabled' => true,
-                ]);
+                'is_enabled' => true,
+            ]);
 
         $infrastructure
             ->forceFill([
@@ -285,19 +272,18 @@ class QueueDriverConfigurationHttpTest extends TestCase
 
         $infrastructure->delete();
 
-        $response =
-            $this
-                ->actingAs(
-                    $this->user([
-                        'admin.settings.queues.update',
-                    ]),
-                )
-                ->get(
-                    route(
-                        'admin.system.queues.edit',
-                        $configuration,
-                    ),
-                );
+        $response = $this
+            ->actingAs(
+                $this->user([
+                    'admin.settings.queues.update',
+                ]),
+            )
+            ->get(
+                route(
+                    'admin.system.queues.edit',
+                    $configuration,
+                ),
+            );
 
         $response
             ->assertOk()
@@ -310,6 +296,13 @@ class QueueDriverConfigurationHttpTest extends TestCase
                         'configuration.id',
                         $configuration->id,
                     )
+                    ->where(
+                        'configuration.infrastructure_connection_id',
+                        $infrastructure->id,
+                    )
+                    ->missing(
+                        'configuration.configuration.infrastructure_connection_id',
+                    )
                     ->has(
                         'redis_connections',
                         1,
@@ -319,14 +312,17 @@ class QueueDriverConfigurationHttpTest extends TestCase
                         $infrastructure->id,
                     )
                     ->where(
+                        'redis_connections.0.type',
+                        'redis',
+                    )
+                    ->where(
                         'redis_connections.0.is_enabled',
                         false,
                     )
                     ->where(
                         'redis_connections.0.deleted_at',
-                        fn ($value) => is_string(
-                            $value,
-                        )
+                        fn ($value) =>
+                            is_string($value)
                             && $value !== '',
                     ),
             );
@@ -335,35 +331,44 @@ class QueueDriverConfigurationHttpTest extends TestCase
     public function test_queue_management_routes_enforce_expected_permissions(): void
     {
         $expected = [
-            'admin.system.queues.index' => 'permission:admin.settings.queues.view',
+            'admin.system.queues.index' =>
+                'permission:admin.settings.queues.view',
 
-            'admin.system.queues.create' => 'permission:admin.settings.queues.create',
+            'admin.system.queues.create' =>
+                'permission:admin.settings.queues.create',
 
-            'admin.system.queues.store' => 'permission:admin.settings.queues.create',
+            'admin.system.queues.store' =>
+                'permission:admin.settings.queues.create',
 
-            'admin.system.queues.edit' => 'permission:admin.settings.queues.update',
+            'admin.system.queues.edit' =>
+                'permission:admin.settings.queues.update',
 
-            'admin.system.queues.update' => 'permission:admin.settings.queues.update',
+            'admin.system.queues.update' =>
+                'permission:admin.settings.queues.update',
 
-            'admin.system.queues.enabled' => 'permission:admin.settings.queues.update',
+            'admin.system.queues.enabled' =>
+                'permission:admin.settings.queues.update',
 
-            'admin.system.queues.destroy' => 'permission:admin.settings.queues.archive',
+            'admin.system.queues.destroy' =>
+                'permission:admin.settings.queues.archive',
 
-            'admin.system.queues.restore' => 'permission:admin.settings.queues.archive',
+            'admin.system.queues.restore' =>
+                'permission:admin.settings.queues.archive',
 
-            'admin.system.queues.force-delete' => 'permission:admin.settings.queues.delete',
+            'admin.system.queues.force-delete' =>
+                'permission:admin.settings.queues.delete',
 
-            'admin.system.queues.test' => 'permission:admin.settings.queues.test',
+            'admin.system.queues.test' =>
+                'permission:admin.settings.queues.test',
         ];
 
         foreach (
             $expected as $name => $middleware
         ) {
-            $route =
-                Route::getRoutes()
-                    ->getByName(
-                        $name,
-                    );
+            $route = Route::getRoutes()
+                ->getByName(
+                    $name,
+                );
 
             $this->assertNotNull(
                 $route,
@@ -387,50 +392,36 @@ class QueueDriverConfigurationHttpTest extends TestCase
 
     public function test_user_without_queue_permissions_cannot_mutate_or_test_configurations(): void
     {
-        $user =
-            User::factory()
-                ->create();
+        $user = User::factory()->create();
 
-        $configuration =
-            QueueDriverConfiguration::query()
-                ->create([
-                    'name' => 'Protected Queue',
+        $configuration = QueueDriverConfiguration::query()
+            ->create([
+                'name' => 'Protected Queue',
+                'driver' => QueueDriverType::Sync,
+                'configuration' => [],
+                'is_enabled' => true,
+            ]);
 
-                    'driver' => QueueDriverType::Sync,
-
-                    'configuration' => [],
-
-                    'is_enabled' => true,
-                ]);
-
-        $archived =
-            QueueDriverConfiguration::query()
-                ->create([
-                    'name' => 'Archived Queue',
-
-                    'driver' => QueueDriverType::Sync,
-
-                    'configuration' => [],
-
-                    'is_enabled' => false,
-                ]);
+        $archived = QueueDriverConfiguration::query()
+            ->create([
+                'name' => 'Archived Queue',
+                'driver' => QueueDriverType::Sync,
+                'configuration' => [],
+                'is_enabled' => false,
+            ]);
 
         $archived->delete();
 
         $payload = [
             'name' => 'Queue',
-
             'driver' => 'sync',
-
+            'infrastructure_connection_id' => null,
             'configuration' => [],
-
             'is_enabled' => true,
         ];
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->get(
                 route(
                     'admin.system.queues.create',
@@ -439,9 +430,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->post(
                 route(
                     'admin.system.queues.store',
@@ -451,9 +440,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->get(
                 route(
                     'admin.system.queues.edit',
@@ -463,9 +450,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->put(
                 route(
                     'admin.system.queues.update',
@@ -476,9 +461,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->patch(
                 route(
                     'admin.system.queues.enabled',
@@ -491,9 +474,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->delete(
                 route(
                     'admin.system.queues.destroy',
@@ -503,9 +484,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->post(
                 route(
                     'admin.system.queues.restore',
@@ -515,9 +494,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->delete(
                 route(
                     'admin.system.queues.force-delete',
@@ -527,9 +504,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
             ->assertForbidden();
 
         $this
-            ->actingAs(
-                $user,
-            )
+            ->actingAs($user)
             ->post(
                 route(
                     'admin.system.queues.test',
@@ -542,59 +517,51 @@ class QueueDriverConfigurationHttpTest extends TestCase
     private function user(
         array $permissionKeys,
     ): User {
-        $user =
-            User::factory()
-                ->create();
+        $user = User::factory()->create();
 
-        $group =
-            PermissionGroup::query()
-                ->create([
-                    'key' => 'queues-'
-                        .$user->id,
+        $group = PermissionGroup::query()
+            ->create([
+                'key' => 'queues-'.$user->id,
+                'label' => 'Queues',
+                'panel' => 'admin',
+                'type' => 'agent',
+                'sort_order' => 1,
+            ]);
 
-                    'label' => 'Queues',
+        $role = Role::query()
+            ->create([
+                'name' => 'queues-'.$user->id,
+                'label' => 'Queues',
+                'type' => 'user',
+            ]);
 
-                    'panel' => 'admin',
+        $permissionIds = collect(
+            $permissionKeys,
+        )
+            ->map(
+                fn (string $key): int =>
+                Permission::query()
+                    ->create([
+                        'permission_group_id' =>
+                            $group->id,
 
-                    'type' => 'agent',
+                        'key' =>
+                            $key,
 
-                    'sort_order' => 1,
-                ]);
+                        'label' =>
+                            $key,
 
-        $role =
-            Role::query()
-                ->create([
-                    'name' => 'queues-'
-                        .$user->id,
+                        'type' =>
+                            'agent',
 
-                    'label' => 'Queues',
+                        'ui_type' =>
+                            'checkbox',
 
-                    'type' => 'user',
-                ]);
-
-        $permissionIds =
-            collect(
-                $permissionKeys,
-            )
-                ->map(
-                    fn (
-                        string $key,
-                    ): int => Permission::query()
-                        ->create([
-                            'permission_group_id' => $group->id,
-
-                            'key' => $key,
-
-                            'label' => $key,
-
-                            'type' => 'agent',
-
-                            'ui_type' => 'checkbox',
-
-                            'sort_order' => 1,
-                        ])
-                        ->id,
-                );
+                        'sort_order' =>
+                            1,
+                    ])
+                    ->id,
+            );
 
         $role
             ->permissions()

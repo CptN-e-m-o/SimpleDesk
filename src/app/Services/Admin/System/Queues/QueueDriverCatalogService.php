@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin\System\Queues;
 
+use App\Enums\Admin\System\InfrastructureConnectionType;
 use App\Enums\Admin\System\QueueConfigurationMode;
 use App\Enums\Admin\System\QueueDriverType;
 use App\Exceptions\Admin\System\Queues\ActiveQueueDriverConfigurationMutationException;
@@ -29,13 +30,12 @@ class QueueDriverCatalogService
                 $data,
                 $actor,
             ): QueueDriverConfiguration {
-                $type =
-                    QueueDriverType::tryFrom(
-                        (string) (
-                            $data['driver']
-                            ?? ''
-                        ),
-                    );
+                $type = QueueDriverType::tryFrom(
+                    (string) (
+                        $data['driver']
+                        ?? ''
+                    ),
+                );
 
                 if (! $type) {
                     throw ValidationException::withMessages([
@@ -47,31 +47,36 @@ class QueueDriverCatalogService
                     $type,
                 );
 
-                $normalized =
-                    $this->normalize(
+                $infrastructure = $this
+                    ->resolveInfrastructureConnection(
                         $type,
                         $data[
-                        'configuration'
-                        ] ?? [],
+                        'infrastructure_connection_id'
+                        ] ?? null,
                     );
 
-                $model =
-                    QueueDriverConfiguration::query()
-                        ->create([
-                            'name' => $data['name'],
+                $normalized = $this->normalize(
+                    $type,
+                    $data['configuration'] ?? [],
+                );
 
-                            'driver' => $type,
+                $model = QueueDriverConfiguration::query()
+                    ->create([
+                        'name' => $data['name'],
+                        'driver' => $type,
 
-                            'configuration' => $normalized,
+                        'infrastructure_connection_id' =>
+                            $infrastructure?->id,
 
-                            'is_enabled' => $data[
-                                'is_enabled'
-                                ] ?? true,
+                        'configuration' => $normalized,
 
-                            'created_by' => $actor->id,
+                        'is_enabled' => $data[
+                            'is_enabled'
+                            ] ?? true,
 
-                            'updated_by' => $actor->id,
-                        ]);
+                        'created_by' => $actor->id,
+                        'updated_by' => $actor->id,
+                    ]);
 
                 $this->log(
                     action: 'create',
@@ -99,15 +104,17 @@ class QueueDriverCatalogService
                 $data,
                 $actor,
             ): QueueDriverConfiguration {
-                $model =
-                    QueueDriverConfiguration::query()
-                        ->lockForUpdate()
-                        ->findOrFail(
-                            $model->id,
-                        );
+                $settings = $this->lockSettings();
+
+                $model = QueueDriverConfiguration::query()
+                    ->lockForUpdate()
+                    ->findOrFail(
+                        $model->id,
+                    );
 
                 $this->guardInactive(
                     $model,
+                    $settings,
                 );
 
                 $this->assertRegistered(
@@ -115,9 +122,7 @@ class QueueDriverCatalogService
                 );
 
                 if (
-                    isset(
-                        $data['driver'],
-                    )
+                    isset($data['driver'])
                     && $data['driver']
                     !== $model
                         ->driver
@@ -128,19 +133,36 @@ class QueueDriverCatalogService
                     ]);
                 }
 
-                $before =
-                    $this->safe(
-                        $model,
+                $before = $this->safe(
+                    $model,
+                );
+
+                $infrastructureInput =
+                    array_key_exists(
+                        'infrastructure_connection_id',
+                        $data,
+                    )
+                        ? $data[
+                    'infrastructure_connection_id'
+                    ]
+                        : $model
+                        ->infrastructure_connection_id;
+
+                $infrastructure = $this
+                    ->resolveInfrastructureConnection(
+                        $model->driver,
+                        $infrastructureInput,
                     );
 
                 $model->update([
                     'name' => $data['name'],
 
+                    'infrastructure_connection_id' =>
+                        $infrastructure?->id,
+
                     'configuration' => $this->normalize(
                         $model->driver,
-                        $data[
-                        'configuration'
-                        ] ?? [],
+                        $data['configuration'] ?? [],
                     ),
 
                     'is_enabled' => $data[
@@ -178,16 +200,18 @@ class QueueDriverCatalogService
                 $enabled,
                 $actor,
             ): QueueDriverConfiguration {
-                $model =
-                    QueueDriverConfiguration::query()
-                        ->lockForUpdate()
-                        ->findOrFail(
-                            $model->id,
-                        );
+                $settings = $this->lockSettings();
+
+                $model = QueueDriverConfiguration::query()
+                    ->lockForUpdate()
+                    ->findOrFail(
+                        $model->id,
+                    );
 
                 if (! $enabled) {
                     $this->guardInactive(
                         $model,
+                        $settings,
                     );
                 }
 
@@ -198,14 +222,12 @@ class QueueDriverCatalogService
                     return $model;
                 }
 
-                $before =
-                    $this->safe(
-                        $model,
-                    );
+                $before = $this->safe(
+                    $model,
+                );
 
                 $model->update([
                     'is_enabled' => $enabled,
-
                     'updated_by' => $actor->id,
                 ]);
 
@@ -237,25 +259,25 @@ class QueueDriverCatalogService
                 $model,
                 $actor,
             ): void {
-                $model =
-                    QueueDriverConfiguration::query()
-                        ->lockForUpdate()
-                        ->findOrFail(
-                            $model->id,
-                        );
+                $settings = $this->lockSettings();
+
+                $model = QueueDriverConfiguration::query()
+                    ->lockForUpdate()
+                    ->findOrFail(
+                        $model->id,
+                    );
 
                 $this->guardInactive(
                     $model,
+                    $settings,
                 );
 
-                $before =
-                    $this->safe(
-                        $model,
-                    );
+                $before = $this->safe(
+                    $model,
+                );
 
                 $model->update([
                     'is_enabled' => false,
-
                     'updated_by' => $actor->id,
                 ]);
 
@@ -283,23 +305,20 @@ class QueueDriverCatalogService
                 $id,
                 $actor,
             ): QueueDriverConfiguration {
-                $model =
-                    QueueDriverConfiguration::onlyTrashed()
-                        ->lockForUpdate()
-                        ->findOrFail(
-                            $id,
-                        );
-
-                $before =
-                    $this->safe(
-                        $model,
+                $model = QueueDriverConfiguration::onlyTrashed()
+                    ->lockForUpdate()
+                    ->findOrFail(
+                        $id,
                     );
+
+                $before = $this->safe(
+                    $model,
+                );
 
                 $model->restore();
 
                 $model->update([
                     'is_enabled' => false,
-
                     'updated_by' => $actor->id,
                 ]);
 
@@ -329,21 +348,22 @@ class QueueDriverCatalogService
                 $id,
                 $actor,
             ): void {
-                $model =
-                    QueueDriverConfiguration::onlyTrashed()
-                        ->lockForUpdate()
-                        ->findOrFail(
-                            $id,
-                        );
+                $settings = $this->lockSettings();
+
+                $model = QueueDriverConfiguration::onlyTrashed()
+                    ->lockForUpdate()
+                    ->findOrFail(
+                        $id,
+                    );
 
                 $this->guardInactive(
                     $model,
+                    $settings,
                 );
 
-                $before =
-                    $this->safe(
-                        $model,
-                    );
+                $before = $this->safe(
+                    $model,
+                );
 
                 $model->forceDelete();
 
@@ -361,25 +381,35 @@ class QueueDriverCatalogService
     public function safe(
         QueueDriverConfiguration $model,
     ): array {
-        $model->loadMissing(
+        $model->loadMissing([
             'latestHealthCheck',
-        );
+            'infrastructureConnection',
+        ]);
 
         $health =
-            $model
-                ->latestHealthCheck;
+            $model->latestHealthCheck;
+
+        $configuration =
+            $model->configuration ?? [];
+
+        unset(
+            $configuration[
+            'infrastructure_connection_id'
+            ],
+        );
 
         $data = [
             'id' => $model->id,
-
             'name' => $model->name,
 
             'driver' => $model
                 ->driver
                 ->value,
 
-            'configuration' => $model->configuration
-                ?? [],
+            'infrastructure_connection_id' =>
+                $model->infrastructure_connection_id,
+
+            'configuration' => $configuration,
 
             'is_enabled' => $model->is_enabled,
 
@@ -400,7 +430,7 @@ class QueueDriverCatalogService
             ),
 
             'latest_health_check' => $health
-                    ? [
+                ? [
                     'status' => $health
                         ->status
                         ->value,
@@ -421,53 +451,41 @@ class QueueDriverCatalogService
                         ->created_at
                         ?->toIso8601String(),
                 ]
-                    : null,
+                : null,
         ];
 
         if (
             $model->driver ===
             QueueDriverType::Redis
         ) {
-            $id =
-                $model
-                    ->configuration[
-                'infrastructure_connection_id'
-                ]
-                ?? null;
-
             $infrastructure =
-                $id
-                    ? InfrastructureConnection::withTrashed()
-                        ->find(
-                            $id,
-                        )
-                    : null;
+                $model->infrastructureConnection;
 
             $data[
             'infrastructure_connection'
-            ] =
-                $infrastructure
-                    ? [
-                        'id' => $infrastructure->id,
+            ] = $infrastructure
+                ? [
+                    'id' => $infrastructure->id,
 
-                        'name' => $infrastructure->name,
+                    'name' => $infrastructure->name,
 
-                        'type' => $infrastructure
-                            ->type
-                            ->value,
+                    'type' => $infrastructure
+                        ->type
+                        ->value,
 
-                        'source' => $infrastructure
-                            ->source
-                            ->value,
+                    'source' => $infrastructure
+                        ->source
+                        ->value,
 
-                        'is_enabled' => $infrastructure
-                            ->is_enabled,
+                    'is_enabled' =>
+                        $infrastructure->is_enabled,
 
-                        'deleted_at' => $infrastructure
+                    'deleted_at' =>
+                        $infrastructure
                             ->deleted_at
                             ?->toIso8601String(),
-                    ]
-                    : null;
+                ]
+                : null;
         }
 
         return $data;
@@ -477,6 +495,12 @@ class QueueDriverCatalogService
         QueueDriverType $type,
         array $configuration,
     ): array {
+        unset(
+            $configuration[
+            'infrastructure_connection_id'
+            ],
+        );
+
         try {
             return $this
                 ->registry
@@ -487,7 +511,7 @@ class QueueDriverCatalogService
                     $configuration,
                 );
         } catch (
-            ValidationException $exception
+        ValidationException $exception
         ) {
             $messages = [];
 
@@ -500,8 +524,7 @@ class QueueDriverCatalogService
                     'configuration.',
                 )
                     ? $key
-                    : 'configuration.'
-                    .$key
+                    : 'configuration.'.$key
                 ] = $values;
             }
 
@@ -509,6 +532,77 @@ class QueueDriverCatalogService
                 $messages,
             );
         }
+    }
+
+    private function resolveInfrastructureConnection(
+        QueueDriverType $type,
+        mixed $connectionId,
+    ): ?InfrastructureConnection {
+        if (
+            $type !==
+            QueueDriverType::Redis
+        ) {
+            if (
+                $connectionId !== null
+                && $connectionId !== ''
+            ) {
+                throw ValidationException::withMessages([
+                    'infrastructure_connection_id' => 'Only Redis queue configurations may reference an infrastructure connection.',
+                ]);
+            }
+
+            return null;
+        }
+
+        $normalizedId = filter_var(
+            $connectionId,
+            FILTER_VALIDATE_INT,
+            [
+                'options' => [
+                    'min_range' => 1,
+                ],
+            ],
+        );
+
+        if ($normalizedId === false) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' => 'A Redis infrastructure connection is required.',
+            ]);
+        }
+
+        $connection = InfrastructureConnection::withTrashed()
+            ->find(
+                $normalizedId,
+            );
+
+        if (! $connection) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' => 'The selected Redis infrastructure connection does not exist.',
+            ]);
+        }
+
+        if ($connection->trashed()) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' => 'The selected Redis infrastructure connection is archived.',
+            ]);
+        }
+
+        if (
+            $connection->type !==
+            InfrastructureConnectionType::Redis
+        ) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' => 'The selected infrastructure connection is not Redis.',
+            ]);
+        }
+
+        if (! $connection->is_enabled) {
+            throw ValidationException::withMessages([
+                'infrastructure_connection_id' => 'The selected Redis infrastructure connection is disabled.',
+            ]);
+        }
+
+        return $connection;
     }
 
     private function assertRegistered(
@@ -547,17 +641,20 @@ class QueueDriverCatalogService
             ->exists();
     }
 
+    private function lockSettings(): ?QueueDriverSettings
+    {
+        return QueueDriverSettings::query()
+            ->whereKey(
+                QueueDriverSettings::SINGLETON_ID,
+            )
+            ->lockForUpdate()
+            ->first();
+    }
+
     private function guardInactive(
         QueueDriverConfiguration $model,
+        ?QueueDriverSettings $settings,
     ): void {
-        $settings =
-            QueueDriverSettings::query()
-                ->whereKey(
-                    QueueDriverSettings::SINGLETON_ID,
-                )
-                ->lockForUpdate()
-                ->first();
-
         if (
             $settings !== null
             && $settings->mode ===
@@ -581,17 +678,11 @@ class QueueDriverCatalogService
     ): void {
         $this->audit->log(
             area: 'queue_driver_configurations',
-
             action: $action,
-
             subjectType: QueueDriverConfiguration::class,
-
             subjectId: $model->id,
-
             before: $before,
-
             after: $after,
-
             actor: $actor,
         );
     }
