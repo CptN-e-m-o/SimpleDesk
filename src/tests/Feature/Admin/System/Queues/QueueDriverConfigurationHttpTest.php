@@ -360,15 +360,22 @@ class QueueDriverConfigurationHttpTest extends TestCase
 
             'admin.system.queues.test' =>
                 'permission:admin.settings.queues.test',
+
+            'admin.system.queues.activate' =>
+                'permission:admin.settings.queues.activate',
+
+            'admin.system.queues.force-activate' =>
+                'permission:admin.settings.queues.force_activate',
+
+            'admin.system.queues.activate-deployment' =>
+                'permission:admin.settings.queues.activate',
+
+            'admin.system.queues.force-activate-deployment' =>
+                'permission:admin.settings.queues.force_activate',
         ];
 
-        foreach (
-            $expected as $name => $middleware
-        ) {
-            $route = Route::getRoutes()
-                ->getByName(
-                    $name,
-                );
+        foreach ($expected as $name => $middleware) {
+            $route = Route::getRoutes()->getByName($name);
 
             $this->assertNotNull(
                 $route,
@@ -381,13 +388,6 @@ class QueueDriverConfigurationHttpTest extends TestCase
                 "Route [{$name}] has incorrect permission middleware.",
             );
         }
-
-        $this->assertNull(
-            Route::getRoutes()
-                ->getByName(
-                    'admin.system.queues.activate',
-                ),
-        );
     }
 
     public function test_user_without_queue_permissions_cannot_mutate_or_test_configurations(): void

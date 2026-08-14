@@ -126,7 +126,11 @@ export type BacklogQueue = {
 
 export type QueueBacklog = {
     queues: BacklogQueue[]
-    total_pending: number
+    total_pending: number | null
+
+    inspected_pending: number
+
+    is_complete: boolean
     has_errors: boolean
     inspected_at: string
 }

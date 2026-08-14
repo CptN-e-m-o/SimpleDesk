@@ -111,6 +111,7 @@ class RolePermissionSeeder extends Seeder
             'admin.settings.queues.archive',
             'admin.settings.queues.delete',
             'admin.settings.queues.test',
+            'admin.settings.queues.activate',
         ];
     }
 

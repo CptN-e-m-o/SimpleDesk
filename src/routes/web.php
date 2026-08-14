@@ -47,6 +47,10 @@ use App\Http\Controllers\Agent\OwnAgentStatusController;
 use App\Http\Controllers\Tickets\Agent\AgentTicketEmailReplyController;
 use App\Http\Controllers\Tickets\User\TicketController;
 use App\Http\Controllers\Tickets\User\TicketReplyController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverActivationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverForceActivationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDeploymentActivationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDeploymentForceActivationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -108,6 +112,13 @@ Route::middleware('auth')->group(function () {
             Route::get('drivers/queues', [QueueDriverConfigurationController::class, 'index'])->middleware('permission:admin.settings.queues.view')->name('queues.index');
             Route::get('drivers/queues/create', [QueueDriverConfigurationController::class, 'create'])->middleware('permission:admin.settings.queues.create')->name('queues.create');
             Route::post('drivers/queues', [QueueDriverConfigurationController::class, 'store'])->middleware('permission:admin.settings.queues.create')->name('queues.store');
+            Route::post('drivers/queues/deployment/activate', QueueDeploymentActivationController::class)
+                ->middleware('permission:admin.settings.queues.activate')
+                ->name('queues.activate-deployment');
+
+            Route::post('drivers/queues/deployment/force-activate', QueueDeploymentForceActivationController::class)
+                ->middleware('permission:admin.settings.queues.force_activate')
+                ->name('queues.force-activate-deployment');
             Route::get('drivers/queues/{configuration}/edit', [QueueDriverConfigurationController::class, 'edit'])->middleware('permission:admin.settings.queues.update')->name('queues.edit');
             Route::put('drivers/queues/{configuration}', [QueueDriverConfigurationController::class, 'update'])->middleware('permission:admin.settings.queues.update')->name('queues.update');
             Route::patch('drivers/queues/{configuration}/enabled', [QueueDriverConfigurationController::class, 'setEnabled'])->middleware('permission:admin.settings.queues.update')->name('queues.enabled');
@@ -115,6 +126,12 @@ Route::middleware('auth')->group(function () {
             Route::post('drivers/queues/{id}/restore', [QueueDriverConfigurationController::class, 'restore'])->middleware('permission:admin.settings.queues.archive')->whereNumber('id')->name('queues.restore');
             Route::delete('drivers/queues/{id}/force-delete', [QueueDriverConfigurationController::class, 'forceDelete'])->middleware('permission:admin.settings.queues.delete')->whereNumber('id')->name('queues.force-delete');
             Route::post('drivers/queues/{configuration}/test', QueueDriverConfigurationTestController::class)->middleware('permission:admin.settings.queues.test')->name('queues.test');
+            Route::post('drivers/queues/{configuration}/activate', QueueDriverActivationController::class)
+                ->middleware('permission:admin.settings.queues.activate')
+                ->name('queues.activate');
+            Route::post('drivers/queues/{configuration}/force-activate', QueueDriverForceActivationController::class)
+                ->middleware('permission:admin.settings.queues.force_activate')
+                ->name('queues.force-activate');
             Route::get('connections', [InfrastructureConnectionController::class, 'index'])->middleware('permission:admin.settings.infrastructure_connections.view')->name('connections.index');
             Route::get('connections/create', [InfrastructureConnectionController::class, 'create'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.create');
             Route::post('connections', [InfrastructureConnectionController::class, 'store'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.store');

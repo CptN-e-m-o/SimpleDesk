@@ -3,7 +3,10 @@
 namespace App\Services\Admin\System\Infrastructure;
 
 use App\Enums\Admin\System\InfrastructureConnectionType;
+use App\Enums\Admin\System\QueueConfigurationMode;
 use App\Models\Admin\System\InfrastructureConnection;
+use App\Models\Admin\System\QueueDriverConfiguration;
+use App\Models\Admin\System\QueueDriverSettings;
 use App\Models\User\User;
 use App\Services\Admin\System\Audit\SystemAuditLogger;
 use Illuminate\Support\Facades\DB;
@@ -20,14 +23,10 @@ class InfrastructureConnectionCatalogService
         array $data,
         User $actor,
     ): InfrastructureConnection {
-        return DB::transaction(function () use (
-            $data,
-            $actor,
-        ) {
-            $type =
-                InfrastructureConnectionType::tryFrom(
-                    (string) $data['type'],
-                );
+        return DB::transaction(function () use ($data, $actor) {
+            $type = InfrastructureConnectionType::tryFrom(
+                (string) $data['type'],
+            );
 
             if (! $type) {
                 throw ValidationException::withMessages([
@@ -35,26 +34,23 @@ class InfrastructureConnectionCatalogService
                 ]);
             }
 
-            $adapter =
-                $this->registry->adapter($type);
+            $adapter = $this->registry->adapter($type);
 
-            $normalized =
-                $adapter->validateAndNormalize(
-                    $data['configuration'] ?? [],
-                    $data['credentials'] ?? [],
-                    $data['source'],
-                );
+            $normalized = $adapter->validateAndNormalize(
+                $data['configuration'] ?? [],
+                $data['credentials'] ?? [],
+                $data['source'],
+            );
 
-            $connection =
-                InfrastructureConnection::query()->create([
-                    'name' => $data['name'],
-                    'type' => $type,
-                    'source' => $data['source'],
-                    ...$normalized,
-                    'is_enabled' => $data['is_enabled'] ?? true,
-                    'created_by' => $actor->id,
-                    'updated_by' => $actor->id,
-                ]);
+            $connection = InfrastructureConnection::query()->create([
+                'name' => $data['name'],
+                'type' => $type,
+                'source' => $data['source'],
+                ...$normalized,
+                'is_enabled' => $data['is_enabled'] ?? true,
+                'created_by' => $actor->id,
+                'updated_by' => $actor->id,
+            ]);
 
             $this->audit->log(
                 'infrastructure_connections',
@@ -62,10 +58,7 @@ class InfrastructureConnectionCatalogService
                 InfrastructureConnection::class,
                 $connection->id,
                 null,
-                $this->safe(
-                    $connection,
-                    $adapter,
-                ),
+                $this->safe($connection, $adapter),
                 [
                     'credentials_changed' => array_keys(
                         $normalized['credentials'],
@@ -88,15 +81,20 @@ class InfrastructureConnectionCatalogService
             $data,
             $actor,
         ) {
-            $connection =
-                InfrastructureConnection::query()
-                    ->lockForUpdate()
-                    ->findOrFail($connection->id);
+            $settings = $this->lockQueueSettings();
 
-            $adapter =
-                $this->registry->adapter(
-                    $connection->type,
-                );
+            $activeQueue = $this->activeManagedQueueUsingConnection(
+                $connection->id,
+                $settings,
+            );
+
+            $connection = InfrastructureConnection::query()
+                ->lockForUpdate()
+                ->findOrFail($connection->id);
+
+            $adapter = $this->registry->adapter(
+                $connection->type,
+            );
 
             $before = $this->safe(
                 $connection,
@@ -105,8 +103,8 @@ class InfrastructureConnectionCatalogService
 
             $incoming = array_filter(
                 $data['credentials'] ?? [],
-                fn (mixed $value): bool => $value !== null
-                    && $value !== '',
+                fn (mixed $value): bool =>
+                    $value !== null && $value !== '',
             );
 
             $credentials = [
@@ -128,38 +126,52 @@ class InfrastructureConnectionCatalogService
                 }
             }
 
-            $normalized =
-                $adapter->validateAndNormalize(
-                    $data['configuration']
-                    ?? $connection->configuration,
-                    $credentials,
-                    $data['source']
-                    ?? $connection->source->value,
+            $source = (string) (
+                $data['source']
+                ?? $connection->source->value
+            );
+
+            $normalized = $adapter->validateAndNormalize(
+                $data['configuration']
+                ?? $connection->configuration,
+                $credentials,
+                $source,
+            );
+
+            $enabled = array_key_exists(
+                'is_enabled',
+                $data,
+            )
+                ? (bool) $data['is_enabled']
+                : $connection->is_enabled;
+
+            if ($activeQueue) {
+                $this->assertActiveQueueInfrastructureUpdateIsSafe(
+                    connection: $connection,
+                    activeQueue: $activeQueue,
+                    source: $source,
+                    normalized: $normalized,
+                    enabled: $enabled,
                 );
+            }
 
             $connection->update([
                 'name' => $data['name'],
-                'source' => $data['source']
-                    ?? $connection->source,
+                'source' => $source,
                 ...$normalized,
-
-                'is_enabled' => $data['is_enabled']
-                    ?? $connection->is_enabled,
-
+                'is_enabled' => $enabled,
                 'updated_by' => $actor->id,
             ]);
 
-            $changedCredentials =
-                array_values(
-                    array_unique([
-                        ...array_keys($incoming),
-                        ...(
-                            $data[
-                            'remove_credentials'
-                            ] ?? []
-                        ),
-                    ]),
-                );
+            $changedCredentials = array_values(
+                array_unique([
+                    ...array_keys($incoming),
+                    ...(
+                        $data['remove_credentials']
+                        ?? []
+                    ),
+                ]),
+            );
 
             $this->audit->log(
                 'infrastructure_connections',
@@ -191,16 +203,36 @@ class InfrastructureConnectionCatalogService
             $enabled,
             $actor,
         ) {
-            $adapter =
-                $this->registry->adapter(
-                    $connection->type,
-                );
+            $settings = $this->lockQueueSettings();
 
-            $before =
-                $this->safe(
-                    $connection,
-                    $adapter,
-                );
+            $activeQueue = $this->activeManagedQueueUsingConnection(
+                $connection->id,
+                $settings,
+            );
+
+            $connection = InfrastructureConnection::query()
+                ->lockForUpdate()
+                ->findOrFail($connection->id);
+
+            if (! $enabled && $activeQueue) {
+                throw ValidationException::withMessages([
+                    'is_enabled' =>
+                        "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be disabled.",
+                ]);
+            }
+
+            if ($connection->is_enabled === $enabled) {
+                return $connection;
+            }
+
+            $adapter = $this->registry->adapter(
+                $connection->type,
+            );
+
+            $before = $this->safe(
+                $connection,
+                $adapter,
+            );
 
             $connection->update([
                 'is_enabled' => $enabled,
@@ -209,9 +241,7 @@ class InfrastructureConnectionCatalogService
 
             $this->audit->log(
                 'infrastructure_connections',
-                $enabled
-                    ? 'enable'
-                    : 'disable',
+                $enabled ? 'enable' : 'disable',
                 InfrastructureConnection::class,
                 $connection->id,
                 $before,
@@ -234,16 +264,32 @@ class InfrastructureConnectionCatalogService
             $connection,
             $actor,
         ) {
-            $adapter =
-                $this->registry->adapter(
-                    $connection->type,
-                );
+            $settings = $this->lockQueueSettings();
 
-            $before =
-                $this->safe(
-                    $connection,
-                    $adapter,
-                );
+            $activeQueue = $this->activeManagedQueueUsingConnection(
+                $connection->id,
+                $settings,
+            );
+
+            $connection = InfrastructureConnection::query()
+                ->lockForUpdate()
+                ->findOrFail($connection->id);
+
+            if ($activeQueue) {
+                throw ValidationException::withMessages([
+                    'connection' =>
+                        "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be archived.",
+                ]);
+            }
+
+            $adapter = $this->registry->adapter(
+                $connection->type,
+            );
+
+            $before = $this->safe(
+                $connection,
+                $adapter,
+            );
 
             $connection->update([
                 'updated_by' => $actor->id,
@@ -271,10 +317,9 @@ class InfrastructureConnectionCatalogService
             $id,
             $actor,
         ) {
-            $connection =
-                InfrastructureConnection::onlyTrashed()
-                    ->lockForUpdate()
-                    ->findOrFail($id);
+            $connection = InfrastructureConnection::onlyTrashed()
+                ->lockForUpdate()
+                ->findOrFail($id);
 
             $connection->restore();
 
@@ -309,18 +354,36 @@ class InfrastructureConnectionCatalogService
             $id,
             $actor,
         ) {
-            $connection =
-                InfrastructureConnection::onlyTrashed()
-                    ->lockForUpdate()
-                    ->findOrFail($id);
+            /*
+             * Check both active and archived Queue profiles.
+             * Soft-deleted Queue rows still retain their FK.
+             */
+            $referencingQueue = QueueDriverConfiguration::withTrashed()
+                ->where(
+                    'infrastructure_connection_id',
+                    $id,
+                )
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->first();
 
-            $before =
-                $this->safe(
-                    $connection,
-                    $this->registry->adapter(
-                        $connection->type,
-                    ),
-                );
+            if ($referencingQueue) {
+                throw ValidationException::withMessages([
+                    'connection' =>
+                        "Infrastructure connection cannot be permanently deleted because Queue configuration [{$referencingQueue->name}] still references it.",
+                ]);
+            }
+
+            $connection = InfrastructureConnection::onlyTrashed()
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            $before = $this->safe(
+                $connection,
+                $this->registry->adapter(
+                    $connection->type,
+                ),
+            );
 
             $subjectId = $connection->id;
 
@@ -342,10 +405,9 @@ class InfrastructureConnectionCatalogService
         InfrastructureConnection $connection,
         mixed $adapter = null,
     ): array {
-        $adapter ??=
-            $this->registry->adapter(
-                $connection->type,
-            );
+        $adapter ??= $this->registry->adapter(
+            $connection->type,
+        );
 
         return [
             'id' => $connection->id,
@@ -357,5 +419,85 @@ class InfrastructureConnectionCatalogService
                 $connection,
             ),
         ];
+    }
+
+    private function lockQueueSettings(): ?QueueDriverSettings
+    {
+        return QueueDriverSettings::query()
+            ->whereKey(
+                QueueDriverSettings::SINGLETON_ID,
+            )
+            ->lockForUpdate()
+            ->first();
+    }
+
+    private function activeManagedQueueUsingConnection(
+        int $connectionId,
+        ?QueueDriverSettings $settings,
+    ): ?QueueDriverConfiguration {
+        if (
+            $settings === null
+            || $settings->mode !== QueueConfigurationMode::Managed
+            || ! $settings->active_configuration_id
+        ) {
+            return null;
+        }
+
+        return QueueDriverConfiguration::withTrashed()
+            ->whereKey(
+                $settings->active_configuration_id,
+            )
+            ->where(
+                'infrastructure_connection_id',
+                $connectionId,
+            )
+            ->lockForUpdate()
+            ->first();
+    }
+
+    private function assertActiveQueueInfrastructureUpdateIsSafe(
+        InfrastructureConnection $connection,
+        QueueDriverConfiguration $activeQueue,
+        string $source,
+        array $normalized,
+        bool $enabled,
+    ): void {
+        if (! $enabled) {
+            throw ValidationException::withMessages([
+                'is_enabled' =>
+                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be disabled.",
+            ]);
+        }
+
+        if ($source !== $connection->source->value) {
+            throw ValidationException::withMessages([
+                'source' =>
+                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Its source cannot be changed while the Queue configuration is active.",
+            ]);
+        }
+
+        $nextConfiguration = $normalized['configuration'] ?? [];
+
+        if (
+            ($connection->configuration ?? [])
+            != $nextConfiguration
+        ) {
+            throw ValidationException::withMessages([
+                'configuration' =>
+                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Runtime connection settings cannot be changed while the Queue configuration is active.",
+            ]);
+        }
+
+        $nextCredentials = $normalized['credentials'] ?? [];
+
+        if (
+            $connection->secrets()
+            != $nextCredentials
+        ) {
+            throw ValidationException::withMessages([
+                'credentials' =>
+                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Credentials cannot be changed while the Queue configuration is active.",
+            ]);
+        }
     }
 }

@@ -37,12 +37,7 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
             infrastructureType: null,
             recommendedForProduction: true,
             options: [
-                'database_connections' => array_keys(
-                    (array) config(
-                        'database.connections',
-                        [],
-                    ),
-                ),
+                'database_connections' => $this->allowedConnections(),
             ],
         );
     }
@@ -51,125 +46,198 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
         array $configuration,
     ): array {
         $input = [
-            'database_connection' => $configuration[
-                'database_connection'
-                ]
-                ?? config(
-                    'database.default',
-                ),
+            'database_connection' =>
+                $configuration['database_connection']
+                ?? config('database.default'),
 
-            'retry_after' => $configuration[
-                'retry_after'
-                ]
+            'retry_after' =>
+                $configuration['retry_after']
                 ?? config(
                     'simpledesk-queues.defaults.retry_after',
                     360,
                 ),
 
-            'after_commit' => $configuration[
-                'after_commit'
-                ]
+            'after_commit' =>
+                $configuration['after_commit']
                 ?? config(
                     'simpledesk-queues.defaults.after_commit',
                     false,
                 ),
         ];
 
-        $validated =
-            Validator::make(
-                $input,
-                [
-                    'database_connection' => [
-                        'required',
-                        'string',
-                        Rule::in(
-                            $this
-                                ->definition()
-                                ->options[
-                            'database_connections'
-                            ],
-                        ),
-                    ],
-
-                    'retry_after' => $this
-                        ->safety
-                        ->retryAfterRules(),
-
-                    'after_commit' => [
-                        'required',
-                        'boolean',
-                    ],
+        $validated = Validator::make(
+            $input,
+            [
+                'database_connection' => [
+                    'required',
+                    'string',
+                    Rule::in(
+                        $this->allowedConnections(),
+                    ),
                 ],
-                $this
-                    ->safety
-                    ->retryAfterMessages(),
-            )->validate();
+
+                'retry_after' =>
+                    $this->safety->retryAfterRules(),
+
+                'after_commit' => [
+                    'required',
+                    'boolean',
+                ],
+            ],
+            $this->safety->retryAfterMessages(),
+        )->validate();
 
         return [
-            'database_connection' => $validated[
-                'database_connection'
-                ],
+            'database_connection' =>
+                $validated['database_connection'],
 
-            'retry_after' => (int) $validated[
-                'retry_after'
-                ],
+            'retry_after' =>
+                (int) $validated['retry_after'],
 
-            'after_commit' => (bool) $validated[
-                'after_commit'
-                ],
+            'after_commit' =>
+                (bool) $validated['after_commit'],
         ];
     }
 
     public function runtimeConfiguration(
         QueueDriverConfiguration $configuration,
     ): QueueRuntimeConfigurationData {
-        $values =
-            $this->validateAndNormalize(
-                $configuration->configuration ?? [],
-            );
+        $values = $this->validateAndNormalize(
+            $configuration->configuration ?? [],
+        );
 
         return new QueueRuntimeConfigurationData(
             queueConnection: [
                 'driver' => 'database',
-
-                'connection' => $values[
-                    'database_connection'
-                    ],
-
+                'connection' =>
+                    $values['database_connection'],
                 'table' => 'jobs',
-
                 'queue' => 'default',
-
-                'retry_after' => $values[
-                    'retry_after'
-                    ],
-
-                'after_commit' => $values[
-                    'after_commit'
-                    ],
+                'retry_after' =>
+                    $values['retry_after'],
+                'after_commit' =>
+                    $values['after_commit'],
             ],
         );
     }
 
-    public function test(QueueDriverConfiguration $configuration): QueueHealthResultData
-    {
+    public function test(
+        QueueDriverConfiguration $configuration,
+    ): QueueHealthResultData {
         $started = hrtime(true);
+
         try {
-            $values = $this->validateAndNormalize($configuration->configuration ?? []);
-            $connection = DB::connection($values['database_connection']);
+            $values = $this->validateAndNormalize(
+                $configuration->configuration ?? [],
+            );
+
+            $connectionName =
+                $values['database_connection'];
+
+            $connection = DB::connection(
+                $connectionName,
+            );
+
             $connection->select('select 1');
-            if (! Schema::connection($values['database_connection'])->hasTable('jobs')) {
-                return new QueueHealthResultData(QueueHealthStatus::Unhealthy, $this->latency($started), 'The configured queue table is not available.', ['database_connection' => $values['database_connection'], 'table' => 'jobs']);
+
+            if (
+                ! Schema::connection(
+                    $connectionName,
+                )->hasTable('jobs')
+            ) {
+                return new QueueHealthResultData(
+                    status: QueueHealthStatus::Unhealthy,
+                    latencyMs: $this->latency($started),
+                    message: 'The configured queue table is not available.',
+                    details: [
+                        'database_connection' =>
+                            $connectionName,
+                        'table' => 'jobs',
+                    ],
+                );
             }
 
-return new QueueHealthResultData(QueueHealthStatus::Healthy, $this->latency($started), 'Database queue storage is usable.', ['database_connection' => $values['database_connection'], 'table' => 'jobs']);
+            return new QueueHealthResultData(
+                status: QueueHealthStatus::Healthy,
+                latencyMs: $this->latency($started),
+                message: 'Database queue storage is usable.',
+                details: [
+                    'database_connection' =>
+                        $connectionName,
+                    'table' => 'jobs',
+                ],
+            );
         } catch (Throwable) {
-            return new QueueHealthResultData(QueueHealthStatus::Unavailable, $this->latency($started), 'Database queue storage is unavailable.');
+            return new QueueHealthResultData(
+                status: QueueHealthStatus::Unavailable,
+                latencyMs: $this->latency($started),
+                message: 'Database queue storage is unavailable.',
+            );
         }
     }
 
-    private function latency(int $started): int
+    private function allowedConnections(): array
     {
-        return (int) round((hrtime(true) - $started) / 1_000_000);
+        $available = array_keys(
+            (array) config(
+                'database.connections',
+                [],
+            ),
+        );
+
+        $configured = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        fn (mixed $value): string =>
+                        trim((string) $value),
+                        (array) config(
+                            'simpledesk-queues.database.allowed_connections',
+                            [],
+                        ),
+                    ),
+                    fn (string $value): bool =>
+                        $value !== '',
+                ),
+            ),
+        );
+
+        if ($configured !== []) {
+            return array_values(
+                array_intersect(
+                    $configured,
+                    $available,
+                ),
+            );
+        }
+
+        $default = trim(
+            (string) config(
+                'database.default',
+                '',
+            ),
+        );
+
+        if (
+            $default === ''
+            || ! in_array(
+                $default,
+                $available,
+                true,
+            )
+        ) {
+            return [];
+        }
+
+        return [$default];
+    }
+
+    private function latency(
+        int $started,
+    ): int {
+        return (int) round(
+            (hrtime(true) - $started)
+            / 1_000_000,
+        );
     }
 }
