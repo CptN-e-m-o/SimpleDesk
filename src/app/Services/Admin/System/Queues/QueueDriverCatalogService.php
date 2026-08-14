@@ -39,8 +39,7 @@ class QueueDriverCatalogService
 
                 if (! $type) {
                     throw ValidationException::withMessages([
-                        'driver' =>
-                            'Unknown queue driver.',
+                        'driver' => 'Unknown queue driver.',
                     ]);
                 }
 
@@ -59,25 +58,19 @@ class QueueDriverCatalogService
                 $model =
                     QueueDriverConfiguration::query()
                         ->create([
-                            'name' =>
-                                $data['name'],
+                            'name' => $data['name'],
 
-                            'driver' =>
-                                $type,
+                            'driver' => $type,
 
-                            'configuration' =>
-                                $normalized,
+                            'configuration' => $normalized,
 
-                            'is_enabled' =>
-                                $data[
+                            'is_enabled' => $data[
                                 'is_enabled'
                                 ] ?? true,
 
-                            'created_by' =>
-                                $actor->id,
+                            'created_by' => $actor->id,
 
-                            'updated_by' =>
-                                $actor->id,
+                            'updated_by' => $actor->id,
                         ]);
 
                 $this->log(
@@ -131,8 +124,7 @@ class QueueDriverCatalogService
                         ->value
                 ) {
                     throw ValidationException::withMessages([
-                        'driver' =>
-                            'Queue driver cannot be changed after creation.',
+                        'driver' => 'Queue driver cannot be changed after creation.',
                     ]);
                 }
 
@@ -142,24 +134,20 @@ class QueueDriverCatalogService
                     );
 
                 $model->update([
-                    'name' =>
-                        $data['name'],
+                    'name' => $data['name'],
 
-                    'configuration' =>
-                        $this->normalize(
-                            $model->driver,
-                            $data[
-                            'configuration'
-                            ] ?? [],
-                        ),
-
-                    'is_enabled' =>
+                    'configuration' => $this->normalize(
+                        $model->driver,
                         $data[
+                        'configuration'
+                        ] ?? [],
+                    ),
+
+                    'is_enabled' => $data[
                         'is_enabled'
                         ] ?? $model->is_enabled,
 
-                    'updated_by' =>
-                        $actor->id,
+                    'updated_by' => $actor->id,
                 ]);
 
                 $model->refresh();
@@ -216,18 +204,15 @@ class QueueDriverCatalogService
                     );
 
                 $model->update([
-                    'is_enabled' =>
-                        $enabled,
+                    'is_enabled' => $enabled,
 
-                    'updated_by' =>
-                        $actor->id,
+                    'updated_by' => $actor->id,
                 ]);
 
                 $model->refresh();
 
                 $this->log(
-                    action:
-                    $enabled
+                    action: $enabled
                         ? 'enable'
                         : 'disable',
                     model: $model,
@@ -269,11 +254,9 @@ class QueueDriverCatalogService
                     );
 
                 $model->update([
-                    'is_enabled' =>
-                        false,
+                    'is_enabled' => false,
 
-                    'updated_by' =>
-                        $actor->id,
+                    'updated_by' => $actor->id,
                 ]);
 
                 $model->delete();
@@ -315,11 +298,9 @@ class QueueDriverCatalogService
                 $model->restore();
 
                 $model->update([
-                    'is_enabled' =>
-                        false,
+                    'is_enabled' => false,
 
-                    'updated_by' =>
-                        $actor->id,
+                    'updated_by' => $actor->id,
                 ]);
 
                 $model->refresh();
@@ -389,72 +370,56 @@ class QueueDriverCatalogService
                 ->latestHealthCheck;
 
         $data = [
-            'id' =>
-                $model->id,
+            'id' => $model->id,
 
-            'name' =>
-                $model->name,
+            'name' => $model->name,
 
-            'driver' =>
-                $model
-                    ->driver
-                    ->value,
+            'driver' => $model
+                ->driver
+                ->value,
 
-            'configuration' =>
-                $model->configuration
+            'configuration' => $model->configuration
                 ?? [],
 
-            'is_enabled' =>
-                $model->is_enabled,
+            'is_enabled' => $model->is_enabled,
 
-            'deleted_at' =>
-                $model
-                    ->deleted_at
-                    ?->toIso8601String(),
+            'deleted_at' => $model
+                ->deleted_at
+                ?->toIso8601String(),
 
-            'created_at' =>
-                $model
-                    ->created_at
-                    ?->toIso8601String(),
+            'created_at' => $model
+                ->created_at
+                ?->toIso8601String(),
 
-            'updated_at' =>
-                $model
-                    ->updated_at
-                    ?->toIso8601String(),
+            'updated_at' => $model
+                ->updated_at
+                ?->toIso8601String(),
 
-            'is_active' =>
-                $this->isActive(
-                    $model,
-                ),
+            'is_active' => $this->isActive(
+                $model,
+            ),
 
-            'latest_health_check' =>
-                $health
+            'latest_health_check' => $health
                     ? [
-                    'status' =>
-                        $health
-                            ->status
-                            ->value,
+                    'status' => $health
+                        ->status
+                        ->value,
 
-                    'latency_ms' =>
-                        $health
-                            ->latency_ms,
+                    'latency_ms' => $health
+                        ->latency_ms,
 
-                    'message' =>
-                        $health
-                            ->message,
+                    'message' => $health
+                        ->message,
 
-                    'details' =>
-                        $health
-                            ->details,
+                    'details' => $health
+                        ->details,
 
-                    'tested_by' =>
-                        $health
-                            ->tested_by,
+                    'tested_by' => $health
+                        ->tested_by,
 
-                    'created_at' =>
-                        $health
-                            ->created_at
-                            ?->toIso8601String(),
+                    'created_at' => $health
+                        ->created_at
+                        ?->toIso8601String(),
                 ]
                     : null,
         ];
@@ -473,9 +438,9 @@ class QueueDriverCatalogService
             $infrastructure =
                 $id
                     ? InfrastructureConnection::withTrashed()
-                    ->find(
-                        $id,
-                    )
+                        ->find(
+                            $id,
+                        )
                     : null;
 
             $data[
@@ -483,31 +448,25 @@ class QueueDriverCatalogService
             ] =
                 $infrastructure
                     ? [
-                    'id' =>
-                        $infrastructure->id,
+                        'id' => $infrastructure->id,
 
-                    'name' =>
-                        $infrastructure->name,
+                        'name' => $infrastructure->name,
 
-                    'type' =>
-                        $infrastructure
+                        'type' => $infrastructure
                             ->type
                             ->value,
 
-                    'source' =>
-                        $infrastructure
+                        'source' => $infrastructure
                             ->source
                             ->value,
 
-                    'is_enabled' =>
-                        $infrastructure
+                        'is_enabled' => $infrastructure
                             ->is_enabled,
 
-                    'deleted_at' =>
-                        $infrastructure
+                        'deleted_at' => $infrastructure
                             ->deleted_at
                             ?->toIso8601String(),
-                ]
+                    ]
                     : null;
         }
 
@@ -528,13 +487,12 @@ class QueueDriverCatalogService
                     $configuration,
                 );
         } catch (
-        ValidationException $exception
+            ValidationException $exception
         ) {
             $messages = [];
 
             foreach (
-                $exception->errors()
-                as $key => $values
+                $exception->errors() as $key => $values
             ) {
                 $messages[
                 str_starts_with(
@@ -566,8 +524,7 @@ class QueueDriverCatalogService
             )
         ) {
             throw ValidationException::withMessages([
-                'driver' =>
-                    "Queue driver [{$type->value}] is not currently available.",
+                'driver' => "Queue driver [{$type->value}] is not currently available.",
             ]);
         }
     }
@@ -623,26 +580,19 @@ class QueueDriverCatalogService
         User $actor,
     ): void {
         $this->audit->log(
-            area:
-            'queue_driver_configurations',
+            area: 'queue_driver_configurations',
 
-            action:
-            $action,
+            action: $action,
 
-            subjectType:
-            QueueDriverConfiguration::class,
+            subjectType: QueueDriverConfiguration::class,
 
-            subjectId:
-            $model->id,
+            subjectId: $model->id,
 
-            before:
-            $before,
+            before: $before,
 
-            after:
-            $after,
+            after: $after,
 
-            actor:
-            $actor,
+            actor: $actor,
         );
     }
 }

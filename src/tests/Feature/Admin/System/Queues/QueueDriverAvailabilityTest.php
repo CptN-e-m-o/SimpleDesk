@@ -26,17 +26,13 @@ class QueueDriverAvailabilityTest extends TestCase
         try {
             $service->create(
                 [
-                    'name' =>
-                        'Future SQS',
+                    'name' => 'Future SQS',
 
-                    'driver' =>
-                        'sqs',
+                    'driver' => 'sqs',
 
-                    'configuration' =>
-                        [],
+                    'configuration' => [],
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ],
                 $actor,
             );
@@ -45,7 +41,7 @@ class QueueDriverAvailabilityTest extends TestCase
                 'SQS should not be creatable before its adapter is registered.',
             );
         } catch (
-        ValidationException $exception
+            ValidationException $exception
         ) {
             $this->assertArrayHasKey(
                 'driver',
@@ -68,17 +64,13 @@ class QueueDriverAvailabilityTest extends TestCase
         try {
             $service->create(
                 [
-                    'name' =>
-                        'Future Beanstalkd',
+                    'name' => 'Future Beanstalkd',
 
-                    'driver' =>
-                        'beanstalkd',
+                    'driver' => 'beanstalkd',
 
-                    'configuration' =>
-                        [],
+                    'configuration' => [],
 
-                    'is_enabled' =>
-                        true,
+                    'is_enabled' => true,
                 ],
                 $actor,
             );
@@ -87,7 +79,7 @@ class QueueDriverAvailabilityTest extends TestCase
                 'Beanstalkd should not be creatable before its adapter is registered.',
             );
         } catch (
-        ValidationException $exception
+            ValidationException $exception
         ) {
             $this->assertArrayHasKey(
                 'driver',

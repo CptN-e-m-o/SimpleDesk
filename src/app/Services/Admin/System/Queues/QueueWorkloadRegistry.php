@@ -30,8 +30,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_incoming',
                 label: 'Incoming mail',
-                description:
-                'Incoming mailbox synchronization dispatched through the standard Mail queue.',
+                description: 'Incoming mailbox synchronization dispatched through the standard Mail queue.',
                 queue: $this->queueName(
                     'simpledesk-mail.queues.incoming',
                     'mail-incoming',
@@ -42,8 +41,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_sync',
                 label: 'Mailbox synchronization',
-                description:
-                'Scheduled and manual mailbox synchronization.',
+                description: 'Scheduled and manual mailbox synchronization.',
                 queue: $this->queueName(
                     'simpledesk-mail-automation.sync.queue',
                     'mail-incoming',
@@ -51,8 +49,7 @@ class QueueWorkloadRegistry
                 connection: $this->optional(
                     'simpledesk-mail-automation.sync.queue_connection',
                 ),
-                enabled:
-                (bool) config(
+                enabled: (bool) config(
                     'simpledesk-mail-automation.enabled',
                     true,
                 )
@@ -65,8 +62,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_ticketing_incoming',
                 label: 'Incoming ticket processing',
-                description:
-                'Processes stored incoming email into tickets and replies.',
+                description: 'Processes stored incoming email into tickets and replies.',
                 queue: $this->queueName(
                     'simpledesk-mail-ticketing.queue',
                     'mail-incoming',
@@ -83,8 +79,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_outgoing',
                 label: 'Outgoing mail',
-                description:
-                'Standard outbound email delivery.',
+                description: 'Standard outbound email delivery.',
                 queue: $this->queueName(
                     'simpledesk-mail.queues.outgoing',
                     'mail-outgoing',
@@ -95,8 +90,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_ticket_reply',
                 label: 'Ticket reply delivery',
-                description:
-                'Outbound email jobs dispatched directly by ticket reply handling.',
+                description: 'Outbound email jobs dispatched directly by ticket reply handling.',
                 queue: $this->queueName(
                     'simpledesk-mail-ticketing.outgoing_replies.queue',
                     'mail-outgoing',
@@ -104,8 +98,7 @@ class QueueWorkloadRegistry
                 connection: $this->optional(
                     'simpledesk-mail-ticketing.outgoing_replies.queue_connection',
                 ),
-                enabled:
-                (bool) config(
+                enabled: (bool) config(
                     'simpledesk-mail-ticketing.enabled',
                     true,
                 )
@@ -118,8 +111,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_outgoing_retry',
                 label: 'Outgoing mail retry',
-                description:
-                'Retry delivery for previously failed outgoing email.',
+                description: 'Retry delivery for previously failed outgoing email.',
                 queue: $this->queueName(
                     'simpledesk-mail.queues.outgoing',
                     'mail-outgoing',
@@ -132,8 +124,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_recovery_incoming',
                 label: 'Incoming mail recovery',
-                description:
-                'Recovery processing for stuck or unprocessed incoming email.',
+                description: 'Recovery processing for stuck or unprocessed incoming email.',
                 queue: $this->queueName(
                     'simpledesk-mail-automation.recovery.incoming_queue',
                     'mail-incoming',
@@ -150,8 +141,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_recovery_outgoing',
                 label: 'Outgoing mail recovery',
-                description:
-                'Recovery processing for stuck or queued outgoing email.',
+                description: 'Recovery processing for stuck or queued outgoing email.',
                 queue: $this->queueName(
                     'simpledesk-mail-automation.recovery.outgoing_queue',
                     'mail-outgoing',
@@ -168,8 +158,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_quarantine_retry',
                 label: 'Mail quarantine retry',
-                description:
-                'Retries quarantined inbound ticket-processing jobs.',
+                description: 'Retries quarantined inbound ticket-processing jobs.',
                 queue: $this->queueName(
                     'simpledesk-mail-quarantine.queue',
                     'mail-incoming',
@@ -186,8 +175,7 @@ class QueueWorkloadRegistry
             $this->make(
                 key: 'mail_antivirus',
                 label: 'Mail antivirus',
-                description:
-                'Attachment antivirus scanning.',
+                description: 'Attachment antivirus scanning.',
                 queue: $this->queueName(
                     'simpledesk-mail-antivirus.queue.name',
                     'mail-antivirus',
@@ -217,8 +205,7 @@ class QueueWorkloadRegistry
             description: $description,
             queueName: $queue,
             connectionName: $connection,
-            usesDefaultConnection:
-            $connection === null,
+            usesDefaultConnection: $connection === null,
             enabled: $enabled,
         );
     }

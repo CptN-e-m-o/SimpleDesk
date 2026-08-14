@@ -114,6 +114,6 @@ class QueueDriverConfigurationController extends Controller
             $ids[] = $configuration->configuration['infrastructure_connection_id'];
         }
 
-return InfrastructureConnection::withTrashed()->where('type', InfrastructureConnectionType::Redis)->where(fn ($q) => $q->where(fn ($q) => $q->whereNull('deleted_at')->where('is_enabled', true))->orWhereIn('id', $ids))->get()->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'source' => $c->source->value, 'is_enabled' => $c->is_enabled, 'deleted_at' => $c->deleted_at?->toIso8601String()])->all();
+        return InfrastructureConnection::withTrashed()->where('type', InfrastructureConnectionType::Redis->value)->where(fn ($q) => $q->where(fn ($q) => $q->whereNull('deleted_at')->where('is_enabled', true))->orWhereIn('id', $ids))->get()->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'source' => $c->source->value, 'is_enabled' => $c->is_enabled, 'deleted_at' => $c->deleted_at?->toIso8601String()])->all();
     }
 }
