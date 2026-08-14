@@ -226,8 +226,19 @@ export default function Index({
                                  }) => (
                                     <article
                                         key={key}
-                                        className="group flex min-h-[290px] flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
+                                        className="group relative flex min-h-[290px] flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
                                     >
+                                        {key === 'queue' && can(
+                                            'admin.settings.queues.view',
+                                        ) ? (
+                                            <Link
+                                                href={route(
+                                                    'admin.system.queues.index',
+                                                )}
+                                                aria-label="Open Queue management"
+                                                className="absolute inset-0 z-10"
+                                            />
+                                        ) : null}
                                         <div className="flex flex-1 flex-col p-5">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 ring-1 ring-inset ring-sky-100 transition group-hover:bg-sky-100">
@@ -280,7 +291,7 @@ export default function Index({
                                                 is not active yet
                                             </span>
 
-                                            <ArrowRight className="h-4 w-4 text-gray-300" />
+                                            <ArrowRight className={`h-4 w-4 ${key === 'queue' && can('admin.settings.queues.view') ? 'text-sky-500' : 'text-gray-300'}`} />
                                         </div>
                                     </article>
                                 ),
