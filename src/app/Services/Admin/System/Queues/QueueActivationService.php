@@ -17,6 +17,7 @@ class QueueActivationService
     public function __construct(
         private readonly QueueBacklogService $backlog,
         private readonly QueueDriverRegistry $registry,
+        private readonly QueuePinnedWorkloadService $pinnedWorkloads,
         private readonly QueueWorkerRestartService $restart,
         private readonly SystemAuditLogger $audit,
     ) {}
@@ -37,10 +38,17 @@ class QueueActivationService
             ]);
         }
 
-        $backlog = $this->backlog->inspect();
-        $overrideRequired = $this->backlogOverrideRequired($backlog);
+        $pinnedWorkloads = $this->pinnedWorkloads->enabled();
+        $workloadRoutingOverrideRequired = $pinnedWorkloads !== [];
 
-        if ($overrideRequired && ! $force) {
+        if ($workloadRoutingOverrideRequired && ! $force) {
+            $this->rejectPinnedWorkloads($pinnedWorkloads);
+        }
+
+        $backlog = $this->backlog->inspect();
+        $backlogOverrideRequired = $this->backlogOverrideRequired($backlog);
+
+        if ($backlogOverrideRequired && ! $force) {
             $this->rejectUnsafeBacklog($backlog);
         }
 
@@ -48,7 +56,9 @@ class QueueActivationService
             configurationId: $configuration->id,
             actor: $actor,
             force: $force,
-            overrideRequired: $overrideRequired,
+            backlogOverrideRequired: $backlogOverrideRequired,
+            workloadRoutingOverrideRequired: $workloadRoutingOverrideRequired,
+            pinnedWorkloads: $pinnedWorkloads,
             backlog: $backlog,
             observedState: $observedState,
         );
@@ -66,7 +76,9 @@ class QueueActivationService
             settings: $settings,
             backlog: $backlog,
             forceRequested: $force,
-            backlogOverrideUsed: $overrideRequired && $force,
+            backlogOverrideUsed: $backlogOverrideRequired && $force,
+            workloadRoutingOverrideUsed: $workloadRoutingOverrideRequired && $force,
+            pinnedWorkloads: $pinnedWorkloads,
             restartSignaled: $restartSignaled,
         );
     }
@@ -84,9 +96,9 @@ class QueueActivationService
         }
 
         $backlog = $this->backlog->inspect();
-        $overrideRequired = $this->backlogOverrideRequired($backlog);
+        $backlogOverrideRequired = $this->backlogOverrideRequired($backlog);
 
-        if ($overrideRequired && ! $force) {
+        if ($backlogOverrideRequired && ! $force) {
             $this->rejectUnsafeBacklog($backlog);
         }
 
@@ -95,7 +107,7 @@ class QueueActivationService
         $this->activateDeploymentConfiguration(
             actor: $actor,
             force: $force,
-            overrideRequired: $overrideRequired,
+            backlogOverrideRequired: $backlogOverrideRequired,
             backlog: $backlog,
             observedState: $observedState,
         );
@@ -113,7 +125,9 @@ class QueueActivationService
             settings: $settings,
             backlog: $backlog,
             forceRequested: $force,
-            backlogOverrideUsed: $overrideRequired && $force,
+            backlogOverrideUsed: $backlogOverrideRequired && $force,
+            workloadRoutingOverrideUsed: false,
+            pinnedWorkloads: [],
             restartSignaled: $restartSignaled,
         );
     }
@@ -122,7 +136,9 @@ class QueueActivationService
         int $configurationId,
         User $actor,
         bool $force,
-        bool $overrideRequired,
+        bool $backlogOverrideRequired,
+        bool $workloadRoutingOverrideRequired,
+        array $pinnedWorkloads,
         array $backlog,
         array $observedState,
     ): void {
@@ -130,7 +146,9 @@ class QueueActivationService
             $configurationId,
             $actor,
             $force,
-            $overrideRequired,
+            $backlogOverrideRequired,
+            $workloadRoutingOverrideRequired,
+            $pinnedWorkloads,
             $backlog,
             $observedState,
         ): void {
@@ -196,7 +214,9 @@ class QueueActivationService
                 after: $this->settingsState($settings),
                 metadata: [
                     'force_requested' => $force,
-                    'backlog_override_used' => $overrideRequired && $force,
+                    'backlog_override_used' => $backlogOverrideRequired && $force,
+                    'workload_routing_override_used' => $workloadRoutingOverrideRequired && $force,
+                    'pinned_workloads' => $pinnedWorkloads,
                     'backlog' => $this->backlogAuditState($backlog),
                 ],
                 actor: $actor,
@@ -207,14 +227,14 @@ class QueueActivationService
     private function activateDeploymentConfiguration(
         User $actor,
         bool $force,
-        bool $overrideRequired,
+        bool $backlogOverrideRequired,
         array $backlog,
         array $observedState,
     ): void {
         DB::transaction(function () use (
             $actor,
             $force,
-            $overrideRequired,
+            $backlogOverrideRequired,
             $backlog,
             $observedState,
         ): void {
@@ -253,7 +273,7 @@ class QueueActivationService
                 after: $this->settingsState($settings),
                 metadata: [
                     'force_requested' => $force,
-                    'backlog_override_used' => $overrideRequired && $force,
+                    'backlog_override_used' => $backlogOverrideRequired && $force,
                     'backlog' => $this->backlogAuditState($backlog),
                 ],
                 actor: $actor,
@@ -500,7 +520,6 @@ class QueueActivationService
         return [
             'mode' => $settings?->mode->value
                 ?? QueueConfigurationMode::Deployment->value,
-
             'active_configuration_id' => $settings?->active_configuration_id,
         ];
     }
@@ -519,9 +538,20 @@ class QueueActivationService
         }
     }
 
-    private function backlogOverrideRequired(
-        array $backlog,
-    ): bool {
+    private function rejectPinnedWorkloads(array $workloads): never
+    {
+        $routes = array_map(
+            fn (array $workload): string => "{$workload['label']} → {$workload['connection']}",
+            $workloads,
+        );
+
+        throw ValidationException::withMessages([
+            'activation' => 'Managed Queue activation is blocked because enabled workloads use explicit Queue connections: '.implode(', ', $routes).'. Clear the explicit workload Queue connections or use emergency force activation.',
+        ]);
+    }
+
+    private function backlogOverrideRequired(array $backlog): bool
+    {
         if (! ($backlog['is_complete'] ?? false)) {
             return true;
         }
@@ -529,9 +559,8 @@ class QueueActivationService
         return ($backlog['total_pending'] ?? null) !== 0;
     }
 
-    private function rejectUnsafeBacklog(
-        array $backlog,
-    ): never {
+    private function rejectUnsafeBacklog(array $backlog): never
+    {
         if (! ($backlog['is_complete'] ?? false)) {
             throw ValidationException::withMessages([
                 'activation' => 'Queue activation is blocked because the current backlog could not be inspected completely.',
@@ -545,9 +574,8 @@ class QueueActivationService
         ]);
     }
 
-    private function backlogAuditState(
-        array $backlog,
-    ): array {
+    private function backlogAuditState(array $backlog): array
+    {
         return [
             'total_pending' => $backlog['total_pending'] ?? null,
             'inspected_pending' => (int) ($backlog['inspected_pending'] ?? 0),
@@ -557,9 +585,8 @@ class QueueActivationService
         ];
     }
 
-    private function settingsState(
-        QueueDriverSettings $settings,
-    ): array {
+    private function settingsState(QueueDriverSettings $settings): array
+    {
         return [
             'mode' => $settings->mode->value,
             'active_configuration_id' => $settings->active_configuration_id,

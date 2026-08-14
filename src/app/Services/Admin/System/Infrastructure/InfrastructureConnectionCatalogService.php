@@ -103,8 +103,7 @@ class InfrastructureConnectionCatalogService
 
             $incoming = array_filter(
                 $data['credentials'] ?? [],
-                fn (mixed $value): bool =>
-                    $value !== null && $value !== '',
+                fn (mixed $value): bool => $value !== null && $value !== '',
             );
 
             $credentials = [
@@ -216,8 +215,7 @@ class InfrastructureConnectionCatalogService
 
             if (! $enabled && $activeQueue) {
                 throw ValidationException::withMessages([
-                    'is_enabled' =>
-                        "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be disabled.",
+                    'is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be disabled.",
                 ]);
             }
 
@@ -277,8 +275,7 @@ class InfrastructureConnectionCatalogService
 
             if ($activeQueue) {
                 throw ValidationException::withMessages([
-                    'connection' =>
-                        "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be archived.",
+                    'connection' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be archived.",
                 ]);
             }
 
@@ -369,8 +366,7 @@ class InfrastructureConnectionCatalogService
 
             if ($referencingQueue) {
                 throw ValidationException::withMessages([
-                    'connection' =>
-                        "Infrastructure connection cannot be permanently deleted because Queue configuration [{$referencingQueue->name}] still references it.",
+                    'connection' => "Infrastructure connection cannot be permanently deleted because Queue configuration [{$referencingQueue->name}] still references it.",
                 ]);
             }
 
@@ -464,15 +460,13 @@ class InfrastructureConnectionCatalogService
     ): void {
         if (! $enabled) {
             throw ValidationException::withMessages([
-                'is_enabled' =>
-                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be disabled.",
+                'is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be disabled.",
             ]);
         }
 
         if ($source !== $connection->source->value) {
             throw ValidationException::withMessages([
-                'source' =>
-                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Its source cannot be changed while the Queue configuration is active.",
+                'source' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Its source cannot be changed while the Queue configuration is active.",
             ]);
         }
 
@@ -483,8 +477,7 @@ class InfrastructureConnectionCatalogService
             != $nextConfiguration
         ) {
             throw ValidationException::withMessages([
-                'configuration' =>
-                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Runtime connection settings cannot be changed while the Queue configuration is active.",
+                'configuration' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Runtime connection settings cannot be changed while the Queue configuration is active.",
             ]);
         }
 
@@ -495,8 +488,7 @@ class InfrastructureConnectionCatalogService
             != $nextCredentials
         ) {
             throw ValidationException::withMessages([
-                'credentials' =>
-                    "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Credentials cannot be changed while the Queue configuration is active.",
+                'credentials' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}]. Credentials cannot be changed while the Queue configuration is active.",
             ]);
         }
     }

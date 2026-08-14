@@ -46,19 +46,16 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
         array $configuration,
     ): array {
         $input = [
-            'database_connection' =>
-                $configuration['database_connection']
+            'database_connection' => $configuration['database_connection']
                 ?? config('database.default'),
 
-            'retry_after' =>
-                $configuration['retry_after']
+            'retry_after' => $configuration['retry_after']
                 ?? config(
                     'simpledesk-queues.defaults.retry_after',
                     360,
                 ),
 
-            'after_commit' =>
-                $configuration['after_commit']
+            'after_commit' => $configuration['after_commit']
                 ?? config(
                     'simpledesk-queues.defaults.after_commit',
                     false,
@@ -76,8 +73,7 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
                     ),
                 ],
 
-                'retry_after' =>
-                    $this->safety->retryAfterRules(),
+                'retry_after' => $this->safety->retryAfterRules(),
 
                 'after_commit' => [
                     'required',
@@ -88,14 +84,11 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
         )->validate();
 
         return [
-            'database_connection' =>
-                $validated['database_connection'],
+            'database_connection' => $validated['database_connection'],
 
-            'retry_after' =>
-                (int) $validated['retry_after'],
+            'retry_after' => (int) $validated['retry_after'],
 
-            'after_commit' =>
-                (bool) $validated['after_commit'],
+            'after_commit' => (bool) $validated['after_commit'],
         ];
     }
 
@@ -109,14 +102,11 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
         return new QueueRuntimeConfigurationData(
             queueConnection: [
                 'driver' => 'database',
-                'connection' =>
-                    $values['database_connection'],
+                'connection' => $values['database_connection'],
                 'table' => 'jobs',
                 'queue' => 'default',
-                'retry_after' =>
-                    $values['retry_after'],
-                'after_commit' =>
-                    $values['after_commit'],
+                'retry_after' => $values['retry_after'],
+                'after_commit' => $values['after_commit'],
             ],
         );
     }
@@ -150,8 +140,7 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
                     latencyMs: $this->latency($started),
                     message: 'The configured queue table is not available.',
                     details: [
-                        'database_connection' =>
-                            $connectionName,
+                        'database_connection' => $connectionName,
                         'table' => 'jobs',
                     ],
                 );
@@ -162,8 +151,7 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
                 latencyMs: $this->latency($started),
                 message: 'Database queue storage is usable.',
                 details: [
-                    'database_connection' =>
-                        $connectionName,
+                    'database_connection' => $connectionName,
                     'table' => 'jobs',
                 ],
             );
@@ -189,15 +177,13 @@ class DatabaseQueueDriverAdapter implements QueueDriverAdapter
             array_unique(
                 array_filter(
                     array_map(
-                        fn (mixed $value): string =>
-                        trim((string) $value),
+                        fn (mixed $value): string => trim((string) $value),
                         (array) config(
                             'simpledesk-queues.database.allowed_connections',
                             [],
                         ),
                     ),
-                    fn (string $value): bool =>
-                        $value !== '',
+                    fn (string $value): bool => $value !== '',
                 ),
             ),
         );

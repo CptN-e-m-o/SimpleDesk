@@ -19,7 +19,7 @@ class QueueDriverHealthServiceTest extends TestCase
 
     public function test_database_and_sync_health_are_persisted_and_audited(): void
     {
-        if (!Schema::hasTable('jobs')) {
+        if (! Schema::hasTable('jobs')) {
             Schema::create(
                 'jobs',
                 function ($table): void {
@@ -51,9 +51,9 @@ class QueueDriverHealthServiceTest extends TestCase
 
         foreach (
             $cases as [
-            $driver,
-            $values,
-        ]
+                $driver,
+                $values,
+            ]
         ) {
             $configuration = QueueDriverConfiguration::query()
                 ->create([
@@ -103,8 +103,7 @@ class QueueDriverHealthServiceTest extends TestCase
             new QueueDriverRegistry(
                 $this->app,
                 [
-                    'redis' =>
-                        LeakyQueueDriverAdapter::class,
+                    'redis' => LeakyQueueDriverAdapter::class,
                 ],
             ),
         );
@@ -127,11 +126,9 @@ class QueueDriverHealthServiceTest extends TestCase
                 ->create([
                     'name' => 'Leaky health test',
 
-                    'driver' =>
-                        QueueDriverType::Redis,
+                    'driver' => QueueDriverType::Redis,
 
-                    'infrastructure_connection_id' =>
-                        $infrastructure->id,
+                    'infrastructure_connection_id' => $infrastructure->id,
 
                     'configuration' => [
                         'retry_after' => 360,
@@ -177,14 +174,11 @@ class QueueDriverHealthServiceTest extends TestCase
 
         $serialized = json_encode(
             [
-                'result' =>
-                    $result->toArray(),
+                'result' => $result->toArray(),
 
-                'health' =>
-                    $health->toArray(),
+                'health' => $health->toArray(),
 
-                'audit' =>
-                    $audit->toArray(),
+                'audit' => $audit->toArray(),
             ],
             JSON_THROW_ON_ERROR,
         );

@@ -115,35 +115,30 @@ class QueueDriverConfigurationController extends Controller
             [
                 'ownership' => [
                     'mode' => $settings
-                            ?->mode
-                            ->value
+                        ?->mode
+                        ->value
                         ?? QueueConfigurationMode::Deployment->value,
 
-                    'owned' =>
-                        $settings !== null,
+                    'owned' => $settings !== null,
 
-                    'worker_restart_required' =>
-                        $settings
-                            ?->worker_restart_required
+                    'worker_restart_required' => $settings
+                        ?->worker_restart_required
                         ?? false,
                 ],
 
-                'effective_connection' =>
-                    config(
-                        'queue.default',
-                    ),
+                'effective_connection' => config(
+                    'queue.default',
+                ),
 
-                'effective_driver' =>
-                    config(
-                        'queue.connections.'
-                        .config('queue.default')
-                        .'.driver',
-                    ),
+                'effective_driver' => config(
+                    'queue.connections.'
+                    .config('queue.default')
+                    .'.driver',
+                ),
 
-                'active_configuration' =>
-                    $settings
-                        ?->activeConfiguration
-                        ? $this
+                'active_configuration' => $settings
+                    ?->activeConfiguration
+                    ? $this
                         ->catalog
                         ->safe(
                             $settings
@@ -151,44 +146,36 @@ class QueueDriverConfigurationController extends Controller
                         )
                         : null,
 
-                'configurations' =>
-                    $items,
+                'configurations' => $items,
 
-                'definitions' =>
-                    $this->definitions(),
+                'definitions' => $this->definitions(),
 
                 'workloads' => array_map(
-                    fn ($definition) =>
-                    $definition->toArray(),
+                    fn ($definition) => $definition->toArray(),
                     $this
                         ->workloads
                         ->definitions(),
                 ),
 
-                'backlog' =>
-                    $this
-                        ->backlog
-                        ->inspect(),
+                'backlog' => $this
+                    ->backlog
+                    ->inspect(),
 
-                'filters' =>
-                    $filters,
+                'filters' => $filters,
 
                 'stats' => [
-                    'total' =>
-                        QueueDriverConfiguration::withTrashed()
-                            ->count(),
+                    'total' => QueueDriverConfiguration::withTrashed()
+                        ->count(),
 
-                    'enabled' =>
-                        QueueDriverConfiguration::query()
-                            ->where(
-                                'is_enabled',
-                                true,
-                            )
-                            ->count(),
+                    'enabled' => QueueDriverConfiguration::query()
+                        ->where(
+                            'is_enabled',
+                            true,
+                        )
+                        ->count(),
 
-                    'archived' =>
-                        QueueDriverConfiguration::onlyTrashed()
-                            ->count(),
+                    'archived' => QueueDriverConfiguration::onlyTrashed()
+                        ->count(),
                 ],
             ],
         );
@@ -199,17 +186,14 @@ class QueueDriverConfigurationController extends Controller
         return Inertia::render(
             'Admin/System/Queues/Create',
             [
-                'definitions' =>
-                    $this->definitions(),
+                'definitions' => $this->definitions(),
 
-                'redis_connections' =>
-                    $this->redisConnections(),
+                'redis_connections' => $this->redisConnections(),
 
                 'defaults' => [
-                    'minimum_retry_after' =>
-                        $this
-                            ->safety
-                            ->minimumRetryAfterSeconds(),
+                    'minimum_retry_after' => $this
+                        ->safety
+                        ->minimumRetryAfterSeconds(),
                 ],
             ],
         );
@@ -239,26 +223,22 @@ class QueueDriverConfigurationController extends Controller
         return Inertia::render(
             'Admin/System/Queues/Edit',
             [
-                'configuration' =>
-                    $this
-                        ->catalog
-                        ->safe(
-                            $configuration,
-                        ),
-
-                'definitions' =>
-                    $this->definitions(),
-
-                'redis_connections' =>
-                    $this->redisConnections(
+                'configuration' => $this
+                    ->catalog
+                    ->safe(
                         $configuration,
                     ),
 
+                'definitions' => $this->definitions(),
+
+                'redis_connections' => $this->redisConnections(
+                    $configuration,
+                ),
+
                 'defaults' => [
-                    'minimum_retry_after' =>
-                        $this
-                            ->safety
-                            ->minimumRetryAfterSeconds(),
+                'minimum_retry_after' => $this
+                    ->safety
+                    ->minimumRetryAfterSeconds(),
                 ],
             ],
         );
@@ -348,8 +328,7 @@ class QueueDriverConfigurationController extends Controller
     private function definitions(): array
     {
         return array_map(
-            fn ($definition) =>
-            $definition->toArray(),
+            fn ($definition) => $definition->toArray(),
             $this
                 ->registry
                 ->definitions(),
@@ -402,30 +381,24 @@ class QueueDriverConfigurationController extends Controller
                 fn (
                     InfrastructureConnection $connection,
                 ) => [
-                    'id' =>
-                        $connection->id,
+                    'id' => $connection->id,
 
-                    'name' =>
-                        $connection->name,
+                    'name' => $connection->name,
 
-                    'type' =>
-                        $connection
-                            ->type
-                            ->value,
+                    'type' => $connection
+                        ->type
+                        ->value,
 
-                    'source' =>
-                        $connection
-                            ->source
-                            ->value,
+                    'source' => $connection
+                        ->source
+                        ->value,
 
-                    'is_enabled' =>
-                        $connection
-                            ->is_enabled,
+                    'is_enabled' => $connection
+                        ->is_enabled,
 
-                    'deleted_at' =>
-                        $connection
-                            ->deleted_at
-                            ?->toIso8601String(),
+                    'deleted_at' => $connection
+                        ->deleted_at
+                        ?->toIso8601String(),
                 ],
             )
             ->all();

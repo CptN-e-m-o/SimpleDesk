@@ -208,17 +208,13 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
             );
 
         $status = match ($result->status) {
-            InfrastructureHealthStatus::Healthy =>
-            QueueHealthStatus::Healthy,
+            InfrastructureHealthStatus::Healthy => QueueHealthStatus::Healthy,
 
-            InfrastructureHealthStatus::Degraded =>
-            QueueHealthStatus::Degraded,
+            InfrastructureHealthStatus::Degraded => QueueHealthStatus::Degraded,
 
-            InfrastructureHealthStatus::Unhealthy =>
-            QueueHealthStatus::Unhealthy,
+            InfrastructureHealthStatus::Unhealthy => QueueHealthStatus::Unhealthy,
 
-            default =>
-            QueueHealthStatus::Unavailable,
+            default => QueueHealthStatus::Unavailable,
         };
 
         return new QueueHealthResultData(

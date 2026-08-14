@@ -34,8 +34,7 @@ class QueueActivationServiceTest extends TestCase
                 'inspected_pending' => 0,
                 'is_complete' => true,
                 'has_errors' => false,
-                'inspected_at' =>
-                    '2026-08-14T00:00:00+00:00',
+                'inspected_at' => '2026-08-14T00:00:00+00:00',
             ]);
 
         $restart =
@@ -127,8 +126,7 @@ class QueueActivationServiceTest extends TestCase
                 'inspected_pending' => 3,
                 'is_complete' => true,
                 'has_errors' => false,
-                'inspected_at' =>
-                    '2026-08-14T00:00:00+00:00',
+                'inspected_at' => '2026-08-14T00:00:00+00:00',
             ]);
 
         $restart =
@@ -191,8 +189,7 @@ class QueueActivationServiceTest extends TestCase
                 'inspected_pending' => 5,
                 'is_complete' => false,
                 'has_errors' => true,
-                'inspected_at' =>
-                    '2026-08-14T00:00:00+00:00',
+                'inspected_at' => '2026-08-14T00:00:00+00:00',
             ]);
 
         $restart =
@@ -244,8 +241,7 @@ class QueueActivationServiceTest extends TestCase
             'inspected_pending' => 7,
             'is_complete' => false,
             'has_errors' => true,
-            'inspected_at' =>
-                '2026-08-14T00:00:00+00:00',
+            'inspected_at' => '2026-08-14T00:00:00+00:00',
         ];
 
         $backlog =
@@ -332,6 +328,144 @@ class QueueActivationServiceTest extends TestCase
         );
     }
 
+    public function test_pinned_enabled_workload_blocks_normal_managed_activation(): void
+    {
+        config()->set('simpledesk-mail-automation.sync.queue_connection', 'redis');
+        config()->set('simpledesk-mail-automation.enabled', true);
+        config()->set('simpledesk-mail-automation.sync.enabled', true);
+
+        $actor = User::factory()->create();
+        $configuration = $this->configuration();
+
+        $backlog = $this->createMock(
+            QueueBacklogService::class,
+        );
+
+        $backlog
+            ->expects($this->never())
+            ->method('inspect');
+
+        $restart = $this->createMock(
+            QueueWorkerRestartService::class,
+        );
+
+        $restart
+            ->expects($this->never())
+            ->method('signal');
+
+        $service = $this->service(
+            $backlog,
+            $restart,
+        );
+
+        try {
+            $service->activate(
+                $configuration,
+                $actor,
+            );
+
+            $this->fail(
+                'Managed activation should be blocked when an enabled workload uses an explicit Queue connection.',
+            );
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey(
+                'activation',
+                $exception->errors(),
+            );
+
+            $this->assertStringContainsString(
+                'Mailbox synchronization',
+                $exception->errors()['activation'][0],
+            );
+
+            $this->assertStringContainsString(
+                'redis',
+                $exception->errors()['activation'][0],
+            );
+        }
+
+        $this->assertFalse(
+            QueueDriverSettings::query()->exists(),
+        );
+    }
+
+    public function test_force_activation_can_override_pinned_workload_routing(): void
+    {
+        config()->set('simpledesk-mail-automation.sync.queue_connection', 'redis');
+        config()->set('simpledesk-mail-automation.enabled', true);
+        config()->set('simpledesk-mail-automation.sync.enabled', true);
+
+        $actor = User::factory()->create();
+        $configuration = $this->configuration();
+
+        $backlog = $this->backlog([
+            'queues' => [],
+            'total_pending' => 0,
+            'inspected_pending' => 0,
+            'is_complete' => true,
+            'has_errors' => false,
+            'inspected_at' => '2026-08-14T00:00:00+00:00',
+        ]);
+
+        $restart = $this->createMock(
+            QueueWorkerRestartService::class,
+        );
+
+        $restart
+            ->expects($this->once())
+            ->method('signal');
+
+        $service = $this->service(
+            $backlog,
+            $restart,
+        );
+
+        $result = $service->activate(
+            $configuration,
+            $actor,
+            true,
+        );
+
+        $this->assertTrue(
+            $result->forceRequested,
+        );
+
+        $this->assertFalse(
+            $result->backlogOverrideUsed,
+        );
+
+        $this->assertTrue(
+            $result->workloadRoutingOverrideUsed,
+        );
+
+        $this->assertNotEmpty(
+            $result->pinnedWorkloads,
+        );
+
+        $this->assertSame(
+            'mail_sync',
+            $result->pinnedWorkloads[0]['key'],
+        );
+
+        $this->assertSame(
+            'redis',
+            $result->pinnedWorkloads[0]['connection'],
+        );
+
+        $audit = SystemAuditLog::query()
+            ->where('action', 'activate')
+            ->firstOrFail();
+
+        $this->assertTrue(
+            $audit->metadata['workload_routing_override_used'],
+        );
+
+        $this->assertSame(
+            'mail_sync',
+            $audit->metadata['pinned_workloads'][0]['key'],
+        );
+    }
+
     public function test_restart_signal_failure_leaves_restart_required(): void
     {
         $actor = User::factory()->create();
@@ -346,8 +480,7 @@ class QueueActivationServiceTest extends TestCase
                 'inspected_pending' => 0,
                 'is_complete' => true,
                 'has_errors' => false,
-                'inspected_at' =>
-                    '2026-08-14T00:00:00+00:00',
+                'inspected_at' => '2026-08-14T00:00:00+00:00',
             ]);
 
         $restart =
@@ -414,8 +547,7 @@ class QueueActivationServiceTest extends TestCase
                 'inspected_pending' => 0,
                 'is_complete' => true,
                 'has_errors' => false,
-                'inspected_at' =>
-                    '2026-08-14T00:00:00+00:00',
+                'inspected_at' => '2026-08-14T00:00:00+00:00',
             ]);
 
         $restart =
@@ -463,23 +595,17 @@ class QueueActivationServiceTest extends TestCase
 
         QueueDriverSettings::query()
             ->create([
-                'id' =>
-                    QueueDriverSettings::SINGLETON_ID,
+                'id' => QueueDriverSettings::SINGLETON_ID,
 
-                'mode' =>
-                    QueueConfigurationMode::Managed,
+                'mode' => QueueConfigurationMode::Managed,
 
-                'active_configuration_id' =>
-                    $configuration->id,
+                'active_configuration_id' => $configuration->id,
 
-                'worker_restart_required' =>
-                    false,
+                'worker_restart_required' => false,
 
-                'activated_at' =>
-                    now(),
+                'activated_at' => now(),
 
-                'activated_by' =>
-                    $actor->id,
+                'activated_by' => $actor->id,
             ]);
 
         $backlog =
@@ -819,20 +945,15 @@ class QueueActivationServiceTest extends TestCase
     ): QueueDriverConfiguration {
         return QueueDriverConfiguration::query()
             ->create([
-                'name' =>
-                    'Activation target',
+                'name' => 'Activation target',
 
-                'driver' =>
-                    QueueDriverType::Sync,
+                'driver' => QueueDriverType::Sync,
 
-                'infrastructure_connection_id' =>
-                    null,
+                'infrastructure_connection_id' => null,
 
-                'configuration' =>
-                    [],
+                'configuration' => [],
 
-                'is_enabled' =>
-                    $enabled,
+                'is_enabled' => $enabled,
             ]);
     }
 }

@@ -62,8 +62,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
                 'queues' => [],
                 'total_pending' => 0,
                 'has_errors' => false,
-                'inspected_at' =>
-                    '2026-08-14T00:00:00+00:00',
+                'inspected_at' => '2026-08-14T00:00:00+00:00',
             ]);
 
         $this->app->instance(
@@ -252,8 +251,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
                 'name' => 'Redis Queue',
                 'driver' => QueueDriverType::Redis,
 
-                'infrastructure_connection_id' =>
-                    $infrastructure->id,
+                'infrastructure_connection_id' => $infrastructure->id,
 
                 'configuration' => [
                     'retry_after' => 360,
@@ -321,8 +319,7 @@ class QueueDriverConfigurationHttpTest extends TestCase
                     )
                     ->where(
                         'redis_connections.0.deleted_at',
-                        fn ($value) =>
-                            is_string($value)
+                        fn ($value) => is_string($value)
                             && $value !== '',
                     ),
             );
@@ -331,47 +328,33 @@ class QueueDriverConfigurationHttpTest extends TestCase
     public function test_queue_management_routes_enforce_expected_permissions(): void
     {
         $expected = [
-            'admin.system.queues.index' =>
-                'permission:admin.settings.queues.view',
+            'admin.system.queues.index' => 'permission:admin.settings.queues.view',
 
-            'admin.system.queues.create' =>
-                'permission:admin.settings.queues.create',
+            'admin.system.queues.create' => 'permission:admin.settings.queues.create',
 
-            'admin.system.queues.store' =>
-                'permission:admin.settings.queues.create',
+            'admin.system.queues.store' => 'permission:admin.settings.queues.create',
 
-            'admin.system.queues.edit' =>
-                'permission:admin.settings.queues.update',
+            'admin.system.queues.edit' => 'permission:admin.settings.queues.update',
 
-            'admin.system.queues.update' =>
-                'permission:admin.settings.queues.update',
+            'admin.system.queues.update' => 'permission:admin.settings.queues.update',
 
-            'admin.system.queues.enabled' =>
-                'permission:admin.settings.queues.update',
+            'admin.system.queues.enabled' => 'permission:admin.settings.queues.update',
 
-            'admin.system.queues.destroy' =>
-                'permission:admin.settings.queues.archive',
+            'admin.system.queues.destroy' => 'permission:admin.settings.queues.archive',
 
-            'admin.system.queues.restore' =>
-                'permission:admin.settings.queues.archive',
+            'admin.system.queues.restore' => 'permission:admin.settings.queues.archive',
 
-            'admin.system.queues.force-delete' =>
-                'permission:admin.settings.queues.delete',
+            'admin.system.queues.force-delete' => 'permission:admin.settings.queues.delete',
 
-            'admin.system.queues.test' =>
-                'permission:admin.settings.queues.test',
+            'admin.system.queues.test' => 'permission:admin.settings.queues.test',
 
-            'admin.system.queues.activate' =>
-                'permission:admin.settings.queues.activate',
+            'admin.system.queues.activate' => 'permission:admin.settings.queues.activate',
 
-            'admin.system.queues.force-activate' =>
-                'permission:admin.settings.queues.force_activate',
+            'admin.system.queues.force-activate' => 'permission:admin.settings.queues.force_activate',
 
-            'admin.system.queues.activate-deployment' =>
-                'permission:admin.settings.queues.activate',
+            'admin.system.queues.activate-deployment' => 'permission:admin.settings.queues.activate',
 
-            'admin.system.queues.force-activate-deployment' =>
-                'permission:admin.settings.queues.force_activate',
+            'admin.system.queues.force-activate-deployment' => 'permission:admin.settings.queues.force_activate',
         ];
 
         foreach ($expected as $name => $middleware) {
@@ -539,26 +522,19 @@ class QueueDriverConfigurationHttpTest extends TestCase
             $permissionKeys,
         )
             ->map(
-                fn (string $key): int =>
-                Permission::query()
+                fn (string $key): int => Permission::query()
                     ->create([
-                        'permission_group_id' =>
-                            $group->id,
+                        'permission_group_id' => $group->id,
 
-                        'key' =>
-                            $key,
+                        'key' => $key,
 
-                        'label' =>
-                            $key,
+                        'label' => $key,
 
-                        'type' =>
-                            'agent',
+                        'type' => 'agent',
 
-                        'ui_type' =>
-                            'checkbox',
+                        'ui_type' => 'checkbox',
 
-                        'sort_order' =>
-                            1,
+                        'sort_order' => 1,
                     ])
                     ->id,
             );

@@ -143,8 +143,19 @@ export default function Index(props: Props) {
         || activeFilters.health !== ''
 
     const inspectableBacklogCount = backlog.queues.filter((item) => item.inspectable).length
-    const activationBlockReason = getActivationBlockReason(backlog)
-    const activationSafe = activationBlockReason === null
+    const pinnedWorkloads = workloads.filter(
+        (workload) => workload.enabled && workload.connection_name !== null,
+    )
+
+    const backlogBlockReason = getBacklogBlockReason(backlog)
+    const backlogSafe = backlogBlockReason === null
+
+    const managedActivationBlockReason = getManagedActivationBlockReason(
+        backlog,
+        pinnedWorkloads,
+    )
+    const managedActivationSafe = managedActivationBlockReason === null
+
     const canActivate = can('admin.settings.queues.activate')
     const canForceActivate = can('admin.settings.queues.force_activate')
 
@@ -381,7 +392,7 @@ export default function Index(props: Props) {
 
                             {ownership.mode === 'managed' && canActivate ? (
                                 <div className="mt-5">
-                                    {activationSafe ? (
+                                    {backlogSafe ? (
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -411,7 +422,7 @@ export default function Index(props: Props) {
                                         <button
                                             type="button"
                                             disabled
-                                            title={activationBlockReason ?? undefined}
+                                            title={backlogBlockReason ?? undefined}
                                             className="inline-flex h-10 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-semibold text-amber-500"
                                         >
                                             <Undo2 className="h-4 w-4" />
@@ -419,9 +430,9 @@ export default function Index(props: Props) {
                                         </button>
                                     )}
 
-                                    {!activationSafe ? (
+                                    {!backlogSafe ? (
                                         <p className="mt-2 max-w-2xl text-xs leading-5 text-amber-700">
-                                            {activationBlockReason}
+                                            {backlogBlockReason}
                                         </p>
                                     ) : null}
                                 </div>
@@ -491,47 +502,105 @@ export default function Index(props: Props) {
                         icon={Boxes}
                         title="Queue workloads"
                         description="Logical SimpleDesk workloads and the physical queue each one resolves to."
+                        trailing={
+                            pinnedWorkloads.length > 0 ? (
+                                <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-inset ring-amber-200">
+                                    {pinnedWorkloads.length} explicit connection
+                                    {pinnedWorkloads.length === 1 ? '' : 's'}
+                                </span>
+                            ) : null
+                        }
                     />
 
-                    <div className="grid gap-3 p-5 sm:p-6 lg:grid-cols-2 xl:grid-cols-3">
-                        {workloads.map((workload) => (
-                            <article
-                                key={workload.key}
-                                className="rounded-2xl border border-gray-200 p-4"
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">
-                                            {workload.label}
-                                        </h3>
+                    {pinnedWorkloads.length > 0 ? (
+                        <div className="border-b border-amber-200 bg-amber-50 px-5 py-4 sm:px-6">
+                            <div className="flex gap-3">
+                                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
 
-                                        <p className="mt-1 text-sm leading-5 text-gray-500">
-                                            {workload.description}
-                                        </p>
+                                <div>
+                                    <p className="text-sm font-semibold text-amber-900">
+                                        Explicit workload routing detected
+                                    </p>
+
+                                    <p className="mt-1 text-sm leading-6 text-amber-800">
+                                        Enabled workloads with an explicit Queue connection bypass the managed default connection.
+                                        Normal managed activation is blocked until these routes are removed.
+                                    </p>
+
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        {pinnedWorkloads.map((workload) => (
+                                            <span
+                                                key={workload.key}
+                                                className="rounded-lg border border-amber-200 bg-white px-2.5 py-1.5 text-xs font-medium text-amber-800"
+                                            >
+                                                {workload.label} → {workload.connection_name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    <div className="grid gap-3 p-5 sm:p-6 lg:grid-cols-2 xl:grid-cols-3">
+                        {workloads.map((workload) => {
+                            const pinned = workload.enabled && workload.connection_name !== null
+
+                            return (
+                                <article
+                                    key={workload.key}
+                                    className={`rounded-2xl border p-4 ${
+                                        pinned
+                                            ? 'border-amber-200 bg-amber-50/40'
+                                            : 'border-gray-200'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="font-semibold text-gray-900">
+                                                    {workload.label}
+                                                </h3>
+
+                                                {pinned ? (
+                                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                                                        Explicit
+                                                    </span>
+                                                ) : null}
+                                            </div>
+
+                                            <p className="mt-1 text-sm leading-5 text-gray-500">
+                                                {workload.description}
+                                            </p>
+                                        </div>
+
+                                        <StateBadge enabled={workload.enabled} />
                                     </div>
 
-                                    <StateBadge enabled={workload.enabled} />
-                                </div>
+                                    <dl className="mt-4 grid grid-cols-1 gap-3 border-t border-gray-100 pt-4 text-sm sm:grid-cols-2">
+                                        <InfoValue
+                                            label="Queue"
+                                            value={workload.queue_name}
+                                        />
 
-                                <dl className="mt-4 grid grid-cols-1 gap-3 border-t border-gray-100 pt-4 text-sm sm:grid-cols-2">
-                                    <InfoValue
-                                        label="Queue"
-                                        value={workload.queue_name}
-                                    />
+                                        <InfoValue
+                                            label="Connection"
+                                            value={workload.connection_name ?? effective_connection}
+                                        />
+                                    </dl>
 
-                                    <InfoValue
-                                        label="Connection"
-                                        value={workload.connection_name ?? effective_connection}
-                                    />
-                                </dl>
-
-                                {workload.uses_default_connection ? (
-                                    <p className="mt-3 text-xs font-medium text-sky-700">
-                                        Uses the default connection
-                                    </p>
-                                ) : null}
-                            </article>
-                        ))}
+                                    {pinned ? (
+                                        <p className="mt-3 text-xs font-medium text-amber-700">
+                                            Bypasses the managed default Queue connection
+                                        </p>
+                                    ) : workload.uses_default_connection ? (
+                                        <p className="mt-3 text-xs font-medium text-sky-700">
+                                            Uses the default connection
+                                        </p>
+                                    ) : null}
+                                </article>
+                            )
+                        })}
                     </div>
                 </section>
 
@@ -631,6 +700,7 @@ export default function Index(props: Props) {
 
                     <ActivationReadiness
                         backlog={backlog}
+                        pinnedWorkloads={pinnedWorkloads}
                         canForce={canForceActivate}
                     />
 
@@ -753,9 +823,10 @@ export default function Index(props: Props) {
                                 const liveTestResult = testResults[configuration.id]
                                 const health = liveTestResult ?? configuration.latest_health_check
                                 const archived = Boolean(configuration.deleted_at)
+
                                 const disabledActivationReason = !configuration.is_enabled
                                     ? 'Enable this configuration before activation.'
-                                    : activationBlockReason
+                                    : managedActivationBlockReason
 
                                 return (
                                     <article
@@ -773,14 +844,14 @@ export default function Index(props: Props) {
 
                                                     {configuration.is_active ? (
                                                         <span className="rounded-full bg-sky-600 px-2.5 py-1 text-xs font-semibold text-white">
-                        Active
-                    </span>
+                                                            Active
+                                                        </span>
                                                     ) : null}
 
                                                     {archived ? (
                                                         <span className="rounded-full bg-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700">
-                        Archived
-                    </span>
+                                                            Archived
+                                                        </span>
                                                     ) : (
                                                         <StateBadge enabled={configuration.is_enabled} />
                                                     )}
@@ -835,12 +906,12 @@ export default function Index(props: Props) {
                                                 {!archived
                                                 && !configuration.is_active
                                                 && configuration.is_enabled
-                                                && !activationSafe ? (
+                                                && !managedActivationSafe ? (
                                                     <div className="flex max-w-2xl gap-2.5">
                                                         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
 
                                                         <p className="text-xs leading-5 text-amber-700">
-                                                            {activationBlockReason}
+                                                            {managedActivationBlockReason}
                                                         </p>
                                                     </div>
                                                 ) : configuration.is_active ? (
@@ -875,7 +946,7 @@ export default function Index(props: Props) {
                                                 && !configuration.is_active
                                                 && canActivate
                                                 && configuration.is_enabled
-                                                && activationSafe ? (
+                                                && managedActivationSafe ? (
                                                     <button
                                                         type="button"
                                                         onClick={() =>
@@ -910,12 +981,12 @@ export default function Index(props: Props) {
                                                 && !configuration.is_active
                                                 && canActivate
                                                 && configuration.is_enabled
-                                                && !activationSafe
+                                                && !managedActivationSafe
                                                 && !canForceActivate ? (
                                                     <button
                                                         type="button"
                                                         disabled
-                                                        title={activationBlockReason ?? undefined}
+                                                        title={managedActivationBlockReason ?? undefined}
                                                         className="inline-flex h-9 cursor-not-allowed items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 text-sm font-medium text-amber-500"
                                                     >
                                                         <Power className="h-4 w-4" />
@@ -926,7 +997,7 @@ export default function Index(props: Props) {
                                                 {!archived
                                                 && !configuration.is_active
                                                 && configuration.is_enabled
-                                                && !activationSafe
+                                                && !managedActivationSafe
                                                 && canForceActivate ? (
                                                     <button
                                                         type="button"
@@ -962,10 +1033,7 @@ export default function Index(props: Props) {
                                                             <button
                                                                 type="button"
                                                                 onClick={() =>
-                                                                    setEnabled(
-                                                                        configuration,
-                                                                        false,
-                                                                    )
+                                                                    setEnabled(configuration, false)
                                                                 }
                                                                 className={actionClass}
                                                             >
@@ -975,10 +1043,7 @@ export default function Index(props: Props) {
                                                             <button
                                                                 type="button"
                                                                 onClick={() =>
-                                                                    setEnabled(
-                                                                        configuration,
-                                                                        true,
-                                                                    )
+                                                                    setEnabled(configuration, true)
                                                                 }
                                                                 className={actionClass}
                                                             >
@@ -1065,6 +1130,7 @@ export default function Index(props: Props) {
                     action={confirmAction}
                     processing={acting}
                     backlog={backlog}
+                    pinnedWorkloads={pinnedWorkloads}
                     activeConfiguration={active_configuration}
                     onOpenChange={(open) => {
                         if (!open && !acting) {
@@ -1080,14 +1146,17 @@ export default function Index(props: Props) {
 
 function ActivationReadiness({
                                  backlog,
+                                 pinnedWorkloads,
                                  canForce,
                              }: {
     backlog: QueueBacklog
+    pinnedWorkloads: QueueWorkload[]
     canForce: boolean
 }) {
-    const reason = getActivationBlockReason(backlog)
+    const backlogReason = getBacklogBlockReason(backlog)
+    const pinnedReason = getPinnedWorkloadBlockReason(pinnedWorkloads)
 
-    if (!reason) {
+    if (!backlogReason && !pinnedReason) {
         return (
             <div className="border-b border-emerald-200 bg-emerald-50 px-5 py-4 sm:px-6">
                 <div className="flex gap-3">
@@ -1095,11 +1164,11 @@ function ActivationReadiness({
 
                     <div>
                         <p className="text-sm font-semibold text-emerald-900">
-                            Safe runtime switch available
+                            Safe managed activation available
                         </p>
 
                         <p className="mt-1 text-sm leading-6 text-emerald-800">
-                            The current Queue backlog was inspected completely and contains no pending jobs.
+                            The current backlog is empty and all enabled workloads use the default Queue connection.
                         </p>
                     </div>
                 </div>
@@ -1112,18 +1181,37 @@ function ActivationReadiness({
             <div className="flex gap-3">
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
 
-                <div>
+                <div className="min-w-0">
                     <p className="text-sm font-semibold text-amber-900">
-                        Normal runtime switch blocked
+                        Normal managed activation blocked
                     </p>
 
-                    <p className="mt-1 text-sm leading-6 text-amber-800">
-                        {reason}
-                    </p>
+                    <div className="mt-1 space-y-1 text-sm leading-6 text-amber-800">
+                        {backlogReason ? (
+                            <p>{backlogReason}</p>
+                        ) : null}
+
+                        {pinnedReason ? (
+                            <p>{pinnedReason}</p>
+                        ) : null}
+                    </div>
+
+                    {pinnedWorkloads.length > 0 ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            {pinnedWorkloads.map((workload) => (
+                                <span
+                                    key={workload.key}
+                                    className="rounded-lg border border-amber-200 bg-white px-2.5 py-1.5 text-xs font-medium text-amber-800"
+                                >
+                                    {workload.label} → {workload.connection_name}
+                                </span>
+                            ))}
+                        </div>
+                    ) : null}
 
                     {canForce ? (
-                        <p className="mt-2 text-xs font-medium leading-5 text-red-700">
-                            Emergency switching is available. Jobs remaining on the current backend may no longer be processed after the switch.
+                        <p className="mt-3 text-xs font-medium leading-5 text-red-700">
+                            Emergency force activation is available and will explicitly bypass these safety checks.
                         </p>
                     ) : null}
                 </div>
@@ -1392,6 +1480,7 @@ function Confirmation({
                           action,
                           processing,
                           backlog,
+                          pinnedWorkloads,
                           activeConfiguration,
                           onOpenChange,
                           onConfirm,
@@ -1399,6 +1488,7 @@ function Confirmation({
     action: ConfirmAction | null
     processing: boolean
     backlog: QueueBacklog
+    pinnedWorkloads: QueueWorkload[]
     activeConfiguration: QueueConfiguration | null
     onOpenChange: (open: boolean) => void
     onConfirm: () => void
@@ -1417,7 +1507,11 @@ function Confirmation({
             'force-activate': {
                 title: 'Force activate Queue configuration?',
                 description: configuration
-                    ? forceActivationDescription(configuration, backlog)
+                    ? forceActivationDescription(
+                        configuration,
+                        backlog,
+                        pinnedWorkloads,
+                    )
                     : '',
                 label: 'Force activate',
             },
@@ -1490,6 +1584,25 @@ function Confirmation({
                         </AlertDialogDescription>
                     </AlertDialogHeader>
 
+                    {action?.kind === 'force-activate' && pinnedWorkloads.length > 0 ? (
+                        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                            <p className="text-sm font-semibold text-amber-900">
+                                Explicit workload routing
+                            </p>
+
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {pinnedWorkloads.map((workload) => (
+                                    <span
+                                        key={workload.key}
+                                        className="rounded-lg border border-amber-200 bg-white px-2.5 py-1 text-xs font-medium text-amber-800"
+                                    >
+                                        {workload.label} → {workload.connection_name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    ) : null}
+
                     {dangerous ? (
                         <div className="mt-5 flex gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
                             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" />
@@ -1500,7 +1613,7 @@ function Confirmation({
                                 </p>
 
                                 <p className="mt-1 text-sm leading-6 text-red-800">
-                                    This bypasses the normal backlog safety gate. Jobs remaining on the current Queue backend may be left behind after the switch.
+                                    This bypasses normal Queue safety checks. Pending jobs may be left behind and explicitly routed workloads may continue using another Queue connection.
                                 </p>
                             </div>
                         </div>
@@ -1584,7 +1697,7 @@ function Pagination({
 const actionClass =
     'inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
 
-function getActivationBlockReason(backlog: QueueBacklog): string | null {
+function getBacklogBlockReason(backlog: QueueBacklog): string | null {
     if (!backlog.is_complete) {
         if (backlog.inspected_pending > 0) {
             return `The Queue backlog could not be inspected completely. At least ${backlog.inspected_pending.toLocaleString()} pending job(s) were observed.`
@@ -1602,17 +1715,54 @@ function getActivationBlockReason(backlog: QueueBacklog): string | null {
     return null
 }
 
+function getPinnedWorkloadBlockReason(
+    pinnedWorkloads: QueueWorkload[],
+): string | null {
+    if (pinnedWorkloads.length === 0) {
+        return null
+    }
+
+    const routes = pinnedWorkloads
+        .map((workload) => `${workload.label} → ${workload.connection_name}`)
+        .join(', ')
+
+    return `Enabled workloads use explicit Queue connections: ${routes}.`
+}
+
+function getManagedActivationBlockReason(
+    backlog: QueueBacklog,
+    pinnedWorkloads: QueueWorkload[],
+): string | null {
+    const backlogReason = getBacklogBlockReason(backlog)
+    const pinnedReason = getPinnedWorkloadBlockReason(pinnedWorkloads)
+
+    if (backlogReason && pinnedReason) {
+        return `${backlogReason} ${pinnedReason}`
+    }
+
+    return backlogReason ?? pinnedReason
+}
+
 function forceActivationDescription(
     configuration: QueueConfiguration,
     backlog: QueueBacklog,
+    pinnedWorkloads: QueueWorkload[],
 ): string {
-    if (!backlog.is_complete) {
-        return `“${configuration.name}” will become the managed Queue runtime even though the current backlog could not be inspected completely. Jobs remaining on the previous backend may be left behind.`
+    const risks: string[] = []
+
+    const backlogReason = getBacklogBlockReason(backlog)
+
+    if (backlogReason) {
+        risks.push(backlogReason)
     }
 
-    const pending = backlog.total_pending ?? 0
+    if (pinnedWorkloads.length > 0) {
+        risks.push(
+            `${pinnedWorkloads.length} enabled workload(s) will continue using explicit Queue connections instead of the managed default.`,
+        )
+    }
 
-    return `“${configuration.name}” will become the managed Queue runtime while ${pending.toLocaleString()} pending job(s) still remain on the current backend. Those jobs may be left behind.`
+    return `“${configuration.name}” will become the managed Queue runtime using emergency override. ${risks.join(' ')}`
 }
 
 function forceDeploymentDescription(

@@ -37,10 +37,10 @@ return new class extends Migration
                 ] ?? null;
 
             if (
-                !is_numeric($connectionId)
+                ! is_numeric($connectionId)
                 || (int) $connectionId <= 0
             ) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     "Redis queue configuration [{$row->id}] does not contain a valid infrastructure connection reference.",
                 );
             }
@@ -52,8 +52,8 @@ return new class extends Migration
                 )
                 ->exists();
 
-            if (!$exists) {
-                throw new \RuntimeException(
+            if (! $exists) {
+                throw new RuntimeException(
                     "Redis queue configuration [{$row->id}] references missing infrastructure connection [{$connectionId}].",
                 );
             }
@@ -99,13 +99,11 @@ return new class extends Migration
                     $row->id,
                 )
                 ->update([
-                    'infrastructure_connection_id' =>
-                        $connectionId,
+                    'infrastructure_connection_id' => $connectionId,
 
-                    'configuration' =>
-                        $this->encodeConfiguration(
-                            $configuration,
-                        ),
+                    'configuration' => $this->encodeConfiguration(
+                        $configuration,
+                    ),
                 ]);
         }
     }
@@ -143,10 +141,9 @@ return new class extends Migration
                     $row->id,
                 )
                 ->update([
-                    'configuration' =>
-                        $this->encodeConfiguration(
-                            $configuration,
-                        ),
+                    'configuration' => $this->encodeConfiguration(
+                        $configuration,
+                    ),
                 ]);
         }
 
@@ -185,15 +182,15 @@ return new class extends Migration
                 512,
                 JSON_THROW_ON_ERROR,
             );
-        } catch (\JsonException $exception) {
-            throw new \RuntimeException(
+        } catch (JsonException $exception) {
+            throw new RuntimeException(
                 'Queue driver configuration contains invalid JSON.',
                 previous: $exception,
             );
         }
 
-        if (!is_array($decoded)) {
-            throw new \RuntimeException(
+        if (! is_array($decoded)) {
+            throw new RuntimeException(
                 'Queue driver configuration JSON must decode to an array.',
             );
         }
@@ -209,8 +206,8 @@ return new class extends Migration
                 $configuration,
                 JSON_THROW_ON_ERROR,
             );
-        } catch (\JsonException $exception) {
-            throw new \RuntimeException(
+        } catch (JsonException $exception) {
+            throw new RuntimeException(
                 'Queue driver configuration could not be encoded as JSON.',
                 previous: $exception,
             );

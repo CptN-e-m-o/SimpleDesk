@@ -11,6 +11,8 @@ final readonly class QueueActivationResultData
         public array $backlog,
         public bool $forceRequested,
         public bool $backlogOverrideUsed,
+        public bool $workloadRoutingOverrideUsed,
+        public array $pinnedWorkloads,
         public bool $restartSignaled,
     ) {}
 }

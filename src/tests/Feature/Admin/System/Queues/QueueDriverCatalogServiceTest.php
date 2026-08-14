@@ -195,8 +195,7 @@ class QueueDriverCatalogServiceTest extends TestCase
                 'name' => 'Redis',
                 'driver' => 'redis',
 
-                'infrastructure_connection_id' =>
-                    $infrastructure->id,
+                'infrastructure_connection_id' => $infrastructure->id,
 
                 'configuration' => [
                     'retry_after' => 360,
@@ -266,8 +265,7 @@ class QueueDriverCatalogServiceTest extends TestCase
             QueueDriverSettings::query()->create([
                 'id' => QueueDriverSettings::SINGLETON_ID,
                 'mode' => QueueConfigurationMode::Managed,
-                'active_configuration_id' =>
-                    $configuration->id,
+                'active_configuration_id' => $configuration->id,
             ]);
 
             try {
@@ -299,7 +297,7 @@ class QueueDriverCatalogServiceTest extends TestCase
                     "Active managed Queue configuration operation [{$operation}] should be rejected.",
                 );
             } catch (
-            ActiveQueueDriverConfigurationMutationException
+                ActiveQueueDriverConfigurationMutationException
             ) {
                 $this->addToAssertionCount(1);
             }

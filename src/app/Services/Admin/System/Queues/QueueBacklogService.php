@@ -84,22 +84,17 @@ class QueueBacklogService
                 $pairs,
             ),
 
-            'total_pending' =>
-                $isComplete
+            'total_pending' => $isComplete
                     ? $inspectedPending
                     : null,
 
-            'inspected_pending' =>
-                $inspectedPending,
+            'inspected_pending' => $inspectedPending,
 
-            'is_complete' =>
-                $isComplete,
+            'is_complete' => $isComplete,
 
-            'has_errors' =>
-                !$isComplete,
+            'has_errors' => ! $isComplete,
 
-            'inspected_at' =>
-                now()->toIso8601String(),
+            'inspected_at' => now()->toIso8601String(),
         ];
     }
 }

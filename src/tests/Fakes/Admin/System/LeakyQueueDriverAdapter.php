@@ -30,8 +30,7 @@ class LeakyQueueDriverAdapter implements QueueDriverAdapter
 
             requiresInfrastructure: true,
 
-            infrastructureType:
-            InfrastructureConnectionType::Redis->value,
+            infrastructureType: InfrastructureConnectionType::Redis->value,
 
             recommendedForProduction: false,
         );
@@ -60,7 +59,7 @@ class LeakyQueueDriverAdapter implements QueueDriverAdapter
             $configuration
                 ->infrastructure_connection_id;
 
-        if (!$connectionId) {
+        if (! $connectionId) {
             throw new \RuntimeException(
                 'Test Redis Queue configuration has no infrastructure connection.',
             );
@@ -79,21 +78,17 @@ class LeakyQueueDriverAdapter implements QueueDriverAdapter
         );
 
         return new QueueHealthResultData(
-            status:
-            QueueHealthStatus::Healthy,
+            status: QueueHealthStatus::Healthy,
 
             latencyMs: 4,
 
-            message:
-            "Connected using {$password}.",
+            message: "Connected using {$password}.",
 
             details: [
-                'diagnostic_dsn' =>
-                    "redis://simpledesk:{$password}@redis.internal:6379/0",
+                'diagnostic_dsn' => "redis://simpledesk:{$password}@redis.internal:6379/0",
 
                 'nested' => [
-                    'password_echo' =>
-                        $password,
+                    'password_echo' => $password,
                 ],
             ],
         );

@@ -65,8 +65,7 @@ class QueueDriverCatalogService
                         'name' => $data['name'],
                         'driver' => $type,
 
-                        'infrastructure_connection_id' =>
-                            $infrastructure?->id,
+                        'infrastructure_connection_id' => $infrastructure?->id,
 
                         'configuration' => $normalized,
 
@@ -146,7 +145,7 @@ class QueueDriverCatalogService
                     'infrastructure_connection_id'
                     ]
                         : $model
-                        ->infrastructure_connection_id;
+                            ->infrastructure_connection_id;
 
                 $infrastructure = $this
                     ->resolveInfrastructureConnection(
@@ -157,8 +156,7 @@ class QueueDriverCatalogService
                 $model->update([
                     'name' => $data['name'],
 
-                    'infrastructure_connection_id' =>
-                        $infrastructure?->id,
+                    'infrastructure_connection_id' => $infrastructure?->id,
 
                     'configuration' => $this->normalize(
                         $model->driver,
@@ -406,8 +404,7 @@ class QueueDriverCatalogService
                 ->driver
                 ->value,
 
-            'infrastructure_connection_id' =>
-                $model->infrastructure_connection_id,
+            'infrastructure_connection_id' => $model->infrastructure_connection_id,
 
             'configuration' => $configuration,
 
@@ -477,13 +474,11 @@ class QueueDriverCatalogService
                         ->source
                         ->value,
 
-                    'is_enabled' =>
-                        $infrastructure->is_enabled,
+                    'is_enabled' => $infrastructure->is_enabled,
 
-                    'deleted_at' =>
-                        $infrastructure
-                            ->deleted_at
-                            ?->toIso8601String(),
+                    'deleted_at' => $infrastructure
+                        ->deleted_at
+                        ?->toIso8601String(),
                 ]
                 : null;
         }
@@ -511,7 +506,7 @@ class QueueDriverCatalogService
                     $configuration,
                 );
         } catch (
-        ValidationException $exception
+            ValidationException $exception
         ) {
             $messages = [];
 

@@ -23,32 +23,24 @@ class RedisQueueRuntimeConfigurationTest extends TestCase
         $infrastructure =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
                     'configuration' => [
-                        'host' =>
-                            'runtime-redis.internal',
+                        'host' => 'runtime-redis.internal',
 
-                        'port' =>
-                            6380,
+                        'port' => 6380,
 
-                        'database' =>
-                            4,
+                        'database' => 4,
 
-                        'username' =>
-                            'queue-user',
+                        'username' => 'queue-user',
 
-                        'tls' =>
-                            true,
+                        'tls' => true,
 
-                        'connect_timeout_seconds' =>
-                            3,
+                        'connect_timeout_seconds' => 3,
                     ],
 
                     'credentials' => [
-                        'password' =>
-                            'runtime-secret',
+                        'password' => 'runtime-secret',
                     ],
 
                     'is_enabled' => true,
@@ -184,12 +176,10 @@ class RedisQueueRuntimeConfigurationTest extends TestCase
         $infrastructure =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Deployment,
+                    'source' => InfrastructureConnectionSource::Deployment,
 
                     'configuration' => [
-                        'connection_name' =>
-                            'queue-deployment',
+                        'connection_name' => 'queue-deployment',
                     ],
 
                     'credentials' => [],
@@ -252,32 +242,24 @@ class RedisQueueRuntimeConfigurationTest extends TestCase
         $infrastructure =
             InfrastructureConnection::factory()
                 ->create([
-                    'source' =>
-                        InfrastructureConnectionSource::Managed,
+                    'source' => InfrastructureConnectionSource::Managed,
 
                     'configuration' => [
-                        'host' =>
-                            'late-runtime-redis.internal',
+                        'host' => 'late-runtime-redis.internal',
 
-                        'port' =>
-                            6381,
+                        'port' => 6381,
 
-                        'database' =>
-                            8,
+                        'database' => 8,
 
-                        'username' =>
-                            '',
+                        'username' => '',
 
-                        'tls' =>
-                            false,
+                        'tls' => false,
 
-                        'connect_timeout_seconds' =>
-                            2,
+                        'connect_timeout_seconds' => 2,
                     ],
 
                     'credentials' => [
-                        'password' =>
-                            'late-runtime-secret',
+                        'password' => 'late-runtime-secret',
                     ],
 
                     'is_enabled' => true,
@@ -368,28 +350,21 @@ class RedisQueueRuntimeConfigurationTest extends TestCase
     ): QueueDriverConfiguration {
         return QueueDriverConfiguration::query()
             ->create([
-                'name' =>
-                    'Managed Redis queue',
+                'name' => 'Managed Redis queue',
 
-                'driver' =>
-                    QueueDriverType::Redis,
+                'driver' => QueueDriverType::Redis,
 
-                'infrastructure_connection_id' =>
-                    $infrastructure->id,
+                'infrastructure_connection_id' => $infrastructure->id,
 
                 'configuration' => [
-                    'retry_after' =>
-                        360,
+                    'retry_after' => 360,
 
-                    'block_for' =>
-                        5,
+                    'block_for' => 5,
 
-                    'after_commit' =>
-                        false,
+                    'after_commit' => false,
                 ],
 
-                'is_enabled' =>
-                    true,
+                'is_enabled' => true,
             ]);
     }
 
@@ -398,17 +373,13 @@ class RedisQueueRuntimeConfigurationTest extends TestCase
     ): void {
         QueueDriverSettings::query()
             ->create([
-                'id' =>
-                    QueueDriverSettings::SINGLETON_ID,
+                'id' => QueueDriverSettings::SINGLETON_ID,
 
-                'mode' =>
-                    QueueConfigurationMode::Managed,
+                'mode' => QueueConfigurationMode::Managed,
 
-                'active_configuration_id' =>
-                    $queue->id,
+                'active_configuration_id' => $queue->id,
 
-                'worker_restart_required' =>
-                    false,
+                'worker_restart_required' => false,
             ]);
     }
 

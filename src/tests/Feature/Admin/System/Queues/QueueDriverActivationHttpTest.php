@@ -126,8 +126,7 @@ class QueueDriverActivationHttpTest extends TestCase
 
         $permissionIds = collect($permissionKeys)
             ->map(
-                fn (string $key): int =>
-                Permission::query()->create([
+                fn (string $key): int => Permission::query()->create([
                     'permission_group_id' => $group->id,
                     'key' => $key,
                     'label' => $key,
