@@ -198,35 +198,81 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
             $configuration,
         );
 
-        $result = $this
-            ->infrastructureRegistry
-            ->adapter(
-                $connection->type,
-            )
-            ->test(
-                $connection,
-            );
+        $result = $this->infrastructureRegistry
+            ->adapter($connection->type)
+            ->test($connection);
 
         $status = match ($result->status) {
             InfrastructureHealthStatus::Healthy => QueueHealthStatus::Healthy,
-
             InfrastructureHealthStatus::Degraded => QueueHealthStatus::Degraded,
-
             InfrastructureHealthStatus::Unhealthy => QueueHealthStatus::Unhealthy,
-
             default => QueueHealthStatus::Unavailable,
         };
 
         return new QueueHealthResultData(
             status: $status,
             latencyMs: $result->latencyMs,
-            message: $result->message
-            ?? 'Redis queue connectivity test completed.',
+            message: $this->safeHealthMessage(
+                $result->status,
+                $result->message,
+            ),
             details: [
                 'infrastructure_connection_id' => $connection->id,
                 'source' => $connection->source->value,
+                'infrastructure_status' => $result->status->value,
             ],
         );
+    }
+
+    private function safeHealthMessage(
+        InfrastructureHealthStatus $status,
+        ?string $message,
+    ): string {
+        if ($status === InfrastructureHealthStatus::Healthy) {
+            return 'Redis queue connection verified successfully.';
+        }
+
+        $message = strtolower(trim((string) $message));
+
+        foreach ([
+                     'noauth',
+                     'wrongpass',
+                     'authentication',
+                     'auth failed',
+                     'invalid password',
+                 ] as $needle) {
+            if (str_contains($message, $needle)) {
+                return 'Redis authentication failed.';
+            }
+        }
+
+        foreach ([
+                     'connection refused',
+                     'timed out',
+                     'timeout',
+                     'getaddrinfo',
+                     'name or service not known',
+                     'no route to host',
+                     'network is unreachable',
+                 ] as $needle) {
+            if (str_contains($message, $needle)) {
+                return 'Redis server could not be reached.';
+            }
+        }
+
+        if (str_contains($message, 'write/read verification failed')) {
+            return 'Redis is reachable, but write/read verification failed.';
+        }
+
+        if (str_contains($message, 'delete verification failed')) {
+            return 'Redis is reachable, but cleanup verification failed.';
+        }
+
+        return match ($status) {
+            InfrastructureHealthStatus::Degraded => 'Redis queue connection is reachable but degraded.',
+            InfrastructureHealthStatus::Unhealthy => 'Redis queue connection could not be verified.',
+            default => 'Redis queue connectivity test is unavailable.',
+        };
     }
 
     private function resolveConnection(

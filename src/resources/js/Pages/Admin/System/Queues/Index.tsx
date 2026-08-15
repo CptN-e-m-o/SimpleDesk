@@ -54,6 +54,7 @@ import QueueTestButton from './components/QueueTestButton'
 import type {
     QueueBacklog,
     QueueConfiguration,
+    QueueDeploymentTarget,
     QueueDriverDefinition,
     QueueFilters,
     QueueHealthResult,
@@ -69,6 +70,7 @@ type Props = {
     }
     effective_connection: string
     effective_driver: string
+    deployment_target: QueueDeploymentTarget
     active_configuration: QueueConfiguration | null
     configurations: QueuePagination
     definitions: QueueDriverDefinition[]
@@ -107,6 +109,7 @@ export default function Index(props: Props) {
         ownership,
         effective_connection,
         effective_driver,
+        deployment_target,
         active_configuration,
         configurations,
         definitions,
@@ -143,6 +146,7 @@ export default function Index(props: Props) {
         || activeFilters.health !== ''
 
     const inspectableBacklogCount = backlog.queues.filter((item) => item.inspectable).length
+
     const pinnedWorkloads = workloads.filter(
         (workload) => workload.enabled && workload.connection_name !== null,
     )
@@ -154,7 +158,12 @@ export default function Index(props: Props) {
         backlog,
         pinnedWorkloads,
     )
+
     const managedActivationSafe = managedActivationBlockReason === null
+
+    const deploymentReturnBlockReason = !deployment_target.available
+        ? 'The configured deployment Queue target is unavailable.'
+        : backlogBlockReason
 
     const canActivate = can('admin.settings.queues.activate')
     const canForceActivate = can('admin.settings.queues.force_activate')
@@ -392,7 +401,55 @@ export default function Index(props: Props) {
 
                             {ownership.mode === 'managed' && canActivate ? (
                                 <div className="mt-5">
-                                    {backlogSafe ? (
+                                    <div
+                                        className={`mb-4 rounded-2xl border p-4 ${
+                                            deployment_target.available
+                                                ? 'border-sky-200 bg-sky-50'
+                                                : 'border-red-200 bg-red-50'
+                                        }`}
+                                    >
+                                        <div className="flex gap-3">
+                                            {deployment_target.available ? (
+                                                <Database className="mt-0.5 h-5 w-5 shrink-0 text-sky-700" />
+                                            ) : (
+                                                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" />
+                                            )}
+
+                                            <div>
+                                                <p
+                                                    className={`text-sm font-semibold ${
+                                                        deployment_target.available
+                                                            ? 'text-sky-900'
+                                                            : 'text-red-900'
+                                                    }`}
+                                                >
+                                                    {deployment_target.available
+                                                        ? 'Deployment return target'
+                                                        : 'Deployment target unavailable'}
+                                                </p>
+
+                                                {deployment_target.available ? (
+                                                    <>
+                                                        <p className="mt-1 text-sm text-sky-800">
+                                                            {deployment_target.connection}
+                                                            {' · '}
+                                                            {humanize(deployment_target.driver ?? '')}
+                                                        </p>
+
+                                                        <p className="mt-1 text-xs leading-5 text-sky-700">
+                                                            SimpleDesk will verify this Queue backend again immediately before switching runtime ownership.
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <p className="mt-1 text-sm leading-6 text-red-800">
+                                                        The configured deployment Queue connection cannot currently be resolved. Return to deployment will be rejected until the deployment configuration is fixed.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {backlogSafe && deployment_target.available ? (
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -405,7 +462,7 @@ export default function Index(props: Props) {
                                             <Undo2 className="h-4 w-4" />
                                             Return to deployment
                                         </button>
-                                    ) : canForceActivate ? (
+                                    ) : deployment_target.available && canForceActivate ? (
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -422,7 +479,7 @@ export default function Index(props: Props) {
                                         <button
                                             type="button"
                                             disabled
-                                            title={backlogBlockReason ?? undefined}
+                                            title={deploymentReturnBlockReason ?? undefined}
                                             className="inline-flex h-10 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-semibold text-amber-500"
                                         >
                                             <Undo2 className="h-4 w-4" />
@@ -439,7 +496,7 @@ export default function Index(props: Props) {
                             ) : null}
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                             <RuntimeValue
                                 label="Configuration source"
                                 value={ownership.mode === 'managed' ? 'Managed' : 'Deployment'}
@@ -461,6 +518,15 @@ export default function Index(props: Props) {
                                     ownership.mode === 'managed'
                                         ? active_configuration?.name ?? 'Unavailable'
                                         : 'Not applicable'
+                                }
+                            />
+
+                            <RuntimeValue
+                                label="Deployment target"
+                                value={
+                                    deployment_target.available
+                                        ? `${deployment_target.connection} · ${humanize(deployment_target.driver ?? '')}`
+                                        : 'Unavailable'
                                 }
                             />
                         </div>
@@ -1132,6 +1198,7 @@ export default function Index(props: Props) {
                     backlog={backlog}
                     pinnedWorkloads={pinnedWorkloads}
                     activeConfiguration={active_configuration}
+                    deploymentTarget={deployment_target}
                     onOpenChange={(open) => {
                         if (!open && !acting) {
                             setConfirmAction(null)
@@ -1482,6 +1549,7 @@ function Confirmation({
                           backlog,
                           pinnedWorkloads,
                           activeConfiguration,
+                          deploymentTarget,
                           onOpenChange,
                           onConfirm,
                       }: {
@@ -1490,6 +1558,7 @@ function Confirmation({
     backlog: QueueBacklog
     pinnedWorkloads: QueueWorkload[]
     activeConfiguration: QueueConfiguration | null
+    deploymentTarget: QueueDeploymentTarget
     onOpenChange: (open: boolean) => void
     onConfirm: () => void
 }) {
@@ -1517,15 +1586,17 @@ function Confirmation({
             },
             'activate-deployment': {
                 title: 'Return to deployment configuration?',
-                description: activeConfiguration
-                    ? `Managed Queue configuration “${activeConfiguration.name}” will be released and SimpleDesk will return to the Queue connection configured by the deployment environment. Workers will be signaled to restart.`
-                    : 'SimpleDesk will return to the Queue connection configured by the deployment environment. Workers will be signaled to restart.',
+                description: deploymentActivationDescription(
+                    activeConfiguration,
+                    deploymentTarget,
+                ),
                 label: 'Return to deployment',
             },
             'force-activate-deployment': {
                 title: 'Force return to deployment configuration?',
                 description: forceDeploymentDescription(
                     activeConfiguration,
+                    deploymentTarget,
                     backlog,
                 ),
                 label: 'Force return',
@@ -1600,6 +1671,26 @@ function Confirmation({
                                     </span>
                                 ))}
                             </div>
+                        </div>
+                    ) : null}
+
+                    {(action?.kind === 'activate-deployment'
+                        || action?.kind === 'force-activate-deployment')
+                    && deploymentTarget.available ? (
+                        <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                            <p className="text-sm font-semibold text-sky-900">
+                                Deployment target
+                            </p>
+
+                            <p className="mt-1 text-sm text-sky-800">
+                                {deploymentTarget.connection}
+                                {' · '}
+                                {humanize(deploymentTarget.driver ?? '')}
+                            </p>
+
+                            <p className="mt-1 text-xs leading-5 text-sky-700">
+                                The target will be checked again immediately before runtime ownership changes.
+                            </p>
                         </div>
                     ) : null}
 
@@ -1765,21 +1856,41 @@ function forceActivationDescription(
     return `“${configuration.name}” will become the managed Queue runtime using emergency override. ${risks.join(' ')}`
 }
 
+function deploymentActivationDescription(
+    activeConfiguration: QueueConfiguration | null,
+    deploymentTarget: QueueDeploymentTarget,
+): string {
+    const source = activeConfiguration
+        ? `Managed Queue configuration “${activeConfiguration.name}” will be released`
+        : 'The managed Queue runtime will be released'
+
+    if (!deploymentTarget.available) {
+        return `${source}. The configured deployment Queue target is currently unavailable.`
+    }
+
+    return `${source} and SimpleDesk will return to deployment connection “${deploymentTarget.connection}”. The target will be verified immediately before the switch and Queue workers will then be signaled to restart.`
+}
+
 function forceDeploymentDescription(
     activeConfiguration: QueueConfiguration | null,
+    deploymentTarget: QueueDeploymentTarget,
     backlog: QueueBacklog,
 ): string {
     const prefix = activeConfiguration
         ? `Managed Queue configuration “${activeConfiguration.name}” will be released`
         : 'The managed Queue runtime will be released'
 
+    const target = deploymentTarget.available
+        ? `deployment connection “${deploymentTarget.connection}”`
+        : 'the deployment Queue connection'
+
     if (!backlog.is_complete) {
-        return `${prefix} even though the current backlog could not be inspected completely. SimpleDesk will return to the deployment Queue configuration and jobs remaining on the managed backend may be left behind.`
+        return `${prefix} even though the current backlog could not be inspected completely. SimpleDesk will return to ${target} and jobs remaining on the managed backend may be left behind.`
     }
 
     const pending = backlog.total_pending ?? 0
 
-    return `${prefix} while ${pending.toLocaleString()} pending job(s) still remain on the managed backend. SimpleDesk will return to the deployment Queue configuration and those jobs may be left behind.`
+    return `${prefix} while ${pending.toLocaleString()} pending job(s) still remain on the managed backend. SimpleDesk will return to ${target} and those jobs may be left behind.`
 }
 
 function configurationSummary(configuration: QueueConfiguration) {

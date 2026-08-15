@@ -136,6 +136,8 @@ class QueueDriverConfigurationController extends Controller
                     .'.driver',
                 ),
 
+                'deployment_target' => $this->deploymentTarget(),
+
                 'active_configuration' => $settings
                     ?->activeConfiguration
                     ? $this
@@ -402,5 +404,31 @@ class QueueDriverConfigurationController extends Controller
                 ],
             )
             ->all();
+    }
+
+    private function deploymentTarget(): array
+    {
+        $connection = trim(
+            (string) config(
+                'simpledesk-queues.deployment.connection',
+                '',
+            ),
+        );
+
+        $configuration = $connection !== ''
+            ? config("queue.connections.{$connection}")
+            : null;
+
+        return [
+            'connection' => $connection !== ''
+                ? $connection
+                : null,
+            'driver' => is_array($configuration)
+                ? ($configuration['driver'] ?? null)
+                : null,
+            'available' => $connection !== ''
+                && is_array($configuration)
+                && ! empty($configuration['driver']),
+        ];
     }
 }

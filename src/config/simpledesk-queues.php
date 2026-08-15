@@ -15,6 +15,10 @@ return [
         'connection_name' => 'simpledesk-managed',
     ],
 
+    'deployment' => [
+        'connection' => env('QUEUE_CONNECTION', 'database'),
+    ],
+
     'worker' => [
         'max_timeout_seconds' => 300,
         'retry_safety_margin_seconds' => 30,

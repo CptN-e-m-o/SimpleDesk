@@ -198,4 +198,75 @@ class QueueDriverHealthServiceTest extends TestCase
             $health->status->value,
         );
     }
+
+    public function test_validation_failure_returns_specific_safe_health_message(): void
+    {
+        $configuration = QueueDriverConfiguration::query()->create([
+            'name' => 'Broken Redis',
+            'driver' => QueueDriverType::Redis,
+            'infrastructure_connection_id' => null,
+            'configuration' => [
+                'retry_after' => 360,
+                'block_for' => 5,
+                'after_commit' => false,
+            ],
+            'is_enabled' => true,
+        ]);
+
+        $result = app(QueueDriverHealthService::class)->test(
+            $configuration,
+        );
+
+        $this->assertSame(
+            'unavailable',
+            $result->status->value,
+        );
+
+        $this->assertSame(
+            'Redis queue configuration requires an infrastructure connection.',
+            $result->message,
+        );
+
+        $health = $configuration
+            ->latestHealthCheck()
+            ->firstOrFail();
+
+        $this->assertSame(
+            $result->message,
+            $health->message,
+        );
+    }
+
+    public function test_activation_preflight_is_persisted_and_audited_separately(): void
+    {
+        $configuration = QueueDriverConfiguration::query()->create([
+            'name' => 'Preflight Sync',
+            'driver' => QueueDriverType::Sync,
+            'configuration' => [],
+            'is_enabled' => true,
+        ]);
+
+        $result = app(QueueDriverHealthService::class)->preflight(
+            $configuration,
+        );
+
+        $this->assertSame(
+            'healthy',
+            $result->status->value,
+        );
+
+        $this->assertNotNull(
+            $configuration
+                ->latestHealthCheck()
+                ->first(),
+        );
+
+        $this->assertSame(
+            1,
+            SystemAuditLog::query()
+                ->where('area', 'queue_driver_configurations')
+                ->where('action', 'activation_preflight')
+                ->count(),
+        );
+    }
 }

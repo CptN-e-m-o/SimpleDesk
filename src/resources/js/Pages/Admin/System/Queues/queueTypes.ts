@@ -115,6 +115,12 @@ export type QueueBacklogWorkload = {
     label: string
 }
 
+export type QueueDeploymentTarget = {
+    connection: string | null
+    driver: string | null
+    available: boolean
+}
+
 export type BacklogQueue = {
     connection: string
     queue: string

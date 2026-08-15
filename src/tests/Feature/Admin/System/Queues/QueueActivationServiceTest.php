@@ -98,6 +98,7 @@ class QueueActivationServiceTest extends TestCase
 
         $this->assertSame(
             [
+                'activation_preflight',
                 'activate',
                 'worker_restart_signaled',
             ],

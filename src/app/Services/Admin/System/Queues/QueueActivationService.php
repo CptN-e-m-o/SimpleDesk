@@ -3,7 +3,9 @@
 namespace App\Services\Admin\System\Queues;
 
 use App\Data\Admin\System\Queues\QueueActivationResultData;
+use App\Data\Admin\System\Queues\QueueHealthResultData;
 use App\Enums\Admin\System\QueueConfigurationMode;
+use App\Enums\Admin\System\QueueHealthStatus;
 use App\Models\Admin\System\QueueDriverConfiguration;
 use App\Models\Admin\System\QueueDriverSettings;
 use App\Models\User\User;
@@ -18,6 +20,8 @@ class QueueActivationService
         private readonly QueueBacklogService $backlog,
         private readonly QueueDriverRegistry $registry,
         private readonly QueuePinnedWorkloadService $pinnedWorkloads,
+        private readonly QueueDriverHealthService $health,
+        private readonly QueueDeploymentTargetService $deploymentTarget,
         private readonly QueueWorkerRestartService $restart,
         private readonly SystemAuditLogger $audit,
     ) {}
@@ -52,13 +56,29 @@ class QueueActivationService
             $this->rejectUnsafeBacklog($backlog);
         }
 
+        $this->validateRuntimeConfiguration($configuration);
+
+        $targetHealth = $this->health->preflight(
+            $configuration,
+            $actor,
+        );
+
+        $targetHealthOverrideRequired =
+            $targetHealth->status !== QueueHealthStatus::Healthy;
+
+        if ($targetHealthOverrideRequired && ! $force) {
+            $this->rejectUnhealthyTarget($targetHealth);
+        }
+
         $this->activateConfiguration(
             configurationId: $configuration->id,
             actor: $actor,
             force: $force,
             backlogOverrideRequired: $backlogOverrideRequired,
             workloadRoutingOverrideRequired: $workloadRoutingOverrideRequired,
+            targetHealthOverrideRequired: $targetHealthOverrideRequired,
             pinnedWorkloads: $pinnedWorkloads,
+            targetHealth: $targetHealth->toArray(),
             backlog: $backlog,
             observedState: $observedState,
         );
@@ -95,11 +115,33 @@ class QueueActivationService
             ]);
         }
 
+        $deploymentTarget = $this->deploymentTarget->resolve();
+
         $backlog = $this->backlog->inspect();
         $backlogOverrideRequired = $this->backlogOverrideRequired($backlog);
 
         if ($backlogOverrideRequired && ! $force) {
             $this->rejectUnsafeBacklog($backlog);
+        }
+
+        $targetHealth = $this->deploymentTarget->test(
+            $deploymentTarget,
+        );
+
+        $this->recordDeploymentTargetPreflight(
+            previousConfigurationId: $observedState['active_configuration_id'],
+            actor: $actor,
+            target: $deploymentTarget,
+            health: $targetHealth,
+        );
+
+        $targetHealthOverrideRequired =
+            $targetHealth->status !== QueueHealthStatus::Healthy;
+
+        if ($targetHealthOverrideRequired && ! $force) {
+            $this->rejectUnhealthyDeploymentTarget(
+                $targetHealth,
+            );
         }
 
         $previousConfigurationId = $observedState['active_configuration_id'];
@@ -108,6 +150,9 @@ class QueueActivationService
             actor: $actor,
             force: $force,
             backlogOverrideRequired: $backlogOverrideRequired,
+            targetHealthOverrideRequired: $targetHealthOverrideRequired,
+            deploymentTarget: $deploymentTarget,
+            targetHealth: $targetHealth->toArray(),
             backlog: $backlog,
             observedState: $observedState,
         );
@@ -138,7 +183,9 @@ class QueueActivationService
         bool $force,
         bool $backlogOverrideRequired,
         bool $workloadRoutingOverrideRequired,
+        bool $targetHealthOverrideRequired,
         array $pinnedWorkloads,
+        array $targetHealth,
         array $backlog,
         array $observedState,
     ): void {
@@ -148,7 +195,9 @@ class QueueActivationService
             $force,
             $backlogOverrideRequired,
             $workloadRoutingOverrideRequired,
+            $targetHealthOverrideRequired,
             $pinnedWorkloads,
+            $targetHealth,
             $backlog,
             $observedState,
         ): void {
@@ -216,7 +265,9 @@ class QueueActivationService
                     'force_requested' => $force,
                     'backlog_override_used' => $backlogOverrideRequired && $force,
                     'workload_routing_override_used' => $workloadRoutingOverrideRequired && $force,
+                    'target_health_override_used' => $targetHealthOverrideRequired && $force,
                     'pinned_workloads' => $pinnedWorkloads,
+                    'target_health' => $targetHealth,
                     'backlog' => $this->backlogAuditState($backlog),
                 ],
                 actor: $actor,
@@ -228,6 +279,9 @@ class QueueActivationService
         User $actor,
         bool $force,
         bool $backlogOverrideRequired,
+        bool $targetHealthOverrideRequired,
+        array $deploymentTarget,
+        array $targetHealth,
         array $backlog,
         array $observedState,
     ): void {
@@ -235,6 +289,9 @@ class QueueActivationService
             $actor,
             $force,
             $backlogOverrideRequired,
+            $targetHealthOverrideRequired,
+            $deploymentTarget,
+            $targetHealth,
             $backlog,
             $observedState,
         ): void {
@@ -274,6 +331,9 @@ class QueueActivationService
                 metadata: [
                     'force_requested' => $force,
                     'backlog_override_used' => $backlogOverrideRequired && $force,
+                    'target_health_override_used' => $targetHealthOverrideRequired && $force,
+                    'deployment_target' => $deploymentTarget,
+                    'target_health' => $targetHealth,
                     'backlog' => $this->backlogAuditState($backlog),
                 ],
                 actor: $actor,
@@ -511,6 +571,28 @@ class QueueActivationService
         }
     }
 
+    private function recordDeploymentTargetPreflight(
+        ?int $previousConfigurationId,
+        User $actor,
+        array $target,
+        QueueHealthResultData $health,
+    ): void {
+        $this->audit->log(
+            area: 'queue_driver_configurations',
+            action: 'deployment_activation_preflight',
+            subjectType: QueueDriverConfiguration::class,
+            subjectId: $previousConfigurationId,
+            before: null,
+            after: null,
+            metadata: [
+                'deployment_target' => $target,
+                'status' => $health->status->value,
+                'latency_ms' => $health->latencyMs,
+            ],
+            actor: $actor,
+        );
+    }
+
     private function currentRuntimeState(): array
     {
         $settings = QueueDriverSettings::query()->find(
@@ -538,8 +620,25 @@ class QueueActivationService
         }
     }
 
-    private function rejectPinnedWorkloads(array $workloads): never
-    {
+    private function rejectUnhealthyTarget(
+        QueueHealthResultData $health,
+    ): never {
+        throw ValidationException::withMessages([
+            'activation' => 'Managed Queue activation is blocked because the target Queue backend is not healthy. '.$health->message,
+        ]);
+    }
+
+    private function rejectUnhealthyDeploymentTarget(
+        QueueHealthResultData $health,
+    ): never {
+        throw ValidationException::withMessages([
+            'activation' => 'Deployment Queue activation is blocked because the deployment Queue backend is not healthy. '.$health->message,
+        ]);
+    }
+
+    private function rejectPinnedWorkloads(
+        array $workloads,
+    ): never {
         $routes = array_map(
             fn (array $workload): string => "{$workload['label']} → {$workload['connection']}",
             $workloads,
@@ -550,8 +649,9 @@ class QueueActivationService
         ]);
     }
 
-    private function backlogOverrideRequired(array $backlog): bool
-    {
+    private function backlogOverrideRequired(
+        array $backlog,
+    ): bool {
         if (! ($backlog['is_complete'] ?? false)) {
             return true;
         }
@@ -559,8 +659,9 @@ class QueueActivationService
         return ($backlog['total_pending'] ?? null) !== 0;
     }
 
-    private function rejectUnsafeBacklog(array $backlog): never
-    {
+    private function rejectUnsafeBacklog(
+        array $backlog,
+    ): never {
         if (! ($backlog['is_complete'] ?? false)) {
             throw ValidationException::withMessages([
                 'activation' => 'Queue activation is blocked because the current backlog could not be inspected completely.',
@@ -574,8 +675,9 @@ class QueueActivationService
         ]);
     }
 
-    private function backlogAuditState(array $backlog): array
-    {
+    private function backlogAuditState(
+        array $backlog,
+    ): array {
         return [
             'total_pending' => $backlog['total_pending'] ?? null,
             'inspected_pending' => (int) ($backlog['inspected_pending'] ?? 0),
@@ -585,8 +687,9 @@ class QueueActivationService
         ];
     }
 
-    private function settingsState(QueueDriverSettings $settings): array
-    {
+    private function settingsState(
+        QueueDriverSettings $settings,
+    ): array {
         return [
             'mode' => $settings->mode->value,
             'active_configuration_id' => $settings->active_configuration_id,
