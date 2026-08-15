@@ -235,26 +235,26 @@ class RedisQueueDriverAdapter implements QueueDriverAdapter
         $message = strtolower(trim((string) $message));
 
         foreach ([
-                     'noauth',
-                     'wrongpass',
-                     'authentication',
-                     'auth failed',
-                     'invalid password',
-                 ] as $needle) {
+            'noauth',
+            'wrongpass',
+            'authentication',
+            'auth failed',
+            'invalid password',
+        ] as $needle) {
             if (str_contains($message, $needle)) {
                 return 'Redis authentication failed.';
             }
         }
 
         foreach ([
-                     'connection refused',
-                     'timed out',
-                     'timeout',
-                     'getaddrinfo',
-                     'name or service not known',
-                     'no route to host',
-                     'network is unreachable',
-                 ] as $needle) {
+            'connection refused',
+            'timed out',
+            'timeout',
+            'getaddrinfo',
+            'name or service not known',
+            'no route to host',
+            'network is unreachable',
+        ] as $needle) {
             if (str_contains($message, $needle)) {
                 return 'Redis server could not be reached.';
             }

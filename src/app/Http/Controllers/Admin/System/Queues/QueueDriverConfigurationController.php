@@ -238,9 +238,9 @@ class QueueDriverConfigurationController extends Controller
                 ),
 
                 'defaults' => [
-                'minimum_retry_after' => $this
-                    ->safety
-                    ->minimumRetryAfterSeconds(),
+                    'minimum_retry_after' => $this
+                        ->safety
+                        ->minimumRetryAfterSeconds(),
                 ],
             ],
         );
