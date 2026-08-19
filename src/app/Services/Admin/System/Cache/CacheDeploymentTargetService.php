@@ -7,35 +7,83 @@ use Illuminate\Validation\ValidationException;
 
 class CacheDeploymentTargetService
 {
-    public function __construct(private readonly CacheStoreHealthProbe $probe) {}
+    public function __construct(
+        private readonly CacheStoreHealthProbe $probe,
+    ) {}
 
     public function resolve(): array
     {
-        $name = trim((string) config('simpledesk-cache.deployment.store', ''));
-        $managed = trim((string) config('simpledesk-cache.runtime.store_name', 'simpledesk-managed'));
+        $name = trim(
+            (string) config(
+                'simpledesk-cache.deployment.store',
+                '',
+            ),
+        );
+
+        $managed = trim(
+            (string) config(
+                'simpledesk-cache.runtime.store_name',
+                'simpledesk-managed',
+            ),
+        );
+
         if ($name === '') {
-            throw ValidationException::withMessages(['activation' => 'The deployment Cache store is not configured.']);
-        }
-        if ($name === $managed) {
-            throw ValidationException::withMessages(['activation' => 'The deployment Cache store cannot use the managed runtime store name.']);
-        }
-        $store = config("cache.stores.{$name}");
-        if (! is_array($store)) {
-            throw ValidationException::withMessages(['activation' => "The deployment Cache store [{$name}] no longer exists."]);
-        }
-        $driver = trim((string) ($store['driver'] ?? ''));
-        if ($driver === '') {
-            throw ValidationException::withMessages(['activation' => "The deployment Cache store [{$name}] does not define a driver."]);
+            $this->reject(
+                'The deployment Cache store is not configured.',
+            );
         }
 
-        return ['store' => $name, 'driver' => $driver, 'configuration' => $store];
+        if ($name === $managed) {
+            $this->reject(
+                'The deployment Cache store cannot use the managed runtime store name.',
+            );
+        }
+
+        $store = config(
+            "cache.stores.{$name}",
+        );
+
+        if (! is_array($store)) {
+            $this->reject(
+                "The deployment Cache store [{$name}] no longer exists.",
+            );
+        }
+
+        $driver = trim(
+            (string) ($store['driver'] ?? ''),
+        );
+
+        if ($driver === '') {
+            $this->reject(
+                "The deployment Cache store [{$name}] does not define a driver.",
+            );
+        }
+
+        $this->validateStructure(
+            storeName: $name,
+            driver: $driver,
+            store: $store,
+        );
+
+        return [
+            'store' => $name,
+            'driver' => $driver,
+            'configuration' => $store,
+        ];
     }
 
-    public function test(?array $target = null): CacheHealthResultData
-    {
+    public function test(
+        ?array $target = null,
+    ): CacheHealthResultData {
         $target ??= $this->resolve();
 
-        return $this->probe->test($target['configuration'], details: ['store' => $target['store'], 'driver' => $target['driver']]);
+        return $this->probe->test(
+            store: $target['configuration'],
+            details: [
+                'store' => $target['store'],
+                'driver' => $target['driver'],
+            ],
+        );
     }
 
     public function safeTarget(): array
@@ -43,9 +91,344 @@ class CacheDeploymentTargetService
         try {
             $target = $this->resolve();
 
-            return ['store' => $target['store'], 'driver' => $target['driver'], 'available' => true];
-        } catch (ValidationException $e) {
-            return ['store' => config('simpledesk-cache.deployment.store'), 'driver' => null, 'available' => false, 'message' => collect($e->errors())->flatten()->first()];
+            return [
+                'store' => $target['store'],
+                'driver' => $target['driver'],
+                'available' => true,
+            ];
+        } catch (ValidationException $exception) {
+            return [
+                'store' => config(
+                    'simpledesk-cache.deployment.store',
+                ),
+                'driver' => null,
+                'available' => false,
+                'message' => $this->validationMessage(
+                    $exception,
+                ),
+            ];
         }
+    }
+
+    private function validateStructure(
+        string $storeName,
+        string $driver,
+        array $store,
+    ): void {
+        match ($driver) {
+            'database' => $this->validateDatabaseStore(
+                $storeName,
+                $store,
+            ),
+            'file' => $this->validateFileStore(
+                $storeName,
+                $store,
+            ),
+            'redis' => $this->validateRedisStore(
+                $storeName,
+                $store,
+            ),
+            'memcached' => $this->validateMemcachedStore(
+                $storeName,
+                $store,
+            ),
+            'dynamodb' => $this->validateDynamoDbStore(
+                $storeName,
+                $store,
+            ),
+            'octane' => $this->validateOctaneStore(
+                $storeName,
+            ),
+            'failover' => $this->validateFailoverStore(
+                $storeName,
+                $store,
+            ),
+            'array', 'null' => null,
+            default => $this->reject(
+                "The deployment Cache store [{$storeName}] uses an unsupported driver [{$driver}].",
+            ),
+        };
+    }
+
+    private function validateDatabaseStore(
+        string $storeName,
+        array $store,
+    ): void {
+        $connection = trim(
+            (string) (
+                $store['connection']
+                ?? config('database.default', '')
+            ),
+        );
+
+        if (
+            $connection === ''
+            || ! is_array(
+                config(
+                    "database.connections.{$connection}",
+                ),
+            )
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] references an unavailable database connection.",
+            );
+        }
+
+        $table = trim(
+            (string) ($store['table'] ?? ''),
+        );
+
+        if ($table === '') {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] does not define a cache table.",
+            );
+        }
+
+        $lockConnection = trim(
+            (string) (
+                $store['lock_connection']
+                ?? $connection
+            ),
+        );
+
+        if (
+            $lockConnection === ''
+            || ! is_array(
+                config(
+                    "database.connections.{$lockConnection}",
+                ),
+            )
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] references an unavailable lock database connection.",
+            );
+        }
+
+        if (
+            array_key_exists(
+                'lock_table',
+                $store,
+            )
+            && trim(
+                (string) $store['lock_table'],
+            ) === ''
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] has an invalid lock table.",
+            );
+        }
+    }
+
+    private function validateFileStore(
+        string $storeName,
+        array $store,
+    ): void {
+        if (
+            trim(
+                (string) ($store['path'] ?? ''),
+            ) === ''
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] does not define a filesystem path.",
+            );
+        }
+
+        if (
+            array_key_exists(
+                'lock_path',
+                $store,
+            )
+            && trim(
+                (string) $store['lock_path'],
+            ) === ''
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] has an invalid lock path.",
+            );
+        }
+    }
+
+    private function validateRedisStore(
+        string $storeName,
+        array $store,
+    ): void {
+        $connection = trim(
+            (string) ($store['connection'] ?? 'default'),
+        );
+
+        if (
+            $connection === ''
+            || ! is_array(
+                config(
+                    "database.redis.{$connection}",
+                ),
+            )
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] references an unavailable Redis connection.",
+            );
+        }
+
+        $lockConnection = trim(
+            (string) (
+                $store['lock_connection']
+                ?? $connection
+            ),
+        );
+
+        if (
+            $lockConnection === ''
+            || ! is_array(
+                config(
+                    "database.redis.{$lockConnection}",
+                ),
+            )
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] references an unavailable Redis lock connection.",
+            );
+        }
+    }
+
+    private function validateMemcachedStore(
+        string $storeName,
+        array $store,
+    ): void {
+        if (! class_exists('Memcached')) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] requires the PHP Memcached extension, which is unavailable.",
+            );
+        }
+
+        $servers = $store['servers'] ?? null;
+
+        if (! is_array($servers) || $servers === []) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] does not define any Memcached servers.",
+            );
+        }
+
+        foreach ($servers as $server) {
+            if (
+                ! is_array($server)
+                || trim(
+                    (string) ($server['host'] ?? ''),
+                ) === ''
+                || filter_var(
+                    $server['port'] ?? null,
+                    FILTER_VALIDATE_INT,
+                    [
+                        'options' => [
+                            'min_range' => 1,
+                            'max_range' => 65535,
+                        ],
+                    ],
+                ) === false
+            ) {
+                $this->reject(
+                    "The deployment Cache store [{$storeName}] contains an invalid Memcached server definition.",
+                );
+            }
+        }
+    }
+
+    private function validateDynamoDbStore(
+        string $storeName,
+        array $store,
+    ): void {
+        if (
+            ! class_exists(
+                'Aws\\DynamoDb\\DynamoDbClient',
+            )
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] requires the AWS SDK, which is unavailable.",
+            );
+        }
+
+        if (
+            trim(
+                (string) ($store['region'] ?? ''),
+            ) === ''
+            || trim(
+                (string) ($store['table'] ?? ''),
+            ) === ''
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] has incomplete DynamoDB configuration.",
+            );
+        }
+    }
+
+    private function validateOctaneStore(
+        string $storeName,
+    ): void {
+        if (
+            ! class_exists(
+                'Laravel\\Octane\\OctaneServiceProvider',
+            )
+        ) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] requires Laravel Octane, which is unavailable.",
+            );
+        }
+    }
+
+    private function validateFailoverStore(
+        string $storeName,
+        array $store,
+    ): void {
+        $stores = $store['stores'] ?? null;
+
+        if (! is_array($stores) || $stores === []) {
+            $this->reject(
+                "The deployment Cache store [{$storeName}] does not define failover stores.",
+            );
+        }
+
+        foreach ($stores as $fallback) {
+            $fallback = trim(
+                (string) $fallback,
+            );
+
+            if (
+                $fallback === ''
+                || $fallback === $storeName
+                || ! is_array(
+                    config(
+                        "cache.stores.{$fallback}",
+                    ),
+                )
+            ) {
+                $this->reject(
+                    "The deployment Cache store [{$storeName}] contains an invalid failover store reference.",
+                );
+            }
+        }
+    }
+
+    private function validationMessage(
+        ValidationException $exception,
+    ): string {
+        foreach ($exception->errors() as $messages) {
+            foreach ($messages as $message) {
+                if (
+                    is_string($message)
+                    && trim($message) !== ''
+                ) {
+                    return trim($message);
+                }
+            }
+        }
+
+        return 'The deployment Cache store is invalid.';
+    }
+
+    private function reject(
+        string $message,
+    ): never {
+        throw ValidationException::withMessages([
+            'activation' => $message,
+        ]);
     }
 }
