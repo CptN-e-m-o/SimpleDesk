@@ -14,9 +14,11 @@ class CacheDriverCatalogServiceTest extends TestCase
 
     public function test_database_profile_uses_allowlisted_connection(): void
     {
-        config()->set('simpledesk-cache.database.allowed_connections', ['sqlite']); config()->set('database.connections.sqlite', config('database.connections.sqlite'));
+        config()->set('simpledesk-cache.database.allowed_connections', ['sqlite']);
+        config()->set('database.connections.sqlite', config('database.connections.sqlite'));
         $model = app(CacheDriverCatalogService::class)->create(['name' => 'Primary cache', 'driver' => 'database', 'configuration' => ['database_connection' => 'sqlite'], 'is_enabled' => true], User::factory()->create());
-        $this->assertSame('sqlite', $model->configuration['database_connection']); $this->assertNull($model->infrastructure_connection_id);
+        $this->assertSame('sqlite', $model->configuration['database_connection']);
+        $this->assertNull($model->infrastructure_connection_id);
     }
 
     public function test_file_profile_rejects_arbitrary_paths(): void

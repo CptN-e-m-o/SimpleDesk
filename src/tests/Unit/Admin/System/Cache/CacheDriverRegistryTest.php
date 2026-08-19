@@ -13,7 +13,9 @@ class CacheDriverRegistryTest extends TestCase
     {
         $registry = app(CacheDriverRegistry::class);
         $this->assertSame([CacheDriverType::Database, CacheDriverType::File, CacheDriverType::Redis], $registry->registeredTypes());
-        foreach ($registry->registeredTypes() as $type) $this->assertSame($type, $registry->adapter($type)->type());
+        foreach ($registry->registeredTypes() as $type) {
+            $this->assertSame($type, $registry->adapter($type)->type());
+        }
     }
 
     public function test_unknown_adapter_is_rejected_safely(): void

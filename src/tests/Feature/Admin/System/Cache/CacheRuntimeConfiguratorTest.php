@@ -15,7 +15,9 @@ class CacheRuntimeConfiguratorTest extends TestCase
 
     public function test_no_settings_row_leaves_deployment_cache_untouched(): void
     {
-        config()->set('cache.default', 'database'); app(CacheRuntimeConfigurator::class)->apply(); $this->assertSame('database', config('cache.default'));
+        config()->set('cache.default', 'database');
+        app(CacheRuntimeConfigurator::class)->apply();
+        $this->assertSame('database', config('cache.default'));
     }
 
     public function test_managed_file_configuration_installs_synthetic_store(): void
@@ -24,12 +26,15 @@ class CacheRuntimeConfiguratorTest extends TestCase
         $configuration = CacheDriverConfiguration::query()->create(['name' => 'Managed file', 'driver' => 'file', 'configuration' => [], 'is_enabled' => true]);
         CacheDriverSettings::query()->create(['id' => 1, 'mode' => CacheConfigurationMode::Managed, 'active_configuration_id' => $configuration->id]);
         app(CacheRuntimeConfigurator::class)->apply();
-        $this->assertSame('simpledesk-managed', config('cache.default')); $this->assertSame('file', config('cache.stores.simpledesk-managed.driver')); $this->assertStringContainsString('framework/cache/simpledesk', str_replace('\\', '/', config('cache.stores.simpledesk-managed.path')));
+        $this->assertSame('simpledesk-managed', config('cache.default'));
+        $this->assertSame('file', config('cache.stores.simpledesk-managed.driver'));
+        $this->assertStringContainsString('framework/cache/simpledesk', str_replace('\\', '/', config('cache.stores.simpledesk-managed.path')));
     }
 
     public function test_stable_deployment_target_does_not_follow_runtime_default(): void
     {
-        config()->set('simpledesk-cache.deployment.store', 'database'); config()->set('cache.default', 'simpledesk-managed');
+        config()->set('simpledesk-cache.deployment.store', 'database');
+        config()->set('cache.default', 'simpledesk-managed');
         $this->assertSame('database', config('simpledesk-cache.deployment.store'));
     }
 }

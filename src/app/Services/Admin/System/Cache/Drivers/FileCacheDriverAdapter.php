@@ -10,17 +10,44 @@ use App\Enums\Admin\System\CacheDriverType;
 use App\Models\Admin\System\CacheDriverConfiguration;
 use App\Services\Admin\System\Cache\CacheStoreHealthProbe;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class FileCacheDriverAdapter implements CacheDriverAdapter
 {
     public function __construct(private readonly CacheStoreHealthProbe $probe) {}
-    public function type(): CacheDriverType { return CacheDriverType::File; }
-    public function definition(): CacheDriverDefinitionData { return new CacheDriverDefinitionData($this->type(), 'File', 'Use an isolated SimpleDesk-owned directory below storage/framework/cache.', false, null, false); }
-    public function validateAndNormalize(array $configuration): array { Validator::make($configuration, ['path' => ['prohibited'], 'lock_path' => ['prohibited']])->validate(); return []; }
+
+    public function type(): CacheDriverType
+    {
+        return CacheDriverType::File;
+    }
+
+    public function definition(): CacheDriverDefinitionData
+    {
+        return new CacheDriverDefinitionData($this->type(), 'File', 'Use an isolated SimpleDesk-owned directory below storage/framework/cache.', false, null, false);
+    }
+
+    public function validateAndNormalize(array $configuration): array
+    {
+        Validator::make($configuration, ['path' => ['prohibited'], 'lock_path' => ['prohibited']])->validate();
+
+        return [];
+    }
+
     public function runtimeConfiguration(CacheDriverConfiguration $configuration): CacheRuntimeConfigurationData
     {
-        $this->validateAndNormalize($configuration->configuration ?? []); if (! $configuration->exists || ! $configuration->id) throw \Illuminate\Validation\ValidationException::withMessages(['configuration' => 'File cache configuration must be persisted before use.']);
-        $path = storage_path('framework/cache/simpledesk/'.$configuration->id); return new CacheRuntimeConfigurationData(['driver' => 'file', 'path' => $path, 'lock_path' => $path]);
+        $this->validateAndNormalize($configuration->configuration ?? []);
+        if (! $configuration->exists || ! $configuration->id) {
+            throw ValidationException::withMessages(['configuration' => 'File cache configuration must be persisted before use.']);
+        }
+        $path = storage_path('framework/cache/simpledesk/'.$configuration->id);
+
+        return new CacheRuntimeConfigurationData(['driver' => 'file', 'path' => $path, 'lock_path' => $path]);
     }
-    public function test(CacheDriverConfiguration $configuration): CacheHealthResultData { $runtime = $this->runtimeConfiguration($configuration); return $this->probe->test($runtime->store, details: ['profile_isolated' => true]); }
+
+    public function test(CacheDriverConfiguration $configuration): CacheHealthResultData
+    {
+        $runtime = $this->runtimeConfiguration($configuration);
+
+        return $this->probe->test($runtime->store, details: ['profile_isolated' => true]);
+    }
 }
