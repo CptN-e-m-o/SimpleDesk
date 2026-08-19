@@ -37,8 +37,7 @@ class RedisCacheDriverAdapterTest extends TestCase
             ->expects($this->once())
             ->method('make')
             ->with($this->callback(
-                fn (InfrastructureConnection $value): bool =>
-                    $value->id === $connection->id,
+                fn (InfrastructureConnection $value): bool => $value->id === $connection->id,
             ))
             ->willReturn([
                 'host' => 'redis.internal',
@@ -256,12 +255,10 @@ class RedisCacheDriverAdapterTest extends TestCase
             ->method('test')
             ->with(
                 $this->callback(
-                    fn (array $store): bool =>
-                        $store['driver'] === 'redis',
+                    fn (array $store): bool => $store['driver'] === 'redis',
                 ),
                 $this->callback(
-                    fn (array $connections): bool =>
-                        count($connections) === 1,
+                    fn (array $connections): bool => count($connections) === 1,
                 ),
                 [
                     'infrastructure_connection_id' => $connection->id,

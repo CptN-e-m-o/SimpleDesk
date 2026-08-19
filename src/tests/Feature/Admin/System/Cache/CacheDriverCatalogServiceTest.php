@@ -1,487 +1,354 @@
 <?php
 
-namespace App\Services\Admin\System\Cache;
+namespace Tests\Feature\Admin\System\Cache;
 
 use App\Enums\Admin\System\CacheConfigurationMode;
 use App\Enums\Admin\System\CacheDriverType;
-use App\Enums\Admin\System\InfrastructureConnectionType;
 use App\Exceptions\Admin\System\Cache\ActiveCacheDriverConfigurationMutationException;
 use App\Models\Admin\System\CacheDriverConfiguration;
 use App\Models\Admin\System\CacheDriverSettings;
 use App\Models\Admin\System\InfrastructureConnection;
 use App\Models\User\User;
-use App\Services\Admin\System\Audit\SystemAuditLogger;
-use Illuminate\Support\Facades\DB;
+use App\Services\Admin\System\Cache\CacheDriverCatalogService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Tests\TestCase;
 
-class CacheDriverCatalogService
+class CacheDriverCatalogServiceTest extends TestCase
 {
-    public function __construct(
-        private readonly CacheDriverRegistry $registry,
-        private readonly SystemAuditLogger $audit,
-    ) {}
+    use RefreshDatabase;
 
-    public function create(array $data, User $actor): CacheDriverConfiguration
+    public function test_database_configuration_is_created_with_normalized_configuration(): void
     {
-        return DB::transaction(function () use ($data, $actor): CacheDriverConfiguration {
-            $type = CacheDriverType::tryFrom(
-                (string) ($data['driver'] ?? ''),
-            );
+        $actor = User::factory()->create();
+        $connection = config('database.default');
 
-            if (! $type) {
-                throw ValidationException::withMessages([
-                    'driver' => 'Unknown cache driver.',
-                ]);
-            }
-
-            $this->registry->adapter($type);
-
-            $infrastructure = $this->resolveInfrastructure(
-                $type,
-                $data['infrastructure_connection_id'] ?? null,
-            );
-
-            $configuration = $this->normalize(
-                $type,
-                $data['configuration'] ?? [],
-            );
-
-            $model = CacheDriverConfiguration::query()->create([
-                'name' => $data['name'],
-                'driver' => $type,
-                'infrastructure_connection_id' => $infrastructure?->id,
-                'configuration' => $configuration,
-                'is_enabled' => $data['is_enabled'] ?? true,
-                'created_by' => $actor->id,
-                'updated_by' => $actor->id,
-            ]);
-
-            $this->log(
-                action: 'create',
-                model: $model,
-                before: null,
-                after: $this->safe($model),
-                actor: $actor,
-            );
-
-            return $model;
-        });
-    }
-
-    public function update(
-        CacheDriverConfiguration $model,
-        array $data,
-        User $actor,
-    ): CacheDriverConfiguration {
-        return DB::transaction(function () use ($model, $data, $actor): CacheDriverConfiguration {
-            $settings = $this->lockSettings();
-
-            $model = CacheDriverConfiguration::query()
-                ->lockForUpdate()
-                ->findOrFail($model->id);
-
-            $this->guardInactive(
-                $model,
-                $settings,
-            );
-
-            if (
-                array_key_exists('driver', $data)
-                && $data['driver'] !== $model->driver->value
-            ) {
-                throw ValidationException::withMessages([
-                    'driver' => 'Cache driver cannot be changed after creation.',
-                ]);
-            }
-
-            $before = $this->safe($model);
-
-            $infrastructureId = array_key_exists(
-                'infrastructure_connection_id',
-                $data,
-            )
-                ? $data['infrastructure_connection_id']
-                : $model->infrastructure_connection_id;
-
-            $infrastructure = $this->resolveInfrastructure(
-                $model->driver,
-                $infrastructureId,
-            );
-
-            $configuration = $this->normalize(
-                $model->driver,
-                $data['configuration'] ?? $model->configuration ?? [],
-            );
-
-            $model->update([
-                'name' => $data['name'] ?? $model->name,
-                'infrastructure_connection_id' => $infrastructure?->id,
-                'configuration' => $configuration,
-                'is_enabled' => array_key_exists('is_enabled', $data)
-                    ? (bool) $data['is_enabled']
-                    : $model->is_enabled,
-                'updated_by' => $actor->id,
-            ]);
-
-            $model->refresh();
-
-            $this->log(
-                action: 'update',
-                model: $model,
-                before: $before,
-                after: $this->safe($model),
-                actor: $actor,
-            );
-
-            return $model;
-        });
-    }
-
-    public function setEnabled(
-        CacheDriverConfiguration $model,
-        bool $enabled,
-        User $actor,
-    ): CacheDriverConfiguration {
-        return DB::transaction(function () use ($model, $enabled, $actor): CacheDriverConfiguration {
-            $settings = $this->lockSettings();
-
-            $model = CacheDriverConfiguration::query()
-                ->lockForUpdate()
-                ->findOrFail($model->id);
-
-            if ($model->is_enabled === $enabled) {
-                return $model;
-            }
-
-            if (! $enabled) {
-                $this->guardInactive(
-                    $model,
-                    $settings,
-                );
-            }
-
-            $before = $this->safe($model);
-
-            $model->update([
-                'is_enabled' => $enabled,
-                'updated_by' => $actor->id,
-            ]);
-
-            $model->refresh();
-
-            $this->log(
-                action: $enabled ? 'enable' : 'disable',
-                model: $model,
-                before: $before,
-                after: $this->safe($model),
-                actor: $actor,
-            );
-
-            return $model;
-        });
-    }
-
-    public function archive(
-        CacheDriverConfiguration $model,
-        User $actor,
-    ): void {
-        DB::transaction(function () use ($model, $actor): void {
-            $settings = $this->lockSettings();
-
-            $model = CacheDriverConfiguration::query()
-                ->lockForUpdate()
-                ->findOrFail($model->id);
-
-            $this->guardInactive(
-                $model,
-                $settings,
-            );
-
-            $before = $this->safe($model);
-
-            $model->update([
-                'is_enabled' => false,
-                'updated_by' => $actor->id,
-            ]);
-
-            $model->delete();
-
-            $this->log(
-                action: 'archive',
-                model: $model,
-                before: $before,
-                after: $this->safe($model),
-                actor: $actor,
-            );
-        });
-    }
-
-    public function restore(
-        int $id,
-        User $actor,
-    ): CacheDriverConfiguration {
-        return DB::transaction(function () use ($id, $actor): CacheDriverConfiguration {
-            $model = CacheDriverConfiguration::onlyTrashed()
-                ->lockForUpdate()
-                ->findOrFail($id);
-
-            $model->restore();
-
-            $model->update([
-                'is_enabled' => false,
-                'updated_by' => $actor->id,
-            ]);
-
-            $model->refresh();
-
-            $this->log(
-                action: 'restore',
-                model: $model,
-                before: null,
-                after: $this->safe($model),
-                actor: $actor,
-            );
-
-            return $model;
-        });
-    }
-
-    public function forceDelete(
-        int $id,
-        User $actor,
-    ): void {
-        DB::transaction(function () use ($id, $actor): void {
-            $settings = $this->lockSettings();
-
-            $model = CacheDriverConfiguration::onlyTrashed()
-                ->lockForUpdate()
-                ->findOrFail($id);
-
-            $this->guardInactive(
-                $model,
-                $settings,
-            );
-
-            $before = $this->safe($model);
-            $subjectId = $model->id;
-
-            $model->forceDelete();
-
-            $this->audit->log(
-                area: 'cache_driver_configurations',
-                action: 'force_delete',
-                subjectType: CacheDriverConfiguration::class,
-                subjectId: $subjectId,
-                before: $before,
-                after: null,
-                actor: $actor,
-            );
-        });
-    }
-
-    public function safe(
-        CacheDriverConfiguration $model,
-    ): array {
-        $model->loadMissing([
-            'latestHealthCheck',
-            'infrastructureConnection',
-        ]);
-
-        $health = $model->latestHealthCheck;
-        $infrastructure = $model->infrastructureConnection;
-
-        return [
-            'id' => $model->id,
-            'name' => $model->name,
-            'driver' => $model->driver->value,
-            'infrastructure_connection_id' => $model->infrastructure_connection_id,
-            'configuration' => array_diff_key(
-                $model->configuration ?? [],
-                [
-                    'infrastructure_connection_id' => true,
-                ],
-            ),
-            'is_enabled' => $model->is_enabled,
-            'deleted_at' => $model->deleted_at?->toIso8601String(),
-            'is_active' => $this->isActive($model),
-            'latest_health_check' => $health
-                ? [
-                    'status' => $health->status->value,
-                    'latency_ms' => $health->latency_ms,
-                    'message' => $health->message,
-                    'details' => $health->details,
-                    'created_at' => $health->created_at?->toIso8601String(),
-                ]
-                : null,
-            'infrastructure_connection' => $infrastructure
-                ? [
-                    'id' => $infrastructure->id,
-                    'name' => $infrastructure->name,
-                    'type' => $infrastructure->type->value,
-                    'source' => $infrastructure->source->value,
-                    'is_enabled' => $infrastructure->is_enabled,
-                    'deleted_at' => $infrastructure->deleted_at?->toIso8601String(),
-                ]
-                : null,
-        ];
-    }
-
-    private function normalize(
-        CacheDriverType $type,
-        array $configuration,
-    ): array {
-        if (
-            array_key_exists(
-                'infrastructure_connection_id',
-                $configuration,
-            )
-        ) {
-            throw ValidationException::withMessages([
-                'configuration.infrastructure_connection_id' => 'Infrastructure connection must be supplied only through the top-level infrastructure_connection_id field.',
-            ]);
-        }
-
-        try {
-            return $this->registry
-                ->adapter($type)
-                ->validateAndNormalize($configuration);
-        } catch (ValidationException $exception) {
-            $messages = [];
-
-            foreach ($exception->errors() as $key => $values) {
-                $messages[
-                str_starts_with(
-                    $key,
-                    'configuration.',
-                )
-                    ? $key
-                    : 'configuration.'.$key
-                ] = $values;
-            }
-
-            throw ValidationException::withMessages(
-                $messages,
-            );
-        }
-    }
-
-    private function resolveInfrastructure(
-        CacheDriverType $type,
-        mixed $id,
-    ): ?InfrastructureConnection {
-        if ($type !== CacheDriverType::Redis) {
-            if ($id !== null && $id !== '') {
-                throw ValidationException::withMessages([
-                    'infrastructure_connection_id' => 'Only Redis cache configurations may reference infrastructure.',
-                ]);
-            }
-
-            return null;
-        }
-
-        $id = filter_var(
-            $id,
-            FILTER_VALIDATE_INT,
-            [
-                'options' => [
-                    'min_range' => 1,
-                ],
+        $configuration = $this->service()->create([
+            'name' => 'Primary database cache',
+            'driver' => CacheDriverType::Database->value,
+            'infrastructure_connection_id' => null,
+            'configuration' => [
+                'database_connection' => $connection,
             ],
+            'is_enabled' => true,
+        ], $actor);
+
+        $this->assertSame(
+            CacheDriverType::Database,
+            $configuration->driver,
         );
 
-        if ($id === false) {
-            throw ValidationException::withMessages([
-                'infrastructure_connection_id' => 'A Redis infrastructure connection is required.',
-            ]);
-        }
+        $this->assertSame(
+            $connection,
+            $configuration->configuration['database_connection'],
+        );
 
-        $connection = InfrastructureConnection::withTrashed()
-            ->find($id);
+        $this->assertNull(
+            $configuration->infrastructure_connection_id,
+        );
 
-        if (! $connection) {
-            throw ValidationException::withMessages([
-                'infrastructure_connection_id' => 'The selected Redis infrastructure connection does not exist.',
-            ]);
-        }
+        $this->assertTrue(
+            $configuration->is_enabled,
+        );
 
-        if ($connection->trashed()) {
-            throw ValidationException::withMessages([
-                'infrastructure_connection_id' => 'The selected Redis infrastructure connection is archived.',
-            ]);
-        }
+        $this->assertSame(
+            $actor->id,
+            $configuration->created_by,
+        );
 
-        if ($connection->type !== InfrastructureConnectionType::Redis) {
-            throw ValidationException::withMessages([
-                'infrastructure_connection_id' => 'The selected infrastructure connection is not Redis.',
-            ]);
-        }
-
-        if (! $connection->is_enabled) {
-            throw ValidationException::withMessages([
-                'infrastructure_connection_id' => 'The selected Redis infrastructure connection is disabled.',
-            ]);
-        }
-
-        return $connection;
+        $this->assertSame(
+            $actor->id,
+            $configuration->updated_by,
+        );
     }
 
-    private function lockSettings(): ?CacheDriverSettings
+    public function test_redis_configuration_uses_top_level_infrastructure_foreign_key(): void
     {
-        return CacheDriverSettings::query()
-            ->whereKey(
-                CacheDriverSettings::SINGLETON_ID,
-            )
-            ->lockForUpdate()
-            ->first();
+        $actor = User::factory()->create();
+        $infrastructure = InfrastructureConnection::factory()->create();
+
+        $configuration = $this->service()->create([
+            'name' => 'Primary Redis cache',
+            'driver' => CacheDriverType::Redis->value,
+            'infrastructure_connection_id' => $infrastructure->id,
+            'configuration' => [],
+            'is_enabled' => true,
+        ], $actor);
+
+        $this->assertSame(
+            CacheDriverType::Redis,
+            $configuration->driver,
+        );
+
+        $this->assertSame(
+            $infrastructure->id,
+            $configuration->infrastructure_connection_id,
+        );
+
+        $this->assertSame(
+            [],
+            $configuration->configuration,
+        );
     }
 
-    private function guardInactive(
-        CacheDriverConfiguration $model,
-        ?CacheDriverSettings $settings,
-    ): void {
-        if (
-            $settings?->mode === CacheConfigurationMode::Managed
-            && $settings->active_configuration_id === $model->id
-        ) {
-            throw new ActiveCacheDriverConfigurationMutationException(
-                'The active managed Cache configuration cannot be mutated. Activate another configuration or return to deployment first.',
+    public function test_nested_infrastructure_connection_id_is_rejected_by_catalog_service(): void
+    {
+        $actor = User::factory()->create();
+
+        try {
+            $this->service()->create([
+                'name' => 'Invalid Cache',
+                'driver' => CacheDriverType::Database->value,
+                'infrastructure_connection_id' => null,
+                'configuration' => [
+                    'infrastructure_connection_id' => 123,
+                ],
+                'is_enabled' => true,
+            ], $actor);
+
+            $this->fail(
+                'Nested infrastructure_connection_id should be rejected.',
+            );
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey(
+                'configuration.infrastructure_connection_id',
+                $exception->errors(),
             );
         }
+
+        $this->assertFalse(
+            CacheDriverConfiguration::query()
+                ->where('name', 'Invalid Cache')
+                ->exists(),
+        );
     }
 
-    private function isActive(
-        CacheDriverConfiguration $model,
-    ): bool {
-        return CacheDriverSettings::query()
-            ->whereKey(
-                CacheDriverSettings::SINGLETON_ID,
-            )
-            ->where(
-                'mode',
-                CacheConfigurationMode::Managed->value,
-            )
-            ->where(
-                'active_configuration_id',
-                $model->id,
-            )
-            ->exists();
+    public function test_driver_cannot_be_changed_after_creation(): void
+    {
+        $actor = User::factory()->create();
+        $configuration = $this->fileConfiguration($actor);
+
+        try {
+            $this->service()->update(
+                $configuration,
+                [
+                    'driver' => CacheDriverType::Database->value,
+                ],
+                $actor,
+            );
+
+            $this->fail(
+                'Cache driver mutation should be rejected.',
+            );
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey(
+                'driver',
+                $exception->errors(),
+            );
+        }
+
+        $this->assertSame(
+            CacheDriverType::File,
+            $configuration->fresh()->driver,
+        );
     }
 
-    private function log(
-        string $action,
-        CacheDriverConfiguration $model,
-        ?array $before,
-        ?array $after,
+    public function test_partial_update_preserves_unspecified_values(): void
+    {
+        $actor = User::factory()->create();
+
+        $configuration = CacheDriverConfiguration::query()->create([
+            'name' => 'Original Cache',
+            'driver' => CacheDriverType::Database,
+            'infrastructure_connection_id' => null,
+            'configuration' => [
+                'database_connection' => config('database.default'),
+            ],
+            'is_enabled' => true,
+            'created_by' => $actor->id,
+            'updated_by' => $actor->id,
+        ]);
+
+        $updated = $this->service()->update(
+            $configuration,
+            [
+                'name' => 'Renamed Cache',
+            ],
+            $actor,
+        );
+
+        $this->assertSame(
+            'Renamed Cache',
+            $updated->name,
+        );
+
+        $this->assertTrue(
+            $updated->is_enabled,
+        );
+
+        $this->assertSame(
+            config('database.default'),
+            $updated->configuration['database_connection'],
+        );
+    }
+
+    public function test_active_configuration_cannot_be_updated(): void
+    {
+        $actor = User::factory()->create();
+        $configuration = $this->fileConfiguration($actor);
+
+        $this->activate(
+            $configuration,
+            $actor,
+        );
+
+        $this->expectException(
+            ActiveCacheDriverConfigurationMutationException::class,
+        );
+
+        $this->service()->update(
+            $configuration,
+            [
+                'name' => 'Mutated Active Cache',
+            ],
+            $actor,
+        );
+    }
+
+    public function test_active_configuration_cannot_be_disabled(): void
+    {
+        $actor = User::factory()->create();
+        $configuration = $this->fileConfiguration($actor);
+
+        $this->activate(
+            $configuration,
+            $actor,
+        );
+
+        $this->expectException(
+            ActiveCacheDriverConfigurationMutationException::class,
+        );
+
+        $this->service()->setEnabled(
+            $configuration,
+            false,
+            $actor,
+        );
+    }
+
+    public function test_active_configuration_cannot_be_archived(): void
+    {
+        $actor = User::factory()->create();
+        $configuration = $this->fileConfiguration($actor);
+
+        $this->activate(
+            $configuration,
+            $actor,
+        );
+
+        $this->expectException(
+            ActiveCacheDriverConfigurationMutationException::class,
+        );
+
+        $this->service()->archive(
+            $configuration,
+            $actor,
+        );
+    }
+
+    public function test_restored_configuration_remains_disabled(): void
+    {
+        $actor = User::factory()->create();
+        $configuration = $this->fileConfiguration($actor);
+
+        $this->service()->archive(
+            $configuration,
+            $actor,
+        );
+
+        $restored = $this->service()->restore(
+            $configuration->id,
+            $actor,
+        );
+
+        $this->assertFalse(
+            $restored->is_enabled,
+        );
+
+        $this->assertNull(
+            $restored->deleted_at,
+        );
+    }
+
+    public function test_enabling_configuration_does_not_activate_it(): void
+    {
+        $actor = User::factory()->create();
+
+        $configuration = CacheDriverConfiguration::query()->create([
+            'name' => 'Disabled Cache',
+            'driver' => CacheDriverType::File,
+            'infrastructure_connection_id' => null,
+            'configuration' => [],
+            'is_enabled' => false,
+            'created_by' => $actor->id,
+            'updated_by' => $actor->id,
+        ]);
+
+        $updated = $this->service()->setEnabled(
+            $configuration,
+            true,
+            $actor,
+        );
+
+        $this->assertTrue(
+            $updated->is_enabled,
+        );
+
+        $this->assertFalse(
+            CacheDriverSettings::query()
+                ->where(
+                    'mode',
+                    CacheConfigurationMode::Managed->value,
+                )
+                ->where(
+                    'active_configuration_id',
+                    $configuration->id,
+                )
+                ->exists(),
+        );
+    }
+
+    private function fileConfiguration(
+        User $actor,
+    ): CacheDriverConfiguration {
+        return CacheDriverConfiguration::query()->create([
+            'name' => 'File Cache',
+            'driver' => CacheDriverType::File,
+            'infrastructure_connection_id' => null,
+            'configuration' => [],
+            'is_enabled' => true,
+            'created_by' => $actor->id,
+            'updated_by' => $actor->id,
+        ]);
+    }
+
+    private function activate(
+        CacheDriverConfiguration $configuration,
         User $actor,
     ): void {
-        $this->audit->log(
-            area: 'cache_driver_configurations',
-            action: $action,
-            subjectType: CacheDriverConfiguration::class,
-            subjectId: $model->id,
-            before: $before,
-            after: $after,
-            actor: $actor,
+        CacheDriverSettings::query()->create([
+            'id' => CacheDriverSettings::SINGLETON_ID,
+            'mode' => CacheConfigurationMode::Managed,
+            'active_configuration_id' => $configuration->id,
+            'activated_at' => now(),
+            'activated_by' => $actor->id,
+        ]);
+    }
+
+    private function service(): CacheDriverCatalogService
+    {
+        return app(
+            CacheDriverCatalogService::class,
         );
     }
 }

@@ -412,8 +412,7 @@ class CacheDriverConfigurationHttpTest extends TestCase
                     )
                     ->where(
                         'redis_connections.0.deleted_at',
-                        fn ($value) =>
-                            is_string($value)
+                        fn ($value) => is_string($value)
                             && $value !== '',
                     ),
             );
