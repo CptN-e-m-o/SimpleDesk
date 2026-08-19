@@ -228,12 +228,10 @@ export default function Index({
                                         key={key}
                                         className="group relative flex min-h-[290px] flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
                                     >
-                                        {key === 'queue' && can(
-                                            'admin.settings.queues.view',
-                                        ) ? (
+                                        {(key === 'queue' && can('admin.settings.queues.view')) || (key === 'cache' && can('admin.settings.cache.view')) ? (
                                             <Link
                                                 href={route(
-                                                    'admin.system.queues.index',
+                                                    key === 'queue' ? 'admin.system.queues.index' : 'admin.system.cache.index',
                                                 )}
                                                 aria-label="Open Queue management"
                                                 className="absolute inset-0 z-10"
@@ -291,7 +289,7 @@ export default function Index({
                                                 is not active yet
                                             </span>
 
-                                            <ArrowRight className={`h-4 w-4 ${key === 'queue' && can('admin.settings.queues.view') ? 'text-sky-500' : 'text-gray-300'}`} />
+                                            <ArrowRight className={`h-4 w-4 ${(key === 'queue' && can('admin.settings.queues.view')) || (key === 'cache' && can('admin.settings.cache.view')) ? 'text-sky-500' : 'text-gray-300'}`} />
                                         </div>
                                     </article>
                                 ),

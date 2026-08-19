@@ -34,6 +34,12 @@ use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\System\DriverController;
+use App\Http\Controllers\Admin\System\Cache\CacheDeploymentActivationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDeploymentForceActivationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverActivationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverConfigurationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverConfigurationTestController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverForceActivationController;
 use App\Http\Controllers\Admin\System\InfrastructureConnectionController;
 use App\Http\Controllers\Admin\System\InfrastructureConnectionTestController;
 use App\Http\Controllers\Admin\System\Queues\QueueDeploymentActivationController;
@@ -109,6 +115,20 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('system')->name('system.')->group(function (): void {
             Route::get('drivers', DriverController::class)->middleware('permission:admin.settings.drivers.view')->name('drivers.index');
+            Route::get('drivers/cache', [CacheDriverConfigurationController::class, 'index'])->middleware('permission:admin.settings.cache.view')->name('cache.index');
+            Route::get('drivers/cache/create', [CacheDriverConfigurationController::class, 'create'])->middleware('permission:admin.settings.cache.create')->name('cache.create');
+            Route::post('drivers/cache', [CacheDriverConfigurationController::class, 'store'])->middleware('permission:admin.settings.cache.create')->name('cache.store');
+            Route::post('drivers/cache/deployment/activate', CacheDeploymentActivationController::class)->middleware('permission:admin.settings.cache.activate')->name('cache.activate-deployment');
+            Route::post('drivers/cache/deployment/force-activate', CacheDeploymentForceActivationController::class)->middleware('permission:admin.settings.cache.force_activate')->name('cache.force-activate-deployment');
+            Route::get('drivers/cache/{configuration}/edit', [CacheDriverConfigurationController::class, 'edit'])->middleware('permission:admin.settings.cache.update')->name('cache.edit');
+            Route::put('drivers/cache/{configuration}', [CacheDriverConfigurationController::class, 'update'])->middleware('permission:admin.settings.cache.update')->name('cache.update');
+            Route::patch('drivers/cache/{configuration}/enabled', [CacheDriverConfigurationController::class, 'setEnabled'])->middleware('permission:admin.settings.cache.update')->name('cache.enabled');
+            Route::delete('drivers/cache/{configuration}', [CacheDriverConfigurationController::class, 'destroy'])->middleware('permission:admin.settings.cache.archive')->name('cache.destroy');
+            Route::post('drivers/cache/{id}/restore', [CacheDriverConfigurationController::class, 'restore'])->middleware('permission:admin.settings.cache.archive')->whereNumber('id')->name('cache.restore');
+            Route::delete('drivers/cache/{id}/force-delete', [CacheDriverConfigurationController::class, 'forceDelete'])->middleware('permission:admin.settings.cache.delete')->whereNumber('id')->name('cache.force-delete');
+            Route::post('drivers/cache/{configuration}/test', CacheDriverConfigurationTestController::class)->middleware('permission:admin.settings.cache.test')->name('cache.test');
+            Route::post('drivers/cache/{configuration}/activate', CacheDriverActivationController::class)->middleware('permission:admin.settings.cache.activate')->name('cache.activate');
+            Route::post('drivers/cache/{configuration}/force-activate', CacheDriverForceActivationController::class)->middleware('permission:admin.settings.cache.force_activate')->name('cache.force-activate');
             Route::get('drivers/queues', [QueueDriverConfigurationController::class, 'index'])->middleware('permission:admin.settings.queues.view')->name('queues.index');
             Route::get('drivers/queues/create', [QueueDriverConfigurationController::class, 'create'])->middleware('permission:admin.settings.queues.create')->name('queues.create');
             Route::post('drivers/queues', [QueueDriverConfigurationController::class, 'store'])->middleware('permission:admin.settings.queues.create')->name('queues.store');

@@ -1,0 +1,4 @@
+export type CacheDefinition = { type: 'database' | 'file' | 'redis'; label: string; description: string; requires_infrastructure: boolean; available: boolean; unavailable_reason: string | null; options: { database_connections?: string[] } }
+export type InfrastructureOption = { id: number; name: string; source: string; is_enabled: boolean; deleted_at: string | null }
+export type Health = { status: 'healthy' | 'degraded' | 'unhealthy' | 'unavailable'; latency_ms: number; message: string; created_at: string }
+export type CacheConfiguration = { id: number; name: string; driver: CacheDefinition['type']; infrastructure_connection_id: number | null; configuration: { database_connection?: string }; infrastructure_connection: InfrastructureOption | null; is_enabled: boolean; deleted_at: string | null; is_active: boolean; latest_health_check: Health | null }

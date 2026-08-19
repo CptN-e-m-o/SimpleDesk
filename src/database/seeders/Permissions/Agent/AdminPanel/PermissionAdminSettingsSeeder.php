@@ -180,6 +180,23 @@ class PermissionAdminSettingsSeeder extends Seeder
                 'sort_order' => 37,
                 'parent_key' => 'admin.settings.manage_system',
             ],
+            ...array_map(fn (array $permission): array => [
+                'key' => 'admin.settings.cache.'.$permission[0],
+                'label' => $permission[1],
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => $permission[2],
+                'parent_key' => 'admin.settings.manage_system',
+            ], [
+                ['view', 'View cache configurations', 38],
+                ['create', 'Create cache configurations', 39],
+                ['update', 'Update cache configurations', 40],
+                ['archive', 'Archive cache configurations', 41],
+                ['delete', 'Permanently delete cache configurations', 42],
+                ['test', 'Test cache configurations', 43],
+                ['activate', 'Activate cache configurations', 44],
+                ['force_activate', 'Force activate cache configurations', 45],
+            ]),
             [
                 'key' => 'admin.settings.manage_social_login',
                 'label' => 'Manage social login',

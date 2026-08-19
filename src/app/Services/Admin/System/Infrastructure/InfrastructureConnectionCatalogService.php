@@ -3,6 +3,9 @@
 namespace App\Services\Admin\System\Infrastructure;
 
 use App\Enums\Admin\System\InfrastructureConnectionType;
+use App\Enums\Admin\System\CacheConfigurationMode;
+use App\Models\Admin\System\CacheDriverConfiguration;
+use App\Models\Admin\System\CacheDriverSettings;
 use App\Enums\Admin\System\QueueConfigurationMode;
 use App\Models\Admin\System\InfrastructureConnection;
 use App\Models\Admin\System\QueueDriverConfiguration;
@@ -87,6 +90,7 @@ class InfrastructureConnectionCatalogService
                 $connection->id,
                 $settings,
             );
+            $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -153,6 +157,9 @@ class InfrastructureConnectionCatalogService
                     enabled: $enabled,
                 );
             }
+            if ($activeCache) {
+                $this->assertActiveCacheInfrastructureUpdateIsSafe($connection, $activeCache, $source, $normalized, $enabled);
+            }
 
             $connection->update([
                 'name' => $data['name'],
@@ -208,6 +215,7 @@ class InfrastructureConnectionCatalogService
                 $connection->id,
                 $settings,
             );
+            $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -218,6 +226,7 @@ class InfrastructureConnectionCatalogService
                     'is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be disabled.",
                 ]);
             }
+            if (! $enabled && $activeCache) throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Cache configuration [{$activeCache->name}] and cannot be disabled."]);
 
             if ($connection->is_enabled === $enabled) {
                 return $connection;
@@ -268,6 +277,7 @@ class InfrastructureConnectionCatalogService
                 $connection->id,
                 $settings,
             );
+            $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -278,6 +288,7 @@ class InfrastructureConnectionCatalogService
                     'connection' => "Infrastructure connection [{$connection->name}] is used by active managed Queue configuration [{$activeQueue->name}] and cannot be archived.",
                 ]);
             }
+            if ($activeCache) throw ValidationException::withMessages(['connection' => "Infrastructure connection [{$connection->name}] is used by active managed Cache configuration [{$activeCache->name}] and cannot be archived."]);
 
             $adapter = $this->registry->adapter(
                 $connection->type,
@@ -369,6 +380,8 @@ class InfrastructureConnectionCatalogService
                     'connection' => "Infrastructure connection cannot be permanently deleted because Queue configuration [{$referencingQueue->name}] still references it.",
                 ]);
             }
+            $referencingCache = CacheDriverConfiguration::withTrashed()->where('infrastructure_connection_id', $id)->orderBy('id')->lockForUpdate()->first();
+            if ($referencingCache) throw ValidationException::withMessages(['connection' => "Infrastructure connection cannot be permanently deleted because Cache configuration [{$referencingCache->name}] still references it."]);
 
             $connection = InfrastructureConnection::onlyTrashed()
                 ->lockForUpdate()
@@ -425,6 +438,25 @@ class InfrastructureConnectionCatalogService
             )
             ->lockForUpdate()
             ->first();
+    }
+
+    private function lockCacheSettings(): ?CacheDriverSettings
+    {
+        return CacheDriverSettings::query()->whereKey(CacheDriverSettings::SINGLETON_ID)->lockForUpdate()->first();
+    }
+
+    private function activeManagedCacheUsingConnection(int $connectionId, ?CacheDriverSettings $settings): ?CacheDriverConfiguration
+    {
+        if ($settings === null || $settings->mode !== CacheConfigurationMode::Managed || ! $settings->active_configuration_id) return null;
+        return CacheDriverConfiguration::withTrashed()->whereKey($settings->active_configuration_id)->where('infrastructure_connection_id', $connectionId)->lockForUpdate()->first();
+    }
+
+    private function assertActiveCacheInfrastructureUpdateIsSafe(InfrastructureConnection $connection, CacheDriverConfiguration $activeCache, string $source, array $normalized, bool $enabled): void
+    {
+        if (! $enabled) throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Cache configuration [{$activeCache->name}] and cannot be disabled."]);
+        if ($source !== $connection->source->value) throw ValidationException::withMessages(['source' => "Infrastructure connection [{$connection->name}] source cannot change while Cache configuration [{$activeCache->name}] is active."]);
+        if (($connection->configuration ?? []) != ($normalized['configuration'] ?? [])) throw ValidationException::withMessages(['configuration' => "Infrastructure runtime settings cannot change while Cache configuration [{$activeCache->name}] is active."]);
+        if ($connection->secrets() != ($normalized['credentials'] ?? [])) throw ValidationException::withMessages(['credentials' => "Infrastructure credentials cannot change while Cache configuration [{$activeCache->name}] is active."]);
     }
 
     private function activeManagedQueueUsingConnection(
