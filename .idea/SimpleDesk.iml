@@ -137,6 +137,9 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/torann/geoip" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/webklex/php-imap" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/firebase/php-jwt" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/src/public/build" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/clue/redis-protocol" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/clue/redis-react" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/evenement/evenement" />

@@ -2,20 +2,22 @@ import '../css/app.css'
 import './bootstrap'
 
 import { createRoot } from 'react-dom/client'
-import { createInertiaApp } from '@inertiajs/react'
+import { createInertiaApp, router } from '@inertiajs/react'
 import type { ComponentType } from 'react'
 import type { Config as ZiggyConfig } from 'ziggy-js'
 
-const pages = import.meta.glob('./Pages/**/*.tsx', { eager: true }) as Record<
-    string,
-    { default: ComponentType }
->
+import { configureRealtime } from '@/lib/realtime'
+import type { SharedData } from '@/types'
+
+const pages = import.meta.glob('./Pages/**/*.tsx', {
+    eager: true,
+}) as Record<string, { default: ComponentType }>
 
 declare global {
     var Ziggy: ZiggyConfig
 }
 
-createInertiaApp({
+createInertiaApp<SharedData>({
     defaults: {
         future: {
             useDataInertiaHeadAttribute: true,
@@ -35,6 +37,20 @@ createInertiaApp({
     setup({ el, App, props }) {
         globalThis.Ziggy = props.initialPage.props.ziggy as ZiggyConfig
 
-        createRoot(el).render(<App {...props} />)
+        configureRealtime(
+            props.initialPage.props.broadcastingClient,
+        )
+
+        router.on('navigate', (event) => {
+            const pageProps = event.detail.page.props as Partial<SharedData>
+
+            configureRealtime(
+                pageProps.broadcastingClient,
+            )
+        })
+
+        createRoot(el).render(
+            <App {...props} />,
+        )
     },
 })

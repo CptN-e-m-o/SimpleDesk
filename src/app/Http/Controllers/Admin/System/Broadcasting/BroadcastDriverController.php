@@ -58,7 +58,8 @@ class BroadcastDriverController extends Controller
     {
         $this->catalog->update($configuration, $request->validated(), $request->user());
 
-        return back()->with('success', 'Real-time configuration updated.');
+        return to_route('admin.system.broadcasting.index')
+            ->with('success', 'Real-time configuration updated.');
     }
 
     public function enabled(Request $request, BroadcastDriverConfiguration $configuration): RedirectResponse

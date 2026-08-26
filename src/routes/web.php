@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\System\Broadcasting\BroadcastDriverController;
+use App\Http\Controllers\Admin\System\Broadcasting\BroadcastBrowserProbeController;
 use App\Http\Controllers\Admin\System\Cache\CacheDeploymentActivationController;
 use App\Http\Controllers\Admin\System\Cache\CacheDeploymentForceActivationController;
 use App\Http\Controllers\Admin\System\Cache\CacheDriverActivationController;
@@ -178,6 +179,15 @@ Route::middleware('auth')->group(function () {
             Route::post('connections/{id}/restore', [InfrastructureConnectionController::class, 'restore'])->middleware('permission:admin.settings.infrastructure_connections.archive')->whereNumber('id')->name('connections.restore');
             Route::delete('connections/{id}/force-delete', [InfrastructureConnectionController::class, 'forceDelete'])->middleware('permission:admin.settings.infrastructure_connections.delete')->whereNumber('id')->name('connections.force-delete');
             Route::get('audit', SystemAuditLogController::class)->middleware('permission:admin.settings.system_audit.view')->name('audit.index');
+            Route::post(
+                'drivers/real-time/browser-probe',
+                BroadcastBrowserProbeController::class,
+            )
+                ->middleware([
+                    'permission:admin.settings.broadcasting.test',
+                    'throttle:10,1',
+                ])
+                ->name('broadcasting.browser-probe');
         });
         Route::get('/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
