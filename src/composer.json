@@ -14,6 +14,7 @@
         "jenssegers/agent": "^2.6",
         "laravel/fortify": "^1.36",
         "laravel/framework": "^13.0",
+        "laravel/reverb": "^1.11",
         "laravel/tinker": "^3.0",
         "tightenco/ziggy": "^2.6",
         "torann/geoip": "^3.0",

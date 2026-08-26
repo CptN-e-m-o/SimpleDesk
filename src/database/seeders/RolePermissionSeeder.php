@@ -119,6 +119,13 @@ class RolePermissionSeeder extends Seeder
             'admin.settings.cache.delete',
             'admin.settings.cache.test',
             'admin.settings.cache.activate',
+            'admin.settings.broadcasting.view',
+            'admin.settings.broadcasting.create',
+            'admin.settings.broadcasting.update',
+            'admin.settings.broadcasting.archive',
+            'admin.settings.broadcasting.delete',
+            'admin.settings.broadcasting.test',
+            'admin.settings.broadcasting.activate',
         ];
     }
 

@@ -28,6 +28,7 @@ type DriverCategoryKey =
 type ImplementedCategoryKey =
     | 'queue'
     | 'cache'
+    | 'broadcasting'
 
 type DriverCategory = {
     key: DriverCategoryKey
@@ -107,10 +108,9 @@ const categoryDefinitions: Record<
         examples: [
             'Laravel Reverb',
             'Pusher',
-            'Ably',
         ],
         icon: Radio,
-        implemented: false,
+        implemented: true,
     },
 
     search: {
@@ -293,11 +293,13 @@ function CategoryCard({
             ? route(
                 'admin.system.queues.index',
             )
-            : category.key === 'cache'
+                : category.key === 'cache'
                 ? route(
                     'admin.system.cache.index',
                 )
-                : null
+                : category.key === 'broadcasting'
+                    ? route('admin.system.broadcasting.index')
+                    : null
 
     return (
         <article
@@ -537,6 +539,10 @@ function canOpenCategory(
         )
     }
 
+    if (key === 'broadcasting') {
+        return can('admin.settings.broadcasting.view')
+    }
+
     return false
 }
 
@@ -569,6 +575,7 @@ function isImplementedCategory(
     return (
         value === 'queue'
         || value === 'cache'
+        || value === 'broadcasting'
     )
 }
 

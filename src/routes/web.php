@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\System\Broadcasting\BroadcastDriverController;
 use App\Http\Controllers\Admin\System\Cache\CacheDeploymentActivationController;
 use App\Http\Controllers\Admin\System\Cache\CacheDeploymentForceActivationController;
 use App\Http\Controllers\Admin\System\Cache\CacheDriverActivationController;
@@ -115,6 +116,20 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('system')->name('system.')->group(function (): void {
             Route::get('drivers', DriverController::class)->middleware('permission:admin.settings.drivers.view')->name('drivers.index');
+            Route::get('drivers/real-time', [BroadcastDriverController::class, 'index'])->middleware('permission:admin.settings.broadcasting.view')->name('broadcasting.index');
+            Route::get('drivers/real-time/create', [BroadcastDriverController::class, 'create'])->middleware('permission:admin.settings.broadcasting.create')->name('broadcasting.create');
+            Route::post('drivers/real-time', [BroadcastDriverController::class, 'store'])->middleware('permission:admin.settings.broadcasting.create')->name('broadcasting.store');
+            Route::post('drivers/real-time/deployment/activate', [BroadcastDriverController::class, 'activateDeployment'])->middleware('permission:admin.settings.broadcasting.activate')->name('broadcasting.activate-deployment');
+            Route::post('drivers/real-time/deployment/force-activate', [BroadcastDriverController::class, 'forceActivateDeployment'])->middleware('permission:admin.settings.broadcasting.force_activate')->name('broadcasting.force-activate-deployment');
+            Route::get('drivers/real-time/{configuration}/edit', [BroadcastDriverController::class, 'edit'])->middleware('permission:admin.settings.broadcasting.update')->name('broadcasting.edit');
+            Route::put('drivers/real-time/{configuration}', [BroadcastDriverController::class, 'update'])->middleware('permission:admin.settings.broadcasting.update')->name('broadcasting.update');
+            Route::patch('drivers/real-time/{configuration}/enabled', [BroadcastDriverController::class, 'enabled'])->middleware('permission:admin.settings.broadcasting.update')->name('broadcasting.enabled');
+            Route::delete('drivers/real-time/{configuration}', [BroadcastDriverController::class, 'destroy'])->middleware('permission:admin.settings.broadcasting.archive')->name('broadcasting.destroy');
+            Route::post('drivers/real-time/{id}/restore', [BroadcastDriverController::class, 'restore'])->middleware('permission:admin.settings.broadcasting.archive')->whereNumber('id')->name('broadcasting.restore');
+            Route::delete('drivers/real-time/{id}/force-delete', [BroadcastDriverController::class, 'forceDelete'])->middleware('permission:admin.settings.broadcasting.delete')->whereNumber('id')->name('broadcasting.force-delete');
+            Route::post('drivers/real-time/{configuration}/test', [BroadcastDriverController::class, 'test'])->middleware('permission:admin.settings.broadcasting.test')->name('broadcasting.test');
+            Route::post('drivers/real-time/{configuration}/activate', [BroadcastDriverController::class, 'activate'])->middleware('permission:admin.settings.broadcasting.activate')->name('broadcasting.activate');
+            Route::post('drivers/real-time/{configuration}/force-activate', [BroadcastDriverController::class, 'forceActivate'])->middleware('permission:admin.settings.broadcasting.force_activate')->name('broadcasting.force-activate');
             Route::get('drivers/cache', [CacheDriverConfigurationController::class, 'index'])->middleware('permission:admin.settings.cache.view')->name('cache.index');
             Route::get('drivers/cache/create', [CacheDriverConfigurationController::class, 'create'])->middleware('permission:admin.settings.cache.create')->name('cache.create');
             Route::post('drivers/cache', [CacheDriverConfigurationController::class, 'store'])->middleware('permission:admin.settings.cache.create')->name('cache.store');

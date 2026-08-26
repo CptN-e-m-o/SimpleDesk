@@ -197,6 +197,23 @@ class PermissionAdminSettingsSeeder extends Seeder
                 ['activate', 'Activate cache configurations', 44],
                 ['force_activate', 'Force activate cache configurations', 45],
             ]),
+            ...array_map(fn (array $permission): array => [
+                'key' => 'admin.settings.broadcasting.'.$permission[0],
+                'label' => $permission[1],
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => $permission[2],
+                'parent_key' => 'admin.settings.manage_system',
+            ], [
+                ['view', 'View real-time configurations', 46],
+                ['create', 'Create real-time configurations', 47],
+                ['update', 'Update real-time configurations', 48],
+                ['archive', 'Archive real-time configurations', 49],
+                ['delete', 'Permanently delete real-time configurations', 50],
+                ['test', 'Test real-time configurations', 51],
+                ['activate', 'Activate real-time configurations', 52],
+                ['force_activate', 'Force activate real-time configurations', 53],
+            ]),
             [
                 'key' => 'admin.settings.manage_social_login',
                 'label' => 'Manage social login',

@@ -2,9 +2,12 @@
 
 namespace App\Services\Admin\System\Infrastructure;
 
+use App\Enums\Admin\System\BroadcastConfigurationMode;
 use App\Enums\Admin\System\CacheConfigurationMode;
 use App\Enums\Admin\System\InfrastructureConnectionType;
 use App\Enums\Admin\System\QueueConfigurationMode;
+use App\Models\Admin\System\BroadcastDriverConfiguration;
+use App\Models\Admin\System\BroadcastDriverSettings;
 use App\Models\Admin\System\CacheDriverConfiguration;
 use App\Models\Admin\System\CacheDriverSettings;
 use App\Models\Admin\System\InfrastructureConnection;
@@ -91,6 +94,7 @@ class InfrastructureConnectionCatalogService
                 $settings,
             );
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
+            $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -160,6 +164,9 @@ class InfrastructureConnectionCatalogService
             if ($activeCache) {
                 $this->assertActiveCacheInfrastructureUpdateIsSafe($connection, $activeCache, $source, $normalized, $enabled);
             }
+            if ($activeBroadcast) {
+                $this->assertActiveBroadcastInfrastructureUpdateIsSafe($connection, $activeBroadcast, $source, $normalized, $enabled);
+            }
 
             $connection->update([
                 'name' => $data['name'],
@@ -216,6 +223,7 @@ class InfrastructureConnectionCatalogService
                 $settings,
             );
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
+            $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -228,6 +236,9 @@ class InfrastructureConnectionCatalogService
             }
             if (! $enabled && $activeCache) {
                 throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Cache configuration [{$activeCache->name}] and cannot be disabled."]);
+            }
+            if (! $enabled && $activeBroadcast) {
+                throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Broadcast configuration [{$activeBroadcast->name}] and cannot be disabled."]);
             }
 
             if ($connection->is_enabled === $enabled) {
@@ -280,6 +291,7 @@ class InfrastructureConnectionCatalogService
                 $settings,
             );
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
+            $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -292,6 +304,9 @@ class InfrastructureConnectionCatalogService
             }
             if ($activeCache) {
                 throw ValidationException::withMessages(['connection' => "Infrastructure connection [{$connection->name}] is used by active managed Cache configuration [{$activeCache->name}] and cannot be archived."]);
+            }
+            if ($activeBroadcast) {
+                throw ValidationException::withMessages(['connection' => "Infrastructure connection [{$connection->name}] is used by active managed Broadcast configuration [{$activeBroadcast->name}] and cannot be archived."]);
             }
 
             $adapter = $this->registry->adapter(
@@ -388,6 +403,10 @@ class InfrastructureConnectionCatalogService
             if ($referencingCache) {
                 throw ValidationException::withMessages(['connection' => "Infrastructure connection cannot be permanently deleted because Cache configuration [{$referencingCache->name}] still references it."]);
             }
+            $referencingBroadcast = BroadcastDriverConfiguration::withTrashed()->where('infrastructure_connection_id', $id)->orderBy('id')->lockForUpdate()->first();
+            if ($referencingBroadcast) {
+                throw ValidationException::withMessages(['connection' => "Infrastructure connection cannot be permanently deleted because Broadcast configuration [{$referencingBroadcast->name}] still references it."]);
+            }
 
             $connection = InfrastructureConnection::onlyTrashed()
                 ->lockForUpdate()
@@ -449,6 +468,36 @@ class InfrastructureConnectionCatalogService
     private function lockCacheSettings(): ?CacheDriverSettings
     {
         return CacheDriverSettings::query()->whereKey(CacheDriverSettings::SINGLETON_ID)->lockForUpdate()->first();
+    }
+
+    private function lockBroadcastSettings(): ?BroadcastDriverSettings
+    {
+        return BroadcastDriverSettings::query()->whereKey(BroadcastDriverSettings::SINGLETON_ID)->lockForUpdate()->first();
+    }
+
+    private function activeManagedBroadcastUsingConnection(int $connectionId, ?BroadcastDriverSettings $settings): ?BroadcastDriverConfiguration
+    {
+        if ($settings === null || $settings->mode !== BroadcastConfigurationMode::Managed || ! $settings->active_configuration_id) {
+            return null;
+        }
+
+        return BroadcastDriverConfiguration::withTrashed()->whereKey($settings->active_configuration_id)->where('infrastructure_connection_id', $connectionId)->lockForUpdate()->first();
+    }
+
+    private function assertActiveBroadcastInfrastructureUpdateIsSafe(InfrastructureConnection $connection, BroadcastDriverConfiguration $activeBroadcast, string $source, array $normalized, bool $enabled): void
+    {
+        if (! $enabled) {
+            throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Broadcast configuration [{$activeBroadcast->name}] and cannot be disabled."]);
+        }
+        if ($source !== $connection->source->value) {
+            throw ValidationException::withMessages(['source' => "Infrastructure source cannot change while Broadcast configuration [{$activeBroadcast->name}] is active."]);
+        }
+        if (($connection->configuration ?? []) != ($normalized['configuration'] ?? [])) {
+            throw ValidationException::withMessages(['configuration' => "Infrastructure runtime settings cannot change while Broadcast configuration [{$activeBroadcast->name}] is active."]);
+        }
+        if ($connection->secrets() != ($normalized['credentials'] ?? [])) {
+            throw ValidationException::withMessages(['credentials' => "Infrastructure credentials cannot change while Broadcast configuration [{$activeBroadcast->name}] is active."]);
+        }
     }
 
     private function activeManagedCacheUsingConnection(int $connectionId, ?CacheDriverSettings $settings): ?CacheDriverConfiguration
