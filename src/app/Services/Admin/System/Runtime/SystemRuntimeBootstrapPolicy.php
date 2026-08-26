@@ -17,8 +17,8 @@ class SystemRuntimeBootstrapPolicy
         }
 
         return $this->commandName(
-                $argv ?? $this->serverArguments(),
-            ) === 'package:discover';
+            $argv ?? $this->serverArguments(),
+        ) === 'package:discover';
     }
 
     private function serverArguments(): array

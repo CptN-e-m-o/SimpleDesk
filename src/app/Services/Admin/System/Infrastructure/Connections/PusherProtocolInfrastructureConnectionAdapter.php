@@ -83,9 +83,9 @@ abstract class PusherProtocolInfrastructureConnectionAdapter implements Infrastr
         $publicScheme = trim((string) ($config['public_scheme'] ?? ''));
 
         if ($publicHost === '' && (
-                isset($config['public_port'])
-                || $publicScheme !== ''
-            )) {
+            isset($config['public_port'])
+            || $publicScheme !== ''
+        )) {
             throw ValidationException::withMessages([
                 'configuration.public_host' => 'A public host is required when public client endpoint settings are supplied.',
             ]);
