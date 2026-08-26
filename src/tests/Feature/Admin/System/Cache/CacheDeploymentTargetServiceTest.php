@@ -15,15 +15,7 @@ class CacheDeploymentTargetServiceTest extends TestCase
     {
         config()->set(
             'simpledesk-cache.deployment.store',
-            'deployment-array',
-        );
-
-        config()->set(
-            'cache.stores.deployment-array',
-            [
-                'driver' => 'array',
-                'serialize' => false,
-            ],
+            'database',
         );
 
         config()->set(
@@ -35,12 +27,60 @@ class CacheDeploymentTargetServiceTest extends TestCase
             ->resolve();
 
         $this->assertSame(
-            'deployment-array',
+            'database',
             $target['store'],
         );
 
         $this->assertSame(
-            'array',
+            'database',
+            $target['driver'],
+        );
+    }
+
+    public function test_default_database_store_accepts_null_lock_table_and_uses_framework_fallback(): void
+    {
+        config()->set(
+            'simpledesk-cache.deployment.store',
+            'database',
+        );
+
+        config()->set(
+            'cache.stores.database.lock_table',
+            null,
+        );
+
+        $target = $this->service()
+            ->resolve();
+
+        $this->assertSame(
+            'database',
+            $target['driver'],
+        );
+    }
+
+    public function test_file_store_accepts_null_lock_path(): void
+    {
+        config()->set(
+            'simpledesk-cache.deployment.store',
+            'deployment-file',
+        );
+
+        config()->set(
+            'cache.stores.deployment-file',
+            [
+                'driver' => 'file',
+                'path' => storage_path(
+                    'framework/cache/deployment-test',
+                ),
+                'lock_path' => null,
+            ],
+        );
+
+        $target = $this->service()
+            ->resolve();
+
+        $this->assertSame(
+            'file',
             $target['driver'],
         );
     }
@@ -80,7 +120,8 @@ class CacheDeploymentTargetServiceTest extends TestCase
         config()->set(
             'cache.stores.simpledesk-managed',
             [
-                'driver' => 'array',
+                'driver' => 'database',
+                'table' => 'cache',
             ],
         );
 
@@ -114,6 +155,77 @@ class CacheDeploymentTargetServiceTest extends TestCase
             ->resolve();
     }
 
+    public function test_array_driver_is_rejected_structurally(): void
+    {
+        config()->set(
+            'simpledesk-cache.deployment.store',
+            'deployment-array',
+        );
+
+        config()->set(
+            'cache.stores.deployment-array',
+            [
+                'driver' => 'array',
+                'serialize' => false,
+            ],
+        );
+
+        $this->expectException(
+            ValidationException::class,
+        );
+
+        $this->service()
+            ->resolve();
+    }
+
+    public function test_null_driver_is_rejected_structurally(): void
+    {
+        config()->set(
+            'simpledesk-cache.deployment.store',
+            'deployment-null',
+        );
+
+        config()->set(
+            'cache.stores.deployment-null',
+            [
+                'driver' => 'null',
+            ],
+        );
+
+        $this->expectException(
+            ValidationException::class,
+        );
+
+        $this->service()
+            ->resolve();
+    }
+
+    public function test_failover_driver_is_rejected_until_supported(): void
+    {
+        config()->set(
+            'simpledesk-cache.deployment.store',
+            'deployment-failover',
+        );
+
+        config()->set(
+            'cache.stores.deployment-failover',
+            [
+                'driver' => 'failover',
+                'stores' => [
+                    'database',
+                    'file',
+                ],
+            ],
+        );
+
+        $this->expectException(
+            ValidationException::class,
+        );
+
+        $this->service()
+            ->resolve();
+    }
+
     public function test_database_store_without_table_is_rejected_structurally(): void
     {
         $default = config(
@@ -131,6 +243,36 @@ class CacheDeploymentTargetServiceTest extends TestCase
                 'driver' => 'database',
                 'connection' => $default,
                 'lock_connection' => $default,
+            ],
+        );
+
+        $this->expectException(
+            ValidationException::class,
+        );
+
+        $this->service()
+            ->resolve();
+    }
+
+    public function test_database_store_with_empty_lock_table_is_rejected_structurally(): void
+    {
+        $default = config(
+            'database.default',
+        );
+
+        config()->set(
+            'simpledesk-cache.deployment.store',
+            'broken-database-lock-cache',
+        );
+
+        config()->set(
+            'cache.stores.broken-database-lock-cache',
+            [
+                'driver' => 'database',
+                'connection' => $default,
+                'table' => 'cache',
+                'lock_connection' => $default,
+                'lock_table' => '',
             ],
         );
 
@@ -196,17 +338,22 @@ class CacheDeploymentTargetServiceTest extends TestCase
     public function test_valid_target_is_passed_to_health_probe(): void
     {
         $store = [
-            'driver' => 'array',
-            'serialize' => false,
+            'driver' => 'file',
+            'path' => storage_path(
+                'framework/cache/deployment-probe',
+            ),
+            'lock_path' => storage_path(
+                'framework/cache/deployment-probe-locks',
+            ),
         ];
 
         config()->set(
             'simpledesk-cache.deployment.store',
-            'deployment-array',
+            'deployment-file',
         );
 
         config()->set(
-            'cache.stores.deployment-array',
+            'cache.stores.deployment-file',
             $store,
         );
 
@@ -221,8 +368,8 @@ class CacheDeploymentTargetServiceTest extends TestCase
                 $store,
                 [],
                 [
-                    'store' => 'deployment-array',
-                    'driver' => 'array',
+                    'store' => 'deployment-file',
+                    'driver' => 'file',
                 ],
             )
             ->willReturn(
@@ -249,14 +396,16 @@ class CacheDeploymentTargetServiceTest extends TestCase
     {
         config()->set(
             'simpledesk-cache.deployment.store',
-            'deployment-array',
+            'deployment-file',
         );
 
         config()->set(
-            'cache.stores.deployment-array',
+            'cache.stores.deployment-file',
             [
-                'driver' => 'array',
-                'serialize' => false,
+                'driver' => 'file',
+                'path' => storage_path(
+                    'framework/cache/deployment-safe-target',
+                ),
                 'secret_value' => 'must-not-be-returned',
             ],
         );
@@ -266,8 +415,8 @@ class CacheDeploymentTargetServiceTest extends TestCase
 
         $this->assertSame(
             [
-                'store' => 'deployment-array',
-                'driver' => 'array',
+                'store' => 'deployment-file',
+                'driver' => 'file',
                 'available' => true,
             ],
             $target,

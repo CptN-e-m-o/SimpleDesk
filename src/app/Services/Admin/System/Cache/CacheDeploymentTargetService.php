@@ -139,11 +139,15 @@ class CacheDeploymentTargetService
             'octane' => $this->validateOctaneStore(
                 $storeName,
             ),
-            'failover' => $this->validateFailoverStore(
-                $storeName,
-                $store,
+            'array' => $this->reject(
+                "The deployment Cache store [{$storeName}] uses the process-local array driver, which cannot provide cross-process Cache coordination.",
             ),
-            'array', 'null' => null,
+            'null' => $this->reject(
+                "The deployment Cache store [{$storeName}] uses the null driver, which does not persist Cache state.",
+            ),
+            'failover' => $this->reject(
+                "The deployment Cache store [{$storeName}] uses the failover driver, which is not supported by SimpleDesk Cache management yet.",
+            ),
             default => $this->reject(
                 "The deployment Cache store [{$storeName}] uses an unsupported driver [{$driver}].",
             ),
@@ -204,15 +208,14 @@ class CacheDeploymentTargetService
             );
         }
 
-        if (
-            array_key_exists(
-                'lock_table',
-                $store,
-            )
-            && trim(
-                (string) $store['lock_table'],
-            ) === ''
-        ) {
+        $lockTable = trim(
+            (string) (
+                $store['lock_table']
+                ?? 'cache_locks'
+            ),
+        );
+
+        if ($lockTable === '') {
             $this->reject(
                 "The deployment Cache store [{$storeName}] has an invalid lock table.",
             );
@@ -234,10 +237,7 @@ class CacheDeploymentTargetService
         }
 
         if (
-            array_key_exists(
-                'lock_path',
-                $store,
-            )
+            isset($store['lock_path'])
             && trim(
                 (string) $store['lock_path'],
             ) === ''
@@ -253,7 +253,10 @@ class CacheDeploymentTargetService
         array $store,
     ): void {
         $connection = trim(
-            (string) ($store['connection'] ?? 'default'),
+            (string) (
+                $store['connection']
+                ?? 'default'
+            ),
         );
 
         if (
@@ -371,39 +374,6 @@ class CacheDeploymentTargetService
             $this->reject(
                 "The deployment Cache store [{$storeName}] requires Laravel Octane, which is unavailable.",
             );
-        }
-    }
-
-    private function validateFailoverStore(
-        string $storeName,
-        array $store,
-    ): void {
-        $stores = $store['stores'] ?? null;
-
-        if (! is_array($stores) || $stores === []) {
-            $this->reject(
-                "The deployment Cache store [{$storeName}] does not define failover stores.",
-            );
-        }
-
-        foreach ($stores as $fallback) {
-            $fallback = trim(
-                (string) $fallback,
-            );
-
-            if (
-                $fallback === ''
-                || $fallback === $storeName
-                || ! is_array(
-                    config(
-                        "cache.stores.{$fallback}",
-                    ),
-                )
-            ) {
-                $this->reject(
-                    "The deployment Cache store [{$storeName}] contains an invalid failover store reference.",
-                );
-            }
         }
     }
 
