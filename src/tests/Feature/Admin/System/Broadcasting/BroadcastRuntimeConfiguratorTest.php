@@ -33,7 +33,7 @@ class BroadcastRuntimeConfiguratorTest extends TestCase
         BroadcastDriverSettings::query()->create(['id' => 1, 'mode' => BroadcastConfigurationMode::Managed, 'active_configuration_id' => $configuration->id]);
         app(BroadcastRuntimeConfigurator::class)->apply();
         $this->assertSame('simpledesk-managed', config('broadcasting.default'));
-        $this->assertSame('pusher', config('broadcasting.connections.simpledesk-managed.driver'));
+        $this->assertSame('reverb', config('broadcasting.connections.simpledesk-managed.driver'));
         $this->assertSame('deployment-log', config('broadcasting.connections.deployment-log.driver'));
     }
 
