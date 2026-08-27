@@ -214,6 +214,23 @@ class PermissionAdminSettingsSeeder extends Seeder
                 ['activate', 'Activate real-time configurations', 52],
                 ['force_activate', 'Force activate real-time configurations', 53],
             ]),
+            ...array_map(fn (array $permission): array => [
+                'key' => 'admin.settings.search.'.$permission[0],
+                'label' => $permission[1],
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => $permission[2],
+                'parent_key' => 'admin.settings.manage_system',
+            ], [
+                ['view', 'View Search configurations', 54],
+                ['create', 'Create Search configurations', 55],
+                ['update', 'Update Search configurations', 56],
+                ['archive', 'Archive Search configurations', 57],
+                ['delete', 'Permanently delete Search configurations', 58],
+                ['test', 'Test Search configurations', 59],
+                ['activate', 'Activate Search configurations', 60],
+                ['force_activate', 'Force activate Search configurations', 61],
+            ]),
             [
                 'key' => 'admin.settings.manage_social_login',
                 'label' => 'Manage social login',

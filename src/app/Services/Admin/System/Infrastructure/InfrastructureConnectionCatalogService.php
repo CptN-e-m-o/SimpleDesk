@@ -6,6 +6,7 @@ use App\Enums\Admin\System\BroadcastConfigurationMode;
 use App\Enums\Admin\System\CacheConfigurationMode;
 use App\Enums\Admin\System\InfrastructureConnectionType;
 use App\Enums\Admin\System\QueueConfigurationMode;
+use App\Enums\Admin\System\SearchConfigurationMode;
 use App\Models\Admin\System\BroadcastDriverConfiguration;
 use App\Models\Admin\System\BroadcastDriverSettings;
 use App\Models\Admin\System\CacheDriverConfiguration;
@@ -13,6 +14,8 @@ use App\Models\Admin\System\CacheDriverSettings;
 use App\Models\Admin\System\InfrastructureConnection;
 use App\Models\Admin\System\QueueDriverConfiguration;
 use App\Models\Admin\System\QueueDriverSettings;
+use App\Models\Admin\System\SearchDriverConfiguration;
+use App\Models\Admin\System\SearchDriverSettings;
 use App\Models\User\User;
 use App\Services\Admin\System\Audit\SystemAuditLogger;
 use Illuminate\Support\Facades\DB;
@@ -95,6 +98,7 @@ class InfrastructureConnectionCatalogService
             );
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
             $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
+            $activeSearch = $this->activeManagedSearchUsingConnection($connection->id, $this->lockSearchSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -167,6 +171,9 @@ class InfrastructureConnectionCatalogService
             if ($activeBroadcast) {
                 $this->assertActiveBroadcastInfrastructureUpdateIsSafe($connection, $activeBroadcast, $source, $normalized, $enabled);
             }
+            if ($activeSearch) {
+                $this->assertActiveSearchInfrastructureUpdateIsSafe($connection, $activeSearch, $source, $normalized, $enabled);
+            }
 
             $connection->update([
                 'name' => $data['name'],
@@ -224,6 +231,7 @@ class InfrastructureConnectionCatalogService
             );
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
             $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
+            $activeSearch = $this->activeManagedSearchUsingConnection($connection->id, $this->lockSearchSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -239,6 +247,9 @@ class InfrastructureConnectionCatalogService
             }
             if (! $enabled && $activeBroadcast) {
                 throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Broadcast configuration [{$activeBroadcast->name}] and cannot be disabled."]);
+            }
+            if (! $enabled && $activeSearch) {
+                throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Search configuration [{$activeSearch->name}] and cannot be disabled."]);
             }
 
             if ($connection->is_enabled === $enabled) {
@@ -292,6 +303,7 @@ class InfrastructureConnectionCatalogService
             );
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
             $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
+            $activeSearch = $this->activeManagedSearchUsingConnection($connection->id, $this->lockSearchSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -307,6 +319,9 @@ class InfrastructureConnectionCatalogService
             }
             if ($activeBroadcast) {
                 throw ValidationException::withMessages(['connection' => "Infrastructure connection [{$connection->name}] is used by active managed Broadcast configuration [{$activeBroadcast->name}] and cannot be archived."]);
+            }
+            if ($activeSearch) {
+                throw ValidationException::withMessages(['connection' => "Infrastructure connection [{$connection->name}] is used by active managed Search configuration [{$activeSearch->name}] and cannot be archived."]);
             }
 
             $adapter = $this->registry->adapter(
@@ -407,6 +422,10 @@ class InfrastructureConnectionCatalogService
             if ($referencingBroadcast) {
                 throw ValidationException::withMessages(['connection' => "Infrastructure connection cannot be permanently deleted because Broadcast configuration [{$referencingBroadcast->name}] still references it."]);
             }
+            $referencingSearch = SearchDriverConfiguration::withTrashed()->where('infrastructure_connection_id', $id)->orderBy('id')->lockForUpdate()->first();
+            if ($referencingSearch) {
+                throw ValidationException::withMessages(['connection' => "Infrastructure connection cannot be permanently deleted because Search configuration [{$referencingSearch->name}] still references it."]);
+            }
 
             $connection = InfrastructureConnection::onlyTrashed()
                 ->lockForUpdate()
@@ -473,6 +492,36 @@ class InfrastructureConnectionCatalogService
     private function lockBroadcastSettings(): ?BroadcastDriverSettings
     {
         return BroadcastDriverSettings::query()->whereKey(BroadcastDriverSettings::SINGLETON_ID)->lockForUpdate()->first();
+    }
+
+    private function lockSearchSettings(): ?SearchDriverSettings
+    {
+        return SearchDriverSettings::query()->whereKey(SearchDriverSettings::SINGLETON_ID)->lockForUpdate()->first();
+    }
+
+    private function activeManagedSearchUsingConnection(int $connectionId, ?SearchDriverSettings $settings): ?SearchDriverConfiguration
+    {
+        if ($settings === null || $settings->mode !== SearchConfigurationMode::Managed || ! $settings->active_configuration_id) {
+            return null;
+        }
+
+        return SearchDriverConfiguration::withTrashed()->whereKey($settings->active_configuration_id)->where('infrastructure_connection_id', $connectionId)->lockForUpdate()->first();
+    }
+
+    private function assertActiveSearchInfrastructureUpdateIsSafe(InfrastructureConnection $connection, SearchDriverConfiguration $activeSearch, string $source, array $normalized, bool $enabled): void
+    {
+        if (! $enabled) {
+            throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Search configuration [{$activeSearch->name}] and cannot be disabled."]);
+        }
+        if ($source !== $connection->source->value) {
+            throw ValidationException::withMessages(['source' => "Infrastructure source cannot change while Search configuration [{$activeSearch->name}] is active."]);
+        }
+        if (($connection->configuration ?? []) != ($normalized['configuration'] ?? [])) {
+            throw ValidationException::withMessages(['configuration' => "Infrastructure runtime settings cannot change while Search configuration [{$activeSearch->name}] is active."]);
+        }
+        if ($connection->secrets() != ($normalized['credentials'] ?? [])) {
+            throw ValidationException::withMessages(['credentials' => "Infrastructure credentials cannot change while Search configuration [{$activeSearch->name}] is active."]);
+        }
     }
 
     private function activeManagedBroadcastUsingConnection(int $connectionId, ?BroadcastDriverSettings $settings): ?BroadcastDriverConfiguration
