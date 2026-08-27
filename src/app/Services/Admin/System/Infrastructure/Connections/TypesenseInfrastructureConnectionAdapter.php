@@ -64,7 +64,7 @@ class TypesenseInfrastructureConnectionAdapter implements InfrastructureConnecti
     {
         $started = hrtime(true);
         try {
-            $client = $this->client($connection);
+            $client = $this->healthClient($connection);
             $client->getHealth()->retrieve();
             $client->getCollections()->retrieve();
 
@@ -74,11 +74,18 @@ class TypesenseInfrastructureConnectionAdapter implements InfrastructureConnecti
         }
     }
 
-    private function client(InfrastructureConnection $connection): object
+    private function healthClient(InfrastructureConnection $connection): object
     {
-        $normalized = $this->validateAndNormalize($this->configuration($connection), $connection->secrets(), (string) $connection->getRawOriginal('source'));
+        $normalized = $this->validateAndNormalize(
+            $this->configuration($connection),
+            $connection->secrets(),
+            (string) $connection->getRawOriginal('source'),
+        );
 
-        return $this->clients->make(['api_key' => $normalized['credentials']['api_key'], ...$normalized['configuration']]);
+        return $this->clients->makeForHealth([
+            'api_key' => $normalized['credentials']['api_key'],
+            ...$normalized['configuration'],
+        ]);
     }
 
     private function elapsed(int $started): int
