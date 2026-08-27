@@ -26,17 +26,53 @@ class SearchDriverController extends Controller
 
     public function index(Request $request): Response
     {
-        $query = SearchDriverConfiguration::query()->with(['latestHealthCheck', 'infrastructureConnection']);
+        $query = SearchDriverConfiguration::query()
+            ->with([
+                'latestHealthCheck',
+                'infrastructureConnection',
+            ]);
+
         if ($request->string('archived')->value() === 'archived') {
             $query->onlyTrashed();
         } elseif ($request->string('archived')->value() === 'all') {
             $query->withTrashed();
         }
-        $settings = SearchDriverSettings::query()->with('activeConfiguration')->find(1);
+
+        $settings = SearchDriverSettings::query()
+            ->with('activeConfiguration.infrastructureConnection')
+            ->find(1);
 
         $active = $settings?->activeConfiguration;
 
-        return Inertia::render('Admin/System/Search/Index', ['ownership' => ['mode' => $settings?->getRawOriginal('mode') ?? SearchConfigurationMode::Deployment->value, 'owned' => $settings !== null], 'effective_driver' => config('scout.driver'), 'deployment_target' => $this->deployment->safeTarget(), 'active_configuration' => $active instanceof SearchDriverConfiguration ? $this->catalog->safe($active) : null, 'configurations' => $query->latest()->paginate(25)->withQueryString()->through(fn (SearchDriverConfiguration $item) => [...$this->catalog->safe($item), 'latest_health' => $item->latestHealthCheck?->only(['status', 'latency_ms', 'message', 'created_at'])]), 'definitions' => array_map(fn ($definition) => $definition->toArray(), $this->registry->definitions())]);
+        return Inertia::render('Admin/System/Search/Index', [
+            'ownership' => [
+                'mode' => $settings?->getRawOriginal('mode')
+                    ?? SearchConfigurationMode::Deployment->value,
+                'owned' => $settings !== null,
+            ],
+            'effective_driver' => config('scout.driver'),
+            'deployment_target' => $this->deployment->safeTarget(),
+            'active_configuration' => $active instanceof SearchDriverConfiguration
+                ? $this->configurationPayload($active)
+                : null,
+            'configurations' => $query
+                ->latest()
+                ->paginate(25)
+                ->withQueryString()
+                ->through(fn (SearchDriverConfiguration $item) => [
+                    ...$this->configurationPayload($item),
+                    'latest_health' => $item->latestHealthCheck?->only([
+                        'status',
+                        'latency_ms',
+                        'message',
+                        'created_at',
+                    ]),
+                ]),
+            'definitions' => array_map(
+                fn ($definition) => $definition->toArray(),
+                $this->registry->definitions(),
+            ),
+        ]);
     }
 
     public function create(): Response
@@ -120,6 +156,27 @@ class SearchDriverController extends Controller
     private function activationResponse($result): RedirectResponse
     {
         return back()->with($result->restartSignaled ? 'success' : 'error', $result->restartSignaled ? 'Search ownership updated; queue worker restart signaled.' : 'Search ownership was updated, but queue worker restart signaling failed.');
+    }
+
+    private function configurationPayload(SearchDriverConfiguration $configuration): array
+    {
+        $connection = $configuration->infrastructureConnection;
+        $deletedAt = $connection?->getAttribute('deleted_at');
+
+        return [
+            ...$this->catalog->safe($configuration),
+            'infrastructure_connection' => $connection
+                ? [
+                    'id' => $connection->id,
+                    'name' => $connection->name,
+                    'type' => $connection->getRawOriginal('type'),
+                    'is_enabled' => $connection->is_enabled,
+                    'archived_at' => $deletedAt instanceof \DateTimeInterface
+                        ? $deletedAt->format(DATE_ATOM)
+                        : null,
+                ]
+                : null,
+        ];
     }
 
     private function connections(?SearchDriverConfiguration $configuration = null): array

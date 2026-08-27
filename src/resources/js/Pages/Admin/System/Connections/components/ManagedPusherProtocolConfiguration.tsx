@@ -10,7 +10,20 @@ import { Eye, EyeOff, KeyRound, LockKeyhole, RadioTower } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 
-export type InfrastructureConfigurationValue = string | number | boolean | null
+export type InfrastructureConfigurationScalar =
+    | string
+    | number
+    | boolean
+    | null
+
+export type InfrastructureConfigurationObject = Record<
+    string,
+    InfrastructureConfigurationScalar
+>
+
+export type InfrastructureConfigurationValue =
+    | InfrastructureConfigurationScalar
+    | InfrastructureConfigurationObject[]
 
 type Credentials = {
     app_key: string

@@ -6,10 +6,12 @@ use App\Enums\Admin\System\BroadcastConfigurationMode;
 use App\Enums\Admin\System\CacheConfigurationMode;
 use App\Enums\Admin\System\DriverCategory;
 use App\Enums\Admin\System\QueueConfigurationMode;
+use App\Enums\Admin\System\SearchConfigurationMode;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\System\BroadcastDriverSettings;
 use App\Models\Admin\System\CacheDriverSettings;
 use App\Models\Admin\System\QueueDriverSettings;
+use App\Models\Admin\System\SearchDriverSettings;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +29,7 @@ class DriverController extends Controller
                 'queue' => $this->queueState(),
                 'cache' => $this->cacheState(),
                 'broadcasting' => $this->broadcastState(),
+                'search' => $this->searchState(),
             ],
         ]);
     }
@@ -45,24 +48,12 @@ class DriverController extends Controller
             ! $settings
             || $settings->mode === QueueConfigurationMode::Deployment
         ) {
-            return [
-                'mode' => 'deployment',
-                'active_configuration' => null,
-                'active_driver' => null,
-                'requires_attention' => false,
-            ];
+            return $this->deploymentState();
         }
 
-        $configuration = $settings->activeConfiguration;
-
-        return [
-            'mode' => 'managed',
-            'active_configuration' => $configuration?->name,
-            'active_driver' => $configuration?->driver->value,
-            'requires_attention' => ! $configuration
-                || $configuration->trashed()
-                || ! $configuration->is_enabled,
-        ];
+        return $this->managedState(
+            $settings->activeConfiguration,
+        );
     }
 
     private function cacheState(): array
@@ -79,16 +70,60 @@ class DriverController extends Controller
             ! $settings
             || $settings->mode === CacheConfigurationMode::Deployment
         ) {
-            return [
-                'mode' => 'deployment',
-                'active_configuration' => null,
-                'active_driver' => null,
-                'requires_attention' => false,
-            ];
+            return $this->deploymentState();
         }
 
-        $configuration = $settings->activeConfiguration;
+        return $this->managedState(
+            $settings->activeConfiguration,
+        );
+    }
 
+    private function broadcastState(): array
+    {
+        if (! Schema::hasTable('broadcast_driver_settings')) {
+            return $this->unavailableState();
+        }
+
+        $settings = BroadcastDriverSettings::query()
+            ->with('activeConfiguration')
+            ->find(BroadcastDriverSettings::SINGLETON_ID);
+
+        if (
+            ! $settings
+            || $settings->mode === BroadcastConfigurationMode::Deployment
+        ) {
+            return $this->deploymentState();
+        }
+
+        return $this->managedState(
+            $settings->activeConfiguration,
+        );
+    }
+
+    private function searchState(): array
+    {
+        if (! Schema::hasTable('search_driver_settings')) {
+            return $this->unavailableState();
+        }
+
+        $settings = SearchDriverSettings::query()
+            ->with('activeConfiguration')
+            ->find(SearchDriverSettings::SINGLETON_ID);
+
+        if (
+            ! $settings
+            || $settings->mode === SearchConfigurationMode::Deployment
+        ) {
+            return $this->deploymentState();
+        }
+
+        return $this->managedState(
+            $settings->activeConfiguration,
+        );
+    }
+
+    private function managedState(mixed $configuration): array
+    {
         return [
             'mode' => 'managed',
             'active_configuration' => $configuration?->name,
@@ -96,6 +131,16 @@ class DriverController extends Controller
             'requires_attention' => ! $configuration
                 || $configuration->trashed()
                 || ! $configuration->is_enabled,
+        ];
+    }
+
+    private function deploymentState(): array
+    {
+        return [
+            'mode' => 'deployment',
+            'active_configuration' => null,
+            'active_driver' => null,
+            'requires_attention' => false,
         ];
     }
 
@@ -107,19 +152,5 @@ class DriverController extends Controller
             'active_driver' => null,
             'requires_attention' => false,
         ];
-    }
-
-    private function broadcastState(): array
-    {
-        if (! Schema::hasTable('broadcast_driver_settings')) {
-            return $this->unavailableState();
-        }
-        $settings = BroadcastDriverSettings::query()->with('activeConfiguration')->find(BroadcastDriverSettings::SINGLETON_ID);
-        if (! $settings || $settings->mode === BroadcastConfigurationMode::Deployment) {
-            return ['mode' => 'deployment', 'active_configuration' => null, 'active_driver' => null, 'requires_attention' => false];
-        }
-        $configuration = $settings->activeConfiguration;
-
-        return ['mode' => 'managed', 'active_configuration' => $configuration?->name, 'active_driver' => $configuration?->driver->value, 'requires_attention' => ! $configuration || $configuration->trashed() || ! $configuration->is_enabled];
     }
 }

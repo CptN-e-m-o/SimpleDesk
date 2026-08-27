@@ -29,6 +29,7 @@ type ImplementedCategoryKey =
     | 'queue'
     | 'cache'
     | 'broadcasting'
+    | 'search'
 
 type DriverCategory = {
     key: DriverCategoryKey
@@ -117,9 +118,9 @@ const categoryDefinitions: Record<
         key: 'search',
         name: 'Search',
         description:
-            'Power indexed discovery across SimpleDesk data.',
+            'Power discovery across SimpleDesk data.',
         details:
-            'Controls how searchable documents are indexed and queried while the database remains the source of truth.',
+            'Controls which Laravel Scout engine SimpleDesk uses while the application database remains the source of truth.',
         examples: [
             'Database',
             'Meilisearch',
@@ -127,7 +128,7 @@ const categoryDefinitions: Record<
             'Algolia',
         ],
         icon: Search,
-        implemented: false,
+        implemented: true,
     },
 
     storage: {
@@ -152,19 +153,16 @@ export default function Index({
                               }: Props) {
     const { can } = usePermissions()
 
-    const visibleCategories =
-        categories
-            .map((category) =>
-                getCategoryDefinition(
-                    category,
-                ),
-            )
-            .filter(
-                (
-                    category,
-                ): category is DriverCategory =>
-                    category !== null,
-            )
+    const visibleCategories = categories
+        .map((category) =>
+            getCategoryDefinition(category),
+        )
+        .filter(
+            (
+                category,
+            ): category is DriverCategory =>
+                category !== null,
+        )
 
     return (
         <AdminLayout title="System Drivers">
@@ -209,7 +207,7 @@ export default function Index({
                             <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
 
                             <p className="text-sm leading-6 text-gray-600">
-                                Deployment ownership remains unchanged until a subsystem is explicitly switched to a managed configuration. Queue and Cache can be managed independently.
+                                Deployment ownership remains unchanged until a subsystem is explicitly switched to a managed configuration. Queue, Cache, Real-time, and Search can be managed independently.
                             </p>
                         </div>
                     </div>
@@ -231,12 +229,8 @@ export default function Index({
                             {visibleCategories.map(
                                 (category) => (
                                     <CategoryCard
-                                        key={
-                                            category.key
-                                        }
-                                        category={
-                                            category
-                                        }
+                                        key={category.key}
+                                        category={category}
                                         state={
                                             isImplementedCategory(
                                                 category.key,
@@ -287,19 +281,20 @@ function CategoryCard({
     accessible: boolean
 }) {
     const Icon = category.icon
-
     const href =
         category.key === 'queue'
-            ? route(
-                'admin.system.queues.index',
-            )
-                : category.key === 'cache'
-                ? route(
-                    'admin.system.cache.index',
-                )
+            ? route('admin.system.queues.index')
+            : category.key === 'cache'
+                ? route('admin.system.cache.index')
                 : category.key === 'broadcasting'
-                    ? route('admin.system.broadcasting.index')
-                    : null
+                    ? route(
+                        'admin.system.broadcasting.index',
+                    )
+                    : category.key === 'search'
+                        ? route(
+                            'admin.system.search.index',
+                        )
+                        : null
 
     return (
         <article
@@ -324,12 +319,8 @@ function CategoryCard({
                     </div>
 
                     <CategoryStatus
-                        category={
-                            category
-                        }
-                        state={
-                            state
-                        }
+                        category={category}
+                        state={state}
                     />
                 </div>
 
@@ -351,9 +342,7 @@ function CategoryCard({
                     {category.examples.map(
                         (example) => (
                             <span
-                                key={
-                                    example
-                                }
+                                key={example}
                                 className="rounded-lg bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-200"
                             >
                                 {example}
@@ -365,12 +354,8 @@ function CategoryCard({
 
             <div className="flex min-h-[65px] items-center justify-between gap-4 border-t border-gray-100 bg-gray-50/60 px-5 py-4">
                 <CategorySummary
-                    category={
-                        category
-                    }
-                    state={
-                        state
-                    }
+                    category={category}
+                    state={state}
                 />
 
                 <ArrowRight
@@ -402,8 +387,7 @@ function CategoryStatus({
 
     if (
         !state
-        || state.mode
-        === 'unavailable'
+        || state.mode === 'unavailable'
     ) {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200">
@@ -413,9 +397,7 @@ function CategoryStatus({
         )
     }
 
-    if (
-        state.requires_attention
-    ) {
+    if (state.requires_attention) {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-200">
                 <TriangleAlert className="h-3.5 w-3.5" />
@@ -424,10 +406,7 @@ function CategoryStatus({
         )
     }
 
-    if (
-        state.mode
-        === 'managed'
-    ) {
+    if (state.mode === 'managed') {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-200">
                 <CheckCircle2 className="h-3.5 w-3.5" />
@@ -462,8 +441,7 @@ function CategorySummary({
 
     if (
         !state
-        || state.mode
-        === 'unavailable'
+        || state.mode === 'unavailable'
     ) {
         return (
             <div className="min-w-0">
@@ -474,9 +452,7 @@ function CategorySummary({
         )
     }
 
-    if (
-        state.requires_attention
-    ) {
+    if (state.requires_attention) {
         return (
             <div className="min-w-0">
                 <p className="text-xs font-semibold text-red-700">
@@ -490,10 +466,7 @@ function CategorySummary({
         )
     }
 
-    if (
-        state.mode
-        === 'managed'
-    ) {
+    if (state.mode === 'managed') {
         return (
             <div className="min-w-0">
                 <p className="text-xs font-semibold text-gray-600">
@@ -540,7 +513,15 @@ function canOpenCategory(
     }
 
     if (key === 'broadcasting') {
-        return can('admin.settings.broadcasting.view')
+        return can(
+            'admin.settings.broadcasting.view',
+        )
+    }
+
+    if (key === 'search') {
+        return can(
+            'admin.settings.search.view',
+        )
     }
 
     return false
@@ -549,15 +530,11 @@ function canOpenCategory(
 function getCategoryDefinition(
     value: string,
 ): DriverCategory | null {
-    if (
-        !isDriverCategoryKey(value)
-    ) {
+    if (!isDriverCategoryKey(value)) {
         return null
     }
 
-    return categoryDefinitions[
-        value
-        ]
+    return categoryDefinitions[value]
 }
 
 function isDriverCategoryKey(
@@ -576,6 +553,7 @@ function isImplementedCategory(
         value === 'queue'
         || value === 'cache'
         || value === 'broadcasting'
+        || value === 'search'
     )
 }
 
@@ -583,10 +561,7 @@ function humanize(
     value: string,
 ): string {
     return value
-        .replace(
-            /[._-]+/g,
-            ' ',
-        )
+        .replace(/[._-]+/g, ' ')
         .replace(
             /\b\w/g,
             (letter) =>
