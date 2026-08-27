@@ -5,6 +5,7 @@ namespace App\Services\Admin\System\Search;
 use App\Data\Admin\System\Search\SearchActivationResultData;
 use App\Enums\Admin\System\SearchConfigurationMode;
 use App\Enums\Admin\System\SearchHealthStatus;
+use App\Models\Admin\System\InfrastructureConnection;
 use App\Models\Admin\System\SearchDriverConfiguration;
 use App\Models\Admin\System\SearchDriverSettings;
 use App\Models\User\User;
@@ -16,21 +17,25 @@ use Throwable;
 
 class SearchActivationService
 {
-    public function __construct(private readonly SearchDriverRegistry $registry, private readonly SearchDriverHealthService $health, private readonly SearchDeploymentTargetService $deployment, private readonly QueueWorkerRestartService $restart, private readonly SystemAuditLogger $audit) {}
+    public function __construct(private readonly SearchDriverRegistry $registry, private readonly SearchDriverHealthService $health, private readonly SearchDeploymentTargetService $deployment, private readonly QueueWorkerRestartService $restart, private readonly SystemAuditLogger $audit, private readonly SearchRuntimeFingerprintService $fingerprints) {}
 
     public function activate(SearchDriverConfiguration $configuration, User $actor, bool $force = false): SearchActivationResultData
     {
         $observed = $this->state();
-        $this->assertActivatable($configuration);
-        $health = $this->health->preflight($configuration, $actor);
+        $target = SearchDriverConfiguration::withTrashed()->findOrFail($configuration->id);
+        $this->assertActivatable($target);
+        $observedRuntime = $this->runtimeFingerprints($target);
+        $health = $this->health->preflight($target, $actor);
         $override = $health->status !== SearchHealthStatus::Healthy;
         if ($override && ! $force) {
             throw ValidationException::withMessages(['activation' => 'Managed Search activation requires a healthy provider preflight. '.$health->message]);
         }
-        DB::transaction(function () use ($configuration, $actor, $force, $health, $override, $observed) {
+        DB::transaction(function () use ($configuration, $actor, $force, $health, $override, $observed, $observedRuntime) {
             $settings = $this->lockSettings();
             $this->assertUnchanged($settings, $observed);
             $target = SearchDriverConfiguration::withTrashed()->lockForUpdate()->findOrFail($configuration->id);
+            $infrastructure = $this->lockInfrastructure($target);
+            $this->assertRuntimeUnchanged($target, $infrastructure, $observedRuntime);
             $this->assertActivatable($target);
             $before = $this->settingsState($settings);
             $settings->update(['mode' => SearchConfigurationMode::Managed, 'active_configuration_id' => $target->id, 'activated_by' => $actor->id, 'activated_at' => now()]);
@@ -83,6 +88,33 @@ class SearchActivationService
             throw ValidationException::withMessages(['configuration' => 'Archived or disabled Search configurations cannot be activated.']);
         }
         $this->registry->adapter($configuration->driver)->runtimeConfiguration($configuration);
+    }
+
+    private function runtimeFingerprints(SearchDriverConfiguration $configuration): array
+    {
+        $infrastructure = null;
+        if ($this->fingerprints->usesInfrastructure($configuration) && $configuration->infrastructure_connection_id) {
+            $infrastructure = InfrastructureConnection::withTrashed()->find($configuration->infrastructure_connection_id);
+        }
+
+        return ['target' => $this->fingerprints->target($configuration), 'infrastructure' => $infrastructure ? $this->fingerprints->infrastructure($infrastructure) : null];
+    }
+
+    private function lockInfrastructure(SearchDriverConfiguration $configuration): ?InfrastructureConnection
+    {
+        if (! $this->fingerprints->usesInfrastructure($configuration) || ! $configuration->infrastructure_connection_id) {
+            return null;
+        }
+
+        return InfrastructureConnection::withTrashed()->whereKey($configuration->infrastructure_connection_id)->lockForUpdate()->first();
+    }
+
+    private function assertRuntimeUnchanged(SearchDriverConfiguration $configuration, ?InfrastructureConnection $infrastructure, array $observed): void
+    {
+        $currentInfrastructure = $infrastructure ? $this->fingerprints->infrastructure($infrastructure) : null;
+        if ($this->fingerprints->target($configuration) !== $observed['target'] || $currentInfrastructure !== $observed['infrastructure']) {
+            throw ValidationException::withMessages(['activation' => 'Search runtime configuration changed while activation was prepared.']);
+        }
     }
 
     private function state(): array

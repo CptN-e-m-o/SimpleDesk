@@ -9,19 +9,22 @@ use App\Data\Admin\System\Search\SearchRuntimeConfigurationData;
 use App\Enums\Admin\System\SearchDriverType;
 use App\Enums\Admin\System\SearchHealthStatus;
 use App\Models\Admin\System\SearchDriverConfiguration;
+use Closure;
 
 class FakeSearchDriverAdapter implements SearchDriverAdapter
 {
     public SearchHealthResultData $result;
 
-    public function __construct()
+    public ?Closure $onTest = null;
+
+    public function __construct(public SearchDriverType $driverType = SearchDriverType::Database)
     {
         $this->result = new SearchHealthResultData(SearchHealthStatus::Healthy, 2, 'Search verified.');
     }
 
     public function type(): SearchDriverType
     {
-        return SearchDriverType::Database;
+        return $this->driverType;
     }
 
     public function definition(): SearchDriverDefinitionData
@@ -41,6 +44,10 @@ class FakeSearchDriverAdapter implements SearchDriverAdapter
 
     public function test(SearchDriverConfiguration $configuration): SearchHealthResultData
     {
+        if ($this->onTest) {
+            ($this->onTest)($configuration);
+        }
+
         return $this->result;
     }
 }
