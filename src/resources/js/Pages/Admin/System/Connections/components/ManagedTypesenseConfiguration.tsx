@@ -19,7 +19,6 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import type {
-    InfrastructureConfigurationObject,
     InfrastructureConfigurationValue,
 } from './ManagedPusherProtocolConfiguration'
 
@@ -567,15 +566,6 @@ function typesenseNodes(
         ]
 }
 
-function isRecord(
-    value: InfrastructureConfigurationObject,
-): value is InfrastructureConfigurationObject {
-    return (
-        typeof value === 'object'
-        && value !== null
-        && !Array.isArray(value)
-    )
-}
 
 function stringValue(
     value: InfrastructureConfigurationValue | undefined,
