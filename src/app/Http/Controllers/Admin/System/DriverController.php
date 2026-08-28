@@ -7,11 +7,13 @@ use App\Enums\Admin\System\CacheConfigurationMode;
 use App\Enums\Admin\System\DriverCategory;
 use App\Enums\Admin\System\QueueConfigurationMode;
 use App\Enums\Admin\System\SearchConfigurationMode;
+use App\Enums\Admin\System\StorageConfigurationMode;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\System\BroadcastDriverSettings;
 use App\Models\Admin\System\CacheDriverSettings;
 use App\Models\Admin\System\QueueDriverSettings;
 use App\Models\Admin\System\SearchDriverSettings;
+use App\Models\Admin\System\StorageDriverSettings;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -30,6 +32,7 @@ class DriverController extends Controller
                 'cache' => $this->cacheState(),
                 'broadcasting' => $this->broadcastState(),
                 'search' => $this->searchState(),
+                'storage' => $this->storageState(),
             ],
         ]);
     }
@@ -132,6 +135,19 @@ class DriverController extends Controller
                 || $configuration->trashed()
                 || ! $configuration->is_enabled,
         ];
+    }
+
+    private function storageState(): array
+    {
+        if (! Schema::hasTable('storage_driver_settings')) {
+            return $this->unavailableState();
+        }
+        $settings = StorageDriverSettings::query()->with('activeConfiguration')->find(StorageDriverSettings::SINGLETON_ID);
+        if (! $settings || $settings->mode === StorageConfigurationMode::Deployment) {
+            return $this->deploymentState();
+        }
+
+        return $this->managedState($settings->activeConfiguration);
     }
 
     private function deploymentState(): array

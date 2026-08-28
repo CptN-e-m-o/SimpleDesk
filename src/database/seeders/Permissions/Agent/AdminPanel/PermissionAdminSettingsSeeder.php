@@ -231,6 +231,23 @@ class PermissionAdminSettingsSeeder extends Seeder
                 ['activate', 'Activate Search configurations', 60],
                 ['force_activate', 'Force activate Search configurations', 61],
             ]),
+            ...array_map(fn (array $permission): array => [
+                'key' => 'admin.settings.storage.'.$permission[0],
+                'label' => $permission[1],
+                'type' => 'agent',
+                'ui_type' => 'checkbox',
+                'sort_order' => $permission[2],
+                'parent_key' => 'admin.settings.manage_system',
+            ], [
+                ['view', 'View Storage configurations', 62],
+                ['create', 'Create Storage configurations', 63],
+                ['update', 'Update Storage configurations', 64],
+                ['archive', 'Archive Storage configurations', 65],
+                ['delete', 'Permanently delete Storage configurations', 66],
+                ['test', 'Test Storage configurations', 67],
+                ['activate', 'Activate Storage configurations', 68],
+                ['force_activate', 'Force activate Storage configurations', 69],
+            ]),
             [
                 'key' => 'admin.settings.manage_social_login',
                 'label' => 'Manage social login',

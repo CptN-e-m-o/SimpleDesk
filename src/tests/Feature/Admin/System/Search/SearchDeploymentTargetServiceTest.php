@@ -11,7 +11,7 @@ class SearchDeploymentTargetServiceTest extends TestCase
 {
     public function test_snapshot_drives_target_after_runtime_config_mutation(): void
     {
-        $snapshot = new SearchDeploymentConfigurationSnapshot();
+        $snapshot = new SearchDeploymentConfigurationSnapshot;
         $snapshot->capture([
             'driver' => 'collection',
         ]);
@@ -208,7 +208,7 @@ class SearchDeploymentTargetServiceTest extends TestCase
 
     private function bindSnapshot(array $configuration): void
     {
-        $snapshot = new SearchDeploymentConfigurationSnapshot();
+        $snapshot = new SearchDeploymentConfigurationSnapshot;
         $snapshot->capture($configuration);
 
         app()->instance(

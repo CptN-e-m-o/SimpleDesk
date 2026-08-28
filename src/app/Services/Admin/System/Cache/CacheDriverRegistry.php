@@ -43,7 +43,7 @@ class CacheDriverRegistry
                 throw new InvalidCacheDriverAdapterException('Unknown cache adapter registry key.');
             }
 
-return $type;
+            return $type;
         }, array_keys($this->adapters));
     }
 

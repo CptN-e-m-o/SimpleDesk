@@ -7,6 +7,7 @@ use App\Enums\Admin\System\CacheConfigurationMode;
 use App\Enums\Admin\System\InfrastructureConnectionType;
 use App\Enums\Admin\System\QueueConfigurationMode;
 use App\Enums\Admin\System\SearchConfigurationMode;
+use App\Enums\Admin\System\StorageConfigurationMode;
 use App\Models\Admin\System\BroadcastDriverConfiguration;
 use App\Models\Admin\System\BroadcastDriverSettings;
 use App\Models\Admin\System\CacheDriverConfiguration;
@@ -16,6 +17,8 @@ use App\Models\Admin\System\QueueDriverConfiguration;
 use App\Models\Admin\System\QueueDriverSettings;
 use App\Models\Admin\System\SearchDriverConfiguration;
 use App\Models\Admin\System\SearchDriverSettings;
+use App\Models\Admin\System\StorageDriverConfiguration;
+use App\Models\Admin\System\StorageDriverSettings;
 use App\Models\User\User;
 use App\Services\Admin\System\Audit\SystemAuditLogger;
 use Illuminate\Support\Facades\DB;
@@ -99,6 +102,7 @@ class InfrastructureConnectionCatalogService
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
             $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
             $activeSearch = $this->activeManagedSearchUsingConnection($connection->id, $this->lockSearchSettings());
+            $activeStorage = $this->activeManagedStorageUsingConnection($connection->id, $this->lockStorageSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -174,6 +178,9 @@ class InfrastructureConnectionCatalogService
             if ($activeSearch) {
                 $this->assertActiveSearchInfrastructureUpdateIsSafe($connection, $activeSearch, $source, $normalized, $enabled);
             }
+            if ($activeStorage) {
+                $this->assertActiveStorageInfrastructureUpdateIsSafe($connection, $activeStorage, $source, $normalized, $enabled);
+            }
 
             $connection->update([
                 'name' => $data['name'],
@@ -232,6 +239,7 @@ class InfrastructureConnectionCatalogService
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
             $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
             $activeSearch = $this->activeManagedSearchUsingConnection($connection->id, $this->lockSearchSettings());
+            $activeStorage = $this->activeManagedStorageUsingConnection($connection->id, $this->lockStorageSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -250,6 +258,9 @@ class InfrastructureConnectionCatalogService
             }
             if (! $enabled && $activeSearch) {
                 throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Search configuration [{$activeSearch->name}] and cannot be disabled."]);
+            }
+            if (! $enabled && $activeStorage) {
+                throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Storage configuration [{$activeStorage->name}] and cannot be disabled."]);
             }
 
             if ($connection->is_enabled === $enabled) {
@@ -304,6 +315,7 @@ class InfrastructureConnectionCatalogService
             $activeCache = $this->activeManagedCacheUsingConnection($connection->id, $this->lockCacheSettings());
             $activeBroadcast = $this->activeManagedBroadcastUsingConnection($connection->id, $this->lockBroadcastSettings());
             $activeSearch = $this->activeManagedSearchUsingConnection($connection->id, $this->lockSearchSettings());
+            $activeStorage = $this->activeManagedStorageUsingConnection($connection->id, $this->lockStorageSettings());
 
             $connection = InfrastructureConnection::query()
                 ->lockForUpdate()
@@ -322,6 +334,9 @@ class InfrastructureConnectionCatalogService
             }
             if ($activeSearch) {
                 throw ValidationException::withMessages(['connection' => "Infrastructure connection [{$connection->name}] is used by active managed Search configuration [{$activeSearch->name}] and cannot be archived."]);
+            }
+            if ($activeStorage) {
+                throw ValidationException::withMessages(['connection' => "Infrastructure connection [{$connection->name}] is used by active managed Storage configuration [{$activeStorage->name}] and cannot be archived."]);
             }
 
             $adapter = $this->registry->adapter(
@@ -426,6 +441,10 @@ class InfrastructureConnectionCatalogService
             if ($referencingSearch) {
                 throw ValidationException::withMessages(['connection' => "Infrastructure connection cannot be permanently deleted because Search configuration [{$referencingSearch->name}] still references it."]);
             }
+            $referencingStorage = StorageDriverConfiguration::withTrashed()->where('infrastructure_connection_id', $id)->orderBy('id')->lockForUpdate()->first();
+            if ($referencingStorage) {
+                throw ValidationException::withMessages(['connection' => "Infrastructure connection cannot be permanently deleted because Storage configuration [{$referencingStorage->name}] still references it."]);
+            }
 
             $connection = InfrastructureConnection::onlyTrashed()
                 ->lockForUpdate()
@@ -497,6 +516,36 @@ class InfrastructureConnectionCatalogService
     private function lockSearchSettings(): ?SearchDriverSettings
     {
         return SearchDriverSettings::query()->whereKey(SearchDriverSettings::SINGLETON_ID)->lockForUpdate()->first();
+    }
+
+    private function lockStorageSettings(): ?StorageDriverSettings
+    {
+        return StorageDriverSettings::query()->whereKey(StorageDriverSettings::SINGLETON_ID)->lockForUpdate()->first();
+    }
+
+    private function activeManagedStorageUsingConnection(int $connectionId, ?StorageDriverSettings $settings): ?StorageDriverConfiguration
+    {
+        if ($settings === null || $settings->getRawOriginal('mode') !== StorageConfigurationMode::Managed->value || ! $settings->active_configuration_id) {
+            return null;
+        }
+
+        return StorageDriverConfiguration::withTrashed()->whereKey($settings->active_configuration_id)->where('infrastructure_connection_id', $connectionId)->lockForUpdate()->first();
+    }
+
+    private function assertActiveStorageInfrastructureUpdateIsSafe(InfrastructureConnection $connection, StorageDriverConfiguration $activeStorage, string $source, array $normalized, bool $enabled): void
+    {
+        if (! $enabled) {
+            throw ValidationException::withMessages(['is_enabled' => "Infrastructure connection [{$connection->name}] is used by active managed Storage configuration [{$activeStorage->name}] and cannot be disabled."]);
+        }
+        if ($source !== $connection->getRawOriginal('source')) {
+            throw ValidationException::withMessages(['source' => "Infrastructure source cannot change while Storage configuration [{$activeStorage->name}] is active."]);
+        }
+        if (($connection->configuration ?? []) != ($normalized['configuration'] ?? [])) {
+            throw ValidationException::withMessages(['configuration' => "Infrastructure runtime settings cannot change while Storage configuration [{$activeStorage->name}] is active."]);
+        }
+        if ($connection->secrets() != ($normalized['credentials'] ?? [])) {
+            throw ValidationException::withMessages(['credentials' => "Infrastructure credentials cannot change while Storage configuration [{$activeStorage->name}] is active."]);
+        }
     }
 
     private function activeManagedSearchUsingConnection(int $connectionId, ?SearchDriverSettings $settings): ?SearchDriverConfiguration

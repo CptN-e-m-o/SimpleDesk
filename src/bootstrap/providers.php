@@ -8,6 +8,7 @@ use App\Providers\Admin\System\CacheServiceProvider;
 use App\Providers\Admin\System\InfrastructureServiceProvider;
 use App\Providers\Admin\System\QueueServiceProvider;
 use App\Providers\Admin\System\SearchServiceProvider;
+use App\Providers\Admin\System\StorageServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\MailServiceProvider;
@@ -23,5 +24,6 @@ return [
     CacheServiceProvider::class,
     BroadcastServiceProvider::class,
     SearchServiceProvider::class,
+    StorageServiceProvider::class,
     QueueServiceProvider::class,
 ];

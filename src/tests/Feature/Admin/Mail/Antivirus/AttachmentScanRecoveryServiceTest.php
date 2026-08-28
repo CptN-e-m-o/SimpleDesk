@@ -585,7 +585,7 @@ class AttachmentScanRecoveryServiceTest extends TestCase
                     'scan_result' => null,
 
                     'metadata' => [
-                    'test' => true,
+                        'test' => true,
                     ],
                 ],
                 $attributes

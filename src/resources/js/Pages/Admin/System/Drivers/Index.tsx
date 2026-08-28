@@ -30,6 +30,7 @@ type ImplementedCategoryKey =
     | 'cache'
     | 'broadcasting'
     | 'search'
+    | 'storage'
 
 type DriverCategory = {
     key: DriverCategoryKey
@@ -143,7 +144,7 @@ const categoryDefinitions: Record<
             'S3-compatible storage',
         ],
         icon: HardDrive,
-        implemented: false,
+        implemented: true,
     },
 }
 
@@ -294,7 +295,7 @@ function CategoryCard({
                         ? route(
                             'admin.system.search.index',
                         )
-                        : null
+                        : route('admin.system.storage.index')
 
     return (
         <article
@@ -524,6 +525,10 @@ function canOpenCategory(
         )
     }
 
+    if (key === 'storage') {
+        return can('admin.settings.storage.view')
+    }
+
     return false
 }
 
@@ -554,6 +559,7 @@ function isImplementedCategory(
         || value === 'cache'
         || value === 'broadcasting'
         || value === 'search'
+        || value === 'storage'
     )
 }
 

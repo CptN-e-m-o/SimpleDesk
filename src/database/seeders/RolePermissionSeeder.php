@@ -133,6 +133,13 @@ class RolePermissionSeeder extends Seeder
             'admin.settings.search.delete',
             'admin.settings.search.test',
             'admin.settings.search.activate',
+            'admin.settings.storage.view',
+            'admin.settings.storage.create',
+            'admin.settings.storage.update',
+            'admin.settings.storage.archive',
+            'admin.settings.storage.delete',
+            'admin.settings.storage.test',
+            'admin.settings.storage.activate',
         ];
     }
 

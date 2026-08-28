@@ -11,6 +11,7 @@ import ManagedPusherProtocolConfiguration, {
 } from './components/ManagedPusherProtocolConfiguration'
 import ManagedSearchProviderConfiguration from './components/ManagedSearchProviderConfiguration'
 import ManagedTypesenseConfiguration from './components/ManagedTypesenseConfiguration'
+import ManagedObjectStorageConfiguration from './components/ManagedObjectStorageConfiguration'
 import { Link, useForm } from '@inertiajs/react'
 import {
     CheckCircle2,
@@ -56,6 +57,8 @@ export type ConnectionFormValue = {
         app_key_configured?: boolean
         app_secret_configured?: boolean
         api_key_configured?: boolean
+        access_key_id_configured?: boolean
+        secret_access_key_configured?: boolean
     }
 }
 
@@ -69,6 +72,8 @@ type FormData = {
         app_key: string
         app_secret: string
         api_key: string
+        access_key_id: string
+        secret_access_key: string
     }
     remove_credentials: string[]
     is_enabled: boolean
@@ -104,6 +109,8 @@ export default function Form({ definitions, connection }: Props) {
             app_key: '',
             app_secret: '',
             api_key: '',
+            access_key_id: '',
+            secret_access_key: '',
         },
         remove_credentials: [],
         is_enabled: connection?.is_enabled ?? true,
@@ -174,6 +181,8 @@ export default function Form({ definitions, connection }: Props) {
                 app_key: '',
                 app_secret: '',
                 api_key: '',
+                access_key_id: '',
+                secret_access_key: '',
             },
             remove_credentials: [],
         }))
@@ -197,6 +206,8 @@ export default function Form({ definitions, connection }: Props) {
                         app_key: '',
                         app_secret: '',
                         api_key: '',
+                        access_key_id: '',
+                        secret_access_key: '',
                     },
         }))
     }
@@ -260,7 +271,9 @@ export default function Form({ definitions, connection }: Props) {
         key:
             | 'app_key'
             | 'app_secret'
-            | 'api_key',
+            | 'api_key'
+            | 'access_key_id'
+            | 'secret_access_key',
         value: string,
     ) => {
         form.setData((data) => ({
@@ -592,6 +605,16 @@ export default function Form({ definitions, connection }: Props) {
                             value,
                         )
                     }
+                />
+            ) : isObjectStorageType(form.data.type) ? (
+                <ManagedObjectStorageConfiguration
+                    type={form.data.type}
+                    configuration={form.data.configuration}
+                    credentials={{ access_key_id: form.data.credentials.access_key_id, secret_access_key: form.data.credentials.secret_access_key }}
+                    credentialFlags={connection?.credential_flags}
+                    errors={errors}
+                    onConfigurationChange={setConfiguration}
+                    onCredentialChange={setProviderCredential}
                 />
             ) : (
                 <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-5">
@@ -1020,9 +1043,7 @@ function ManagedRedisConfiguration({
                         onClick={() =>
                             onConfigurationChange(
                                 'tls',
-                                !Boolean(
-                                    configuration.tls,
-                                ),
+                                !configuration.tls,
                             )
                         }
                         className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-gray-50/60 p-4 text-left transition hover:border-gray-300 hover:bg-gray-50"
@@ -1465,6 +1486,14 @@ function createDefaultConfiguration(
         }
     }
 
+    if (definition?.type === 'aws') {
+        return { region: 'us-east-1', bucket: '' }
+    }
+
+    if (definition?.type === 's3_compatible') {
+        return { endpoint: 'http://127.0.0.1:9000', region: 'us-east-1', bucket: '', use_path_style_endpoint: true }
+    }
+
     return {
         host: '127.0.0.1',
         port: 6379,
@@ -1514,6 +1543,10 @@ function isSimpleSearchProviderType(
         type === 'meilisearch'
         || type === 'algolia'
     )
+}
+
+function isObjectStorageType(type: string): type is 'aws' | 's3_compatible' {
+    return type === 'aws' || type === 's3_compatible'
 }
 
 function numberValue(
@@ -1575,6 +1608,14 @@ function connectionNamePlaceholder(
 
     if (type === 'algolia') {
         return 'Production Algolia'
+    }
+
+    if (type === 'aws') {
+        return 'Production Amazon S3'
+    }
+
+    if (type === 's3_compatible') {
+        return 'Production S3-compatible'
     }
 
     return 'Production Redis'
