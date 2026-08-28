@@ -17,6 +17,7 @@ public_html/hot
 
 storage/*.key
 .env
+.env.meilisearch
 .env.docker
 .env.reverb
 Homestead.yaml

@@ -160,6 +160,19 @@ services:
     networks:
       - simpledesk
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.53.1
+    container_name: simpledesk_meilisearch
+    restart: unless-stopped
+    env_file:
+      - src/.env.meilisearch
+    ports:
+      - "127.0.0.1:7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - simpledesk
+
   mailpit:
     image: axllent/mailpit:latest
     container_name: simpledesk_mailpit
@@ -191,6 +204,7 @@ services:
 volumes:
   pgsql_data:
   redis_data:
+  meilisearch_data:
   mail_attachment_storage:
     name: simpledesk_mail_attachment_storage
 
