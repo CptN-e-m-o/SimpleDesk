@@ -144,6 +144,19 @@
       <path value="$PROJECT_DIR$/src/vendor/maxmind-db/reader" />
       <path value="$PROJECT_DIR$/src/vendor/webklex/php-imap" />
       <path value="$PROJECT_DIR$/src/vendor/firebase/php-jwt" />
+      <path value="$PROJECT_DIR$/src/vendor/laravel/reverb" />
+      <path value="$PROJECT_DIR$/src/vendor/clue/redis-protocol" />
+      <path value="$PROJECT_DIR$/src/vendor/clue/redis-react" />
+      <path value="$PROJECT_DIR$/src/vendor/evenement/evenement" />
+      <path value="$PROJECT_DIR$/src/vendor/pusher/pusher-php-server" />
+      <path value="$PROJECT_DIR$/src/vendor/ratchet/rfc6455" />
+      <path value="$PROJECT_DIR$/src/vendor/react/cache" />
+      <path value="$PROJECT_DIR$/src/vendor/react/dns" />
+      <path value="$PROJECT_DIR$/src/vendor/react/event-loop" />
+      <path value="$PROJECT_DIR$/src/vendor/react/promise" />
+      <path value="$PROJECT_DIR$/src/vendor/react/promise-timer" />
+      <path value="$PROJECT_DIR$/src/vendor/react/socket" />
+      <path value="$PROJECT_DIR$/src/vendor/react/stream" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />

@@ -1,0 +1,26 @@
+import { useState, type ReactNode } from 'react'
+import { Eye, EyeOff, HardDrive, LockKeyhole } from 'lucide-react'
+
+import InputError from '@/Components/InputError'
+import type { InfrastructureConfigurationValue } from './ManagedPusherProtocolConfiguration'
+
+type Credentials = { access_key_id: string; secret_access_key: string }
+type Props = { type: 'aws' | 's3_compatible'; configuration: Record<string, InfrastructureConfigurationValue>; credentials: Credentials; credentialFlags?: { access_key_id_configured?: boolean; secret_access_key_configured?: boolean }; errors: Record<string, string | undefined>; onConfigurationChange: (key: string, value: InfrastructureConfigurationValue) => void; onCredentialChange: (key: keyof Credentials, value: string) => void }
+
+export default function ManagedObjectStorageConfiguration({ type, configuration, credentials, credentialFlags, errors, onConfigurationChange, onCredentialChange }: Props) {
+    const [showAccess, setShowAccess] = useState(false)
+    const [showSecret, setShowSecret] = useState(false)
+    return <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm"><div className="flex gap-3 border-b border-gray-200 bg-gray-50 p-5"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100"><HardDrive className="h-5 w-5 text-violet-700" /></span><div><h2 className="font-semibold">{type === 'aws' ? 'Amazon S3 bucket' : 'S3-compatible bucket'}</h2><p className="mt-1 text-sm text-gray-500">One private bucket and its server-side credentials.</p></div></div><div className="grid gap-5 p-6 sm:grid-cols-2">
+        {type === 's3_compatible' ? <Field label="Endpoint" error={errors['configuration.endpoint']}><input className={inputClass} value={stringValue(configuration.endpoint)} onChange={(event) => onConfigurationChange('endpoint', event.target.value)} placeholder="https://s3.example.com" /></Field> : null}
+        <Field label="Region" error={errors['configuration.region']}><input className={inputClass} value={stringValue(configuration.region)} onChange={(event) => onConfigurationChange('region', event.target.value)} placeholder="us-east-1" /></Field>
+        <Field label="Bucket" error={errors['configuration.bucket']}><input className={inputClass} value={stringValue(configuration.bucket)} onChange={(event) => onConfigurationChange('bucket', event.target.value)} placeholder="simpledesk-private" /></Field>
+        {type === 's3_compatible' ? <button type="button" onClick={() => onConfigurationChange('use_path_style_endpoint', configuration.use_path_style_endpoint !== true)} className="flex items-center justify-between rounded-xl border border-gray-200 p-4 text-left"><span><span className="block text-sm font-semibold">Path-style endpoint</span><span className="text-xs text-gray-500">Required by some compatible providers.</span></span><span className={`h-6 w-11 rounded-full p-0.5 ${configuration.use_path_style_endpoint ? 'bg-violet-600' : 'bg-gray-300'}`}><span className={`block h-5 w-5 rounded-full bg-white ${configuration.use_path_style_endpoint ? 'translate-x-5' : ''}`} /></span></button> : null}
+        <Secret label="Access key ID" value={credentials.access_key_id} configured={Boolean(credentialFlags?.access_key_id_configured)} visible={showAccess} error={errors['credentials.access_key_id']} onToggle={() => setShowAccess(!showAccess)} onChange={(value) => onCredentialChange('access_key_id', value)} />
+        <Secret label="Secret access key" value={credentials.secret_access_key} configured={Boolean(credentialFlags?.secret_access_key_configured)} visible={showSecret} error={errors['credentials.secret_access_key']} onToggle={() => setShowSecret(!showSecret)} onChange={(value) => onCredentialChange('secret_access_key', value)} />
+    </div></section>
+}
+
+function Secret({ label, value, configured, visible, error, onToggle, onChange }: { label: string; value: string; configured: boolean; visible: boolean; error?: string; onToggle: () => void; onChange: (value: string) => void }) { return <Field label={label} error={error}><div className="relative"><input type={visible ? 'text' : 'password'} autoComplete="new-password" className={`${inputClass} pr-11`} value={value} placeholder={configured ? 'Leave blank to keep current value' : label} onChange={(event) => onChange(event.target.value)} /><button type="button" onClick={onToggle} className="absolute right-3 top-3 text-gray-500">{visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>{configured ? <p className="mt-2 flex gap-2 text-xs text-emerald-700"><LockKeyhole className="h-4 w-4" />Blank keeps the encrypted current value; a new value rotates it.</p> : null}</Field> }
+function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) { return <div><label className="mb-2 block text-sm font-semibold">{label}</label>{children}<InputError className="mt-2" message={error} /></div> }
+function stringValue(value: InfrastructureConfigurationValue | undefined) { return typeof value === 'string' ? value : '' }
+const inputClass = 'h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100'

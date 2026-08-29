@@ -2,18 +2,21 @@ import AdminLayout from '@/Layouts/AdminLayout'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Head, Link } from '@inertiajs/react'
 import {
-    ArrowRight,
     Activity,
+    ArrowRight,
     Building2,
+    Cable,
     CalendarClock,
     KeyRound,
     Mailbox,
     MailSearch,
+    ScrollText,
+    ServerCog,
     ShieldCheck,
+    Sparkles,
     TextQuote,
     UserCog,
     UsersRound,
-    Sparkles,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { route } from 'ziggy-js'
@@ -148,14 +151,16 @@ export default function Index() {
         },
         {
             title: 'Agent Statuses',
-            description: 'Manage agent availability, routing eligibility, and temporary statuses.',
+            description:
+                'Manage agent availability, routing eligibility, and temporary statuses.',
             href: route('admin.agent-statuses.index'),
             permissions: ['admin.staff.agent_statuses.view'],
             icon: Activity,
         },
         {
             title: 'Skills',
-            description: 'Build reusable ticket classification rules with ANY or ALL conditions.',
+            description:
+                'Build reusable ticket classification rules with ANY or ALL conditions.',
             href: route('admin.skills.index'),
             permissions: ['admin.staff.skills.view'],
             icon: Sparkles,
@@ -201,6 +206,41 @@ export default function Index() {
             icon: KeyRound,
         },
     ]
+
+    const systemItems: DashboardItem[] = [
+        {
+            title: 'Drivers',
+            description:
+                'Overview of subsystem driver categories.',
+            href: route('admin.system.drivers.index'),
+            permissions: ['admin.settings.drivers.view'],
+            icon: ServerCog,
+        },
+        {
+            title: 'Infrastructure Connections',
+            description:
+                'Secure access to infrastructure resources.',
+            href: route('admin.system.connections.index'),
+            permissions: [
+                'admin.settings.infrastructure_connections.view',
+            ],
+            icon: Cable,
+        },
+        {
+            title: 'System Audit',
+            description:
+                'Review security-sensitive system operations.',
+            href: route('admin.system.audit.index'),
+            permissions: ['admin.settings.system_audit.view'],
+            icon: ScrollText,
+        },
+    ]
+
+    const visibleSystemItems = systemItems.filter(
+        (item) =>
+            !item.permissions ||
+            canAny(item.permissions),
+    )
 
     return (
         <AdminLayout title="Admin Panel">
@@ -274,6 +314,36 @@ export default function Index() {
                         </div>
                     </div>
                 </section>
+
+                {visibleSystemItems.length > 0 && (
+                    <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+                        <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
+                            <div className="flex items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+                                        System
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Infrastructure, drivers, health, and
+                                        audit controls.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                                {visibleSystemItems.map((item) => (
+                                    <DashboardCard
+                                        key={item.title}
+                                        item={item}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
             </div>
         </AdminLayout>
     )

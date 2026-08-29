@@ -88,21 +88,21 @@ class EmailMessageDiagnosticResource extends JsonResource
             'sender_name' => $this->sender_name,
 
             'recipient_counts' => [
-            'to' => count(
-                $this->to_recipients ?? []
-            ),
+                'to' => count(
+                    $this->to_recipients ?? []
+                ),
 
-            'cc' => count(
-                $this->cc_recipients ?? []
-            ),
+                'cc' => count(
+                    $this->cc_recipients ?? []
+                ),
 
-            'bcc' => count(
-                $this->bcc_recipients ?? []
-            ),
+                'bcc' => count(
+                    $this->bcc_recipients ?? []
+                ),
 
-            'reply_to' => count(
-                $this->reply_to_recipients ?? []
-            ),
+                'reply_to' => count(
+                    $this->reply_to_recipients ?? []
+                ),
             ],
 
             'subject' => $this->subject,

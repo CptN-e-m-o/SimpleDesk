@@ -422,11 +422,11 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
             ),
 
             'to_recipients' => [
-            [
-                'address' => $mailbox->email_address,
+                [
+                    'address' => $mailbox->email_address,
 
-                'name' => $mailbox->display_name,
-            ],
+                    'name' => $mailbox->display_name,
+                ],
             ],
 
             'cc_recipients' => [],
@@ -442,13 +442,13 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
             'html_body' => null,
 
             'headers' => [
-            'in-reply-to' => [
-                '<original-agent-message@example.test>',
-            ],
+                'in-reply-to' => [
+                    '<original-agent-message@example.test>',
+                ],
 
-            'references' => [
-                '<original-agent-message@example.test>',
-            ],
+                'references' => [
+                    '<original-agent-message@example.test>',
+                ],
             ],
 
             'metadata' => [],

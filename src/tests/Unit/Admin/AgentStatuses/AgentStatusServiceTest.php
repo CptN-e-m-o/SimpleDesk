@@ -77,6 +77,6 @@ class AgentStatusServiceTest extends TestCase
         $service->setChannelStatus($agent, $available, AgentWorkChannel::Email);
         $resolved = app(AgentStatusResolver::class)->currentStatus($agent, AgentWorkChannel::Email);
         $this->assertSame('unavailable', $resolved->availability->value);
-        $this->assertSame('blocked',$resolved->routingEligibility->value);
+        $this->assertSame('blocked', $resolved->routingEligibility->value);
     }
 }

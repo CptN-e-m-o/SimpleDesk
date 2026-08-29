@@ -622,7 +622,7 @@ class OutgoingEmailMessageFactoryTest extends TestCase
                     'scan_result' => null,
 
                     'metadata' => [
-                    'source' => 'test',
+                        'source' => 'test',
                     ],
                 ],
                 $attributes

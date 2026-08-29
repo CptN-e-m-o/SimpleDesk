@@ -14,6 +14,37 @@ services:
     networks:
       - simpledesk
 
+  reverb:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: simpledesk_reverb
+    restart: unless-stopped
+    init: true
+    working_dir: /var/www
+    command:
+      - php
+      - artisan
+      - reverb:start
+      - --host=0.0.0.0
+      - --port=8080
+    env_file:
+      - .env.reverb
+    volumes:
+      - ./src:/var/www
+    depends_on:
+      - pgsql
+      - redis
+    healthcheck:
+      test: ["CMD", "php", "-r", "if (@fsockopen('127.0.0.1', 8080) === false) { exit(1); } exit(0);"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    stop_grace_period: 30s
+    networks:
+      - simpledesk
+
   queue_mail:
     build:
       context: ./docker/php
@@ -34,7 +65,7 @@ services:
     depends_on:
       - pgsql
       - redis
-    stop_grace_period: 30s
+    stop_grace_period: 330s
     networks:
       - simpledesk
 
@@ -58,7 +89,7 @@ services:
     depends_on:
       - pgsql
       - redis
-    stop_grace_period: 30s
+    stop_grace_period: 330s
     networks:
       - simpledesk
 
@@ -69,7 +100,14 @@ services:
     container_name: simpledesk_scheduler
     restart: unless-stopped
     working_dir: /var/www
-    command: php artisan schedule:work
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while true; do
+          php artisan schedule:run --no-interaction
+          sleep 60
+        done
     volumes:
       - ./src:/var/www
       - mail_attachment_storage:/var/www/storage/app/private/mail/attachments
@@ -89,7 +127,10 @@ services:
       - ./src:/var/www
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - app
+      app:
+        condition: service_started
+      reverb:
+        condition: service_healthy
     networks:
       - simpledesk
 
@@ -116,6 +157,52 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - simpledesk
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.53.1
+    container_name: simpledesk_meilisearch
+    restart: unless-stopped
+    env_file:
+      - src/.env.meilisearch
+    ports:
+      - "127.0.0.1:7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - simpledesk
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: simpledesk_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    env_file:
+      - src/.env.minio
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - simpledesk
+
+  minio_init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    container_name: simpledesk_minio_init
+    env_file:
+      - src/.env.minio
+    depends_on:
+      - minio
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - >
+        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done;
+        mc mb --ignore-existing "local/$$MINIO_BUCKET";
+        mc stat "local/$$MINIO_BUCKET";
     networks:
       - simpledesk
 
@@ -150,6 +237,8 @@ services:
 volumes:
   pgsql_data:
   redis_data:
+  meilisearch_data:
+  minio_data:
   mail_attachment_storage:
     name: simpledesk_mail_attachment_storage
 

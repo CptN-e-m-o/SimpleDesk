@@ -47,6 +47,10 @@ import {
 
 import { Agent, getMobile, getPhone, getStatusClasses, getStatusLabel } from './shared'
 
+type Props = {
+    agents?: Agent[]
+}
+
 type AgentAction =
     | {
     type: 'delete' | 'restore' | 'force-delete'

@@ -33,6 +33,26 @@ use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\System\Broadcasting\BroadcastBrowserProbeController;
+use App\Http\Controllers\Admin\System\Broadcasting\BroadcastDriverController;
+use App\Http\Controllers\Admin\System\Cache\CacheDeploymentActivationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDeploymentForceActivationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverActivationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverConfigurationController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverConfigurationTestController;
+use App\Http\Controllers\Admin\System\Cache\CacheDriverForceActivationController;
+use App\Http\Controllers\Admin\System\DriverController;
+use App\Http\Controllers\Admin\System\InfrastructureConnectionController;
+use App\Http\Controllers\Admin\System\InfrastructureConnectionTestController;
+use App\Http\Controllers\Admin\System\Queues\QueueDeploymentActivationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDeploymentForceActivationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverActivationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverConfigurationController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverConfigurationTestController;
+use App\Http\Controllers\Admin\System\Queues\QueueDriverForceActivationController;
+use App\Http\Controllers\Admin\System\Search\SearchDriverController;
+use App\Http\Controllers\Admin\System\Storage\StorageDriverController;
+use App\Http\Controllers\Admin\System\SystemAuditLogController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\WorkScheduleAssignmentController;
 use App\Http\Controllers\Admin\WorkScheduleController;
@@ -97,6 +117,108 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::prefix('system')->name('system.')->group(function (): void {
+            Route::get('drivers', DriverController::class)->middleware('permission:admin.settings.drivers.view')->name('drivers.index');
+            Route::get('drivers/real-time', [BroadcastDriverController::class, 'index'])->middleware('permission:admin.settings.broadcasting.view')->name('broadcasting.index');
+            Route::get('drivers/real-time/create', [BroadcastDriverController::class, 'create'])->middleware('permission:admin.settings.broadcasting.create')->name('broadcasting.create');
+            Route::post('drivers/real-time', [BroadcastDriverController::class, 'store'])->middleware('permission:admin.settings.broadcasting.create')->name('broadcasting.store');
+            Route::post('drivers/real-time/deployment/activate', [BroadcastDriverController::class, 'activateDeployment'])->middleware('permission:admin.settings.broadcasting.activate')->name('broadcasting.activate-deployment');
+            Route::post('drivers/real-time/deployment/force-activate', [BroadcastDriverController::class, 'forceActivateDeployment'])->middleware('permission:admin.settings.broadcasting.force_activate')->name('broadcasting.force-activate-deployment');
+            Route::get('drivers/real-time/{configuration}/edit', [BroadcastDriverController::class, 'edit'])->middleware('permission:admin.settings.broadcasting.update')->name('broadcasting.edit');
+            Route::put('drivers/real-time/{configuration}', [BroadcastDriverController::class, 'update'])->middleware('permission:admin.settings.broadcasting.update')->name('broadcasting.update');
+            Route::patch('drivers/real-time/{configuration}/enabled', [BroadcastDriverController::class, 'enabled'])->middleware('permission:admin.settings.broadcasting.update')->name('broadcasting.enabled');
+            Route::delete('drivers/real-time/{configuration}', [BroadcastDriverController::class, 'destroy'])->middleware('permission:admin.settings.broadcasting.archive')->name('broadcasting.destroy');
+            Route::post('drivers/real-time/{id}/restore', [BroadcastDriverController::class, 'restore'])->middleware('permission:admin.settings.broadcasting.archive')->whereNumber('id')->name('broadcasting.restore');
+            Route::delete('drivers/real-time/{id}/force-delete', [BroadcastDriverController::class, 'forceDelete'])->middleware('permission:admin.settings.broadcasting.delete')->whereNumber('id')->name('broadcasting.force-delete');
+            Route::post('drivers/real-time/{configuration}/test', [BroadcastDriverController::class, 'test'])->middleware('permission:admin.settings.broadcasting.test')->name('broadcasting.test');
+            Route::post('drivers/real-time/{configuration}/activate', [BroadcastDriverController::class, 'activate'])->middleware('permission:admin.settings.broadcasting.activate')->name('broadcasting.activate');
+            Route::post('drivers/real-time/{configuration}/force-activate', [BroadcastDriverController::class, 'forceActivate'])->middleware('permission:admin.settings.broadcasting.force_activate')->name('broadcasting.force-activate');
+            Route::get('drivers/search', [SearchDriverController::class, 'index'])->middleware('permission:admin.settings.search.view')->name('search.index');
+            Route::get('drivers/search/create', [SearchDriverController::class, 'create'])->middleware('permission:admin.settings.search.create')->name('search.create');
+            Route::post('drivers/search', [SearchDriverController::class, 'store'])->middleware('permission:admin.settings.search.create')->name('search.store');
+            Route::post('drivers/search/deployment/activate', [SearchDriverController::class, 'activateDeployment'])->middleware('permission:admin.settings.search.activate')->name('search.activate-deployment');
+            Route::post('drivers/search/deployment/force-activate', [SearchDriverController::class, 'forceActivateDeployment'])->middleware('permission:admin.settings.search.force_activate')->name('search.force-activate-deployment');
+            Route::get('drivers/search/{configuration}/edit', [SearchDriverController::class, 'edit'])->middleware('permission:admin.settings.search.update')->name('search.edit');
+            Route::put('drivers/search/{configuration}', [SearchDriverController::class, 'update'])->middleware('permission:admin.settings.search.update')->name('search.update');
+            Route::patch('drivers/search/{configuration}/enabled', [SearchDriverController::class, 'enabled'])->middleware('permission:admin.settings.search.update')->name('search.enabled');
+            Route::delete('drivers/search/{configuration}', [SearchDriverController::class, 'destroy'])->middleware('permission:admin.settings.search.archive')->name('search.destroy');
+            Route::post('drivers/search/{id}/restore', [SearchDriverController::class, 'restore'])->middleware('permission:admin.settings.search.archive')->whereNumber('id')->name('search.restore');
+            Route::delete('drivers/search/{id}/force-delete', [SearchDriverController::class, 'forceDelete'])->middleware('permission:admin.settings.search.delete')->whereNumber('id')->name('search.force-delete');
+            Route::post('drivers/search/{configuration}/test', [SearchDriverController::class, 'test'])->middleware('permission:admin.settings.search.test')->name('search.test');
+            Route::post('drivers/search/{configuration}/activate', [SearchDriverController::class, 'activate'])->middleware('permission:admin.settings.search.activate')->name('search.activate');
+            Route::post('drivers/search/{configuration}/force-activate', [SearchDriverController::class, 'forceActivate'])->middleware('permission:admin.settings.search.force_activate')->name('search.force-activate');
+            Route::get('drivers/storage', [StorageDriverController::class, 'index'])->middleware('permission:admin.settings.storage.view')->name('storage.index');
+            Route::get('drivers/storage/create', [StorageDriverController::class, 'create'])->middleware('permission:admin.settings.storage.create')->name('storage.create');
+            Route::post('drivers/storage', [StorageDriverController::class, 'store'])->middleware('permission:admin.settings.storage.create')->name('storage.store');
+            Route::post('drivers/storage/deployment/activate', [StorageDriverController::class, 'activateDeployment'])->middleware('permission:admin.settings.storage.activate')->name('storage.activate-deployment');
+            Route::post('drivers/storage/deployment/force-activate', [StorageDriverController::class, 'forceActivateDeployment'])->middleware('permission:admin.settings.storage.force_activate')->name('storage.force-activate-deployment');
+            Route::get('drivers/storage/{configuration}/edit', [StorageDriverController::class, 'edit'])->middleware('permission:admin.settings.storage.update')->name('storage.edit');
+            Route::put('drivers/storage/{configuration}', [StorageDriverController::class, 'update'])->middleware('permission:admin.settings.storage.update')->name('storage.update');
+            Route::patch('drivers/storage/{configuration}/enabled', [StorageDriverController::class, 'enabled'])->middleware('permission:admin.settings.storage.update')->name('storage.enabled');
+            Route::delete('drivers/storage/{configuration}', [StorageDriverController::class, 'destroy'])->middleware('permission:admin.settings.storage.archive')->name('storage.destroy');
+            Route::post('drivers/storage/{id}/restore', [StorageDriverController::class, 'restore'])->middleware('permission:admin.settings.storage.archive')->whereNumber('id')->name('storage.restore');
+            Route::delete('drivers/storage/{id}/force-delete', [StorageDriverController::class, 'forceDelete'])->middleware('permission:admin.settings.storage.delete')->whereNumber('id')->name('storage.force-delete');
+            Route::post('drivers/storage/{configuration}/test', [StorageDriverController::class, 'test'])->middleware('permission:admin.settings.storage.test')->name('storage.test');
+            Route::post('drivers/storage/{configuration}/activate', [StorageDriverController::class, 'activate'])->middleware('permission:admin.settings.storage.activate')->name('storage.activate');
+            Route::post('drivers/storage/{configuration}/force-activate', [StorageDriverController::class, 'forceActivate'])->middleware('permission:admin.settings.storage.force_activate')->name('storage.force-activate');
+            Route::get('drivers/cache', [CacheDriverConfigurationController::class, 'index'])->middleware('permission:admin.settings.cache.view')->name('cache.index');
+            Route::get('drivers/cache/create', [CacheDriverConfigurationController::class, 'create'])->middleware('permission:admin.settings.cache.create')->name('cache.create');
+            Route::post('drivers/cache', [CacheDriverConfigurationController::class, 'store'])->middleware('permission:admin.settings.cache.create')->name('cache.store');
+            Route::post('drivers/cache/deployment/activate', CacheDeploymentActivationController::class)->middleware('permission:admin.settings.cache.activate')->name('cache.activate-deployment');
+            Route::post('drivers/cache/deployment/force-activate', CacheDeploymentForceActivationController::class)->middleware('permission:admin.settings.cache.force_activate')->name('cache.force-activate-deployment');
+            Route::get('drivers/cache/{configuration}/edit', [CacheDriverConfigurationController::class, 'edit'])->middleware('permission:admin.settings.cache.update')->name('cache.edit');
+            Route::put('drivers/cache/{configuration}', [CacheDriverConfigurationController::class, 'update'])->middleware('permission:admin.settings.cache.update')->name('cache.update');
+            Route::patch('drivers/cache/{configuration}/enabled', [CacheDriverConfigurationController::class, 'setEnabled'])->middleware('permission:admin.settings.cache.update')->name('cache.enabled');
+            Route::delete('drivers/cache/{configuration}', [CacheDriverConfigurationController::class, 'destroy'])->middleware('permission:admin.settings.cache.archive')->name('cache.destroy');
+            Route::post('drivers/cache/{id}/restore', [CacheDriverConfigurationController::class, 'restore'])->middleware('permission:admin.settings.cache.archive')->whereNumber('id')->name('cache.restore');
+            Route::delete('drivers/cache/{id}/force-delete', [CacheDriverConfigurationController::class, 'forceDelete'])->middleware('permission:admin.settings.cache.delete')->whereNumber('id')->name('cache.force-delete');
+            Route::post('drivers/cache/{configuration}/test', CacheDriverConfigurationTestController::class)->middleware('permission:admin.settings.cache.test')->name('cache.test');
+            Route::post('drivers/cache/{configuration}/activate', CacheDriverActivationController::class)->middleware('permission:admin.settings.cache.activate')->name('cache.activate');
+            Route::post('drivers/cache/{configuration}/force-activate', CacheDriverForceActivationController::class)->middleware('permission:admin.settings.cache.force_activate')->name('cache.force-activate');
+            Route::get('drivers/queues', [QueueDriverConfigurationController::class, 'index'])->middleware('permission:admin.settings.queues.view')->name('queues.index');
+            Route::get('drivers/queues/create', [QueueDriverConfigurationController::class, 'create'])->middleware('permission:admin.settings.queues.create')->name('queues.create');
+            Route::post('drivers/queues', [QueueDriverConfigurationController::class, 'store'])->middleware('permission:admin.settings.queues.create')->name('queues.store');
+            Route::post('drivers/queues/deployment/activate', QueueDeploymentActivationController::class)
+                ->middleware('permission:admin.settings.queues.activate')
+                ->name('queues.activate-deployment');
+
+            Route::post('drivers/queues/deployment/force-activate', QueueDeploymentForceActivationController::class)
+                ->middleware('permission:admin.settings.queues.force_activate')
+                ->name('queues.force-activate-deployment');
+            Route::get('drivers/queues/{configuration}/edit', [QueueDriverConfigurationController::class, 'edit'])->middleware('permission:admin.settings.queues.update')->name('queues.edit');
+            Route::put('drivers/queues/{configuration}', [QueueDriverConfigurationController::class, 'update'])->middleware('permission:admin.settings.queues.update')->name('queues.update');
+            Route::patch('drivers/queues/{configuration}/enabled', [QueueDriverConfigurationController::class, 'setEnabled'])->middleware('permission:admin.settings.queues.update')->name('queues.enabled');
+            Route::delete('drivers/queues/{configuration}', [QueueDriverConfigurationController::class, 'destroy'])->middleware('permission:admin.settings.queues.archive')->name('queues.destroy');
+            Route::post('drivers/queues/{id}/restore', [QueueDriverConfigurationController::class, 'restore'])->middleware('permission:admin.settings.queues.archive')->whereNumber('id')->name('queues.restore');
+            Route::delete('drivers/queues/{id}/force-delete', [QueueDriverConfigurationController::class, 'forceDelete'])->middleware('permission:admin.settings.queues.delete')->whereNumber('id')->name('queues.force-delete');
+            Route::post('drivers/queues/{configuration}/test', QueueDriverConfigurationTestController::class)->middleware('permission:admin.settings.queues.test')->name('queues.test');
+            Route::post('drivers/queues/{configuration}/activate', QueueDriverActivationController::class)
+                ->middleware('permission:admin.settings.queues.activate')
+                ->name('queues.activate');
+            Route::post('drivers/queues/{configuration}/force-activate', QueueDriverForceActivationController::class)
+                ->middleware('permission:admin.settings.queues.force_activate')
+                ->name('queues.force-activate');
+            Route::get('connections', [InfrastructureConnectionController::class, 'index'])->middleware('permission:admin.settings.infrastructure_connections.view')->name('connections.index');
+            Route::get('connections/create', [InfrastructureConnectionController::class, 'create'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.create');
+            Route::post('connections', [InfrastructureConnectionController::class, 'store'])->middleware('permission:admin.settings.infrastructure_connections.create')->name('connections.store');
+            Route::get('connections/{connection}/edit', [InfrastructureConnectionController::class, 'edit'])->middleware('permission:admin.settings.infrastructure_connections.update')->name('connections.edit');
+            Route::put('connections/{connection}', [InfrastructureConnectionController::class, 'update'])->middleware('permission:admin.settings.infrastructure_connections.update')->name('connections.update');
+            Route::patch('connections/{connection}/toggle', [InfrastructureConnectionController::class, 'toggle'])->middleware('permission:admin.settings.infrastructure_connections.update')->name('connections.toggle');
+            Route::post('connections/{connection}/test', InfrastructureConnectionTestController::class)->middleware('permission:admin.settings.infrastructure_connections.test')->name('connections.test');
+            Route::delete('connections/{connection}', [InfrastructureConnectionController::class, 'destroy'])->middleware('permission:admin.settings.infrastructure_connections.archive')->name('connections.destroy');
+            Route::post('connections/{id}/restore', [InfrastructureConnectionController::class, 'restore'])->middleware('permission:admin.settings.infrastructure_connections.archive')->whereNumber('id')->name('connections.restore');
+            Route::delete('connections/{id}/force-delete', [InfrastructureConnectionController::class, 'forceDelete'])->middleware('permission:admin.settings.infrastructure_connections.delete')->whereNumber('id')->name('connections.force-delete');
+            Route::get('audit', SystemAuditLogController::class)->middleware('permission:admin.settings.system_audit.view')->name('audit.index');
+            Route::post(
+                'drivers/real-time/browser-probe',
+                BroadcastBrowserProbeController::class,
+            )
+                ->middleware([
+                    'permission:admin.settings.broadcasting.test',
+                    'throttle:10,1',
+                ])
+                ->name('broadcasting.browser-probe');
+        });
         Route::get('/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })
