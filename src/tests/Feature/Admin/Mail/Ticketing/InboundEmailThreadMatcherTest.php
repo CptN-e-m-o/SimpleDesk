@@ -8,6 +8,7 @@ use App\Enums\Admin\Mail\MailboxDriver;
 use App\Models\Admin\Mail\EmailMessage;
 use App\Models\Admin\Mail\Mailbox;
 use App\Models\Ticket;
+use App\Models\TicketPriority;
 use App\Models\User\User;
 use App\Services\Admin\Mail\Ticketing\InboundEmailThreadMatcher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -316,7 +317,7 @@ class InboundEmailThreadMatcherTest extends TestCase
 
             'subject' => 'Thread matcher test ticket',
 
-            'priority' => Ticket::PRIORITY_MEDIUM,
+            'priority_id' => TicketPriority::query()->where('is_default', true)->valueOrFail('id'),
 
             'status' => $status,
 

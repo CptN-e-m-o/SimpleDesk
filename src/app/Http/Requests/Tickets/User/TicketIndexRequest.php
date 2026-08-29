@@ -27,7 +27,7 @@ class TicketIndexRequest extends FormRequest
         return [
             'search' => ['nullable', 'string', 'max:255'],
             'status' => ['nullable', 'string', Rule::in(Ticket::statuses())],
-            'priority' => ['nullable', 'string', Rule::in(Ticket::priorities())],
+            'priority' => ['nullable', 'integer', Rule::exists('ticket_priorities', 'id')->where(fn ($query) => $query->where('visibility', 'public')->whereNull('deleted_at'))],
         ];
     }
 }

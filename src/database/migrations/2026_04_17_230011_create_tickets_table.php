@@ -28,7 +28,7 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->string('subject');
-            $table->string('priority')->default(Ticket::PRIORITY_MEDIUM);
+            $table->string('priority')->default('medium');
             $table->string('status')->default(Ticket::STATUS_OPEN);
             $table->string('source')->default(Ticket::SOURCE_PORTAL);
             $table->string('service')->nullable();

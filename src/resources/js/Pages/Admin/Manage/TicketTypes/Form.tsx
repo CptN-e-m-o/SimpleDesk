@@ -1,0 +1,15 @@
+import { Form, Head, Link } from '@inertiajs/react'
+import { ArrowLeft, Save } from 'lucide-react'
+import { route } from 'ziggy-js'
+import AdminLayout from '@/Layouts/AdminLayout'
+
+type TicketType = { id: number; name: string; description: string | null; visibility: string; is_active: boolean }
+type Props = { ticketType?: TicketType; visibilityOptions: string[] }
+
+export default function TicketTypeForm({ ticketType, visibilityOptions }: Props) {
+    const editing = Boolean(ticketType)
+    return <AdminLayout title={editing ? 'Edit Ticket Type' : 'Create Ticket Type'}><Head title={editing ? 'Edit Ticket Type' : 'Create Ticket Type'} /><Form action={editing ? route('admin.manage.ticket-types.update', ticketType!.id) : route('admin.manage.ticket-types.store')} method={editing ? 'put' : 'post'}>{({ errors, processing }) => <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6"><header className="flex items-center justify-between rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm"><div><h1 className="text-2xl font-semibold">{editing ? 'Edit ticket type' : 'Create ticket type'}</h1><p className="mt-1 text-sm text-gray-500">Classification only; routing and SLA behavior are configured elsewhere.</p></div><Link href={route('admin.manage.ticket-types.index')} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold"><ArrowLeft className="h-4 w-4" />Back</Link></header><section className="space-y-5 rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm"><Field label="Name" error={errors.name}><input name="name" defaultValue={ticketType?.name} required className={inputClass} /></Field><Field label="Description" error={errors.description}><textarea name="description" defaultValue={ticketType?.description ?? ''} rows={4} className={inputClass} /></Field><Field label="Visibility" error={errors.visibility}><select name="visibility" defaultValue={ticketType?.visibility ?? 'public'} className={inputClass}>{visibilityOptions.map((value) => <option key={value} value={value}>{value === 'public' ? 'Public' : 'Internal'}</option>)}</select></Field><label className="flex items-center gap-3 rounded-2xl border p-4"><input type="hidden" name="is_active" value="0" /><input type="checkbox" name="is_active" value="1" defaultChecked={ticketType?.is_active ?? true} /><span><strong className="block text-sm">Active</strong><span className="text-xs text-gray-500">Available for new classifications.</span></span></label><button disabled={processing} className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white"><Save className="h-4 w-4" />Save ticket type</button></section></div>}</Form></AdminLayout>
+}
+
+const inputClass = 'mt-2 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100'
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) { return <label className="block text-sm font-medium text-gray-800">{label}{children}{error ? <span className="mt-1 block text-xs text-red-600">{error}</span> : null}</label> }

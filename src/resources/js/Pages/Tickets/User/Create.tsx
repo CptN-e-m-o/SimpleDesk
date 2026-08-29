@@ -21,30 +21,8 @@ type Category = {
 
 type Props = {
     readonly categories: Category[]
+    readonly priorityOptions: Array<{ id: number; name: string; color: string; is_default: boolean }>
 }
-
-const priorityOptions = [
-    {
-        value: 'low',
-        label: 'Low',
-        description: 'General question or non-urgent issue.',
-    },
-    {
-        value: 'medium',
-        label: 'Medium',
-        description: 'Issue affecting normal usage.',
-    },
-    {
-        value: 'high',
-        label: 'High',
-        description: 'Major issue requiring quick attention.',
-    },
-    {
-        value: 'urgent',
-        label: 'Urgent',
-        description: 'Critical problem blocking work completely.',
-    },
-]
 
 const suggestions = [
     'Describe what happened and what you expected instead.',
@@ -52,11 +30,11 @@ const suggestions = [
     'Attach screenshots or files if they help explain the issue.',
 ]
 
-export default function CreateTicket({ categories }: Props) {
+export default function CreateTicket({ categories, priorityOptions }: Props) {
     const form = useForm({
         subject: '',
         category_id: '',
-        priority: 'medium',
+        priority_id: priorityOptions.find((priority) => priority.is_default)?.id ?? '',
         service: '',
         description: '',
         attachments: [] as File[],
@@ -208,26 +186,26 @@ export default function CreateTicket({ categories }: Props) {
 
                                 <div>
                                     <label
-                                        htmlFor="priority"
+                                        htmlFor="priority_id"
                                         className="mb-2 block text-sm font-medium text-gray-800"
                                     >
                                         Priority <span className="text-rose-500">*</span>
                                     </label>
                                     <select
-                                        id="priority"
-                                        value={form.data.priority}
-                                        onChange={(e) => form.setData('priority', e.target.value)}
+                                        id="priority_id"
+                                        value={form.data.priority_id}
+                                        onChange={(e) => form.setData('priority_id', e.target.value)}
                                         className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm text-gray-900 outline-none transition focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100"
                                     >
                                         {priorityOptions.map((priority) => (
-                                            <option key={priority.value} value={priority.value}>
-                                                {priority.label}
+                                            <option key={priority.id} value={priority.id}>
+                                                {priority.name}
                                             </option>
                                         ))}
                                     </select>
-                                    {form.errors.priority && (
+                                    {form.errors.priority_id && (
                                         <p className="mt-2 text-sm text-rose-600">
-                                            {form.errors.priority}
+                                            {form.errors.priority_id}
                                         </p>
                                     )}
                                 </div>
@@ -393,15 +371,13 @@ export default function CreateTicket({ categories }: Props) {
                             <div className="mt-4 space-y-3">
                                 {priorityOptions.map((item) => (
                                     <div
-                                        key={item.value}
+                                        key={item.id}
                                         className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"
                                     >
                                         <div className="text-sm font-medium text-gray-900">
-                                            {item.label}
+                                            {item.name}
                                         </div>
-                                        <div className="mt-1 text-sm leading-6 text-gray-600">
-                                            {item.description}
-                                        </div>
+                                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-600"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />Available to requesters</div>
                                     </div>
                                 ))}
                             </div>

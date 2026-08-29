@@ -25,7 +25,8 @@ class Ticket extends Model
         'mailbox_id',
         'department_id',
         'subject',
-        'priority',
+        'priority_id',
+        'ticket_type_id',
         'status',
         'source',
         'service',
@@ -51,14 +52,6 @@ class Ticket extends Model
 
     public const STATUS_CLOSED = 'closed';
 
-    public const PRIORITY_LOW = 'low';
-
-    public const PRIORITY_MEDIUM = 'medium';
-
-    public const PRIORITY_HIGH = 'high';
-
-    public const PRIORITY_URGENT = 'urgent';
-
     public const SOURCE_PORTAL = 'portal';
 
     public const SOURCE_EMAIL = 'email';
@@ -73,16 +66,6 @@ class Ticket extends Model
             self::STATUS_WAITING_FOR_CUSTOMER,
             self::STATUS_RESOLVED,
             self::STATUS_CLOSED,
-        ];
-    }
-
-    public static function priorities(): array
-    {
-        return [
-            self::PRIORITY_LOW,
-            self::PRIORITY_MEDIUM,
-            self::PRIORITY_HIGH,
-            self::PRIORITY_URGENT,
         ];
     }
 
@@ -116,32 +99,6 @@ class Ticket extends Model
         ];
     }
 
-    public static function priorityOptions(): array
-    {
-        return [
-            [
-                'value' => '',
-                'label' => 'All priorities',
-            ],
-            [
-                'value' => self::PRIORITY_LOW,
-                'label' => 'Low',
-            ],
-            [
-                'value' => self::PRIORITY_MEDIUM,
-                'label' => 'Medium',
-            ],
-            [
-                'value' => self::PRIORITY_HIGH,
-                'label' => 'High',
-            ],
-            [
-                'value' => self::PRIORITY_URGENT,
-                'label' => 'Urgent',
-            ],
-        ];
-    }
-
     public static function statusLabel(
         string $status
     ): string {
@@ -152,18 +109,6 @@ class Ticket extends Model
             self::STATUS_RESOLVED => 'Resolved',
             self::STATUS_CLOSED => 'Closed',
             default => $status,
-        };
-    }
-
-    public static function priorityLabel(
-        string $priority
-    ): string {
-        return match ($priority) {
-            self::PRIORITY_LOW => 'Low',
-            self::PRIORITY_MEDIUM => 'Medium',
-            self::PRIORITY_HIGH => 'High',
-            self::PRIORITY_URGENT => 'Urgent',
-            default => $priority,
         };
     }
 
@@ -216,6 +161,16 @@ class Ticket extends Model
         return $this->belongsTo(
             Department::class
         );
+    }
+
+    public function priority(): BelongsTo
+    {
+        return $this->belongsTo(TicketPriority::class, 'priority_id')->withTrashed();
+    }
+
+    public function ticketType(): BelongsTo
+    {
+        return $this->belongsTo(TicketType::class)->withTrashed();
     }
 
     public function replies(): HasMany

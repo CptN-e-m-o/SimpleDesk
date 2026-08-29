@@ -10,7 +10,9 @@ import {
 } from '@inertiajs/react'
 import {
     Activity,
+    BadgeCheck,
     Bell,
+    BookOpen,
     Briefcase,
     Building2,
     Cable,
@@ -19,8 +21,12 @@ import {
     CheckCircle2,
     ChevronDown,
     ChevronUp,
+    Clock3,
+    FileText,
+    Gauge,
     GitBranch,
     LayoutDashboard,
+    ListPlus,
     LogOut,
     Mail,
     Plus,
@@ -30,8 +36,11 @@ import {
     ServerCog,
     Shield,
     Sparkles,
+    Tags,
+    Timer,
     UserCog,
     UsersRound,
+    Workflow,
     Wrench,
 } from 'lucide-react'
 
@@ -52,14 +61,15 @@ type Props = {
 
 type NavItem = {
     label: string
-    href: string
+    href?: string
     icon: ComponentType<{
         className?: string
     }>
-    isActive: (url: string) => boolean
+    isActive?: (url: string) => boolean
     permission?: string
     permissions?: string[]
     visible?: boolean
+    disabled?: boolean
 }
 
 type NavSection = {
@@ -251,6 +261,59 @@ export default function AdminLayout({
                                     currentUrl.startsWith(
                                         '/admin/skills',
                                     ),
+                            },
+                        ],
+                    },
+                    {
+                        title: 'Manage',
+                        collapsible: true,
+                        items: [
+                            {
+                                label: 'Priorities',
+                                icon: Gauge,
+                                href: route('admin.manage.priorities.index'),
+                                permissions: ['admin.manage.priorities.view'],
+                            },
+                            {
+                                label: 'Ticket Types',
+                                icon: Tags,
+                                href: route('admin.manage.ticket-types.index'),
+                                permissions: ['admin.manage.ticket_types.view'],
+                            },
+                            {
+                                label: 'Ticket Fields',
+                                icon: ListPlus,
+                                disabled: true,
+                            },
+                            {
+                                label: 'Forms',
+                                icon: FileText,
+                                disabled: true,
+                            },
+                            {
+                                label: 'Help Topics',
+                                icon: BookOpen,
+                                disabled: true,
+                            },
+                            {
+                                label: 'Business Hours',
+                                icon: Clock3,
+                                disabled: true,
+                            },
+                            {
+                                label: 'SLA Plans',
+                                icon: Timer,
+                                disabled: true,
+                            },
+                            {
+                                label: 'Automations',
+                                icon: Workflow,
+                                disabled: true,
+                            },
+                            {
+                                label: 'Approval Workflows',
+                                icon: BadgeCheck,
+                                disabled: true,
                             },
                         ],
                     },
@@ -451,8 +514,10 @@ export default function AdminLayout({
 
         sections.forEach((section) => {
             const hasActiveItem =
-                section.items.some((item) =>
-                    item.isActive(url),
+                section.items.some(
+                    (item) =>
+                        item.isActive?.(url) ??
+                        false,
                 )
 
             if (section.collapsible) {
@@ -471,6 +536,60 @@ export default function AdminLayout({
             ...previous,
             [title]: !previous[title],
         }))
+    }
+
+    function renderNavItem(
+        sectionTitle: string,
+        item: NavItem,
+    ) {
+        const Icon = item.icon
+        const active =
+            item.isActive?.(url) ?? false
+
+        if (item.disabled || !item.href) {
+            return (
+                <div
+                    key={`${sectionTitle}-${item.label}`}
+                    aria-disabled="true"
+                    title="Not available yet"
+                    className="flex cursor-not-allowed items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium text-slate-600"
+                >
+                    <Icon className="h-4 w-4 shrink-0 text-slate-700" />
+
+                    <span className="min-w-0 flex-1 truncate">
+                        {item.label}
+                    </span>
+
+                    <span className="rounded-full border border-white/5 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                        Soon
+                    </span>
+                </div>
+            )
+        }
+
+        return (
+            <Link
+                key={`${sectionTitle}-${item.label}`}
+                href={item.href}
+                className={`group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium transition-all ${
+                    active
+                        ? 'bg-sky-500/15 text-sky-300 ring-1 ring-inset ring-sky-500/20'
+                        : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
+            >
+                <Icon
+                    className={`h-4 w-4 shrink-0 transition ${
+                        active
+                            ? 'text-sky-300'
+                            : 'text-slate-500 group-hover:text-slate-300'
+                    }`}
+                />
+
+                <span>
+                    {item.label}
+                </span>
+            </Link>
+        )
     }
 
     return (
@@ -513,9 +632,10 @@ export default function AdminLayout({
                                             (
                                                 item,
                                             ) =>
-                                                item.isActive(
+                                                item.isActive?.(
                                                     url,
-                                                ),
+                                                ) ??
+                                                false,
                                         )
 
                                     if (
@@ -537,43 +657,11 @@ export default function AdminLayout({
                                                     {section.items.map(
                                                         (
                                                             item,
-                                                        ) => {
-                                                            const Icon =
-                                                                item.icon
-
-                                                            const active =
-                                                                item.isActive(
-                                                                    url,
-                                                                )
-
-                                                            return (
-                                                                <Link
-                                                                    key={`${section.title}-${item.label}`}
-                                                                    href={
-                                                                        item.href
-                                                                    }
-                                                                    className={`group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium transition-all ${
-                                                                        active
-                                                                            ? 'bg-sky-500/15 text-sky-300 ring-1 ring-inset ring-sky-500/20'
-                                                                            : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                                                                    }`}
-                                                                >
-                                                                    <Icon
-                                                                        className={`h-4 w-4 shrink-0 transition ${
-                                                                            active
-                                                                                ? 'text-sky-300'
-                                                                                : 'text-slate-500 group-hover:text-slate-300'
-                                                                        }`}
-                                                                    />
-
-                                                                    <span>
-                                                                        {
-                                                                            item.label
-                                                                        }
-                                                                    </span>
-                                                                </Link>
-                                                            )
-                                                        },
+                                                        ) =>
+                                                            renderNavItem(
+                                                                section.title,
+                                                                item,
+                                                            ),
                                                     )}
                                                 </nav>
                                             </div>
@@ -620,43 +708,11 @@ export default function AdminLayout({
                                                     {section.items.map(
                                                         (
                                                             item,
-                                                        ) => {
-                                                            const Icon =
-                                                                item.icon
-
-                                                            const active =
-                                                                item.isActive(
-                                                                    url,
-                                                                )
-
-                                                            return (
-                                                                <Link
-                                                                    key={`${section.title}-${item.label}`}
-                                                                    href={
-                                                                        item.href
-                                                                    }
-                                                                    className={`group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium transition-all ${
-                                                                        active
-                                                                            ? 'bg-sky-500/15 text-sky-300 ring-1 ring-inset ring-sky-500/20'
-                                                                            : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                                                                    }`}
-                                                                >
-                                                                    <Icon
-                                                                        className={`h-4 w-4 shrink-0 transition ${
-                                                                            active
-                                                                                ? 'text-sky-300'
-                                                                                : 'text-slate-500 group-hover:text-slate-300'
-                                                                        }`}
-                                                                    />
-
-                                                                    <span>
-                                                                        {
-                                                                            item.label
-                                                                        }
-                                                                    </span>
-                                                                </Link>
-                                                            )
-                                                        },
+                                                        ) =>
+                                                            renderNavItem(
+                                                                section.title,
+                                                                item,
+                                                            ),
                                                     )}
                                                 </nav>
                                             )}

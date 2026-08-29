@@ -25,7 +25,7 @@ type TicketItem = {
     ticket_number: string
     subject: string
     status: string
-    priority: string
+    priority: { id: number; name: string; slug: string; color: string }
     service: string | null
     created_at: string | null
     last_reply_at: string | null
@@ -95,21 +95,6 @@ function getStatusClasses(status: string) {
             return 'border-gray-200 bg-gray-100 text-gray-700'
         default:
             return 'border-gray-200 bg-gray-100 text-gray-700'
-    }
-}
-
-function getPriorityClasses(priority: string) {
-    switch (priority) {
-        case 'low':
-            return 'bg-gray-100 text-gray-700'
-        case 'medium':
-            return 'bg-sky-100 text-sky-700'
-        case 'high':
-            return 'bg-amber-100 text-amber-700'
-        case 'urgent':
-            return 'bg-rose-100 text-rose-700'
-        default:
-            return 'bg-gray-100 text-gray-700'
     }
 }
 
@@ -373,9 +358,10 @@ export default function TicketsIndex({
                                             </span>
 
                                             <span
-                                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getPriorityClasses(ticket.priority)}`}
+                                                className="inline-flex rounded-full px-3 py-1 text-xs font-semibold text-white"
+                                                style={{ backgroundColor: ticket.priority.color }}
                                             >
-                                                {humanize(ticket.priority)}
+                                                {ticket.priority.name}
                                             </span>
                                         </div>
                                     </div>

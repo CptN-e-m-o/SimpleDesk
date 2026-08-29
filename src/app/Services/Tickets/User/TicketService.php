@@ -4,6 +4,7 @@ namespace App\Services\Tickets\User;
 
 use App\Http\Resources\Tickets\User\TicketIndexResource;
 use App\Models\Ticket;
+use App\Models\TicketPriority;
 use App\Repositories\Tickets\User\TicketRepository;
 
 class TicketService
@@ -40,7 +41,7 @@ class TicketService
                 'priority' => $priority ?? '',
             ],
             'statusOptions' => Ticket::statusOptions(),
-            'priorityOptions' => Ticket::priorityOptions(),
+            'priorityOptions' => TicketPriority::query()->where('visibility', 'public')->where('is_active', true)->orderBy('sort_order')->get()->map(fn (TicketPriority $priority) => ['value' => (string) $priority->id, 'label' => $priority->name])->prepend(['value' => '', 'label' => 'All priorities'])->values(),
         ];
     }
 }

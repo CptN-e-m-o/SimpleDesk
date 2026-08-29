@@ -79,6 +79,10 @@ class PermissionAdminManageSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 80,
             ],
+            ['key' => 'admin.manage.priorities.view', 'label' => 'View Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 81],
+            ['key' => 'admin.manage.priorities.create', 'label' => 'Create Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 82],
+            ['key' => 'admin.manage.priorities.update', 'label' => 'Update Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 83],
+            ['key' => 'admin.manage.priorities.archive', 'label' => 'Archive Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 84],
             [
                 'key' => 'admin.manage.manage_ticket_types',
                 'label' => 'Manage Ticket Types',
@@ -86,6 +90,10 @@ class PermissionAdminManageSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 90,
             ],
+            ['key' => 'admin.manage.ticket_types.view', 'label' => 'View Ticket Types', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 91],
+            ['key' => 'admin.manage.ticket_types.create', 'label' => 'Create Ticket Types', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 92],
+            ['key' => 'admin.manage.ticket_types.update', 'label' => 'Update Ticket Types', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 93],
+            ['key' => 'admin.manage.ticket_types.archive', 'label' => 'Archive Ticket Types', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 94],
             [
                 'key' => 'admin.manage.manage_widgets',
                 'label' => 'Manage Widgets',

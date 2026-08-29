@@ -55,8 +55,6 @@ return [
 
     'default_status' => 'open',
 
-    'default_priority' => 'medium',
-
     'subject_fallback' => 'Обращение по электронной почте',
 
     'empty_body_fallback' => 'Письмо не содержит текстового содержимого.',
