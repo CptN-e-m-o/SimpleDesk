@@ -173,6 +173,39 @@ services:
     networks:
       - simpledesk
 
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: simpledesk_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    env_file:
+      - src/.env.minio
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - simpledesk
+
+  minio_init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    container_name: simpledesk_minio_init
+    env_file:
+      - src/.env.minio
+    depends_on:
+      - minio
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - >
+        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done;
+        mc mb --ignore-existing "local/$$MINIO_BUCKET";
+        mc stat "local/$$MINIO_BUCKET";
+    networks:
+      - simpledesk
+
   mailpit:
     image: axllent/mailpit:latest
     container_name: simpledesk_mailpit
@@ -205,6 +238,7 @@ volumes:
   pgsql_data:
   redis_data:
   meilisearch_data:
+  minio_data:
   mail_attachment_storage:
     name: simpledesk_mail_attachment_storage
 

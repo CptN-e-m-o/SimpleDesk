@@ -47,6 +47,10 @@ class LocalStorageDriverAdapter implements StorageDriverAdapter
 
     public function test(StorageDriverConfiguration $configuration): StorageHealthResultData
     {
-        return $this->probe->test($this->factory->build($this->runtimeConfiguration($configuration)->disk));
+        return $this->probe->test(
+            $this->factory->buildForHealth(
+                $this->runtimeConfiguration($configuration)->disk,
+            ),
+        );
     }
 }

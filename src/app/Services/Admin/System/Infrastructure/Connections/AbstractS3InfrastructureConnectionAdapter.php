@@ -59,7 +59,14 @@ abstract class AbstractS3InfrastructureConnectionAdapter implements Infrastructu
     public function test(InfrastructureConnection $connection): InfrastructureHealthResultData
     {
         $normalized = $this->validateAndNormalize($connection->configuration ?? [], $connection->secrets(), (string) $connection->getRawOriginal('source'));
-        $result = $this->probe->test($this->factory->build($this->disk($normalized['configuration'], $normalized['credentials'])));
+        $result = $this->probe->test(
+            $this->factory->buildForHealth(
+                $this->disk(
+                    $normalized['configuration'],
+                    $normalized['credentials'],
+                ),
+            ),
+        );
         $status = match ($result->status) {
             StorageHealthStatus::Healthy => InfrastructureHealthStatus::Healthy,
             StorageHealthStatus::Degraded => InfrastructureHealthStatus::Degraded,
