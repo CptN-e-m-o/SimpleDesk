@@ -81,8 +81,6 @@ class RolePermissionSeeder extends Seeder
             'admin.manage.manage_forms',
             'admin.manage.manage_ticket_fields',
             'admin.manage.manage_approval_workflow',
-            'admin.manage.manage_priority',
-            'admin.manage.manage_ticket_types',
             'admin.manage.priorities.view',
             'admin.manage.priorities.create',
             'admin.manage.priorities.update',

@@ -14,8 +14,10 @@ return new class extends Migration
             $table->foreignId('ticket_type_id')->nullable()->after('priority_id')->constrained('ticket_types')->nullOnDelete();
         });
 
-        foreach (['low' => 'low', 'medium' => 'normal', 'high' => 'high', 'urgent' => 'urgent'] as $legacy => $slug) {
-            DB::table('tickets')->where('priority', $legacy)->update(['priority_id' => DB::table('ticket_priorities')->where('slug', $slug)->value('id')]);
+        foreach (DB::table('ticket_priorities')->get(['id', 'slug']) as $priority) {
+            DB::table('tickets')
+                ->where('priority', $priority->slug === 'normal' ? 'medium' : $priority->slug)
+                ->update(['priority_id' => $priority->id]);
         }
 
         $defaultId = DB::table('ticket_priorities')->where('is_default', true)->value('id');
@@ -33,7 +35,19 @@ return new class extends Migration
         Schema::table('tickets', function (Blueprint $table) {
             $table->string('priority')->nullable();
         });
-        DB::table('tickets')->update(['priority' => 'medium']);
+
+        DB::table('tickets')
+            ->join('ticket_priorities', 'ticket_priorities.id', '=', 'tickets.priority_id')
+            ->select(['tickets.id', 'ticket_priorities.slug'])
+            ->orderBy('tickets.id')
+            ->chunkById(500, function ($tickets) {
+                foreach ($tickets as $ticket) {
+                    DB::table('tickets')->where('id', $ticket->id)->update([
+                        'priority' => $ticket->slug === 'normal' ? 'medium' : $ticket->slug,
+                    ]);
+                }
+            }, 'tickets.id', 'id');
+
         Schema::table('tickets', function (Blueprint $table) {
             $table->dropConstrainedForeignId('ticket_type_id');
             $table->dropConstrainedForeignId('priority_id');

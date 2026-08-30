@@ -4,12 +4,22 @@ namespace Database\Seeders\Permissions\Agent\AdminPanel;
 
 use App\Models\Permission;
 use App\Models\PermissionGroup;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class PermissionAdminManageSeeder extends Seeder
 {
     public function run(): void
     {
+        $legacyPermissions = Permission::query()
+            ->with('roles:id')
+            ->whereIn('key', [
+                'admin.manage.manage_priority',
+                'admin.manage.manage_ticket_types',
+            ])
+            ->get();
+
         $group = PermissionGroup::updateOrCreate(
             [
                 'key' => 'manage',
@@ -72,24 +82,10 @@ class PermissionAdminManageSeeder extends Seeder
                 'ui_type' => 'checkbox',
                 'sort_order' => 70,
             ],
-            [
-                'key' => 'admin.manage.manage_priority',
-                'label' => 'Manage Priority',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 80,
-            ],
             ['key' => 'admin.manage.priorities.view', 'label' => 'View Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 81],
             ['key' => 'admin.manage.priorities.create', 'label' => 'Create Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 82],
             ['key' => 'admin.manage.priorities.update', 'label' => 'Update Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 83],
             ['key' => 'admin.manage.priorities.archive', 'label' => 'Archive Priorities', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 84],
-            [
-                'key' => 'admin.manage.manage_ticket_types',
-                'label' => 'Manage Ticket Types',
-                'type' => 'agent',
-                'ui_type' => 'checkbox',
-                'sort_order' => 90,
-            ],
             ['key' => 'admin.manage.ticket_types.view', 'label' => 'View Ticket Types', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 91],
             ['key' => 'admin.manage.ticket_types.create', 'label' => 'Create Ticket Types', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 92],
             ['key' => 'admin.manage.ticket_types.update', 'label' => 'Update Ticket Types', 'type' => 'agent', 'ui_type' => 'checkbox', 'sort_order' => 93],
@@ -118,24 +114,44 @@ class PermissionAdminManageSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            $parentKey = $permission['parent_key'] ?? null;
-
-            unset($permission['parent_key']);
-
-            $parentId = null;
-
-            if ($parentKey) {
-                $parentId = Permission::where('key', $parentKey)->value('id');
-            }
-
             Permission::updateOrCreate(
                 ['key' => $permission['key']],
                 [
                     ...$permission,
                     'permission_group_id' => $group->id,
-                    'parent_id' => $parentId,
+                    'parent_id' => null,
                 ]
             );
         }
+
+        DB::transaction(function () use ($legacyPermissions) {
+            $replacementKeys = [
+                'admin.manage.manage_priority' => [
+                    'admin.manage.priorities.view',
+                    'admin.manage.priorities.create',
+                    'admin.manage.priorities.update',
+                    'admin.manage.priorities.archive',
+                ],
+                'admin.manage.manage_ticket_types' => [
+                    'admin.manage.ticket_types.view',
+                    'admin.manage.ticket_types.create',
+                    'admin.manage.ticket_types.update',
+                    'admin.manage.ticket_types.archive',
+                ],
+            ];
+
+            foreach ($legacyPermissions as $legacyPermission) {
+                $replacementIds = Permission::query()
+                    ->whereIn('key', $replacementKeys[$legacyPermission->key])
+                    ->pluck('id')
+                    ->all();
+
+                foreach (Role::query()->whereKey($legacyPermission->roles->pluck('id'))->get() as $role) {
+                    $role->permissions()->syncWithoutDetaching($replacementIds);
+                }
+
+                $legacyPermission->delete();
+            }
+        });
     }
 }

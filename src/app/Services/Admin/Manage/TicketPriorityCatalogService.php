@@ -64,35 +64,44 @@ class TicketPriorityCatalogService
 
     public function setActive(TicketPriority $priority, bool $active, User $actor): TicketPriority
     {
-        if (! $active && $priority->is_default) {
-            throw ValidationException::withMessages(['priority' => 'The default priority cannot be disabled.']);
-        }
-        $before = $this->safe($priority);
-        $priority->update(['is_active' => $active, 'updated_by' => $actor->id]);
-        $this->audit($priority, $active ? 'manage.priority.enabled' : 'manage.priority.disabled', $before, $this->safe($priority), $actor);
+        return DB::transaction(function () use ($priority, $active, $actor) {
+            $priority = TicketPriority::query()->lockForUpdate()->findOrFail($priority->id);
+            if (! $active && $priority->is_default) {
+                throw ValidationException::withMessages(['priority' => 'The default priority cannot be disabled.']);
+            }
+            $before = $this->safe($priority);
+            $priority->update(['is_active' => $active, 'updated_by' => $actor->id]);
+            $this->audit($priority, $active ? 'manage.priority.enabled' : 'manage.priority.disabled', $before, $this->safe($priority), $actor);
 
-        return $priority->refresh();
+            return $priority->refresh();
+        });
     }
 
     public function archive(TicketPriority $priority, User $actor): void
     {
-        if ($priority->is_default) {
-            throw ValidationException::withMessages(['priority' => 'The default priority cannot be archived.']);
-        }
-        $before = $this->safe($priority);
-        $priority->update(['updated_by' => $actor->id]);
-        $priority->delete();
-        $this->audit($priority, 'manage.priority.archived', $before, $this->safe($priority), $actor);
+        DB::transaction(function () use ($priority, $actor) {
+            $priority = TicketPriority::query()->lockForUpdate()->findOrFail($priority->id);
+            if ($priority->is_default) {
+                throw ValidationException::withMessages(['priority' => 'The default priority cannot be archived.']);
+            }
+            $before = $this->safe($priority);
+            $priority->update(['updated_by' => $actor->id]);
+            $priority->delete();
+            $this->audit($priority, 'manage.priority.archived', $before, $this->safe($priority), $actor);
+        });
     }
 
     public function restore(int $id, User $actor): TicketPriority
     {
-        $priority = TicketPriority::onlyTrashed()->findOrFail($id);
-        $priority->restore();
-        $priority->update(['is_active' => false, 'is_default' => false, 'updated_by' => $actor->id]);
-        $this->audit($priority, 'manage.priority.restored', null, $this->safe($priority), $actor);
+        return DB::transaction(function () use ($id, $actor) {
+            $priority = TicketPriority::onlyTrashed()->lockForUpdate()->findOrFail($id);
+            $this->assertNameUnique($priority->name);
+            $priority->restore();
+            $priority->update(['is_active' => false, 'is_default' => false, 'updated_by' => $actor->id]);
+            $this->audit($priority, 'manage.priority.restored', null, $this->safe($priority), $actor);
 
-        return $priority->refresh();
+            return $priority->refresh();
+        });
     }
 
     public function reorder(array $ids, User $actor): void

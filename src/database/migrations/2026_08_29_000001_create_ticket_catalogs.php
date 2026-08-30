@@ -49,12 +49,12 @@ return new class extends Migration
 
         $now = now();
         DB::table('ticket_priorities')->insert([
-            ['name' => 'Low', 'slug' => 'low', 'color' => '#2563EB', 'visibility' => 'public', 'sort_order' => 10, 'is_default' => false, 'is_active' => true, 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Normal', 'slug' => 'normal', 'color' => '#16A34A', 'visibility' => 'public', 'sort_order' => 20, 'is_default' => true, 'is_active' => true, 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'High', 'slug' => 'high', 'color' => '#EA580C', 'visibility' => 'public', 'sort_order' => 30, 'is_default' => false, 'is_active' => true, 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Urgent', 'slug' => 'urgent', 'color' => '#DC2626', 'visibility' => 'public', 'sort_order' => 40, 'is_default' => false, 'is_active' => true, 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Low', 'slug' => 'low', 'color' => '#2563EB', 'visibility' => 'public', 'sort_order' => 10, 'is_default' => false, 'is_active' => true, 'is_system' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Normal', 'slug' => 'normal', 'color' => '#16A34A', 'visibility' => 'public', 'sort_order' => 20, 'is_default' => true, 'is_active' => true, 'is_system' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'High', 'slug' => 'high', 'color' => '#EA580C', 'visibility' => 'public', 'sort_order' => 30, 'is_default' => false, 'is_active' => true, 'is_system' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Urgent', 'slug' => 'urgent', 'color' => '#DC2626', 'visibility' => 'public', 'sort_order' => 40, 'is_default' => false, 'is_active' => true, 'is_system' => false, 'created_at' => $now, 'updated_at' => $now],
         ]);
-        DB::table('ticket_types')->insert(array_map(fn (array $type) => [...$type, 'visibility' => 'public', 'is_active' => true, 'is_system' => true, 'created_at' => $now, 'updated_at' => $now], [
+        DB::table('ticket_types')->insert(array_map(fn (array $type) => [...$type, 'visibility' => 'public', 'is_active' => true, 'is_system' => false, 'created_at' => $now, 'updated_at' => $now], [
             ['name' => 'Incident', 'slug' => 'incident', 'sort_order' => 10],
             ['name' => 'Service Request', 'slug' => 'service-request', 'sort_order' => 20],
             ['name' => 'Problem', 'slug' => 'problem', 'sort_order' => 30],

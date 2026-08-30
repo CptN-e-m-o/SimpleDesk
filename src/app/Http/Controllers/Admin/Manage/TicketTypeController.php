@@ -18,14 +18,17 @@ class TicketTypeController extends Controller
 
     public function index(Request $request): Response
     {
-        $query = TicketType::withTrashed()->withCount('tickets')->orderBy('sort_order')->orderBy('name');
+        $query = $request->string('status')->value() === 'archived'
+            ? TicketType::onlyTrashed()
+            : TicketType::query();
+        $query->withCount('tickets')->orderBy('sort_order')->orderBy('name');
         $query->when($request->string('search')->trim()->value(), fn ($q, $search) => $q->where(fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%")));
         $query->when($request->filled('visibility'), fn ($q) => $q->where('visibility', $request->string('visibility')->value()));
         $query->when($request->string('status')->value(), function ($q, $status) {
             match ($status) {
                 'active' => $q->whereNull('deleted_at')->where('is_active', true),
                 'inactive' => $q->whereNull('deleted_at')->where('is_active', false),
-                'archived' => $q->onlyTrashed(),
+                'archived' => null,
                 default => null,
             };
         });

@@ -15,49 +15,63 @@ class TicketTypeCatalogService
 
     public function create(array $data, User $actor): TicketType
     {
-        $this->assertNameUnique($data['name']);
-        $type = TicketType::query()->create([...$data, 'slug' => $this->uniqueSlug($data['name']), 'created_by' => $actor->id, 'updated_by' => $actor->id]);
-        $this->log($type, 'manage.ticket_type.created', null, $this->safe($type), $actor);
+        return DB::transaction(function () use ($data, $actor) {
+            $this->assertNameUnique($data['name']);
+            $type = TicketType::query()->create([...$data, 'slug' => $this->uniqueSlug($data['name']), 'created_by' => $actor->id, 'updated_by' => $actor->id]);
+            $this->log($type, 'manage.ticket_type.created', null, $this->safe($type), $actor);
 
-        return $type;
+            return $type;
+        });
     }
 
     public function update(TicketType $type, array $data, User $actor): TicketType
     {
-        $this->assertNameUnique($data['name'], $type->id);
-        $before = $this->safe($type);
-        unset($data['slug'], $data['is_system']);
-        $type->update([...$data, 'updated_by' => $actor->id]);
-        $this->log($type, 'manage.ticket_type.updated', $before, $this->safe($type), $actor);
+        return DB::transaction(function () use ($type, $data, $actor) {
+            $type = TicketType::query()->lockForUpdate()->findOrFail($type->id);
+            $this->assertNameUnique($data['name'], $type->id);
+            $before = $this->safe($type);
+            unset($data['slug'], $data['is_system']);
+            $type->update([...$data, 'updated_by' => $actor->id]);
+            $this->log($type, 'manage.ticket_type.updated', $before, $this->safe($type), $actor);
 
-        return $type->refresh();
+            return $type->refresh();
+        });
     }
 
     public function setActive(TicketType $type, bool $active, User $actor): TicketType
     {
-        $before = $this->safe($type);
-        $type->update(['is_active' => $active, 'updated_by' => $actor->id]);
-        $this->log($type, $active ? 'manage.ticket_type.enabled' : 'manage.ticket_type.disabled', $before, $this->safe($type), $actor);
+        return DB::transaction(function () use ($type, $active, $actor) {
+            $type = TicketType::query()->lockForUpdate()->findOrFail($type->id);
+            $before = $this->safe($type);
+            $type->update(['is_active' => $active, 'updated_by' => $actor->id]);
+            $this->log($type, $active ? 'manage.ticket_type.enabled' : 'manage.ticket_type.disabled', $before, $this->safe($type), $actor);
 
-        return $type->refresh();
+            return $type->refresh();
+        });
     }
 
     public function archive(TicketType $type, User $actor): void
     {
-        $before = $this->safe($type);
-        $type->update(['updated_by' => $actor->id]);
-        $type->delete();
-        $this->log($type, 'manage.ticket_type.archived', $before, $this->safe($type), $actor);
+        DB::transaction(function () use ($type, $actor) {
+            $type = TicketType::query()->lockForUpdate()->findOrFail($type->id);
+            $before = $this->safe($type);
+            $type->update(['updated_by' => $actor->id]);
+            $type->delete();
+            $this->log($type, 'manage.ticket_type.archived', $before, $this->safe($type), $actor);
+        });
     }
 
     public function restore(int $id, User $actor): TicketType
     {
-        $type = TicketType::onlyTrashed()->findOrFail($id);
-        $type->restore();
-        $type->update(['is_active' => false, 'updated_by' => $actor->id]);
-        $this->log($type, 'manage.ticket_type.restored', null, $this->safe($type), $actor);
+        return DB::transaction(function () use ($id, $actor) {
+            $type = TicketType::onlyTrashed()->lockForUpdate()->findOrFail($id);
+            $this->assertNameUnique($type->name);
+            $type->restore();
+            $type->update(['is_active' => false, 'updated_by' => $actor->id]);
+            $this->log($type, 'manage.ticket_type.restored', null, $this->safe($type), $actor);
 
-        return $type->refresh();
+            return $type->refresh();
+        });
     }
 
     public function reorder(array $ids, User $actor): void

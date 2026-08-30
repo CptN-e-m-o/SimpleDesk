@@ -11,6 +11,7 @@ use App\Models\TicketType;
 use App\Models\User\User;
 use App\Services\Admin\Manage\TicketPriorityCatalogService;
 use App\Services\Admin\Manage\TicketTypeCatalogService;
+use App\Services\Admin\System\Audit\SystemAuditLogger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -30,6 +31,12 @@ class TicketCatalogServiceTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $service->create($this->priorityData('business impact'), $actor);
+    }
+
+    public function test_starter_catalog_records_are_not_system_records(): void
+    {
+        $this->assertSame(0, TicketPriority::query()->whereIn('slug', ['low', 'normal', 'high', 'urgent'])->where('is_system', true)->count());
+        $this->assertSame(0, TicketType::query()->whereIn('slug', ['incident', 'service-request', 'problem', 'question'])->where('is_system', true)->count());
     }
 
     public function test_default_invariants_and_transactional_switching_are_enforced(): void
@@ -104,6 +111,58 @@ class TicketCatalogServiceTest extends TestCase
         $user = User::factory()->create();
         TicketPriority::factory()->create(['name' => 'Staff Only', 'visibility' => 'internal', 'is_active' => true]);
         $this->actingAs($user)->get(route('tickets.create'))->assertInertia(fn ($page) => $page->component('Tickets/User/Create')->where('priorityOptions', fn ($options) => collect($options)->doesntContain('name', 'Staff Only')));
+    }
+
+    public function test_restore_rejects_case_insensitive_name_conflicts(): void
+    {
+        $actor = User::factory()->create();
+        $priorityService = app(TicketPriorityCatalogService::class);
+        $priority = $priorityService->create($this->priorityData('Conflict Priority'), $actor);
+        $priorityService->archive($priority, $actor);
+        $priorityService->create($this->priorityData('conflict priority'), $actor);
+
+        try {
+            $priorityService->restore($priority->id, $actor);
+            $this->fail('Conflicting priority was restored.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('name', $exception->errors());
+            $this->assertSoftDeleted('ticket_priorities', ['id' => $priority->id]);
+        }
+
+        $typeService = app(TicketTypeCatalogService::class);
+        $type = $typeService->create(['name' => 'Conflict Type', 'description' => null, 'visibility' => 'public', 'is_active' => true], $actor);
+        $typeService->archive($type, $actor);
+        $typeService->create(['name' => 'CONFLICT TYPE', 'description' => null, 'visibility' => 'public', 'is_active' => true], $actor);
+
+        try {
+            $typeService->restore($type->id, $actor);
+            $this->fail('Conflicting ticket type was restored.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('name', $exception->errors());
+            $this->assertSoftDeleted('ticket_types', ['id' => $type->id]);
+        }
+    }
+
+    public function test_catalog_mutation_rolls_back_when_audit_write_fails(): void
+    {
+        $actor = User::factory()->create();
+        $priority = TicketPriority::query()->where('slug', 'low')->firstOrFail();
+        $audit = $this->createMock(SystemAuditLogger::class);
+        $audit->method('log')->willThrowException(new \RuntimeException('Audit unavailable'));
+
+        try {
+            (new TicketPriorityCatalogService($audit))->setActive($priority, false, $actor);
+            $this->fail('Priority mutation was not rolled back.');
+        } catch (\RuntimeException) {
+            $this->assertTrue($priority->refresh()->is_active);
+        }
+
+        try {
+            (new TicketTypeCatalogService($audit))->create(['name' => 'Atomic Type', 'description' => null, 'visibility' => 'public', 'is_active' => true], $actor);
+            $this->fail('Ticket type mutation was not rolled back.');
+        } catch (\RuntimeException) {
+            $this->assertDatabaseMissing('ticket_types', ['name' => 'Atomic Type']);
+        }
     }
 
     private function priorityData(string $name): array
