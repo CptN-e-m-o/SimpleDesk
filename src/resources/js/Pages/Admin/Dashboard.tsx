@@ -42,7 +42,9 @@ type DashboardCardProps = {
     item: DashboardItem
 }
 
-function DashboardCard({ item }: DashboardCardProps) {
+function DashboardCard({
+                           item,
+                       }: DashboardCardProps) {
     const Icon = item.icon
 
     const content = (
@@ -64,7 +66,7 @@ function DashboardCard({ item }: DashboardCardProps) {
             </div>
 
             <div className="mt-5">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-start justify-between gap-3">
                     <h3
                         className={
                             item.href
@@ -76,7 +78,7 @@ function DashboardCard({ item }: DashboardCardProps) {
                     </h3>
 
                     {item.href ? (
-                        <ArrowRight className="h-4 w-4 text-gray-400 transition group-hover:translate-x-0.5 group-hover:text-sky-600" />
+                        <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-gray-400 transition group-hover:translate-x-0.5 group-hover:text-sky-600" />
                     ) : (
                         <span className="shrink-0 rounded-full bg-gray-200 px-2.5 py-1 text-xs font-medium text-gray-500">
                             Coming soon
@@ -126,35 +128,57 @@ export default function Index() {
             title: 'Agents',
             description:
                 'Manage support agents, permissions, and account access.',
-            href: route('admin.agents.index'),
+            href: route(
+                'admin.agents.index',
+            ),
+            permissions: [
+                'admin.staff.manage_agents',
+            ],
             icon: UserCog,
         },
         {
             title: 'Roles',
             description:
                 'Configure admin and agent roles for your help desk team.',
-            href: route('admin.roles.index'),
+            href: route(
+                'admin.roles.index',
+            ),
+            permissions: [
+                'admin.staff.manage_roles',
+            ],
             icon: ShieldCheck,
         },
         {
             title: 'Departments',
             description:
                 'Organize requests by department and assign ownership.',
-            href: route('admin.departments.index'),
+            href: route(
+                'admin.departments.index',
+            ),
+            permissions: [
+                'admin.staff.manage_departments',
+            ],
             icon: Building2,
         },
         {
             title: 'Teams',
             description:
                 'Group agents into teams for routing and collaboration.',
-            href: route('admin.teams.index'),
+            href: route(
+                'admin.teams.index',
+            ),
+            permissions: [
+                'admin.staff.manage_teams',
+            ],
             icon: UsersRound,
         },
         {
             title: 'Work Schedules',
             description:
                 'Configure agent working hours, assignments, and schedule exceptions.',
-            href: route('admin.work-schedules.index'),
+            href: route(
+                'admin.work-schedules.index',
+            ),
             permissions: [
                 'admin.staff.work_schedules.view',
             ],
@@ -164,7 +188,9 @@ export default function Index() {
             title: 'Agent Statuses',
             description:
                 'Manage agent availability, routing eligibility, and temporary statuses.',
-            href: route('admin.agent-statuses.index'),
+            href: route(
+                'admin.agent-statuses.index',
+            ),
             permissions: [
                 'admin.staff.agent_statuses.view',
             ],
@@ -174,7 +200,9 @@ export default function Index() {
             title: 'Skills',
             description:
                 'Build reusable ticket classification rules with ANY or ALL conditions.',
-            href: route('admin.skills.index'),
+            href: route(
+                'admin.skills.index',
+            ),
             permissions: [
                 'admin.staff.skills.view',
             ],
@@ -187,16 +215,24 @@ export default function Index() {
             title: 'Priorities',
             description:
                 'Configure ticket urgency levels, visibility, ordering, and default behavior.',
-            href: route('admin.manage.priorities.index'),
-            permissions: ['admin.manage.priorities.view'],
+            href: route(
+                'admin.manage.priorities.index',
+            ),
+            permissions: [
+                'admin.manage.priorities.view',
+            ],
             icon: Gauge,
         },
         {
             title: 'Ticket Types',
             description:
                 'Define the kinds of requests and issues handled by your help desk.',
-            href: route('admin.manage.ticket-types.index'),
-            permissions: ['admin.manage.ticket_types.view'],
+            href: route(
+                'admin.manage.ticket-types.index',
+            ),
+            permissions: [
+                'admin.manage.ticket_types.view',
+            ],
             icon: Tags,
         },
         {
@@ -251,6 +287,9 @@ export default function Index() {
             href: route(
                 'admin.email.settings.index',
             ),
+            permissions: [
+                'admin.mail.view',
+            ],
             icon: Mailbox,
         },
         {
@@ -260,6 +299,10 @@ export default function Index() {
             href: route(
                 'admin.email.reply-parsing.index',
             ),
+            permissions: [
+                'admin.mail.view_reply_parsing',
+                'admin.mail.manage_reply_parsing',
+            ],
             icon: TextQuote,
         },
         {
@@ -295,7 +338,7 @@ export default function Index() {
         {
             title: 'Drivers',
             description:
-                'Overview of subsystem driver categories.',
+                'Configure runtime drivers used by SimpleDesk subsystems.',
             href: route(
                 'admin.system.drivers.index',
             ),
@@ -308,7 +351,7 @@ export default function Index() {
             title:
                 'Infrastructure Connections',
             description:
-                'Secure access to infrastructure resources.',
+                'Manage secure connections to shared infrastructure resources.',
             href: route(
                 'admin.system.connections.index',
             ),
@@ -320,7 +363,7 @@ export default function Index() {
         {
             title: 'System Audit',
             description:
-                'Review security-sensitive system operations.',
+                'Review security-sensitive and administrative system operations.',
             href: route(
                 'admin.system.audit.index',
             ),
@@ -331,153 +374,228 @@ export default function Index() {
         },
     ]
 
+    const visibleStaffItems =
+        staffItems.filter(
+            (item) =>
+                !item.permissions ||
+                canAny(
+                    item.permissions,
+                ),
+        )
+
+    const visibleManageItems =
+        manageItems.filter(
+            (item) =>
+                !item.permissions ||
+                canAny(
+                    item.permissions,
+                ),
+        )
+
+    const visibleEmailItems =
+        emailItems.filter(
+            (item) =>
+                !item.permissions ||
+                canAny(
+                    item.permissions,
+                ),
+        )
+
     const visibleSystemItems =
         systemItems.filter(
             (item) =>
                 !item.permissions ||
-                canAny(item.permissions),
+                canAny(
+                    item.permissions,
+                ),
         )
+
+    const availableManageCount =
+        visibleManageItems.filter(
+            (item) =>
+                Boolean(item.href),
+        ).length
+
+    const plannedManageCount =
+        visibleManageItems.filter(
+            (item) =>
+                !item.href,
+        ).length
 
     return (
         <AdminLayout title="Admin Panel">
             <Head title="Admin Panel" />
 
             <div className="space-y-6">
-                <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
-                        <div className="flex items-center justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                                    Staff
-                                </h2>
-
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Core administration
-                                    tools for managing your
-                                    support team.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-6">
-                        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                            {staffItems
-                                .filter(
-                                    (item) =>
-                                        !item.permissions ||
-                                        canAny(
-                                            item.permissions,
-                                        ),
-                                )
-                                .map((item) => (
-                                    <DashboardCard
-                                        key={
-                                            item.title
-                                        }
-                                        item={item}
-                                    />
-                                ))}
-                        </div>
-                    </div>
-                </section>
-
-                <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
-                        <div className="flex items-center justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                                    Manage
-                                </h2>
-
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Configure how tickets
-                                    are collected,
-                                    classified, prioritized,
-                                    routed, and processed.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-6">
-                        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                            {manageItems.filter((item) => !item.permissions || canAny(item.permissions)).map(
-                                (item) => (
-                                    <DashboardCard
-                                        key={
-                                            item.title
-                                        }
-                                        item={item}
-                                    />
-                                ),
-                            )}
-                        </div>
-                    </div>
-                </section>
-
-                <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
-                        <div className="flex items-center justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                                    Email
-                                </h2>
-
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Configure how SimpleDesk
-                                    receives, processes, and
-                                    sends support emails.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-6">
-                        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                            {emailItems
-                                .filter(
-                                    (item) =>
-                                        !item.permissions ||
-                                        canAny(
-                                            item.permissions,
-                                        ),
-                                )
-                                .map((item) => (
-                                    <DashboardCard
-                                        key={
-                                            item.title
-                                        }
-                                        item={item}
-                                    />
-                                ))}
-                        </div>
-                    </div>
-                </section>
-
-                {visibleSystemItems.length >
+                {visibleStaffItems.length >
                     0 && (
                         <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
                             <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
-                                <div className="flex items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+                                        Staff
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Core
+                                        administration
+                                        tools for
+                                        managing your
+                                        support team.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="p-6">
+                                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                                    {visibleStaffItems.map(
+                                        (
+                                            item,
+                                        ) => (
+                                            <DashboardCard
+                                                key={
+                                                    item.title
+                                                }
+                                                item={
+                                                    item
+                                                }
+                                            />
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                {visibleManageItems.length >
+                    0 && (
+                        <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div>
                                         <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                                            System
+                                            Manage
                                         </h2>
 
-                                        <p className="mt-1 text-sm text-gray-500">
-                                            Infrastructure,
-                                            drivers, health, and
-                                            audit controls.
+                                        <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+                                            Configure
+                                            how tickets
+                                            are
+                                            collected,
+                                            classified,
+                                            prioritized,
+                                            routed, and
+                                            processed.
                                         </p>
+
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                            {
+                                                availableManageCount
+                                            }{' '}
+                                            available
+                                        </span>
+
+                                            {plannedManageCount >
+                                                0 && (
+                                                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 ring-1 ring-inset ring-gray-200">
+                                                {
+                                                    plannedManageCount
+                                                }{' '}
+                                                        planned
+                                            </span>
+                                                )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="p-6">
                                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                                    {visibleManageItems.map(
+                                        (
+                                            item,
+                                        ) => (
+                                            <DashboardCard
+                                                key={
+                                                    item.title
+                                                }
+                                                item={
+                                                    item
+                                                }
+                                            />
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                {visibleEmailItems.length >
+                    0 && (
+                        <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
+                                <div>
+                                    <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+                                        Email
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Configure how
+                                        SimpleDesk
+                                        receives,
+                                        processes, and
+                                        sends support
+                                        emails.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="p-6">
+                                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                                    {visibleEmailItems.map(
+                                        (
+                                            item,
+                                        ) => (
+                                            <DashboardCard
+                                                key={
+                                                    item.title
+                                                }
+                                                item={
+                                                    item
+                                                }
+                                            />
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                {visibleSystemItems.length >
+                    0 && (
+                        <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-5">
+                                <div>
+                                    <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+                                        System
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Infrastructure,
+                                        drivers,
+                                        health, and
+                                        audit controls.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="p-6">
+                                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
                                     {visibleSystemItems.map(
-                                        (item) => (
+                                        (
+                                            item,
+                                        ) => (
                                             <DashboardCard
                                                 key={
                                                     item.title

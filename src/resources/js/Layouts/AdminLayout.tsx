@@ -271,14 +271,38 @@ export default function AdminLayout({
                             {
                                 label: 'Priorities',
                                 icon: Gauge,
-                                href: route('admin.manage.priorities.index'),
-                                permissions: ['admin.manage.priorities.view'],
+                                href: route(
+                                    'admin.manage.priorities.index',
+                                ),
+                                permissions: [
+                                    'admin.manage.priorities.view',
+                                ],
+                                isActive: (
+                                    currentUrl: string,
+                                ) =>
+                                    currentUrl ===
+                                    '/admin/manage/priorities' ||
+                                    currentUrl.startsWith(
+                                        '/admin/manage/priorities/',
+                                    ),
                             },
                             {
                                 label: 'Ticket Types',
                                 icon: Tags,
-                                href: route('admin.manage.ticket-types.index'),
-                                permissions: ['admin.manage.ticket_types.view'],
+                                href: route(
+                                    'admin.manage.ticket-types.index',
+                                ),
+                                permissions: [
+                                    'admin.manage.ticket_types.view',
+                                ],
+                                isActive: (
+                                    currentUrl: string,
+                                ) =>
+                                    currentUrl ===
+                                    '/admin/manage/ticket-types' ||
+                                    currentUrl.startsWith(
+                                        '/admin/manage/ticket-types/',
+                                    ),
                             },
                             {
                                 label: 'Ticket Fields',
