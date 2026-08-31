@@ -11,7 +11,7 @@ class TicketRepository
     public function queryUserTickets(int $userId): Builder
     {
         return Ticket::query()
-            ->with(['category:id,name'])
+            ->with(['category:id,name', 'priority:id,name,slug,color'])
             ->where('requester_id', $userId);
     }
 
@@ -35,7 +35,7 @@ class TicketRepository
                 $query->where('status', $status);
             })
             ->when($priority, function (Builder $query) use ($priority) {
-                $query->where('priority', $priority);
+                $query->where('priority_id', $priority);
             });
     }
 

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Ticket;
 use App\Models\TicketCategory;
+use App\Models\TicketPriority;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,7 +20,7 @@ class TicketFactory extends Factory
             'category_id' => TicketCategory::factory(),
             'assignee_id' => null,
             'subject' => fake()->sentence(),
-            'priority' => fake()->randomElement(Ticket::priorities()),
+            'priority_id' => fn () => TicketPriority::query()->where('is_default', true)->value('id'),
             'status' => fake()->randomElement([
                 Ticket::STATUS_OPEN,
                 Ticket::STATUS_IN_PROGRESS,

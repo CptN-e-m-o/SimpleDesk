@@ -31,6 +31,8 @@ use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthIntegrationController;
 use App\Http\Controllers\Admin\Mail\OAuth\MailOAuthRefreshController;
 use App\Http\Controllers\Admin\Mail\OutgoingEmailRetryController;
 use App\Http\Controllers\Admin\Mail\ReplyParsingRuleController;
+use App\Http\Controllers\Admin\Manage\TicketPriorityController;
+use App\Http\Controllers\Admin\Manage\TicketTypeController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\System\Broadcasting\BroadcastBrowserProbeController;
@@ -224,6 +226,29 @@ Route::middleware('auth')->group(function () {
         })
             ->middleware('permission:admin.manage.manage_dashboard')
             ->name('dashboard');
+
+        Route::prefix('manage')->name('manage.')->group(function (): void {
+            Route::get('priorities', [TicketPriorityController::class, 'index'])->middleware('permission:admin.manage.priorities.view')->name('priorities.index');
+            Route::get('priorities/create', [TicketPriorityController::class, 'create'])->middleware('permission:admin.manage.priorities.create')->name('priorities.create');
+            Route::post('priorities', [TicketPriorityController::class, 'store'])->middleware('permission:admin.manage.priorities.create')->name('priorities.store');
+            Route::get('priorities/{priority}/edit', [TicketPriorityController::class, 'edit'])->middleware('permission:admin.manage.priorities.update')->name('priorities.edit');
+            Route::put('priorities/{priority}', [TicketPriorityController::class, 'update'])->middleware('permission:admin.manage.priorities.update')->name('priorities.update');
+            Route::patch('priorities/{priority}/enabled', [TicketPriorityController::class, 'enabled'])->middleware('permission:admin.manage.priorities.update')->name('priorities.enabled');
+            Route::patch('priorities/{priority}/default', [TicketPriorityController::class, 'makeDefault'])->middleware('permission:admin.manage.priorities.update')->name('priorities.default');
+            Route::patch('priorities/reorder', [TicketPriorityController::class, 'reorder'])->middleware('permission:admin.manage.priorities.update')->name('priorities.reorder');
+            Route::delete('priorities/{priority}', [TicketPriorityController::class, 'destroy'])->middleware('permission:admin.manage.priorities.archive')->name('priorities.destroy');
+            Route::post('priorities/{priority}/restore', [TicketPriorityController::class, 'restore'])->middleware('permission:admin.manage.priorities.archive')->whereNumber('priority')->name('priorities.restore');
+
+            Route::get('ticket-types', [TicketTypeController::class, 'index'])->middleware('permission:admin.manage.ticket_types.view')->name('ticket-types.index');
+            Route::get('ticket-types/create', [TicketTypeController::class, 'create'])->middleware('permission:admin.manage.ticket_types.create')->name('ticket-types.create');
+            Route::post('ticket-types', [TicketTypeController::class, 'store'])->middleware('permission:admin.manage.ticket_types.create')->name('ticket-types.store');
+            Route::get('ticket-types/{ticketType}/edit', [TicketTypeController::class, 'edit'])->middleware('permission:admin.manage.ticket_types.update')->name('ticket-types.edit');
+            Route::put('ticket-types/{ticketType}', [TicketTypeController::class, 'update'])->middleware('permission:admin.manage.ticket_types.update')->name('ticket-types.update');
+            Route::patch('ticket-types/{ticketType}/enabled', [TicketTypeController::class, 'enabled'])->middleware('permission:admin.manage.ticket_types.update')->name('ticket-types.enabled');
+            Route::patch('ticket-types/reorder', [TicketTypeController::class, 'reorder'])->middleware('permission:admin.manage.ticket_types.update')->name('ticket-types.reorder');
+            Route::delete('ticket-types/{ticketType}', [TicketTypeController::class, 'destroy'])->middleware('permission:admin.manage.ticket_types.archive')->name('ticket-types.destroy');
+            Route::post('ticket-types/{ticketType}/restore', [TicketTypeController::class, 'restore'])->middleware('permission:admin.manage.ticket_types.archive')->whereNumber('ticketType')->name('ticket-types.restore');
+        });
 
         Route::resource('teams', TeamController::class)
             ->middleware('permission:admin.staff.manage_teams');

@@ -4,6 +4,7 @@ namespace App\Services\Admin\Skills;
 
 use App\Models\Admin\Department;
 use App\Models\Ticket;
+use App\Models\TicketPriority;
 
 class SkillRuleFieldRegistry
 {
@@ -14,12 +15,14 @@ class SkillRuleFieldRegistry
     public function schema(): array
     {
         return [
-            $this->enumField(
-                'priority',
-                'Priority',
-                Ticket::priorities(),
-                fn (string $value) => Ticket::priorityLabel($value)
-            ),
+            [
+                'key' => 'priority',
+                'label' => 'Priority',
+                'type' => 'enum',
+                'operators' => self::REFERENCE_OPERATORS,
+                'multiple' => false,
+                'options' => TicketPriority::query()->where('is_active', true)->orderBy('sort_order')->get(['slug', 'name'])->map(fn (TicketPriority $priority) => ['value' => $priority->slug, 'label' => $priority->name])->all(),
+            ],
             $this->enumField(
                 'source',
                 'Source',

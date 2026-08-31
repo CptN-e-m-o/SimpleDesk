@@ -11,6 +11,7 @@ use App\Enums\Admin\Mail\MailboxDriver;
 use App\Models\Admin\Mail\EmailMessage;
 use App\Models\Admin\Mail\Mailbox;
 use App\Models\Ticket;
+use App\Models\TicketPriority;
 use App\Models\TicketReply;
 use App\Models\User\User;
 use App\Services\Admin\Mail\ReplyParsing\InboundEmailClassifier;
@@ -362,7 +363,7 @@ class InboundEmailTicketReplyProcessorTest extends TestCase
 
             'subject' => 'Не работает авторизация',
 
-            'priority' => Ticket::PRIORITY_MEDIUM,
+            'priority_id' => TicketPriority::query()->where('is_default', true)->valueOrFail('id'),
 
             'status' => $status,
 

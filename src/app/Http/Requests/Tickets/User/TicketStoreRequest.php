@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Tickets\User;
 
-use App\Models\Ticket;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +17,7 @@ class TicketStoreRequest extends FormRequest
         return [
             'subject' => ['required', 'string', 'max:255'],
             'category_id' => ['required', 'integer', 'exists:ticket_categories,id'],
-            'priority' => ['required', 'string', Rule::in(Ticket::priorities())],
+            'priority_id' => ['nullable', 'integer', Rule::exists('ticket_priorities', 'id')->where(fn ($query) => $query->where('visibility', 'public')->where('is_active', true)->whereNull('deleted_at'))],
             'service' => ['nullable', 'string', 'max:255'],
             'description' => ['required', 'string', 'min:10'],
             'attachments' => ['nullable', 'array'],
@@ -32,8 +31,7 @@ class TicketStoreRequest extends FormRequest
             'subject.required' => 'Please enter a subject.',
             'category_id.required' => 'Please select a category.',
             'category_id.exists' => 'Selected category is invalid.',
-            'priority.required' => 'Please select a priority.',
-            'priority.in' => 'Selected priority is invalid.',
+            'priority_id.exists' => 'Selected priority is unavailable.',
             'description.required' => 'Please provide a description.',
             'description.min' => 'Description must be at least 10 characters.',
             'attachments.*.max' => 'Each attachment must not exceed 5 MB.',

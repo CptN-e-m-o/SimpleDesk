@@ -7,6 +7,7 @@ use App\Http\Requests\Tickets\User\TicketIndexRequest;
 use App\Http\Requests\Tickets\User\TicketStoreRequest;
 use App\Models\Ticket;
 use App\Models\TicketCategory;
+use App\Models\TicketPriority;
 use App\Services\Tickets\User\TicketService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -40,12 +41,7 @@ class TicketController extends Controller
 
         return Inertia::render('Tickets/User/Create', [
             'categories' => $categories,
-            'priorityOptions' => [
-                ['value' => Ticket::PRIORITY_LOW, 'label' => 'Low'],
-                ['value' => Ticket::PRIORITY_MEDIUM, 'label' => 'Medium'],
-                ['value' => Ticket::PRIORITY_HIGH, 'label' => 'High'],
-                ['value' => Ticket::PRIORITY_URGENT, 'label' => 'Urgent'],
-            ],
+            'priorityOptions' => TicketPriority::query()->where('visibility', 'public')->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'color', 'is_default']),
         ]);
     }
 
@@ -59,7 +55,7 @@ class TicketController extends Controller
                 'requester_id' => $request->user()->id,
                 'category_id' => $validated['category_id'],
                 'subject' => $validated['subject'],
-                'priority' => $validated['priority'],
+                'priority_id' => $validated['priority_id'] ?? TicketPriority::query()->where('is_default', true)->where('is_active', true)->valueOrFail('id'),
                 'status' => Ticket::STATUS_OPEN,
                 'source' => Ticket::SOURCE_PORTAL,
                 'service' => $validated['service'] ?? null,
@@ -81,6 +77,8 @@ class TicketController extends Controller
             'category:id,name',
             'requester:id,first_name,last_name,email',
             'assignee:id,first_name,last_name,email',
+            'priority:id,name,slug,color',
+            'ticketType:id,name,slug',
             'replies.user:id,first_name,last_name,email',
         ]);
 
@@ -92,6 +90,7 @@ class TicketController extends Controller
                 'description' => $ticket->description,
                 'status' => $ticket->status,
                 'priority' => $ticket->priority,
+                'ticket_type' => $ticket->ticketType,
                 'service' => $ticket->service,
                 'source' => $ticket->source,
                 'created_at' => $ticket->created_at?->toDateTimeString(),

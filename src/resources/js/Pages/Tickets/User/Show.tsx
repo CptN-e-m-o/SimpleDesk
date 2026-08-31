@@ -43,7 +43,7 @@ type TicketData = {
     subject: string
     description: string
     status: string
-    priority: string
+    priority: { id: number; name: string; slug: string; color: string }
     service: string | null
     source: string
     created_at: string | null
@@ -96,21 +96,6 @@ function getStatusClasses(status: string) {
             return 'border-gray-200 bg-gray-100 text-gray-700'
         default:
             return 'border-gray-200 bg-gray-100 text-gray-700'
-    }
-}
-
-function getPriorityClasses(priority: string) {
-    switch (priority) {
-        case 'low':
-            return 'bg-gray-100 text-gray-700'
-        case 'medium':
-            return 'bg-sky-100 text-sky-700'
-        case 'high':
-            return 'bg-amber-100 text-amber-700'
-        case 'urgent':
-            return 'bg-rose-100 text-rose-700'
-        default:
-            return 'bg-gray-100 text-gray-700'
     }
 }
 
@@ -192,10 +177,11 @@ export default function TicketsShow({ ticket }: Props) {
                                 </Link>
 
                                 <Link
-                                    href={route('tickets.index', { priority: ticket.priority })}
-                                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition hover:opacity-80 hover:shadow-sm ${getPriorityClasses(ticket.priority)}`}
+                                    href={route('tickets.index', { priority: ticket.priority.id })}
+                                    className="inline-flex rounded-full px-3 py-1 text-xs font-semibold text-white transition hover:opacity-80 hover:shadow-sm"
+                                    style={{ backgroundColor: ticket.priority.color }}
                                 >
-                                    {humanize(ticket.priority)}
+                                    {ticket.priority.name}
                                 </Link>
 
                                 {ticket.category?.name && (
@@ -475,7 +461,7 @@ export default function TicketsShow({ ticket }: Props) {
                                             Priority
                                         </div>
                                         <div className="mt-1 text-sm font-medium text-gray-900">
-                                            {humanize(ticket.priority)}
+                                            {ticket.priority.name}
                                         </div>
                                     </div>
                                 </div>

@@ -11,6 +11,7 @@ use App\Exceptions\Admin\Mail\InboundEmailAlreadyProcessingException;
 use App\Exceptions\Admin\Mail\InboundEmailTicketingException;
 use App\Models\Admin\Mail\EmailMessage;
 use App\Models\Ticket;
+use App\Models\TicketPriority;
 use App\Models\TicketReply;
 use App\Models\User\User;
 use App\Services\Admin\Mail\ReplyParsing\InboundEmailClassifier;
@@ -484,21 +485,7 @@ class InboundEmailTicketProcessor
             $status = Ticket::STATUS_OPEN;
         }
 
-        $priority = (string) config(
-            'simpledesk-mail-ticketing.default_priority',
-            Ticket::PRIORITY_MEDIUM
-        );
-
-        if (
-            ! in_array(
-                $priority,
-                Ticket::priorities(),
-                true
-            )
-        ) {
-            $priority =
-                Ticket::PRIORITY_MEDIUM;
-        }
+        $priorityId = TicketPriority::query()->where('is_default', true)->where('is_active', true)->valueOrFail('id');
 
         return Ticket::query()->create([
             'ticket_number' => $this->ticketNumber(),
@@ -518,7 +505,7 @@ class InboundEmailTicketProcessor
                 $emailMessage
             ),
 
-            'priority' => $priority,
+            'priority_id' => $priorityId,
             'status' => $status,
             'source' => Ticket::SOURCE_EMAIL,
 
